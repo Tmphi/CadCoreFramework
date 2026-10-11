@@ -1,0 +1,22 @@
+======================================================================
+ CadCoreFramework v2.0 - PLUGIN QUẢN TRỊ THIẾT BỊ ĐIỆN & CHÈN CAD TỰ ĐỘNG
+======================================================================
+
+1. CÀI ĐẶT:
+- Giải nén toàn bộ thư mục file ZIP.
+- Nhấp đúp chuột vào file "Install.bat" để cài đặt tự động vào AutoCAD.
+- Mở AutoCAD (Tương thích AutoCAD 2021 đến 2025).
+
+2. CÁC LỆNH SỬ DỤNG TRONG AUTOCAD:
+- CORE_INFO    : Kiểm tra trạng thái khởi tạo và sẵn sàng của plugin.
+- SHOW_PALETTE   : Mở bảng thanh công cụ dạng Palette gắn cạnh màn hình CAD.
+
+3. TÍNH NĂNG NỔI BẬT:
+- Gói cơ sở dữ liệu 1 file duy nhất: device_library.json.
+- Xuất / Nhập gói thư viện dạng ZIP (bao gồm cấu hình JSON và toàn bộ file DWG Blocks) để chia sẻ giữa các máy tính.
+- Tìm kiếm thiết bị thông minh đa từ khóa (Multi-token AND search), không dấu tiếng Việt.
+- Lọc theo trạng thái file DWG (Đã có DWG / Thiếu DWG).
+- Nhập/Xuất Excel (.xlsx) chuẩn OpenXML thuần túy không cần cài Microsoft Office.
+
+4. GỠ BỎ:
+- Nhấp đúp chuột vào file "Uninstall.bat".

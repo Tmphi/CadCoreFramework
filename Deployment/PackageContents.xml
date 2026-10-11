@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage 
+    SchemaVersion="1.0" 
+    AppVersion="2.0.0" 
+    Author="CadCoreFramework Team" 
+    ProductCode="{32077C6A-6136-4AD8-BF65-D8235959ACF1}" 
+    UpgradeCode="{7C5F7C3A-A212-4DE6-A6F9-183637C0C793}" 
+    Name="CadCoreFramework - Electrical Family &amp; Device Manager" 
+    Description="Hệ thống quản trị danh mục thiết bị điện tủ bảng phân phối và chèn Dynamic Block AutoCAD tự động" 
+    Icon="./Contents/Resources/icon.ico">
+
+  <CompanyDetails 
+      Name="CadCoreFramework" 
+      Url="https://github.com" 
+      Email="support@CadCoreFramework.com" />
+
+  <Components Description="AutoCAD 2021 - 2025 Compatibility">
+    <RuntimeRequirements 
+        OS="Win64" 
+        Platform="AutoCAD*" 
+        SeriesMin="R24.0" 
+        SeriesMax="R25.0" />
+    
+    <ComponentEntry 
+        AppName="CadCoreFramework" 
+        Version="2.0.0" 
+        ModuleName="./Contents/CadCoreFramework.dll" 
+        AppDescription="Add-in Quản Lý Thiết Bị Tủ Điện và Chèn Block Tự Động" 
+        LoadOnAutoCADStartup="True">
+      
+      <Commands GroupName="CadCoreFramework">
+        <Command Local="SHOW_PALETTE" Global="SHOW_PALETTE" />
+        <Command Local="CORE_INFO" Global="CORE_INFO" />
+        <Command Local="CORE_TEST_ALL" Global="CORE_TEST_ALL" />
+      </Commands>
+      
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>

@@ -1,0 +1,108 @@
+<UserControl x:Class="CadCoreFramework.Views.CommonControlsPalette"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:CadCoreFramework.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CadCoreFramework;component/Themes/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <viewmodels:ViewModelLocator x:Key="Locator"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid DataContext="{Binding Source={StaticResource Locator}, Path=CommonControls}" Background="{StaticResource BackgroundBrush}">
+        <!-- IsBusy Overlay -->
+        <Grid Panel.ZIndex="99" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Background="#AA1E1E2E">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
+                <TextBlock Text="Đang xử lý..." Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="16">
+                
+                <TextBlock Text="WPF Controls Showcase" Style="{StaticResource HeaderStyle}" Margin="0,0,0,4"/>
+                <TextBlock Text="Tổng hợp các WPF Controls thông dụng dùng trong AutoCAD Plugin." Style="{StaticResource LabelStyle}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+
+                <TabControl Background="{StaticResource SurfaceBrush}" BorderThickness="0" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" Style="{StaticResource TabControlStyle}">
+                    <!-- Tab 1: Inputs & Selectors -->
+                    <TabItem Header="Basic" Style="{StaticResource TabItemStyle}">
+                        <StackPanel Margin="12">
+                            <!-- TextBox -->
+                            <TextBlock Text="TextBox (Single Line)" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource InputStyle}" Text="{Binding SingleLineText, UpdateSourceTrigger=PropertyChanged}"/>
+                            
+                            <!-- TextBox Multiline -->
+                            <TextBlock Text="TextBox (Multi Line)" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource InputStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding MultiLineText, UpdateSourceTrigger=PropertyChanged}"/>
+                            
+                            <!-- PasswordBox (Cannot bind directly in standard WPF without behavior, just for show) -->
+                            <TextBlock Text="PasswordBox" Style="{StaticResource LabelStyle}"/>
+                            <PasswordBox Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="8,6" FontSize="13"/>
+
+                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+
+                            <!-- ComboBox -->
+                            <TextBlock Text="ComboBox" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox ItemsSource="{Binding AvailableLayers}" SelectedItem="{Binding SelectedLayer}" Style="{StaticResource ComboBoxStyle}"/>
+                            
+                            <!-- Slider -->
+                            <TextBlock Text="Slider" Style="{StaticResource LabelStyle}"/>
+                            <Slider Minimum="0" Maximum="100" Value="{Binding SliderValue}" Style="{StaticResource SliderStyle}"/>
+                            <TextBlock Text="{Binding SliderValue, StringFormat=N0}" HorizontalAlignment="Right" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            
+                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+
+                            <!-- CheckBox -->
+                            <TextBlock Text="CheckBoxes" Style="{StaticResource LabelStyle}"/>
+                            <CheckBox Content="Bật tính năng A" IsChecked="{Binding IsOptionAEnabled}" Style="{StaticResource CheckBoxStyle}"/>
+                            <CheckBox Content="Bật tính năng B" IsChecked="{Binding IsOptionBEnabled}" Style="{StaticResource CheckBoxStyle}"/>
+                            
+                            <TextBlock Text="Radio Buttons" Style="{StaticResource LabelStyle}" Margin="0,12,0,4"/>
+                            <RadioButton Content="Tùy chọn 1" IsChecked="True" GroupName="R1" Style="{StaticResource RadioButtonStyle}"/>
+                            <RadioButton Content="Tùy chọn 2" GroupName="R1" Style="{StaticResource RadioButtonStyle}"/>
+                        </StackPanel>
+                    </TabItem>
+                    
+                    <!-- Tab 2: Layouts & Lists -->
+                    <TabItem Header="Advanced" Style="{StaticResource TabItemStyle}">
+                        <StackPanel Margin="12">
+                            <!-- Expander -->
+                            <Expander Header="Mở rộng để xem thêm" Foreground="{StaticResource TextPrimaryBrush}" Style="{StaticResource ExpanderStyle}">
+                                <StackPanel Margin="8">
+                                    <TextBlock Text="Nội dung bị ẩn đi" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <Button Content="Nút phụ" Style="{StaticResource SecondaryButton}" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Expander>
+
+                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+
+                            <!-- DataGrid -->
+                            <TextBlock Text="DataGrid (Bảng dữ liệu)" Style="{StaticResource LabelStyle}"/>
+                            <DataGrid ItemsSource="{Binding DataItems}" AutoGenerateColumns="False" 
+                                      Style="{StaticResource DataGridStyle}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                                    <DataGridTextColumn Header="Thiết Bị" Binding="{Binding Name}" Width="*"/>
+                                    <DataGridTextColumn Header="C.Suất (kW)" Binding="{Binding Power}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+
+                <!-- Actions -->
+                <Button Content="Submit Data" Style="{StaticResource PrimaryButton}" Command="{Binding SubmitDataCommand}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,49 @@
+# CadCoreFramework — .gitignore
+# Generated for: Visual Studio + AutoCAD .NET Plugin + PowerShell build
+
+# ─── Visual Studio ────────────────────────────────────────────────────────────
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Machine-specific VS project files (e.g. CadCoreFramework-DESKTOP-ABC.csproj)
+*-DESKTOP-*.csproj
+*-LAPTOP-*.csproj
+
+# ─── Build Outputs ────────────────────────────────────────────────────────────
+bin/
+obj/
+
+# ─── NuGet ───────────────────────────────────────────────────────────────────
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+
+# ─── AutoCAD Plugin Distribution ─────────────────────────────────────────────
+dist/
+*.bundle/
+
+# ─── Test / Coverage Outputs ──────────────────────────────────────────────────
+coverage/
+TestResults/
+
+# ─── Build Logs ───────────────────────────────────────────────────────────────
+build_log.txt
+*.log
+
+# ─── Secrets & Local Config ──────────────────────────────────────────────────
+*.local.json
+appsettings.local.*
+secrets.json
+
+# ─── OS Artefacts ─────────────────────────────────────────────────────────────
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ─── nuget.exe binary (use NuGet CLI via dotnet instead) ─────────────────────
+nuget.exe

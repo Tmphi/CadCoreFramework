@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Multi-target build:
+        net48           → AutoCAD 2021–2024  (.NET Framework 4.8)
+        net8.0-windows  → AutoCAD 2025+      (.NET 8.0)
+      Switch by selecting the appropriate Configuration/Platform in Visual Studio,
+      or pass /p:TargetFramework=net48 to MSBuild explicitly.
+    -->
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>CadCoreFramework</RootNamespace>
+    <LangVersion>10.0</LangVersion>
+
+    <!--
+      WPF HOT-RELOAD TRICK (Debug only):
+      Append a timestamp to the AssemblyName on every Debug build so AutoCAD
+      never holds a file lock on the previous DLL. Allows NETLOAD of the new
+      DLL without restarting AutoCAD.
+      The Post-Build event below copies the timestamped file back to the
+      canonical name so other tooling can always find CadCoreFramework.dll.
+    -->
+    <AssemblyName Condition="'$(Configuration)' == 'Debug' And '$(DesignTimeBuild)' != 'true'">CadCoreFramework_$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</AssemblyName>
+    <AssemblyName Condition="'$(Configuration)' != 'Debug' Or '$(DesignTimeBuild)' == 'true'">CadCoreFramework</AssemblyName>
+
+    <DefaultItemExcludes>$(DefaultItemExcludes);CadCoreFramework.Tests\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- ═══ AutoCAD NuGet References ════════════════════════════════════════════
+       ExcludeAssets="runtime" is MANDATORY: AutoCAD ships its own copies of
+       AcDbMgd / AcMgd / AcCoreMgd. Copying them to the output directory causes
+       DLL version conflicts and Fatal Errors on NETLOAD.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <!-- AutoCAD 2021–2024: API version 24.x -->
+    <PackageReference Include="AutoCAD.NET"       Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <!-- AutoCAD 2025+: API version 25.x -->
+    <PackageReference Include="AutoCAD.NET"       Version="25.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Core"  Version="25.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="25.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- ═══ Shared Dependencies ══════════════════════════════════════════════ -->
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm"                    Version="8.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json"                          Version="13.0.3" />
+    <PackageReference Include="Serilog"                                  Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File"                       Version="5.0.0" />
+  </ItemGroup>
+
+  <!-- System.IO.Compression is built-in for net8; only needed for net48 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <!-- ═══ WPF Hot-Reload Post-Build ══════════════════════════════════════
+       Copies the timestamped Debug DLL to the canonical CadCoreFramework.dll
+       so that NETLOAD scripts and external tools always find a stable filename.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent"
+          Condition="'$(Configuration)' == 'Debug' And '$(TargetName)' != 'CadCoreFramework'">
+    <Exec Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(TargetDir)CadCoreFramework.dll&quot;" />
+    <Exec Command="if exist &quot;$(TargetDir)$(TargetName).pdb&quot; copy /Y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(TargetDir)CadCoreFramework.pdb&quot;" />
+  </Target>
+
+</Project>

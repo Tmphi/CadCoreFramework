@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Target net48 only for tests: the production plugin's pure-C# logic
+      (XData chunking, helpers, model validation) does not require AutoCAD runtime,
+      so we can run tests on .NET Framework 4.8 without needing an AutoCAD install.
+    -->
+    <TargetFramework>net48</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- xUnit test framework -->
+    <PackageReference Include="xunit"                         Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio"     Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"        Version="17.11.0" />
+
+    <!-- Assertion library — reads like English -->
+    <PackageReference Include="FluentAssertions"              Version="6.12.0" />
+
+    <!-- Mocking framework — for future integration-style tests -->
+    <PackageReference Include="Moq"                           Version="4.20.70" />
+
+    <!-- Shared serialisation library (same version as production) -->
+    <PackageReference Include="Newtonsoft.Json"               Version="13.0.3" />
+
+    <!-- AutoCAD.NET assemblies for test execution (needed for SelectionFilterBuilder & TypedValue) -->
+    <PackageReference Include="AutoCAD.NET"                   Version="24.0.0" />
+    <PackageReference Include="AutoCAD.NET.Core"              Version="24.0.0" />
+    <PackageReference Include="AutoCAD.NET.Model"             Version="24.0.0" />
+
+    <!-- Code Coverage — collect coverage data during test run -->
+    <PackageReference Include="coverlet.collector"            Version="6.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the production project.
+         InternalsVisibleTo in AssemblyInfo.cs gives access to internal members. -->
+    <ProjectReference Include="..\CadCoreFramework.csproj" />
+  </ItemGroup>
+
+</Project>

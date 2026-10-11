@@ -1,0 +1,209 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║              AutoCAD Theme Resource Dictionary                       ║
+    ║                                                                      ║
+    ║  Tự động adapt theo AutoCAD Dark/Light theme.                        ║
+    ║  ThemeManager.cs sẽ swap giữa AutoCadDarkTheme.xaml                 ║
+    ║  và AutoCadLightTheme.xaml khi DARKMODE sysvar thay đổi.            ║
+    ║                                                                      ║
+    ║  CÁCH DÙNG trong App.xaml hoặc UserControl.Resources:               ║
+    ║  <ResourceDictionary.MergedDictionaries>                             ║
+    ║    <ResourceDictionary Source="/Themes/AutoCadTheme.xaml"/>          ║
+    ║  </ResourceDictionary.MergedDictionaries>                            ║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    -->
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  DARK THEME (Default — AutoCAD 2024 dark palette)                 -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- === Background Colors === -->
+    <SolidColorBrush x:Key="CadBackground.Primary"   Color="#FF2B2B2B"/>
+    <SolidColorBrush x:Key="CadBackground.Secondary" Color="#FF383838"/>
+    <SolidColorBrush x:Key="CadBackground.Tertiary"  Color="#FF404040"/>
+    <SolidColorBrush x:Key="CadBackground.Hover"     Color="#FF4A4A4A"/>
+    <SolidColorBrush x:Key="CadBackground.Pressed"   Color="#FF525252"/>
+    <SolidColorBrush x:Key="CadBackground.Control"   Color="#FF313131"/>
+
+    <!-- === Foreground / Text Colors === -->
+    <SolidColorBrush x:Key="CadForeground.Primary"   Color="#FFE8E8E8"/>
+    <SolidColorBrush x:Key="CadForeground.Secondary" Color="#FFAAAAAA"/>
+    <SolidColorBrush x:Key="CadForeground.Disabled"  Color="#FF666666"/>
+    <SolidColorBrush x:Key="CadForeground.Accent"    Color="#FF3CB0D0"/>
+
+    <!-- === Accent / Brand Colors === -->
+    <SolidColorBrush x:Key="CadAccent.Blue"          Color="#FF3CB0D0"/>
+    <SolidColorBrush x:Key="CadAccent.BlueHover"     Color="#FF4EC4E4"/>
+    <SolidColorBrush x:Key="CadAccent.Green"         Color="#FF4CAF50"/>
+    <SolidColorBrush x:Key="CadAccent.Orange"        Color="#FFFF9800"/>
+    <SolidColorBrush x:Key="CadAccent.Red"           Color="#FFF44336"/>
+
+    <!-- === Border Colors === -->
+    <SolidColorBrush x:Key="CadBorder.Default"       Color="#FF555555"/>
+    <SolidColorBrush x:Key="CadBorder.Focus"         Color="#FF3CB0D0"/>
+    <SolidColorBrush x:Key="CadBorder.Input"         Color="#FF444444"/>
+
+    <!-- === Input Controls === -->
+    <SolidColorBrush x:Key="CadInput.Background"     Color="#FF252525"/>
+    <SolidColorBrush x:Key="CadInput.Foreground"     Color="#FFE8E8E8"/>
+
+    <!-- === Status Colors === -->
+    <SolidColorBrush x:Key="CadStatus.Success"       Color="#FF4CAF50"/>
+    <SolidColorBrush x:Key="CadStatus.Warning"       Color="#FFFF9800"/>
+    <SolidColorBrush x:Key="CadStatus.Error"         Color="#FFF44336"/>
+    <SolidColorBrush x:Key="CadStatus.Info"          Color="#FF3CB0D0"/>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  CONTROL STYLES — Chuẩn hóa Button, TextBox, ComboBox            -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+
+    <!-- Button Base Style -->
+    <Style x:Key="CadButton" TargetType="Button">
+        <Setter Property="Background"        Value="{StaticResource CadBackground.Tertiary}"/>
+        <Setter Property="Foreground"        Value="{StaticResource CadForeground.Primary}"/>
+        <Setter Property="BorderBrush"       Value="{StaticResource CadBorder.Default}"/>
+        <Setter Property="BorderThickness"   Value="1"/>
+        <Setter Property="Padding"           Value="12,6"/>
+        <Setter Property="Cursor"            Value="Hand"/>
+        <Setter Property="FontSize"          Value="12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background"
+                                    Value="{StaticResource CadBackground.Hover}"/>
+                            <Setter TargetName="border" Property="BorderBrush"
+                                    Value="{StaticResource CadAccent.Blue}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background"
+                                    Value="{StaticResource CadBackground.Pressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource CadForeground.Disabled}"/>
+                            <Setter TargetName="border" Property="Background"
+                                    Value="{StaticResource CadBackground.Secondary}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Accent Button (primary action) -->
+    <Style x:Key="CadButton.Accent" TargetType="Button" BasedOn="{StaticResource CadButton}">
+        <Setter Property="Background"  Value="{StaticResource CadAccent.Blue}"/>
+        <Setter Property="Foreground"  Value="#FFFFFFFF"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CadAccent.Blue}"/>
+    </Style>
+
+    <!-- Danger Button -->
+    <Style x:Key="CadButton.Danger" TargetType="Button" BasedOn="{StaticResource CadButton}">
+        <Setter Property="Background"  Value="{StaticResource CadAccent.Red}"/>
+        <Setter Property="Foreground"  Value="#FFFFFFFF"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CadAccent.Red}"/>
+    </Style>
+
+    <!-- TextBox Style -->
+    <Style x:Key="CadTextBox" TargetType="TextBox">
+        <Setter Property="Background"       Value="{StaticResource CadInput.Background}"/>
+        <Setter Property="Foreground"       Value="{StaticResource CadInput.Foreground}"/>
+        <Setter Property="BorderBrush"      Value="{StaticResource CadBorder.Input}"/>
+        <Setter Property="BorderThickness"  Value="1"/>
+        <Setter Property="Padding"          Value="6,4"/>
+        <Setter Property="FontSize"         Value="12"/>
+        <Setter Property="CaretBrush"       Value="{StaticResource CadForeground.Primary}"/>
+        <Setter Property="SelectionBrush"   Value="{StaticResource CadAccent.Blue}"/>
+        <Style.Triggers>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource CadBorder.Focus}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ComboBox Style -->
+    <Style x:Key="CadComboBox" TargetType="ComboBox">
+        <Setter Property="Background"      Value="{StaticResource CadInput.Background}"/>
+        <Setter Property="Foreground"      Value="{StaticResource CadInput.Foreground}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource CadBorder.Input}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding"         Value="6,4"/>
+        <Setter Property="FontSize"        Value="12"/>
+    </Style>
+
+    <!-- Label Style -->
+    <Style x:Key="CadLabel" TargetType="TextBlock">
+        <Setter Property="Foreground"  Value="{StaticResource CadForeground.Primary}"/>
+        <Setter Property="FontSize"    Value="12"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Secondary Label -->
+    <Style x:Key="CadLabel.Secondary" TargetType="TextBlock" BasedOn="{StaticResource CadLabel}">
+        <Setter Property="Foreground" Value="{StaticResource CadForeground.Secondary}"/>
+        <Setter Property="FontSize"   Value="11"/>
+    </Style>
+
+    <!-- Section Header -->
+    <Style x:Key="CadLabel.SectionHeader" TargetType="TextBlock" BasedOn="{StaticResource CadLabel}">
+        <Setter Property="Foreground"  Value="{StaticResource CadAccent.Blue}"/>
+        <Setter Property="FontSize"    Value="13"/>
+        <Setter Property="FontWeight"  Value="SemiBold"/>
+        <Setter Property="Margin"      Value="0,8,0,4"/>
+    </Style>
+
+    <!-- Separator -->
+    <Style x:Key="CadSeparator" TargetType="Separator">
+        <Setter Property="Background"   Value="{StaticResource CadBorder.Default}"/>
+        <Setter Property="Margin"       Value="0,4"/>
+        <Setter Property="Height"       Value="1"/>
+    </Style>
+
+    <!-- CheckBox Style -->
+    <Style x:Key="CadCheckBox" TargetType="CheckBox">
+        <Setter Property="Foreground"  Value="{StaticResource CadForeground.Primary}"/>
+        <Setter Property="FontSize"    Value="12"/>
+    </Style>
+
+    <!-- GroupBox-like Panel -->
+    <Style x:Key="CadGroupPanel" TargetType="Border">
+        <Setter Property="Background"       Value="{StaticResource CadBackground.Secondary}"/>
+        <Setter Property="BorderBrush"      Value="{StaticResource CadBorder.Default}"/>
+        <Setter Property="BorderThickness"  Value="1"/>
+        <Setter Property="CornerRadius"     Value="4"/>
+        <Setter Property="Padding"          Value="8"/>
+        <Setter Property="Margin"           Value="0,4"/>
+    </Style>
+
+    <!-- Loading Spinner (ProgressBar Indeterminate) -->
+    <Style x:Key="CadSpinner" TargetType="ProgressBar">
+        <Setter Property="IsIndeterminate" Value="True"/>
+        <Setter Property="Height"          Value="3"/>
+        <Setter Property="Foreground"      Value="{StaticResource CadAccent.Blue}"/>
+        <Setter Property="Background"      Value="{StaticResource CadBackground.Secondary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Error Message TextBlock -->
+    <Style x:Key="CadError" TargetType="TextBlock" BasedOn="{StaticResource CadLabel}">
+        <Setter Property="Foreground"   Value="{StaticResource CadStatus.Error}"/>
+        <Setter Property="FontSize"     Value="11"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin"       Value="0,4"/>
+    </Style>
+
+</ResourceDictionary>
