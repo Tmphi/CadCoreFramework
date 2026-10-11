@@ -34,6 +34,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
+// CA1416: Suppress Windows-platform warnings on .NET 8 — this plugin only targets AutoCAD on Windows.
+#if NET
+[assembly: System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  ĐĂNG KÝ PLUGIN AUTOCAD (AUTOCAD PLUGIN REGISTRATION)
 //

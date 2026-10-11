@@ -30,8 +30,9 @@ namespace CadCoreFramework.Core
         /// </param>
         /// <param name="undoMarkName">
         /// Nếu được chỉ định (khác null/empty), toàn bộ thao tác vẽ bên trong sẽ được gom
-        /// thành MỘT bước Ctrl+Z duy nhất bằng cách gọi Database.BeginUndoMark / EndUndoMark.
-        /// Nếu để null, mỗi entity sẽ tạo một bước Undo riêng.
+        /// thành MỘT bước Ctrl+Z duy nhất bằng cách gọi COM interop StartUndoMark / EndUndoMark.
+        /// Nếu để null, bên trong một command AutoCAD vẫn gom toàn bộ transaction thành 1 bước Undo —
+        /// tham số này hữu ích nhất khi gọi từ Palette (application context).
         /// </param>
         void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string undoMarkName = null);
 

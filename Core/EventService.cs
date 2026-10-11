@@ -40,6 +40,9 @@ namespace CadCoreFramework.Core
     /// Quản lý tất cả các sự kiện ứng dụng AutoCAD tại một nơi tập trung duy nhất.
     /// Theo dõi việc tạo/đóng bản vẽ và chuyển tiếp các sự kiện cấp đối tượng (thêm/xóa)
     /// kèm theo tham chiếu Document nguồn để đảm bảo an toàn trong môi trường nhiều bản vẽ (MDI).
+    ///
+    /// Lazy subscribe: ObjectAppended / ObjectErased chỉ được hook vào AutoCAD khi có ít nhất
+    /// một subscriber. Điều này tránh overhead trên mọi INSERT/XREF/PASTE khi plugin không dùng tới.
     /// </summary>
     public class EventService : IEventService
     {
@@ -47,11 +50,15 @@ namespace CadCoreFramework.Core
         private bool _isInitialized;
 
         // Lưu trữ tham chiếu delegate để có thể hủy đăng ký (-=) chính xác khi tắt.
-        // Dùng lambda ẩn danh mà không lưu tham chiếu sẽ khiến việc -= không thể thực hiện được.
         private readonly Dictionary<Document, ObjectEventHandler> _appendedHandlers
             = new Dictionary<Document, ObjectEventHandler>();
         private readonly Dictionary<Document, ObjectErasedEventHandler> _erasedHandlers
             = new Dictionary<Document, ObjectErasedEventHandler>();
+
+        // Lazy subscribe state: DB-level hooks are only active when someone is subscribed
+        private bool _docObjectHooksActive;
+        private EventHandler<DocumentObjectEventArgs> _objectAppendedHandlers;
+        private EventHandler<DocumentObjectErasedEventArgs> _objectErasedHandlers;
 
         /// <summary>Bắn ra khi một bản vẽ mới được tạo hoặc mở.</summary>
         public event EventHandler<DocumentCollectionEventArgs> DocumentCreated;
@@ -61,15 +68,55 @@ namespace CadCoreFramework.Core
 
         /// <summary>
         /// Bắn ra khi một đối tượng được thêm vào cơ sở dữ liệu của bất kỳ bản vẽ nào đang theo dõi.
-        /// EventArgs chứa Document nguồn để lọc theo đúng bản vẽ.
+        /// Lazy: chỉ subscribe AutoCAD DB events khi có ít nhất một subscriber.
         /// </summary>
-        public event EventHandler<DocumentObjectEventArgs> ObjectAppended;
+        public event EventHandler<DocumentObjectEventArgs> ObjectAppended
+        {
+            add
+            {
+                if (!_docObjectHooksActive)
+                {
+                    _docObjectHooksActive = true;
+                    if (_isInitialized) HookAllDocumentObjects();
+                }
+                _objectAppendedHandlers += value;
+            }
+            remove
+            {
+                _objectAppendedHandlers -= value;
+                if (_objectAppendedHandlers == null && _objectErasedHandlers == null && _docObjectHooksActive)
+                {
+                    _docObjectHooksActive = false;
+                    UnhookAllDocumentObjects();
+                }
+            }
+        }
 
         /// <summary>
         /// Bắn ra khi một đối tượng bị xóa khỏi cơ sở dữ liệu của bất kỳ bản vẽ nào đang theo dõi.
-        /// EventArgs chứa Document nguồn để lọc theo đúng bản vẽ.
+        /// Lazy: chỉ subscribe AutoCAD DB events khi có ít nhất một subscriber.
         /// </summary>
-        public event EventHandler<DocumentObjectErasedEventArgs> ObjectErased;
+        public event EventHandler<DocumentObjectErasedEventArgs> ObjectErased
+        {
+            add
+            {
+                if (!_docObjectHooksActive)
+                {
+                    _docObjectHooksActive = true;
+                    if (_isInitialized) HookAllDocumentObjects();
+                }
+                _objectErasedHandlers += value;
+            }
+            remove
+            {
+                _objectErasedHandlers -= value;
+                if (_objectAppendedHandlers == null && _objectErasedHandlers == null && _docObjectHooksActive)
+                {
+                    _docObjectHooksActive = false;
+                    UnhookAllDocumentObjects();
+                }
+            }
+        }
 
         public EventService(ILoggerService logger)
         {
@@ -88,8 +135,12 @@ namespace CadCoreFramework.Core
                 Application.DocumentManager.DocumentCreated += OnDocumentCreated;
                 Application.DocumentManager.DocumentToBeDestroyed += OnDocumentToBeDestroyed;
 
-                foreach (Document doc in Application.DocumentManager)
-                    HookDocument(doc);
+                // Only hook DB object events if someone already subscribed before Initialize()
+                if (_docObjectHooksActive)
+                {
+                    foreach (Document doc in Application.DocumentManager)
+                        HookDocumentObjects(doc);
+                }
 
                 _isInitialized = true;
                 _logger?.Info("EventService khởi tạo thành công.");
@@ -111,12 +162,7 @@ namespace CadCoreFramework.Core
             {
                 Application.DocumentManager.DocumentCreated -= OnDocumentCreated;
                 Application.DocumentManager.DocumentToBeDestroyed -= OnDocumentToBeDestroyed;
-
-                // Lấy bản sao danh sách keys vì UnhookDocument sẽ sửa đổi Dictionary.
-                var documents = new List<Document>(_appendedHandlers.Keys);
-                foreach (var doc in documents)
-                    UnhookDocument(doc);
-
+                UnhookAllDocumentObjects();
                 _isInitialized = false;
             }
             catch (Exception ex)
@@ -127,28 +173,39 @@ namespace CadCoreFramework.Core
 
         private void OnDocumentCreated(object sender, DocumentCollectionEventArgs e)
         {
-            HookDocument(e.Document);
+            // Only hook DB events on the new document if someone is subscribed
+            if (_docObjectHooksActive) HookDocumentObjects(e.Document);
             DocumentCreated?.Invoke(this, e);
         }
 
         private void OnDocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
-            UnhookDocument(e.Document);
+            UnhookDocumentObjects(e.Document);
             DocumentToBeDestroyed?.Invoke(this, e);
+        }
+
+        private void HookAllDocumentObjects()
+        {
+            foreach (Document doc in Application.DocumentManager)
+                HookDocumentObjects(doc);
+        }
+
+        private void UnhookAllDocumentObjects()
+        {
+            var documents = new List<Document>(_appendedHandlers.Keys);
+            foreach (var doc in documents)
+                UnhookDocumentObjects(doc);
         }
 
         /// <summary>
         /// Móc nối sự kiện database của một bản vẽ và lưu tham chiếu delegate
-        /// để có thể gỡ bỏ chuẩn xác trong UnhookDocument.
+        /// để có thể gỡ bỏ chuẩn xác trong UnhookDocumentObjects.
         /// </summary>
-        private void HookDocument(Document doc)
+        private void HookDocumentObjects(Document doc)
         {
             if (doc?.Database == null) return;
-
-            // Tránh móc nối lặp hai lần vào cùng một bản vẽ.
             if (_appendedHandlers.ContainsKey(doc)) return;
 
-            // Bắt 'doc' trong closure và lưu delegate để có thể -= sau này.
             ObjectEventHandler appendedHandler = (s, e) => OnObjectAppended(doc, e);
             ObjectErasedEventHandler erasedHandler = (s, e) => OnObjectErased(doc, e);
 
@@ -162,7 +219,7 @@ namespace CadCoreFramework.Core
         /// <summary>
         /// Hủy đăng ký chuẩn xác các delegate đã lưu cho một bản vẽ cụ thể.
         /// </summary>
-        private void UnhookDocument(Document doc)
+        private void UnhookDocumentObjects(Document doc)
         {
             if (doc?.Database == null) return;
 
@@ -181,12 +238,12 @@ namespace CadCoreFramework.Core
 
         private void OnObjectAppended(Document doc, ObjectEventArgs e)
         {
-            ObjectAppended?.Invoke(this, new DocumentObjectEventArgs(doc, e));
+            _objectAppendedHandlers?.Invoke(this, new DocumentObjectEventArgs(doc, e));
         }
 
         private void OnObjectErased(Document doc, ObjectErasedEventArgs e)
         {
-            ObjectErased?.Invoke(this, new DocumentObjectErasedEventArgs(doc, e));
+            _objectErasedHandlers?.Invoke(this, new DocumentObjectErasedEventArgs(doc, e));
         }
     }
 }

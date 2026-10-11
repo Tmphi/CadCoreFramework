@@ -76,9 +76,12 @@ namespace CadCoreFramework.Extensions
         /// </summary>
         public static ObjectId DrawJoggedRadialDimension(this ICadScope scope,
             Point3d center, Point3d chordPoint, Point3d jogPoint, double jogAngle = 0.785398,
-            string dimStyle = null, string layer = null, Action<RadialDimensionLarge> configure = null)
+            string dimStyle = null, string layer = null,
+            Point3d? overrideCenter = null,
+            Action<RadialDimensionLarge> configure = null)
         {
-            var dim = new RadialDimensionLarge(center, chordPoint, jogPoint, jogPoint, jogAngle, string.Empty, scope.Database.Dimstyle);
+            var oc = overrideCenter ?? center;
+            var dim = new RadialDimensionLarge(center, chordPoint, oc, jogPoint, jogAngle, string.Empty, scope.Database.Dimstyle);
             dim.SetDatabaseDefaults(scope.Database);
             CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
             CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);

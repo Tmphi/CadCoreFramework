@@ -10,9 +10,10 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/CadCoreFramework;component/Themes/Styles.xaml"/>
+                <!-- Styles loaded dynamically in code-behind via ThemeManager to support Debug hot-reload
+                     (assembly name changes each build, so the hardcoded pack URI would fail). -->
             </ResourceDictionary.MergedDictionaries>
-            
+
             <viewmodels:ViewModelLocator x:Key="Locator"/>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>

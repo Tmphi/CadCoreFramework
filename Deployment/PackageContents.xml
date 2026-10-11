@@ -1,39 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage 
-    SchemaVersion="1.0" 
-    AppVersion="2.0.0" 
-    Author="CadCoreFramework Team" 
-    ProductCode="{32077C6A-6136-4AD8-BF65-D8235959ACF1}" 
-    UpgradeCode="{7C5F7C3A-A212-4DE6-A6F9-183637C0C793}" 
-    Name="CadCoreFramework - Electrical Family &amp; Device Manager" 
-    Description="Hệ thống quản trị danh mục thiết bị điện tủ bảng phân phối và chèn Dynamic Block AutoCAD tự động" 
-    Icon="./Contents/Resources/icon.ico">
+<ApplicationPackage
+    SchemaVersion="1.0"
+    AppVersion="2.0.0"
+    Author="CadCoreFramework"
+    ProductCode="{32077C6A-6136-4AD8-BF65-D8235959ACF1}"
+    UpgradeCode="{7C5F7C3A-A212-4DE6-A6F9-183637C0C793}"
+    Name="CadCoreFramework"
+    Description="AutoCAD .NET Plugin Framework — DI, ICadContext, MVVM">
 
-  <CompanyDetails 
-      Name="CadCoreFramework" 
-      Url="https://github.com" 
+  <CompanyDetails
+      Name="CadCoreFramework"
+      Url="https://github.com"
       Email="support@CadCoreFramework.com" />
 
-  <Components Description="AutoCAD 2021 - 2025 Compatibility">
-    <RuntimeRequirements 
-        OS="Win64" 
-        Platform="AutoCAD*" 
-        SeriesMin="R24.0" 
-        SeriesMax="R25.0" />
-    
-    <ComponentEntry 
-        AppName="CadCoreFramework" 
-        Version="2.0.0" 
-        ModuleName="./Contents/CadCoreFramework.dll" 
-        AppDescription="Add-in Quản Lý Thiết Bị Tủ Điện và Chèn Block Tự Động" 
+  <!-- AutoCAD 2021–2024 (R24.x): net48 build -->
+  <Components Description="AutoCAD 2021-2024 (.NET Framework 4.8)">
+    <RuntimeRequirements
+        OS="Win64"
+        Platform="AutoCAD*"
+        SeriesMin="R24.0"
+        SeriesMax="R24.3" />
+
+    <ComponentEntry
+        AppName="CadCoreFramework"
+        Version="2.0.0"
+        ModuleName="./Contents/net48/CadCoreFramework.dll"
+        AppDescription="CadCoreFramework AutoCAD Plugin (.NET 4.8)"
         LoadOnAutoCADStartup="True">
-      
+
       <Commands GroupName="CadCoreFramework">
         <Command Local="SHOW_PALETTE" Global="SHOW_PALETTE" />
-        <Command Local="CORE_INFO" Global="CORE_INFO" />
+        <Command Local="CORE_INFO"    Global="CORE_INFO" />
         <Command Local="CORE_TEST_ALL" Global="CORE_TEST_ALL" />
       </Commands>
-      
+
     </ComponentEntry>
   </Components>
+
+  <!-- AutoCAD 2025+ (R25.x): net8.0-windows build -->
+  <Components Description="AutoCAD 2025+ (.NET 8.0)">
+    <RuntimeRequirements
+        OS="Win64"
+        Platform="AutoCAD*"
+        SeriesMin="R25.0"
+        SeriesMax="R26.0" />
+
+    <ComponentEntry
+        AppName="CadCoreFramework"
+        Version="2.0.0"
+        ModuleName="./Contents/net8.0-windows/CadCoreFramework.dll"
+        AppDescription="CadCoreFramework AutoCAD Plugin (.NET 8.0)"
+        LoadOnAutoCADStartup="True">
+
+      <Commands GroupName="CadCoreFramework">
+        <Command Local="SHOW_PALETTE" Global="SHOW_PALETTE" />
+        <Command Local="CORE_INFO"    Global="CORE_INFO" />
+        <Command Local="CORE_TEST_ALL" Global="CORE_TEST_ALL" />
+      </Commands>
+
+    </ComponentEntry>
+  </Components>
+
 </ApplicationPackage>

@@ -106,6 +106,9 @@ namespace CadCoreFramework.Core
             {
                 _ribbon = ComponentManager.Ribbon;
                 ComponentManager.ItemInitialized -= ComponentManager_ItemInitialized;
+                // Build ribbon now that it's available (deferred from InitializeRibbon)
+                try { _buildRibbonAction?.Invoke(); }
+                catch (Exception ex) { _logger?.Error("Lỗi khi dựng Ribbon sau ItemInitialized", ex); }
             }
         }
 
@@ -157,7 +160,6 @@ namespace CadCoreFramework.Core
                 tab = new RibbonTab { Title = tabTitle, Id = tabId ?? tabName, Name = tabName };
                 _ribbon.Tabs.Add(tab);
             }
-            tab.IsActive = true;
         }
 
         /// <summary>Thêm một nhóm chức năng (Panel) vào một Tab đã có.</summary>
@@ -276,7 +278,8 @@ namespace CadCoreFramework.Core
                 var doc = Application.DocumentManager.MdiActiveDocument;
                 if (doc != null)
                 {
-                    doc.SendStringToExecute(cmd + " ", true, false, false);
+                    // \x03\x03 cancels any running command; _. uses English (locale-neutral) command name
+                    doc.SendStringToExecute("\x03\x03_." + cmd + " ", true, false, false);
                 }
             }
         }

@@ -13,6 +13,7 @@ namespace CadCoreFramework.Extensions
         /// Thực thi một hành động một cách an toàn bên trong khóa tài liệu (DocumentLock) và Transaction.
         /// Tự động Commit nếu thành công hoặc Abort nếu phát sinh lỗi.
         /// </summary>
+        [Obsolete("Dùng ICadContext.Execute() thay thế để tuân thủ kiến trúc DI của dự án.")]
         public static void RunInTransaction(this Document doc, Action<Transaction> action)
         {
             if (doc == null)

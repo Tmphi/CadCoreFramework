@@ -14,16 +14,15 @@ $distDir = Join-Path $workspaceRoot "dist"
 $releaseStaging = Join-Path $distDir "CadCoreFramework_Release"
 $bundleDir = Join-Path $releaseStaging "CadCoreFramework.bundle"
 $contentsDir = Join-Path $bundleDir "Contents"
-$dataDir = Join-Path $contentsDir "Data"
 $zipOutput = Join-Path $distDir "CadCoreFramework_v$($Version)_Setup.zip"
 
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host "  DONG GOI PHAT HANH CadCoreFramework v$Version" -ForegroundColor Cyan
 Write-Host "=================================================" -ForegroundColor Cyan
 
-# 1. Chay build Release x64
-Write-Host "`n[1/5] Bien dich cau hinh Release x64..." -ForegroundColor Green
-& powershell.exe -ExecutionPolicy Bypass -File (Join-Path $workspaceRoot "build.ps1") -Configuration Release -Platform x64
+# 1. Build Release x64 - both target frameworks
+Write-Host "`n[1/5] Bien dich cau hinh Release x64 (net48 + net8.0-windows)..." -ForegroundColor Green
+& dotnet build (Join-Path $workspaceRoot "CadCoreFramework.csproj") -c Release -p:Platform=x64 --nologo
 
 if ($LASTEXITCODE -ne 0) {
     throw "[ERROR] Build Release that bai!"
@@ -38,54 +37,51 @@ if (Test-Path $zipOutput) {
     Remove-Item $zipOutput -Force
 }
 
-New-Item -ItemType Directory -Path $contentsDir -Force | Out-Null
-New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+$net48Dir = Join-Path $contentsDir "net48"
+$net8Dir  = Join-Path $contentsDir "net8.0-windows"
+New-Item -ItemType Directory -Path $net48Dir -Force | Out-Null
+New-Item -ItemType Directory -Path $net8Dir  -Force | Out-Null
 
 # 3. Sao chep DLL va thu vien phu thuoc
 Write-Host "`n[3/5] Sao chep DLL va thu vien phu thuoc..." -ForegroundColor Green
-$binRelease = Join-Path $workspaceRoot "bin\x64\Release"
 
-# Copy CadCoreFramework DLL & PDB
-Copy-Item (Join-Path $binRelease "CadCoreFramework.dll") -Destination $contentsDir -Force
-if (Test-Path (Join-Path $binRelease "CadCoreFramework.pdb")) {
-    Copy-Item (Join-Path $binRelease "CadCoreFramework.pdb") -Destination $contentsDir -Force
-}
+# Helper: copy plugin DLL + non-AutoCAD deps from a TFM output folder
+function Copy-TfmOutput([string]$srcDir, [string]$destDir) {
+    if (-not (Test-Path $srcDir)) {
+        throw "[ERROR] Thu muc output khong ton tai: $srcDir"
+    }
 
-# Copy cac dll phu thuoc (tru AutoCAD dlls da co san trong AutoCAD)
-Get-ChildItem -Path $binRelease -Filter "*.dll" | ForEach-Object {
-    $name = $_.Name
-    if (-not ($name.StartsWith("Ac", [System.StringComparison]::OrdinalIgnoreCase) -or
-              $name.StartsWith("Ad", [System.StringComparison]::OrdinalIgnoreCase))) {
-        Copy-Item $_.FullName -Destination $contentsDir -Force
-        Write-Host "   + $name" -ForegroundColor Gray
+    # Copy main DLL & PDB
+    Copy-Item (Join-Path $srcDir "CadCoreFramework.dll") -Destination $destDir -Force
+    $pdb = Join-Path $srcDir "CadCoreFramework.pdb"
+    if (Test-Path $pdb) { Copy-Item $pdb -Destination $destDir -Force }
+
+    # Copy third-party deps only (skip AutoCAD's own Ac*/Ad* assemblies)
+    Get-ChildItem -Path $srcDir -Filter "*.dll" | ForEach-Object {
+        $name = $_.Name
+        if (-not ($name.Equals("CadCoreFramework.dll", [System.StringComparison]::OrdinalIgnoreCase) -or
+                  $name.StartsWith("Ac", [System.StringComparison]::OrdinalIgnoreCase) -or
+                  $name.StartsWith("Ad", [System.StringComparison]::OrdinalIgnoreCase))) {
+            Copy-Item $_.FullName -Destination $destDir -Force
+            Write-Host "   + $name" -ForegroundColor Gray
+        }
     }
 }
 
-# Copy Data (device_library.json + Blocks)
-$sourceData = Join-Path $workspaceRoot "Data"
-if (Test-Path $sourceData) {
-    # File JSON
-    $sourceJson = Join-Path $sourceData "device_library.json"
-    if (Test-Path $sourceJson) {
-        Copy-Item $sourceJson -Destination $dataDir -Force
-        Write-Host "   + Data/device_library.json" -ForegroundColor Gray
-    }
-    # Thu muc Blocks DWG
-    $sourceBlocks = Join-Path $sourceData "Blocks"
-    if (Test-Path $sourceBlocks) {
-        Copy-Item $sourceBlocks -Destination (Join-Path $dataDir "Blocks") -Recurse -Force
-        Write-Host "   + Data/Blocks/ (*.dwg)" -ForegroundColor Gray
-    }
-}
+$binBase = Join-Path $workspaceRoot "bin\x64\Release"
+Copy-TfmOutput (Join-Path $binBase "net48")          $net48Dir
+Copy-TfmOutput (Join-Path $binBase "net8.0-windows") $net8Dir
 
 # 4. Sao chep PackageContents.xml, Install.bat, Uninstall.bat, HDSD.txt
 Write-Host "`n[4/5] Sao chep file cau hinh bundle va script cai dat..." -ForegroundColor Green
 $deployDir = Join-Path $workspaceRoot "Deployment"
 
 Copy-Item (Join-Path $deployDir "PackageContents.xml") -Destination $bundleDir -Force
-Copy-Item (Join-Path $deployDir "Install.bat") -Destination $releaseStaging -Force
-Copy-Item (Join-Path $deployDir "Uninstall.bat") -Destination $releaseStaging -Force
-Copy-Item (Join-Path $deployDir "HDSD.txt") -Destination $releaseStaging -Force
+
+foreach ($f in @("Install.bat", "Uninstall.bat", "HDSD.txt")) {
+    $src = Join-Path $deployDir $f
+    if (Test-Path $src) { Copy-Item $src -Destination $releaseStaging -Force }
+}
 
 # 5. Nen toan bo releaseStaging thanh ZIP
 Write-Host "`n[5/5] Nen goi phat hanh ZIP..." -ForegroundColor Green

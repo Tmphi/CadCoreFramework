@@ -45,19 +45,17 @@ namespace CadCoreFramework.ViewModels
         /// Thường được gọi khi View vừa khởi tạo (Loaded event).
         /// </summary>
         [RelayCommand]
-        private async Task LoadLayersAsync()
+        private void LoadLayers()
         {
             IsLoading = true;
             try
             {
                 var layerList = _layerService.GetAllLayers();
-                
+
                 Layers.Clear();
                 foreach (var layer in layerList)
-                {
                     Layers.Add(layer);
-                }
-                
+
                 _notify.Info($"Đã tải thành công {Layers.Count} layers.");
             }
             catch (Exception ex)
@@ -78,16 +76,19 @@ namespace CadCoreFramework.ViewModels
         {
             if (layer == null) return;
 
-            // Đảo ngược trạng thái hiện tại
             bool newState = !layer.IsOn;
-            
-            bool success = await _layerService.ToggleLayerVisibilityAsync(layer.Name, newState);
-            
-            if (success)
+            try
             {
-                // Nếu đổi thành công dưới DB thì mới cập nhật lên UI
-                layer.IsOn = newState;
-                _notify.Info($"Đã {(newState ? "BẬT" : "TẮT")} layer: {layer.Name}");
+                bool success = await _layerService.ToggleLayerVisibilityAsync(layer.Name, newState);
+                if (success)
+                {
+                    layer.IsOn = newState;
+                    _notify.Info($"Đã {(newState ? "BẬT" : "TẮT")} layer: {layer.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _notify.Error($"Lỗi khi đổi trạng thái layer: {layer.Name}", ex);
             }
         }
     }

@@ -26,14 +26,15 @@ namespace CadCoreFramework.Themes
     public static class ThemeManager
     {
         // ─── URIs ─────────────────────────────────────────────────────────────────
+        // Lazy evaluation: in Debug, the assembly name includes a timestamp suffix
+        // (e.g. CadCoreFramework_20240101_120000), so pack URIs must use the actual
+        // runtime name rather than the canonical hard-coded string.
 
-        private static readonly Uri DarkThemeUri  = new Uri(
-            "/CadCoreFramework;component/Themes/AutoCadTheme.xaml",
-            UriKind.Relative);
+        private static Uri DarkThemeUri =>
+            new Uri($"/{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name};component/Themes/AutoCadTheme.xaml", UriKind.Relative);
 
-        private static readonly Uri LightThemeUri = new Uri(
-            "/CadCoreFramework;component/Themes/AutoCadLightTheme.xaml",
-            UriKind.Relative);
+        private static Uri LightThemeUri =>
+            new Uri($"/{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name};component/Themes/AutoCadLightTheme.xaml", UriKind.Relative);
 
         // ─── State ────────────────────────────────────────────────────────────────
 

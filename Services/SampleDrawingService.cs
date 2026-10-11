@@ -50,7 +50,7 @@ namespace CadCoreFramework.Services
             {
                 Action<ICadScope> action = scope =>
                 {
-                    scope.DrawMLeader("trần minh phở", p3.Value, p4.Value);
+                    scope.DrawMLeader(deviceName, p3.Value, p4.Value);
                     scope.DrawRectangle(pt.Value, p2, layer: layerName);
                     scope.DrawText(deviceName, pt.Value + new Vector3d(5, 15, 0),
                                    height: 5, layer: layerName);

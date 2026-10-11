@@ -313,9 +313,8 @@ namespace CadCoreFramework.Commands.Demos
         /// <summary>
         /// DEMO_ASYNC_AWAIT — Minh họa chạy ngầm (không treo AutoCAD) và vẽ khi xong.
         /// Sử dụng CadAsyncHelper để chuyển luồng an toàn.
-        /// Lưu ý: Lệnh này phải được định nghĩa bằng CommandFlags.Modal hoặc không có,
-        /// nhưng vì C# method không thể là 'async void' một cách an toàn nếu không handle exception, 
-        /// ta nên gọi qua một Fire-and-Forget pattern.
+        /// [CommandMethod] không thể là 'async Task', nên ta dùng FireAndForget(onError)
+        /// để mọi exception đều được log và hiển thị thay vì bị nuốt mất.
         /// </summary>
         [CommandMethod("DEMO_ASYNC_AWAIT")]
         public void DemoAsyncAwait()
@@ -323,8 +322,8 @@ namespace CadCoreFramework.Commands.Demos
             Notify?.Section("DEMO: ASYNC / AWAIT (Không treo CAD)");
             Notify?.Info("Bắt đầu gọi API hoặc tải dữ liệu nặng (đợi 3 giây)... Bạn vẫn có thể pan/zoom bản vẽ!");
 
-            // Gọi ngầm mà không await trực tiếp trong CommandMethod (fire and forget an toàn)
-            _ = CadAsyncHelper.ExecuteSafeAsync<string>(
+            // Fire-and-forget CÓ xử lý lỗi. ExecuteSafeAsync tự capture Main Thread context ngay tại đây.
+            CadAsyncHelper.ExecuteSafeAsync<string>(
                 async () =>
                 {
                     // Mô phỏng tải dữ liệu (ví dụ gọi HTTP API) tốn 3 giây
@@ -342,7 +341,7 @@ namespace CadCoreFramework.Commands.Demos
                         Notify?.Info("Đã vẽ một đường tròn sau khi tải xong.");
                     });
                 }
-            );
+            ).FireAndForget(ex => Notify?.Error("DEMO_ASYNC_AWAIT thất bại", ex));
         }
     }
 }

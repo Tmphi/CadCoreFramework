@@ -15,23 +15,23 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Lấy danh sách các đối tượng thuộc kiểu T từ không gian hiện hành, có thể lọc theo Layer.
         /// </summary>
-        public static System.Collections.Generic.IEnumerable<T> GetEntities<T>(this ICadScope scope, string layer = null) where T : Entity
+        public static System.Collections.Generic.List<T> GetEntities<T>(this ICadScope scope, string layer = null) where T : Entity
         {
+            // Cache RXClass outside the loop to avoid repeated reflection lookups
+            var rxClass = Autodesk.AutoCAD.Runtime.RXObject.GetClass(typeof(T));
             var btr = (BlockTableRecord)scope.Transaction.GetObject(scope.CurrentSpace.Id, OpenMode.ForRead);
+            var result = new System.Collections.Generic.List<T>();
             foreach (ObjectId id in btr)
             {
-                if (id.ObjectClass.IsDerivedFrom(Autodesk.AutoCAD.Runtime.RXObject.GetClass(typeof(T))))
+                if (!id.ObjectClass.IsDerivedFrom(rxClass)) continue;
+                var entity = scope.Transaction.GetObject(id, OpenMode.ForRead) as T;
+                if (entity != null &&
+                    (layer == null || string.Equals(entity.Layer, layer, StringComparison.OrdinalIgnoreCase)))
                 {
-                    var entity = scope.Transaction.GetObject(id, OpenMode.ForRead) as T;
-                    if (entity != null)
-                    {
-                        if (layer == null || string.Equals(entity.Layer, layer, StringComparison.OrdinalIgnoreCase))
-                        {
-                            yield return entity;
-                        }
-                    }
+                    result.Add(entity);
                 }
             }
+            return result;
         }
 
         #endregion

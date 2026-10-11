@@ -8,6 +8,12 @@ namespace CadCoreFramework.Core
     /// Quản lý nhóm lệnh Undo (Undo Grouping).
     /// Hỗ trợ gom cụm nhiều thao tác nhỏ lại thành một bước Undo duy nhất trong lịch sử của AutoCAD.
     /// Sử dụng khối using để đảm bảo EndUndoMark luôn được gọi.
+    ///
+    /// LƯU Ý:
+    /// - BẮT BUỘC dùng trong khối using trên Main Thread. Class này CỐ Ý không có finalizer:
+    ///   gọi COM (EndUndoMark) từ GC finalizer thread có thể gây Fatal Error cho AutoCAD.
+    /// - Bên trong MỘT command, AutoCAD vốn đã gom mọi transaction thành 1 bước Undo.
+    ///   UndoGroupManager hữu ích nhất khi thao tác được khởi chạy từ Palette (application context).
     /// </summary>
     /// <example>
     /// using (var undo = new UndoGroupManager())
@@ -62,14 +68,8 @@ namespace CadCoreFramework.Core
                     // Đảm bảo không ném ngoại lệ làm crash app khi dispose
                 }
             }
-            
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
-        }
 
-        ~UndoGroupManager()
-        {
-            Dispose();
+            _isDisposed = true;
         }
     }
 }

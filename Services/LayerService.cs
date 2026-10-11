@@ -68,17 +68,10 @@ namespace CadCoreFramework.Services
                     {
                         var layerRecord = (LayerTableRecord)scope.Transaction.GetObject(layerTable[layerName], OpenMode.ForWrite);
 
-                        // Lưu ý: Layer hiện hành (Current Layer) không thể tắt được (AutoCAD rule)
-                        if (scope.Database.Clayer == layerRecord.ObjectId && !isOn)
-                        {
-                            _notify.Warn($"Không thể tắt Layer hiện hành: {layerName}");
-                            success = false;
-                        }
-                        else
-                        {
-                            layerRecord.IsOff = !isOn;
-                            success = true;
-                        }
+                        // Off/On là hợp lệ kể cả với Current Layer.
+                        // Điều không thể là FREEZE Current Layer (IsFrozen) — không phải IsOff.
+                        layerRecord.IsOff = !isOn;
+                        success = true;
                     }
                 };
 

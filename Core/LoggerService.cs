@@ -8,9 +8,10 @@ namespace CadCoreFramework.Core
     /// Triển khai dịch vụ ILoggerService sử dụng thư viện Serilog.
     /// Tự động tạo thư mục và ghi log ra file theo ngày tại %AppData%/CadCoreFramework/Logs.
     /// </summary>
-    public class LoggerService : ILoggerService
+    public class LoggerService : ILoggerService, IDisposable
     {
-        private readonly Serilog.ILogger _logger;
+        private readonly Serilog.Core.Logger _logger;
+        private bool _disposed;
 
         /// <summary>
         /// Khởi tạo LoggerService và cấu hình đường dẫn file log luân phiên theo ngày.
@@ -18,15 +19,25 @@ namespace CadCoreFramework.Core
         public LoggerService()
         {
             string logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CadCoreFramework", "Logs");
-            if (!Directory.Exists(logDir))
-            {
-                Directory.CreateDirectory(logDir);
-            }
+            Directory.CreateDirectory(logDir);
 
+            var level =
+#if DEBUG
+                Serilog.Events.LogEventLevel.Debug;
+#else
+                Serilog.Events.LogEventLevel.Information;
+#endif
             _logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day)
+                .MinimumLevel.Is(level)
+                .WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day, shared: true)
                 .CreateLogger();
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _logger.Dispose();
+            _disposed = true;
         }
 
         /// <inheritdoc/>

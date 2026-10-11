@@ -74,6 +74,13 @@ namespace CadCoreFramework.Utils
             string json = JsonConvert.SerializeObject(data,
                 new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.EscapeNonAscii });
 
+            // AutoCAD XData per-application limit ≈ 16383 bytes; each 250-char chunk ≈ 254 bytes → ~64 chunks max
+            const int MaxJsonLength = 15000;
+            if (json.Length > MaxJsonLength)
+                throw new InvalidOperationException(
+                    $"Metadata quá lớn ({json.Length} ký tự sau escape, giới hạn {MaxJsonLength}). " +
+                    "Dùng XRecord/ExtensionDictionary cho dữ liệu lớn hơn.");
+
             var rb = new ResultBuffer(
                 new TypedValue((int)DxfCode.ExtendedDataRegAppName, appName));
 

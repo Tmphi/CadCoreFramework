@@ -10,7 +10,7 @@
     <SolidColorBrush x:Key="BackgroundBrush"    Color="#1E1E2E"/>
     <SolidColorBrush x:Key="BorderBrush"        Color="#3D3D5C"/>
     
-    <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#FF2214E6"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#E8E8F0"/>
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9693AC"/>
     
     <SolidColorBrush x:Key="DangerBrush"        Color="#EF4444"/>
