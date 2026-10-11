@@ -32,10 +32,10 @@ namespace CadCoreFramework.Tests
                 set => base.ErrorMessage = value;
             }
 
-            public void InvokeRunSafe(Action action, string errorPrefix = null)
+            public void InvokeRunSafe(Action action, string? errorPrefix = null)
                 => RunSafe(action, errorPrefix);
 
-            public async System.Threading.Tasks.Task InvokeRunSafeAsync(Func<System.Threading.Tasks.Task> asyncAction, string errorPrefix = null)
+            public async System.Threading.Tasks.Task InvokeRunSafeAsync(Func<System.Threading.Tasks.Task> asyncAction, string? errorPrefix = null)
                 => await RunSafeAsync(asyncAction, errorPrefix);
         }
 

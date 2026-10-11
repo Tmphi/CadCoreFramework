@@ -11,7 +11,7 @@ namespace CadCoreFramework.Tests
         [Fact]
         public void NotNull_WithNullValue_ShouldThrow()
         {
-            Action act = () => Guard.NotNull<object>(null, "myParam");
+            Action act = () => Guard.NotNull<object>(null!, "myParam");
             act.Should().Throw<ArgumentNullException>().WithParameterName("myParam");
         }
 

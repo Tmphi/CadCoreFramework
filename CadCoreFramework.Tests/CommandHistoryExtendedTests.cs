@@ -85,7 +85,7 @@ namespace CadCoreFramework.Tests
         }
 
         [Fact]
-        public void Record_ThreadSafe_ShouldNotLoseRecords()
+        public async Task Record_ThreadSafe_ShouldNotLoseRecords()
         {
             var service = new CommandHistoryService(200);
             const int threadCount = 10;
@@ -100,7 +100,7 @@ namespace CadCoreFramework.Tests
                     }
                 })).ToArray();
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
 
             service.RecentCommands.Should().HaveCount(threadCount * recordsPerThread);
         }

@@ -41,7 +41,7 @@ namespace CadCoreFramework.Tests
             foreach (var chunk in chunks)
                 sb.Append(chunk);
 
-            return JsonConvert.DeserializeObject<T>(sb.ToString());
+            return JsonConvert.DeserializeObject<T>(sb.ToString())!;
         }
 
         // ─── Chunking Tests ───────────────────────────────────────────────────────

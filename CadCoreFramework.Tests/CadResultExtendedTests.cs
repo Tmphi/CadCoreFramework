@@ -14,7 +14,7 @@ namespace CadCoreFramework.Tests
         [Fact]
         public void GenericSuccess_WithNullValue_ShouldBeSuccessWithNull()
         {
-            var result = CadResult<string>.Success(null);
+            var result = CadResult<string>.Success(null!);
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeNull();
         }

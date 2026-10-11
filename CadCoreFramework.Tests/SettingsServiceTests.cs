@@ -28,7 +28,7 @@ namespace CadCoreFramework.Tests
             _mockFileSystem.Setup(f => f.DirectoryExists(It.IsAny<string>())).Returns(true);
         }
 
-        private SettingsService CreateService(string existingJson = null)
+        private SettingsService CreateService(string? existingJson = null)
         {
             if (existingJson != null)
             {
@@ -140,7 +140,7 @@ namespace CadCoreFramework.Tests
         {
             public int Width { get; set; }
             public int Height { get; set; }
-            public string Name { get; set; }
+            public string Name { get; set; } = string.Empty;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace CadCoreFramework.Tests
     {
         public class TestMessage
         {
-            public string Text { get; set; }
+            public string Text { get; set; } = string.Empty;
         }
 
         [Fact]
