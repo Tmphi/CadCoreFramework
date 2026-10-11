@@ -34,7 +34,7 @@ namespace CadCoreFramework.Core
         /// Nếu để null, bên trong một command AutoCAD vẫn gom toàn bộ transaction thành 1 bước Undo —
         /// tham số này hữu ích nhất khi gọi từ Palette (application context).
         /// </param>
-        void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string undoMarkName = null);
+        void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null);
 
         /// <summary>
         /// Chạy một khối lệnh đồng bộ an toàn có giá trị trả về.
@@ -44,7 +44,7 @@ namespace CadCoreFramework.Core
         /// <param name="cadFunc">Hàm cần thực thi, nhận ICadScope và trả về T.</param>
         /// <param name="autoRegen">Nếu true, tự động Regen sau khi commit. Mặc định FALSE.</param>
         /// <param name="undoMarkName">Nếu chỉ định, gom toàn bộ thao tác thành 1 bước Ctrl+Z.</param>
-        CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string undoMarkName = null);
+        CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null);
 
         /// <summary>
         /// Chạy một khối lệnh ĐỌC đồng bộ an toàn.
@@ -66,7 +66,7 @@ namespace CadCoreFramework.Core
         Task ExecuteAsync(
             Func<Task<Action<ICadScope>>> asyncPreparation,
             bool autoRegen = false,
-            string undoMarkName = null,
+            string? undoMarkName = null,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace CadCoreFramework.Core
         void ExecuteBatch<T>(
             IEnumerable<T> items,
             Action<ICadScope, T> drawAction,
-            IProgress<int> progress = null,
+            IProgress<int>? progress = null,
             string undoMarkName = "Batch");
     }
 }

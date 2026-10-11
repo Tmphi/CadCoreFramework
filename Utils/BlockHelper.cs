@@ -35,6 +35,9 @@ namespace CadCoreFramework.Utils
                 ScaleFactors = new Scale3d(scale)
             };
 
+            // CadContext opens CurrentSpace ForRead by default; lazy-upgrade to ForWrite here.
+            if (!space.IsWriteEnabled) space.UpgradeOpen();
+
             ObjectId refId = space.AppendEntity(blockRef);
             tr.AddNewlyCreatedDBObject(blockRef, true);
 

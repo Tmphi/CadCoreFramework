@@ -97,11 +97,12 @@ namespace CadCoreFramework.Tests
         {
             var aggregator = new EventAggregator();
             var token = aggregator.Subscribe<OrderCreated>(msg => { });
+            token.Should().NotBeNull();
 
             Action act = () =>
             {
-                token.Dispose();
-                token.Dispose(); // Double dispose should be safe
+                token!.Dispose();
+                token!.Dispose(); // Double dispose should be safe
             };
             act.Should().NotThrow();
         }

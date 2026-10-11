@@ -90,7 +90,7 @@ namespace CadCoreFramework.ViewModels
         ///     });
         /// </code>
         /// </summary>
-        protected async Task RunSafeAsync(Func<Task> asyncAction, string errorPrefix = null)
+        protected async Task RunSafeAsync(Func<Task> asyncAction, string? errorPrefix = null)
         {
             ErrorMessage = string.Empty;
             IsBusy = true;
@@ -111,7 +111,7 @@ namespace CadCoreFramework.ViewModels
         }
 
         /// <summary>Biến thể đồng bộ của RunSafeAsync cho các thao tác không async.</summary>
-        protected void RunSafe(Action action, string errorPrefix = null)
+        protected void RunSafe(Action action, string? errorPrefix = null)
         {
             ErrorMessage = string.Empty;
             IsBusy = true;

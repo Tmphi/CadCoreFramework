@@ -1,0 +1,35 @@
+; CadCoreFramework — AutoCAD integration smoke test script
+;
+; Driven by run-integration-tests.ps1 under accoreconsole.exe.
+; accoreconsole runs AutoCAD in a headless mode: no GUI, no palettes, just the
+; command line + database. The /i and /s flags feed this .scr file into it line
+; by line. Palette/UI commands (SHOW_PALETTE etc.) are intentionally skipped.
+;
+; A line beginning with ';' is a comment. Blank lines send ENTER.
+; Each real command must be terminated by either a space or a newline.
+;
+; EXIT CODE: accoreconsole returns 0 if every command dispatched. Semantic
+; failures (CORE_TEST_ALL throwing silently) still return 0 — the runner script
+; must parse the console log for "[ERROR]" / "Fatal" / "eLockViolation" markers.
+
+; ─── 1. Load the plugin ──────────────────────────────────────────────────────
+; NETLOAD takes an absolute path to the DLL — provided via COMMAND_LINE_ARG by
+; the runner script, which substitutes {{DLL_PATH}} before invocation.
+NETLOAD
+"{{DLL_PATH}}"
+
+; ─── 2. Smoke tests ──────────────────────────────────────────────────────────
+; CORE_INFO: verifies DI container resolved and plugin reported ready.
+CORE_INFO
+
+; CORE_TEST_ALL: full exercise — Layer creation, Rectangle/MText/DBText draw,
+; XData round-trip. Exercises CadContext.Execute, UpgradeOpen (ForRead → ForWrite),
+; EnsureLayer, DrawRectangle, DrawMText, DrawText, SetMetadata/GetMetadata.
+CORE_TEST_ALL
+
+; DRAW_CIRCLE_SAMPLE: minimal single-draw path. Exercises DrawCircle.
+DRAW_CIRCLE_SAMPLE
+
+; ─── 3. Exit ────────────────────────────────────────────────────────────────
+QUIT
+Y

@@ -22,11 +22,14 @@ namespace CadCoreFramework.Testing.Fakes
     {
         private readonly List<Entity> _appended = new List<Entity>();
 
-        public Document? Document => null;
-        public Database? Database => null;
-        public Transaction? Transaction => null;
-        public BlockTableRecord? CurrentSpace => null;
-        public Editor? Editor => null;
+        // ICadScope declares these as non-nullable because the production CadScope always
+        // supplies them inside a valid Execute lambda. The fake returns null! to tell the
+        // compiler we know this is a lie — see class XML doc for the limitation.
+        public Document Document => null!;
+        public Database Database => null!;
+        public Transaction Transaction => null!;
+        public BlockTableRecord CurrentSpace => null!;
+        public Editor Editor => null!;
         public bool IsReadOnly => false;
 
         /// <summary>Danh sách Entity đã được "append" (thay cho database thật).</summary>

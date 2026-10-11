@@ -23,7 +23,7 @@ namespace CadCoreFramework.Utils
         /// Lọc theo kiểu đối tượng (ví dụ: "INSERT" cho block, "LINE", "LWPOLYLINE", "TEXT", "MTEXT").
         /// Nhiều kiểu đối tượng được nối bằng dấu phẩy — AutoCAD tự hiểu đây là phép toán logic OR.
         /// </summary>
-        public SelectionFilterBuilder OfTypes(params string[] entityTypes)
+        public SelectionFilterBuilder OfTypes(params string[]? entityTypes)
         {
             if (entityTypes == null || entityTypes.Length == 0) return this;
             _values.Add(new TypedValue((int)DxfCode.Start, string.Join(",", entityTypes)));

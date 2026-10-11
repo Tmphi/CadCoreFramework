@@ -12,7 +12,7 @@ namespace CadCoreFramework.Utils
         /// <summary>
         /// Đảm bảo đối tượng không được null. Nếu null sẽ ném ArgumentNullException.
         /// </summary>
-        public static T NotNull<T>(T value, string paramName) where T : class
+        public static T NotNull<T>(T? value, string paramName) where T : class
         {
             if (value == null)
             {
@@ -24,7 +24,7 @@ namespace CadCoreFramework.Utils
         /// <summary>
         /// Đảm bảo chuỗi không bị rỗng hoặc chỉ chứa khoảng trắng. Nếu có sẽ ném ArgumentException.
         /// </summary>
-        public static string NotEmpty(string value, string paramName)
+        public static string NotEmpty(string? value, string paramName)
         {
             if (string.IsNullOrWhiteSpace(value))
             {

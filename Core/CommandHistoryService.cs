@@ -39,7 +39,7 @@ namespace CadCoreFramework.Core
         }
 
         /// <inheritdoc/>
-        public void Record(string commandName, TimeSpan duration, bool success)
+        public void Record(string? commandName, TimeSpan duration, bool success)
         {
             if (string.IsNullOrWhiteSpace(commandName)) return;
 

@@ -9,6 +9,20 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (Final 10/10 polish)
+- `CadCoreFramework.Tests/LayerServiceTests.cs` — 6 control-flow tests for `LayerService` using `FakeCadContext` (verify ExecuteRead/ExecuteAsync call counts, undoMarkName, exception propagation).
+- `CadCoreFramework.Tests/PathProviderTests.cs` — 3 pure-C# tests for `PathProvider`.
+- `CadCoreFramework.Tests/FileSystemServiceTests.cs` — 6 pure-C# tests for `FileSystemService` (file I/O round-trips, idempotency, missing-path handling).
+- `tests/integration/smoke.scr` + `run-integration-tests.ps1` + `README.md` — accoreconsole-driven integration test scaffolding that NETLOADs the plugin and runs CORE_INFO, CORE_TEST_ALL, DRAW_CIRCLE_SAMPLE; parses the console log for failure markers. Runs locally (self-hosted CI) because GitHub Actions `windows-latest` lacks AutoCAD.
+
+### Changed (Final 10/10 polish)
+- `Core/CadContext.cs` — `ExecuteCore` and `ExecuteCore<T>` now open `CurrentSpace` with `OpenMode.ForRead`; `AppendEntityToCurrentSpace` lazy-upgrades to `ForWrite` only when a caller actually writes. Removes unnecessary write locks on pure-read Execute lambdas.
+- `Utils/BlockHelper.cs` — `InsertBlock` lazy-upgrades `space` to `ForWrite` to match the new CadContext default.
+- `CadCoreFramework.csproj` — `<Nullable>annotations</Nullable>` enabled on the main project. Lets public API use `?` / non-null annotations without flow-analysis noise from the un-annotated AutoCAD API.
+- Nullable annotations added to: `AppBootstrapper.ServiceProvider`, `ICadContext.Execute`/`ExecuteAsync`/`ExecuteBatch` (undoMarkName, progress), `IEventAggregator.Subscribe`/`Unsubscribe`, `ICommandHistoryService.Record`, `ViewModelBase.RunSafe`/`RunSafeAsync` (errorPrefix), `Guard.NotNull`/`NotEmpty`, `SelectionFilterBuilder.OfTypes`.
+- `CadCoreFramework.Testing/Fakes/FakeCadScope.cs` — properties switched from `Document?` to `Document` + `null!` to match the (correctly non-nullable) `ICadScope` interface contract.
+- Tests pass: 90 → 105 (added 15 service/path/filesystem tests).
+
 ### Added (Tier 3 — Template polish & docs sync)
 - `init-template.ps1` — extended with `-ProjectName` parameter for full namespace/file/directory rename workflow when cloning without `dotnet new`; GUID regeneration now also refreshes all project and solution GUIDs in the `.sln` file.
 - `docs/06_DEVOPS_AND_STANDARDS.md` — new §6.3 CI/CD section documenting the GitHub Actions workflows; §6.2 testing section updated with `FakeCadContext` example and coverage-report commands.

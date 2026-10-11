@@ -49,6 +49,12 @@ namespace CadCoreFramework.Core
                 if (IsReadOnly) throw new InvalidOperationException("Không thể ghi đối tượng trong scope ExecuteRead.");
                 if (entity == null) throw new ArgumentNullException(nameof(entity));
 
+                // Lazy upgrade: CurrentSpace is opened ForRead by Execute; promote to ForWrite
+                // only now that we actually need to write. UpgradeOpen is idempotent — calling it
+                // when already open ForWrite is a no-op.
+                if (!CurrentSpace.IsWriteEnabled)
+                    CurrentSpace.UpgradeOpen();
+
                 ObjectId entityId = CurrentSpace.AppendEntity(entity);
                 Transaction.AddNewlyCreatedDBObject(entity, true);
                 return entityId;
@@ -59,7 +65,7 @@ namespace CadCoreFramework.Core
         // ExecuteAsync captures the Document before await so the active document
         // cannot change between the async preparation and the actual draw phase.
 
-        private void ExecuteCore(Document doc, Action<ICadScope> cadAction, bool autoRegen, string undoMarkName)
+        private void ExecuteCore(Document doc, Action<ICadScope> cadAction, bool autoRegen, string? undoMarkName)
         {
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
@@ -79,8 +85,11 @@ namespace CadCoreFramework.Core
                     {
                         using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
                         {
+                            // Open ForRead by default — AppendEntityToCurrentSpace calls UpgradeOpen()
+                            // only when the caller actually writes an entity. Avoids holding a write
+                            // lock on CurrentSpace during pure-read passes inside Execute.
                             BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                                doc.Database.CurrentSpaceId, OpenMode.ForWrite);
+                                doc.Database.CurrentSpaceId, OpenMode.ForRead);
                             var scope = new CadScope(doc, tr, currentSpace, false);
                             cadAction(scope);
                             tr.Commit();
@@ -97,7 +106,7 @@ namespace CadCoreFramework.Core
             finally { CadContextGuard.Exit(); }
         }
 
-        private CadResult<T> ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string undoMarkName)
+        private CadResult<T> ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string? undoMarkName)
         {
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
@@ -118,8 +127,11 @@ namespace CadCoreFramework.Core
                         T result;
                         using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
                         {
+                            // Open ForRead by default — AppendEntityToCurrentSpace calls UpgradeOpen()
+                            // only when the caller actually writes an entity. Avoids holding a write
+                            // lock on CurrentSpace during pure-read passes inside Execute.
                             BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                                doc.Database.CurrentSpaceId, OpenMode.ForWrite);
+                                doc.Database.CurrentSpaceId, OpenMode.ForRead);
                             var scope = new CadScope(doc, tr, currentSpace, false);
                             result = cadFunc(scope);
                             tr.Commit();
@@ -149,7 +161,7 @@ namespace CadCoreFramework.Core
         /// Nếu undoMarkName được chỉ định, gom toàn bộ thao tác thành 1 bước Ctrl+Z.
         /// Ném exception nếu có lỗi — caller chịu trách nhiệm hiển thị và xử lý.
         /// </summary>
-        public void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string undoMarkName = null)
+        public void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
@@ -161,7 +173,7 @@ namespace CadCoreFramework.Core
         /// Thực thi một hành động ghi đồng bộ an toàn có giá trị trả về.
         /// Trả về CadResult&lt;T&gt; thay vì throw exception khi lỗi — caller quyết định hiển thị lỗi.
         /// </summary>
-        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string undoMarkName = null)
+        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
@@ -204,7 +216,7 @@ namespace CadCoreFramework.Core
         public async Task ExecuteAsync(
             Func<Task<Action<ICadScope>>> asyncPreparation,
             bool autoRegen = false,
-            string undoMarkName = null,
+            string? undoMarkName = null,
             CancellationToken cancellationToken = default)
         {
             // Capture document before the async gap — user may switch drawings during await
@@ -227,7 +239,7 @@ namespace CadCoreFramework.Core
         public void ExecuteBatch<T>(
             IEnumerable<T> items,
             Action<ICadScope, T> drawAction,
-            IProgress<int> progress = null,
+            IProgress<int>? progress = null,
             string undoMarkName = "Batch")
         {
             if (items == null) throw new ArgumentNullException(nameof(items));

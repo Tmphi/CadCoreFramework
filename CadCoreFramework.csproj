@@ -17,6 +17,15 @@
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>CadCoreFramework</RootNamespace>
     <LangVersion>10.0</LangVersion>
+    <!--
+      NULLABLE REFERENCE TYPES — MIGRATION MODE
+      `annotations` lets us write ? / NotNullWhen() / etc. on our public API
+      WITHOUT turning the hundreds of "possibly null" warnings from the
+      largely-non-annotated AutoCAD API into noise. Once the codebase is fully
+      annotated and the AutoCAD assemblies ship with nullability metadata
+      (unlikely before 2027), switch this to `enable` for full flow analysis.
+    -->
+    <Nullable>annotations</Nullable>
 
     <!--
       WPF HOT-RELOAD TRICK (Debug only):

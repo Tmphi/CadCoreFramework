@@ -14,7 +14,7 @@ namespace CadCoreFramework.Core
         private readonly object _lock = new object();
 
         /// <inheritdoc/>
-        public IDisposable Subscribe<TMessage>(Action<TMessage> action)
+        public IDisposable? Subscribe<TMessage>(Action<TMessage>? action)
         {
             if (action == null) return null;
             var messageType = typeof(TMessage);
@@ -46,7 +46,7 @@ namespace CadCoreFramework.Core
         }
 
         /// <inheritdoc/>
-        public void Unsubscribe<TMessage>(Action<TMessage> action)
+        public void Unsubscribe<TMessage>(Action<TMessage>? action)
         {
             if (action == null) return;
             var messageType = typeof(TMessage);

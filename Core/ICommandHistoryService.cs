@@ -58,7 +58,7 @@ namespace CadCoreFramework.Core
         /// <param name="commandName">Tên lệnh AutoCAD.</param>
         /// <param name="duration">Thời lượng thực thi lệnh.</param>
         /// <param name="success">False nếu lệnh kết thúc bằng một ngoại lệ không được xử lý.</param>
-        void Record(string commandName, TimeSpan duration, bool success);
+        void Record(string? commandName, TimeSpan duration, bool success);
 
         /// <summary>Xóa toàn bộ lịch sử lệnh đã lưu.</summary>
         void Clear();

@@ -12,12 +12,12 @@ namespace CadCoreFramework.Core
         /// Đăng ký lắng nghe một kiểu thông điệp (Message Type) cụ thể.
         /// Trả về IDisposable để có thể tự động Unsubscribe bằng block using hoặc gọi Dispose().
         /// </summary>
-        IDisposable Subscribe<TMessage>(Action<TMessage> action);
+        IDisposable? Subscribe<TMessage>(Action<TMessage>? action);
 
         /// <summary>
         /// Hủy đăng ký một hành động khỏi kiểu thông điệp cụ thể.
         /// </summary>
-        void Unsubscribe<TMessage>(Action<TMessage> action);
+        void Unsubscribe<TMessage>(Action<TMessage>? action);
 
         /// <summary>
         /// Phát hành (Publish) một thông điệp tới tất cả những ai đã đăng ký kiểu thông điệp này.

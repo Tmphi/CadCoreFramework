@@ -35,7 +35,7 @@ namespace CadCoreFramework.Core
         /// KHÔNG gọi ServiceProvider.GetService&lt;T&gt;() bên trong constructor của Service
         /// vì container có thể chưa được build hoàn tất — hãy dùng constructor injection thay thế.
         /// </summary>
-        public static IServiceProvider ServiceProvider { get; private set; }
+        public static IServiceProvider? ServiceProvider { get; private set; }
 
 #if DEBUG
         /// <summary>
