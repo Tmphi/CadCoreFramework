@@ -40,7 +40,9 @@ namespace CadCoreFramework.Extensions
 
         /// <summary>
         /// Yêu cầu người dùng chọn một điểm trên màn hình. Trả về null nếu người dùng hủy lệnh.
-        /// Sử dụng trực tiếp Editor của scope — an toàn tuyệt đối bên trong transaction.
+        /// AN TOÀN khi gọi từ command context (bên trong transaction).
+        /// KHÔNG GỌI từ Palette modeless (application context) mà không chuyển sang command context
+        /// trước bằng ExecuteInCommandContextAsync hoặc SendStringToExecute.
         /// </summary>
         public static Point3d? AskPoint(this ICadScope scope, string message, Point3d? basePoint = null)
         {

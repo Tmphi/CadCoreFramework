@@ -16,10 +16,8 @@ namespace CadCoreFramework.Services
         /// </summary>
         public string GetPluginDirectory()
         {
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            return Path.GetDirectoryName(path);
+            // Assembly.Location is the recommended replacement for the obsolete CodeBase
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
         /// <summary>

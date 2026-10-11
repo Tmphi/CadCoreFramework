@@ -27,11 +27,27 @@ namespace CadCoreFramework.Core
         private readonly Dictionary<string, IBusyIndicator> _paletteIndicators
             = new Dictionary<string, IBusyIndicator>(StringComparer.OrdinalIgnoreCase);
 
+        // Lưu content đang hiển thị để có thể Dispose ViewModel khi thay thế
+        private readonly Dictionary<string, FrameworkElement> _paletteContent
+            = new Dictionary<string, FrameworkElement>(StringComparer.OrdinalIgnoreCase);
+
         private readonly ILoggerService _logger;
 
         public PaletteService(ILoggerService logger)
         {
             _logger = logger;
+        }
+
+        // ─── Content Lifecycle ────────────────────────────────────────────────────
+
+        private void DisposeExistingContent(string paletteName)
+        {
+            if (_paletteContent.TryGetValue(paletteName, out var old) &&
+                old?.DataContext is IDisposable vm)
+            {
+                try { vm.Dispose(); } catch { }
+            }
+            _paletteContent.Remove(paletteName);
         }
 
         // ─── PaletteSet Management ────────────────────────────────────────────────
@@ -77,9 +93,11 @@ namespace CadCoreFramework.Core
                 var ps = GetOrCreatePaletteSet(paletteName, defaultDock: defaultDock);
                 if (content != null)
                 {
-                    // Luôn xóa UI cũ để nạp UI mới (phục vụ Hot-Reload)
+                    // Giải phóng ViewModel cũ trước khi thay thế content (tránh event leak)
+                    DisposeExistingContent(paletteName);
                     while (ps.Count > 0) ps.Remove(0);
                     ps.AddVisual(tabTitle ?? paletteName, content);
+                    _paletteContent[paletteName] = content;
                 }
                 ps.Visible = true;
             }
@@ -120,10 +138,14 @@ namespace CadCoreFramework.Core
                 {
                     if (contentFactory != null)
                     {
+                        DisposeExistingContent(paletteName);
                         while (ps.Count > 0) ps.Remove(0);
                         var content = contentFactory();
                         if (content != null)
+                        {
                             ps.AddVisual(tabTitle ?? paletteName, content);
+                            _paletteContent[paletteName] = content;
+                        }
                     }
                     ps.Visible = true;
                 }
@@ -196,6 +218,11 @@ namespace CadCoreFramework.Core
             }
             _palettes.Clear();
             _paletteIndicators.Clear();
+
+            foreach (var kvp in _paletteContent)
+                if (kvp.Value?.DataContext is IDisposable vm)
+                    try { vm.Dispose(); } catch { }
+            _paletteContent.Clear();
         }
     }
 }

@@ -2,7 +2,7 @@
 > [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md)
 > ---
 
-# 🚀 CadCoreFramework - The 10/10 Enterprise AutoCAD .NET Template
+# 🚀 CadCoreFramework - AutoCAD .NET Plugin Template
 
 Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫu (Template) chuyên nghiệp dành cho việc phát triển các ứng dụng/plugin AutoCAD bằng C# (.NET). 
 
@@ -81,19 +81,15 @@ Trước khi code, hãy đảm bảo bạn setup đúng môi trường:
 ### Cấu hình file `.csproj` (Cực Kỳ Quan Trọng)
 Nếu cấu hình sai, AutoCAD sẽ "văng" (Fatal Error) ngay lập tức khi bạn chạy lệnh `NETLOAD`. Hãy mở file `.csproj` và đảm bảo:
 
-1. **`CopyLocal="False"` (Private = False)**: Toàn bộ thư viện cốt lõi của AutoCAD như `AcDbMgd.dll`, `AcMgd.dll`, `AcCoreMgd.dll` bắt buộc phải set `CopyLocal = False`. Nếu để `True`, nó sẽ chép đè file DLL của Autodesk ra thư mục output và tranh chấp bộ nhớ!
-2. Thiết lập đúng `<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>`.
+1. **`<ExcludeAssets>runtime</ExcludeAssets>`**: Toàn bộ thư viện cốt lõi của AutoCAD như `AcDbMgd.dll`, `AcMgd.dll`, `AcCoreMgd.dll` bắt buộc phải thêm `<ExcludeAssets>runtime</ExcludeAssets>` trong PackageReference (SDK-style). Nếu không, NuGet sẽ chép đè DLL của Autodesk ra thư mục output và tranh chấp bộ nhớ!
+2. Dự án đã cấu hình **multi-targeting** sẵn: `<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>` — tự động build cả hai TFM cùng lúc.
 
-### Hướng dẫn nâng cấp lên AutoCAD 2025+ (.NET 8.0)
-AutoCAD 2025 đánh dấu bước ngoặt khi Autodesk chuyển sang `.NET 8.0`. Do dự án này đã dùng chuẩn SDK-style, bạn chỉ cần thay đổi **4 chỗ** trong file `.csproj`:
-1. Thay `<TargetFramework>net48</TargetFramework>` thành `<TargetFramework>net8.0-windows</TargetFramework>`.
-2. Nâng cấp 3 gói NuGet `AutoCAD.NET`, `AutoCAD.NET.Core`, `AutoCAD.NET.Model` lên phiên bản `25.0.0` hoặc cao hơn.
-3. Xóa các Reference cũ đã được tích hợp sẵn trong .NET 8: Xóa dòng `<Reference Include="System.IO.Compression" />` và `System.IO.Compression.FileSystem`.
-4. Nếu có trỏ cứng đường dẫn `HintPath` của `Newtonsoft.Json`, hãy trỏ lại vào thư mục cài đặt CAD 2025 hoặc dùng thẳng qua NuGet.
+### Hỗ trợ AutoCAD 2025+ (.NET 8.0)
+Dự án đã **multi-target** sẵn cả `net48` (AutoCAD 2021–2024) lẫn `net8.0-windows` (AutoCAD 2025+). Một lần `dotnet build` sinh ra cả hai TFM, `package.ps1` đóng gói vào bundle đúng thư mục. Không cần thay đổi thêm gì.
 
 ### Chế độ Build (Debug vs Release)
 - **Chế độ Debug**: Dự án đã được thiết lập Post-build event sao chép file `.dll` thành tên ngẫu nhiên (ví dụ `CadCoreFramework_1234.dll`). Việc này cho phép bạn biên dịch lại mã và `NETLOAD` file mới vào AutoCAD mà không cần khởi động lại AutoCAD! Để Debug, mở Visual Studio -> `Debug` -> `Attach to Process` -> chọn `acad.exe`.
-- **Chế độ Release**: Khi Build ở Release, dự án tự động sinh ra thư mục `.bundle` theo đúng chuẩn của Autodesk (bao gồm file `PackageContents.xml`). Bạn chỉ việc chép thư mục bundle này vào `%APPDATA%\Autodesk\ApplicationPlugins` là plugin tự chạy.
+- **Chế độ Release**: Sau khi Build Release, chạy `.\package.ps1` để đóng gói thành thư mục `.bundle` đúng chuẩn Autodesk. Chép thư mục bundle vào `%APPDATA%\Autodesk\ApplicationPlugins` là plugin tự chạy.
 
 ---
 
@@ -198,7 +194,7 @@ var result = Editor.Drag(jig);
 ## 💣 6. Xử Lý Sự Cố (Troubleshooting)
 
 Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockViolation`, `eNotOpenForWrite`, v.v.
-👉 **Hãy xem hướng dẫn cứu hộ tại:** [Cẩm Nang Gỡ Lỗi (Troubleshooting)](docs/08_TROUBLESHOOTING.md)
+👉 **Hãy xem hướng dẫn cứu hộ tại:** [DevOps & Troubleshooting](docs/06_DEVOPS_AND_STANDARDS.md)
 
 ---
 *Chúc bạn có một trải nghiệm lập trình AutoCAD dễ chịu, khoa học và đạt chuẩn kỹ nghệ phần mềm cùng CadCoreFramework!*
