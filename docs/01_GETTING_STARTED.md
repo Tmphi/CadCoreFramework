@@ -29,20 +29,19 @@ Trước khi Build, hãy lướt qua cấu trúc thư mục của Framework đ�
 └── 📁 Views/          # Giao diện WPF (XAML). TUYỆT ĐỐI KHÔNG chứa code xử lý AutoCAD.
 ```
 
-### Bước 1: Build Plugin (Bản chất của `build.ps1`)
-Mở Terminal (hoặc Developer Command Prompt) tại thư mục gốc của project và chạy:
+### Bước 1: Build Plugin
+Mở Terminal tại thư mục gốc của project và chạy:
 ```powershell
-.\build.ps1
+dotnet build CadCoreFramework.sln -c Debug
 ```
 
 > [!NOTE]
-> **Under the hood (Bản chất bên trong):** File `build.ps1` không chỉ gọi lệnh `dotnet build` thông thường. Trong môi trường AutoCAD, nếu bạn đã `NETLOAD` một file DLL, Windows sẽ khoá cứng (Lock) file DLL đó lại. Bạn không thể ghi đè file DLL mới trừ khi khởi động lại AutoCAD (rất mất thời gian).
-> 
-> Giải pháp của Framework: File `build.ps1` kết hợp với cấu hình trong `.csproj` sẽ sinh ra một file DLL mới tinh kèm theo Timestamp (ví dụ: `CadCoreFramework_20261010_120000.dll`). Nhờ đó, file mới sẽ không đụng độ với file cũ đang bị khoá. Sau đó, nó tự động copy đổi tên file này trở về tên `CadCoreFramework.dll` chuẩn để FileWatcher của bạn dễ nhận diện.
+> **WPF Hot-Reload (Không cần tắt AutoCAD):** Trong chế độ Debug, `.csproj` tự sinh ra file DLL mới kèm Timestamp (ví dụ: `CadCoreFramework_20261010_120000.dll`). Nhờ đó file mới không đụng độ với bản cũ đang bị Windows lock. Sau đó PostBuild event tự copy về tên chuẩn `CadCoreFramework.dll`.
+> Chi tiết trong Phần 6.1.
 
 ### Bước 2: Nạp Plugin Vào AutoCAD
 1. Mở AutoCAD, gõ lệnh `NETLOAD` vào Command Line.
-2. Điều hướng đến file: `<thư mục project>\bin\x64\Debug\net48\CadCoreFramework.dll`.
+2. Điều hướng đến file: `<thư mục project>\bin\Debug\net48\CadCoreFramework.dll`.
 3. Nhấn **Open**. (Sẽ không có bảng thông báo nào hiện ra, điều này là bình thường).
 
 ### Bước 3: Kiểm Tra Plugin
