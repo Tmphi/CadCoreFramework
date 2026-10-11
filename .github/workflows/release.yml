@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-
+
+      - name: Build (Release)
+        run: dotnet build CadCoreFramework.sln -c Release -v minimal
+
+      - name: Test
+        run: >
+          dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj
+          -c Release --no-build --logger "console;verbosity=normal"
+
+      - name: Package bundle
+        run: .\package.ps1
+        shell: pwsh
+
+      - name: Zip bundle
+        run: >
+          Compress-Archive
+          -Path dist\*
+          -DestinationPath dist\CadCoreFramework-${{ github.ref_name }}.zip
+        shell: pwsh
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-${{ github.ref_name }}
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/CadCoreFramework-${{ github.ref_name }}.zip
+          generate_release_notes: true

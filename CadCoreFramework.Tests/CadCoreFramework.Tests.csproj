@@ -47,6 +47,8 @@
     <!-- Reference the production project.
          InternalsVisibleTo in AssemblyInfo.cs gives access to internal members. -->
     <ProjectReference Include="..\CadCoreFramework.csproj" />
+    <!-- Test doubles: FakeCadContext, FakeCadScope -->
+    <ProjectReference Include="..\CadCoreFramework.Testing\CadCoreFramework.Testing.csproj" />
   </ItemGroup>
 
 </Project>

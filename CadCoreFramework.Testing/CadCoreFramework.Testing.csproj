@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Test-double library: FakeCadScope + FakeCadContext.
+      net48 only — mirrors the test project target so CI needs no extra setup.
+    -->
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>CadCoreFramework.Testing</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      AutoCAD.NET compile-only: FakeCadScope/FakeCadContext only use AutoCAD types
+      as return types (all return null). ExcludeAssets="runtime" keeps the test
+      output clean — no AutoCAD DLLs copied into the Testing project's bin.
+    -->
+    <PackageReference Include="AutoCAD.NET"       Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CadCoreFramework.csproj" />
+  </ItemGroup>
+
+</Project>
