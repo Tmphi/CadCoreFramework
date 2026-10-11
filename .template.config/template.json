@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "CadCoreFramework",
+  "classifications": ["AutoCAD", "Plugin", ".NET", "WPF", "MVVM"],
+  "identity": "CadCoreFramework.Template.1.0",
+  "name": "AutoCAD .NET Plugin (CadCoreFramework)",
+  "shortName": "cad-plugin",
+  "description": "Template khởi tạo AutoCAD .NET Plugin với DI, MVVM, ICadContext, hot-reload, multi-target net48+net8.",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "sourceName": "CadCoreFramework",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "PluginDescription": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "AutoCAD .NET Plugin",
+      "replaces": "AutoCAD .NET Plugin Framework — DI, ICadContext, MVVM",
+      "description": "Mô tả plugin xuất hiện trong PackageContents.xml và README."
+    },
+    "AuthorName": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "Author",
+      "replaces": "CadCoreFramework",
+      "fileRename": "CadCoreFramework",
+      "description": "Tên tác giả. Mặc định dùng tên project."
+    }
+  },
+
+  "guids": [
+    "32077C6A-6136-4AD8-BF65-D8235959ACF1",
+    "C68B708A-6E05-4CAE-B20C-8A70BBA3A4E2",
+    "7489807D-8D2C-4E87-A16C-C08603642291",
+    "FF9622DB-9E9C-4A98-8822-4E84C4F00DC2",
+    "7C5F7C3A-A212-4DE6-A6F9-183637C0C793"
+  ],
+
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            ".git/**",
+            ".vs/**",
+            "bin/**",
+            "obj/**",
+            "dist/**",
+            "coverage/**",
+            "*.user",
+            "*.suo",
+            "**/*.lock.json",
+            "code_review_report.md",
+            ".template.config/**"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "postActions": [
+    {
+      "condition": "(OS != \"Windows_NT\")",
+      "description": "Make init-template.ps1 executable",
+      "manualInstructions": [{ "text": "Run: chmod +x init-template.ps1" }],
+      "actionId": "cb9a19eb-ab61-4e09-8098-8a779fd85556",
+      "continueOnError": true
+    }
+  ]
+}

@@ -64,32 +64,37 @@ namespace CadCoreFramework.Core
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
 
-            using (doc.LockDocument())
+            CadContextGuard.Enter();
+            try
             {
-                if (useUndoMark)
+                using (doc.LockDocument())
                 {
-                    try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
-                    catch { comDoc = null; }
-                }
-
-                try
-                {
-                    using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                    if (useUndoMark)
                     {
-                        BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                            doc.Database.CurrentSpaceId, OpenMode.ForWrite);
-                        var scope = new CadScope(doc, tr, currentSpace, false);
-                        cadAction(scope);
-                        tr.Commit();
+                        try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
+                        catch { comDoc = null; }
                     }
 
-                    if (autoRegen) doc.Editor.Regen();
-                }
-                finally
-                {
-                    if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
+                    try
+                    {
+                        using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                        {
+                            BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
+                                doc.Database.CurrentSpaceId, OpenMode.ForWrite);
+                            var scope = new CadScope(doc, tr, currentSpace, false);
+                            cadAction(scope);
+                            tr.Commit();
+                        }
+
+                        if (autoRegen) doc.Editor.Regen();
+                    }
+                    finally
+                    {
+                        if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
+                    }
                 }
             }
+            finally { CadContextGuard.Exit(); }
         }
 
         private CadResult<T> ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string undoMarkName)
@@ -97,38 +102,43 @@ namespace CadCoreFramework.Core
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
 
-            using (doc.LockDocument())
+            CadContextGuard.Enter();
+            try
             {
-                if (useUndoMark)
+                using (doc.LockDocument())
                 {
-                    try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
-                    catch { comDoc = null; }
-                }
-
-                try
-                {
-                    T result;
-                    using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                    if (useUndoMark)
                     {
-                        BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                            doc.Database.CurrentSpaceId, OpenMode.ForWrite);
-                        var scope = new CadScope(doc, tr, currentSpace, false);
-                        result = cadFunc(scope);
-                        tr.Commit();
+                        try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
+                        catch { comDoc = null; }
                     }
 
-                    if (autoRegen) doc.Editor.Regen();
-                    return CadResult<T>.Success(result);
-                }
-                catch (Exception ex)
-                {
-                    return CadResult<T>.Fail(ex.Message, ex);
-                }
-                finally
-                {
-                    if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
+                    try
+                    {
+                        T result;
+                        using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                        {
+                            BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
+                                doc.Database.CurrentSpaceId, OpenMode.ForWrite);
+                            var scope = new CadScope(doc, tr, currentSpace, false);
+                            result = cadFunc(scope);
+                            tr.Commit();
+                        }
+
+                        if (autoRegen) doc.Editor.Regen();
+                        return CadResult<T>.Success(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        return CadResult<T>.Fail(ex.Message, ex);
+                    }
+                    finally
+                    {
+                        if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
+                    }
                 }
             }
+            finally { CadContextGuard.Exit(); }
         }
 
         // ─── Public API ─────────────────────────────────────────────────────────
@@ -170,14 +180,19 @@ namespace CadCoreFramework.Core
             if (doc == null)
                 throw new InvalidOperationException("Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.");
 
-            using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+            CadContextGuard.Enter();
+            try
             {
-                BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                    doc.Database.CurrentSpaceId, OpenMode.ForRead);
-                var scope = new CadScope(doc, tr, currentSpace, true);
-                readAction(scope);
-                tr.Commit(); // Commit is cheaper than Abort for a read-only transaction
+                using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                {
+                    BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
+                        doc.Database.CurrentSpaceId, OpenMode.ForRead);
+                    var scope = new CadScope(doc, tr, currentSpace, true);
+                    readAction(scope);
+                    tr.Commit(); // Commit is cheaper than Abort for a read-only transaction
+                }
             }
+            finally { CadContextGuard.Exit(); }
         }
 
         /// <summary>

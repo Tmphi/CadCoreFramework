@@ -4,6 +4,8 @@
 
 # 🚀 CadCoreFramework - AutoCAD .NET Plugin Template
 
+[![Build and Test](https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/build-and-test.yml)
+
 Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫu (Template) chuyên nghiệp dành cho việc phát triển các ứng dụng/plugin AutoCAD bằng C# (.NET). 
 
 Cuốn tài liệu này được viết theo dạng **"Giáo trình thực chiến"**, không chỉ hướng dẫn bạn làm *như thế nào*, mà còn giải thích *tại sao* phải làm như vậy để giúp bạn tránh khỏi 99% các lỗi kinh điển (Fatal Error) của AutoCAD API.

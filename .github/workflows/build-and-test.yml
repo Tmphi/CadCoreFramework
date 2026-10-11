@@ -26,15 +26,27 @@ jobs:
           key: nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: nuget-
 
+      - name: Restore dotnet tools (ReportGenerator)
+        run: dotnet tool restore
+
       - name: Build (Release)
         run: dotnet build CadCoreFramework.sln -c Release -v minimal
 
-      - name: Test
+      - name: Test with coverage
         run: >
           dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj
           -c Release --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory coverage
           --logger "trx;LogFileName=test-results.trx"
           --logger "console;verbosity=normal"
+
+      - name: Generate coverage report
+        run: >
+          dotnet reportgenerator
+          -reports:"coverage/**/coverage.cobertura.xml"
+          -targetdir:"coverage/report"
+          -reporttypes:"Html;Cobertura"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -42,3 +54,10 @@ jobs:
         with:
           name: test-results
           path: "**/*.trx"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/report
