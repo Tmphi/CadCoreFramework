@@ -5,7 +5,6 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.PlottingServices;
 using CadCoreFramework.Core;
-using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace CadCoreFramework.Services
 {

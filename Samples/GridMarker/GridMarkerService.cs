@@ -54,9 +54,9 @@ namespace CadCoreFramework.Samples.GridMarker
             // Không có gì để vẽ → không mở transaction, không tạo bước Undo rỗng.
             if (cells.Count == 0) return CadResult<int>.Success(0);
 
-            // Execute<T> trả về CadResult thay vì throw: lỗi AutoCAD (layer bị khóa, bản vẽ
+            // TryExecute trả về CadResult thay vì throw: lỗi AutoCAD (layer bị khóa, bản vẽ
             // read-only…) trở thành giá trị để caller quyết định hiển thị thế nào.
-            CadResult<int> result = _cadContext.Execute(
+            CadResult<int> result = _cadContext.TryExecute(
                 scope => DrawCells(scope, spec, cells),
                 undoMarkName: UndoMarkName);
 

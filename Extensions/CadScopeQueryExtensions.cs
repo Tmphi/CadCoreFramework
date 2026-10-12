@@ -44,6 +44,7 @@ namespace CadCoreFramework.Extensions
         /// KHÔNG GỌI từ Palette modeless (application context) mà không chuyển sang command context
         /// trước bằng ExecuteInCommandContextAsync hoặc SendStringToExecute.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetPoint() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static Point3d? AskPoint(this ICadScope scope, string message, Point3d? basePoint = null)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptPointOptions($"\n{message}");
@@ -59,6 +60,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng nhập một chuỗi văn bản. Trả về null nếu người dùng hủy lệnh.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetString() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static string AskString(this ICadScope scope, string message, string defaultValue = null)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptStringOptions($"\n{message}") { AllowSpaces = true };
@@ -70,6 +72,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng chọn một từ khóa trong danh sách cho trước. Trả về null nếu người dùng hủy lệnh.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetKeywords() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static string AskKeyword(this ICadScope scope, string message, string[] keywords, string defaultKeyword = null)
         {
             if (keywords == null || keywords.Length == 0) return null;
@@ -84,6 +87,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng nhập một số thực. Trả về null nếu người dùng hủy lệnh.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetDouble() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static double? AskDouble(this ICadScope scope, string message, double? defaultValue = null)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptDoubleOptions($"\n{message}");
@@ -95,6 +99,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng chọn một đối tượng (Entity). Trả về ObjectId.Null nếu người dùng hủy lệnh.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetEntity() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static ObjectId AskEntity(this ICadScope scope, string message)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptEntityOptions($"\n{message}");
@@ -105,6 +110,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng đo hoặc nhập khoảng cách (có hiển thị đường dóng cao su kéo dài từ basePoint).
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetDistance() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static double? AskDistance(this ICadScope scope, string message, Point3d? basePoint = null)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptDistanceOptions($"\n{message}");
@@ -120,6 +126,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Yêu cầu người dùng nhập hoặc trỏ góc (Radian) với đường dóng cao su từ basePoint.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetAngle() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static double? AskAngle(this ICadScope scope, string message, Point3d? basePoint = null)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptAngleOptions($"\n{message}");
@@ -136,6 +143,7 @@ namespace CadCoreFramework.Extensions
         /// Yêu cầu người dùng chọn điểm góc thứ hai (hiển thị khung chữ nhật cao su kéo dài từ basePoint).
         /// Rất tiện lợi cho các lệnh vẽ hình chữ nhật hoặc khoanh vùng tương tác.
         /// </summary>
+        [Obsolete("Prompt bên trong scope giữ Transaction + Lock trong lúc chờ người dùng. Dùng CadPromptHelper.GetCorner() TRƯỚC khi gọi ICadContext.Execute (xem docs/09_GOLDEN_SAMPLE.md).")]
         public static Point3d? AskCorner(this ICadScope scope, string message, Point3d basePoint)
         {
             var opts = new Autodesk.AutoCAD.EditorInput.PromptCornerOptions($"\n{message}", basePoint);

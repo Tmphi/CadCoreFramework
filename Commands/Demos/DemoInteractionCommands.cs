@@ -1,14 +1,11 @@
-using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
-using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
 using CadCoreFramework.Utils.Jigs;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -19,7 +16,7 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoInteractionCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         /// <summary>
         /// DEMO_PROMPT — Minh họa toàn bộ các hàm yêu cầu người dùng nhập liệu:
@@ -28,10 +25,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_PROMPT")]
         public void DemoPrompt()
         {
-            Notify?.Section("DEMO: CADPROMPTHELPER — NHẬP LIỆU TỪ NGƯỜI DÙNG");
-
             ExecuteCommand(() =>
             {
+                Notify.Section("DEMO: CADPROMPTHELPER — NHẬP LIỆU TỪ NGƯỜI DÙNG");
+
                 // 1. GetPoint — Chọn điểm trên màn hình
                 var pt = CadPromptHelper.GetPoint("Chọn một điểm bất kỳ trên bản vẽ:");
                 if (pt == null) { Notify?.Warn("Đã hủy tại GetPoint."); return; }
@@ -70,9 +67,9 @@ namespace CadCoreFramework.Commands.Demos
                 var entId = CadPromptHelper.GetEntity("Chọn một đối tượng trên bản vẽ:");
                 if (entId == ObjectId.Null) { Notify?.Warn("Đã hủy tại GetEntity."); return; }
                 Notify?.Info($"7. GetEntity: ObjectId = {entId}, ObjectClass = {entId.ObjectClass.Name}");
-            });
 
-            Notify?.Section("HOÀN TẤT: ĐÃ THỬ TOÀN BỘ CADPROMPTHELPER");
+                Notify.Section("HOÀN TẤT: ĐÃ THỬ TOÀN BỘ CADPROMPTHELPER");
+            });
         }
 
         /// <summary>
@@ -82,10 +79,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_SELECTION_FILTER")]
         public void DemoSelectionFilter()
         {
-            Notify?.Section("DEMO: SELECTIONFILTERBUILDER — LỌC ĐỐI TƯỢNG");
-
             ExecuteCommand(() =>
             {
+                Notify.Section("DEMO: SELECTIONFILTERBUILDER — LỌC ĐỐI TƯỢNG");
+
                 // ── Ví dụ 1: Lọc tất cả LINE và CIRCLE ─────────────────────────
                 Notify?.Info("--- Ví dụ 1: Lọc tất cả LINE và CIRCLE ---");
                 var filter1 = SelectionFilterBuilder.Create()
@@ -132,9 +129,9 @@ namespace CadCoreFramework.Commands.Demos
 
                 var ids5 = CadPromptHelper.GetSelection("Chọn LINE trên layer DEMO_SHAPES:", filter5);
                 Notify?.Info($"  → Đã chọn {ids5.Length} LINE(s) trên DEMO_SHAPES.");
-            });
 
-            Notify?.Section("HOÀN TẤT: ĐÃ MINH HỌA 5 CÁCH LỌC VỚI SELECTIONFILTERBUILDER");
+                Notify.Section("HOÀN TẤT: ĐÃ MINH HỌA 5 CÁCH LỌC VỚI SELECTIONFILTERBUILDER");
+            });
         }
 
         /// <summary>
@@ -144,10 +141,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_JIG_RECTANGLE")]
         public void DemoJigRectangle()
         {
-            Notify?.Section("DEMO: RECTANGLEJIG — VẼ HÌNH CHỮ NHẬT BẰNG TƯƠNG TÁC");
-
             ExecuteCommand(() =>
             {
+                Notify.Section("DEMO: RECTANGLEJIG — VẼ HÌNH CHỮ NHẬT BẰNG TƯƠNG TÁC");
+
                 // 1. Lấy điểm góc thứ nhất (TRƯỚC khi mở transaction)
                 var corner1 = CadPromptHelper.GetPoint("Chọn góc thứ nhất của hình chữ nhật:");
                 if (corner1 == null) { Notify?.Warn("Đã hủy."); return; }
@@ -168,7 +165,7 @@ namespace CadCoreFramework.Commands.Demos
                 }
 
                 // 4. Jig thành công → Mở transaction để thêm Polyline vào bản vẽ
-                CadContext?.Execute(scope =>
+                CadContext.Execute(scope =>
                 {
                     scope.EnsureLayer("DEMO_JIGS", colorIndex: 3);
                     polyline.Layer = "DEMO_JIGS";
@@ -179,9 +176,9 @@ namespace CadCoreFramework.Commands.Demos
                     Notify?.Info($"  Góc 2: ({jig.Corner2.X:F2}, {jig.Corner2.Y:F2})");
                     Notify?.Info($"  Kích thước: {jig.Width:F2} x {jig.Height:F2}");
                 });
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO RECTANGLEJIG");
+                Notify.Section("HOÀN TẤT: DEMO RECTANGLEJIG");
+            });
         }
 
         /// <summary>
@@ -192,14 +189,14 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_JIG_BLOCK")]
         public void DemoJigBlock()
         {
-            Notify?.Section("DEMO: BLOCKPLACEMENTJIG — ĐẶT BLOCK BẰNG TƯƠNG TÁC");
-
             ExecuteCommand(() =>
             {
+                Notify.Section("DEMO: BLOCKPLACEMENTJIG — ĐẶT BLOCK BẰNG TƯƠNG TÁC");
+
                 const string blockName = "DEMO_SYMBOL";
 
                 // 1. Đảm bảo block definition tồn tại (tạo mới nếu chưa có)
-                CadContext?.Execute(scope =>
+                CadContext.Execute(scope =>
                 {
                     var bt = (BlockTable)scope.Transaction.GetObject(
                         scope.Database.BlockTableId, OpenMode.ForWrite);
@@ -232,7 +229,7 @@ namespace CadCoreFramework.Commands.Demos
                 // 2. Tạo BlockReference tạm (chưa thêm vào DB) cho Jig
                 BlockReference blockRef = null;
 
-                CadContext?.Execute(scope =>
+                CadContext.Execute(scope =>
                 {
                     var bt = (BlockTable)scope.Transaction.GetObject(
                         scope.Database.BlockTableId, OpenMode.ForRead);
@@ -265,7 +262,7 @@ namespace CadCoreFramework.Commands.Demos
                 }
 
                 // 4. Thêm BlockReference vào bản vẽ
-                CadContext?.Execute(scope =>
+                CadContext.Execute(scope =>
                 {
                     scope.EnsureLayer("DEMO_JIGS", colorIndex: 3);
                     blockRef.Layer = "DEMO_JIGS";
@@ -273,9 +270,9 @@ namespace CadCoreFramework.Commands.Demos
 
                     Notify?.Info($"Đã đặt Block '{blockName}' tại ({jig.Position.X:F2}, {jig.Position.Y:F2}).");
                 });
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO BLOCKPLACEMENTJIG");
+                Notify.Section("HOÀN TẤT: DEMO BLOCKPLACEMENTJIG");
+            });
         }
     }
 }

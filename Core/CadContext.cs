@@ -61,52 +61,15 @@ namespace CadCoreFramework.Core
             }
         }
 
+        private const string NoActiveDocumentMessage = "Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.";
+
         // ─── Private core — receives an already-resolved Document ──────────────
         // ExecuteAsync captures the Document before await so the active document
         // cannot change between the async preparation and the actual draw phase.
+        // MỘT core duy nhất cho mọi overload ghi: luôn throw khi lỗi; các biến thể
+        // Try* bọc nó và chuyển exception thành CadResult.
 
-        private void ExecuteCore(Document doc, Action<ICadScope> cadAction, bool autoRegen, string? undoMarkName)
-        {
-            bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
-            dynamic comDoc = null;
-
-            CadContextGuard.Enter();
-            try
-            {
-                using (doc.LockDocument())
-                {
-                    if (useUndoMark)
-                    {
-                        try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
-                        catch { comDoc = null; }
-                    }
-
-                    try
-                    {
-                        using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
-                        {
-                            // Open ForRead by default — AppendEntityToCurrentSpace calls UpgradeOpen()
-                            // only when the caller actually writes an entity. Avoids holding a write
-                            // lock on CurrentSpace during pure-read passes inside Execute.
-                            BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
-                                doc.Database.CurrentSpaceId, OpenMode.ForRead);
-                            var scope = new CadScope(doc, tr, currentSpace, false);
-                            cadAction(scope);
-                            tr.Commit();
-                        }
-
-                        if (autoRegen) doc.Editor.Regen();
-                    }
-                    finally
-                    {
-                        if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
-                    }
-                }
-            }
-            finally { CadContextGuard.Exit(); }
-        }
-
-        private CadResult<T> ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string? undoMarkName)
+        private T ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string? undoMarkName)
         {
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
@@ -138,11 +101,7 @@ namespace CadCoreFramework.Core
                         }
 
                         if (autoRegen) doc.Editor.Regen();
-                        return CadResult<T>.Success(result);
-                    }
-                    catch (Exception ex)
-                    {
-                        return CadResult<T>.Fail(ex.Message, ex);
+                        return result;
                     }
                     finally
                     {
@@ -153,7 +112,15 @@ namespace CadCoreFramework.Core
             finally { CadContextGuard.Exit(); }
         }
 
+        private void ExecuteCore(Document doc, Action<ICadScope> cadAction, bool autoRegen, string? undoMarkName)
+            => ExecuteCore<object?>(doc, scope => { cadAction(scope); return null; }, autoRegen, undoMarkName);
+
+        private static Document RequireActiveDocument()
+            => Application.DocumentManager.MdiActiveDocument
+               ?? throw new InvalidOperationException(NoActiveDocumentMessage);
+
         // ─── Public API ─────────────────────────────────────────────────────────
+        // QUY ƯỚC: Execute* ném exception khi lỗi · TryExecute* trả CadResult, không bao giờ throw.
 
         /// <summary>
         /// Thực thi một hành động ghi đồng bộ an toàn bên trong tài liệu được khóa và transaction.
@@ -163,38 +130,69 @@ namespace CadCoreFramework.Core
         /// </summary>
         public void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null)
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null)
-                throw new InvalidOperationException("Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.");
-            ExecuteCore(doc, cadAction, autoRegen, undoMarkName);
+            if (cadAction == null) throw new ArgumentNullException(nameof(cadAction));
+            ExecuteCore(RequireActiveDocument(), cadAction, autoRegen, undoMarkName);
+        }
+
+        /// <inheritdoc/>
+        [Obsolete("Dùng TryExecute<T>() — cùng hành vi, tên thể hiện rõ việc trả CadResult thay vì throw.")]
+        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
+            => TryExecute(cadFunc, autoRegen, undoMarkName);
+
+        /// <summary>
+        /// Như <see cref="Execute(Action{ICadScope}, bool, string)"/> nhưng KHÔNG throw:
+        /// mọi lỗi (kể cả không có bản vẽ) được trả về dưới dạng <see cref="CadResult"/>.
+        /// </summary>
+        public CadResult TryExecute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null)
+        {
+            if (cadAction == null) throw new ArgumentNullException(nameof(cadAction));
+            try
+            {
+                ExecuteCore(RequireActiveDocument(), cadAction, autoRegen, undoMarkName);
+                return CadResult.Ok();
+            }
+            catch (Exception ex)
+            {
+                return CadResult.Fail(ex.Message, ex);
+            }
         }
 
         /// <summary>
-        /// Thực thi một hành động ghi đồng bộ an toàn có giá trị trả về.
-        /// Trả về CadResult&lt;T&gt; thay vì throw exception khi lỗi — caller quyết định hiển thị lỗi.
+        /// Thực thi một hành động ghi có giá trị trả về, KHÔNG throw:
+        /// trả CadResult&lt;T&gt; thành công kèm giá trị, hoặc thất bại kèm thông điệp + exception.
         /// </summary>
-        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
+        public CadResult<T> TryExecute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null)
-                return CadResult<T>.Fail("Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.");
-            return ExecuteCore<T>(doc, cadFunc, autoRegen, undoMarkName);
+            if (cadFunc == null) throw new ArgumentNullException(nameof(cadFunc));
+            try
+            {
+                return CadResult<T>.Success(ExecuteCore(RequireActiveDocument(), cadFunc, autoRegen, undoMarkName));
+            }
+            catch (Exception ex)
+            {
+                return CadResult<T>.Fail(ex.Message, ex);
+            }
         }
 
         /// <summary>
         /// Thực thi một hành động chỉ đọc (read-only) đồng bộ.
-        /// KHÔNG khóa tài liệu (không cần thiết khi chỉ đọc từ command context).
+        /// Lock document CHỈ khi đang ở application context (Palette, modeless dialog) — nơi AutoCAD
+        /// không tự lock. Trong command context, document đã được command lock sẵn → bỏ qua.
         /// KHÔNG cho phép gọi AppendEntityToCurrentSpace bên trong scope này.
         /// </summary>
         public void ExecuteRead(Action<ICadScope> readAction)
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null)
-                throw new InvalidOperationException("Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.");
+            if (readAction == null) throw new ArgumentNullException(nameof(readAction));
+            Document doc = RequireActiveDocument();
 
             CadContextGuard.Enter();
             try
             {
+                DocumentLock? docLock = Application.DocumentManager.IsApplicationContext
+                    ? doc.LockDocument()
+                    : null;
+
+                using (docLock)
                 using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
                 {
                     BlockTableRecord currentSpace = (BlockTableRecord)tr.GetObject(
@@ -220,9 +218,7 @@ namespace CadCoreFramework.Core
             CancellationToken cancellationToken = default)
         {
             // Capture document before the async gap — user may switch drawings during await
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            if (doc == null)
-                throw new InvalidOperationException("Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.");
+            Document doc = RequireActiveDocument();
 
             cancellationToken.ThrowIfCancellationRequested();
             Action<ICadScope> drawAction = await asyncPreparation();

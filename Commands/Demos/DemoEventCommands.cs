@@ -1,10 +1,7 @@
 using System;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
-using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -24,19 +21,19 @@ namespace CadCoreFramework.Commands.Demos
     }
 
     /// <summary>
-    /// Các lệnh minh họa hệ thống sự kiện (Events & EventAggregator):
+    /// Các lệnh minh họa hệ thống sự kiện (Events &amp; EventAggregator):
     /// Giao tiếp lỏng lẻo Publish/Subscribe và theo dõi sự kiện thêm/xóa đối tượng thời gian thực.
     /// </summary>
     public class DemoEventCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         private IEventAggregator EventAgg
-            => AppBootstrapper.ServiceProvider?.GetService<IEventAggregator>();
+            => GetRequiredService<IEventAggregator>();
 
         private IEventService EventService
-            => AppBootstrapper.ServiceProvider?.GetService<IEventService>();
+            => GetRequiredService<IEventService>();
 
         private static Action<DemoMessage> _demoMessageHandler;
         private static bool _isSubscribed = false;
@@ -51,15 +48,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_EVENT_SUBSCRIBE")]
         public void DemoEventSubscribe()
         {
-            Notify?.Section("DEMO: EVENTAGGREGATOR — SUBSCRIBE/UNSUBSCRIBE");
-
             ExecuteCommand(() =>
             {
-                if (EventAgg == null)
-                {
-                    Notify?.Error("IEventAggregator chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: EVENTAGGREGATOR — SUBSCRIBE/UNSUBSCRIBE");
 
                 if (!_isSubscribed)
                 {
@@ -88,15 +79,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_EVENT_PUBLISH")]
         public void DemoEventPublish()
         {
-            Notify?.Section("DEMO: EVENTAGGREGATOR — PUBLISH");
-
             ExecuteCommand(() =>
             {
-                if (EventAgg == null)
-                {
-                    Notify?.Error("IEventAggregator chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: EVENTAGGREGATOR — PUBLISH");
 
                 var content = CadPromptHelper.GetString("Nhập nội dung tin nhắn:", defaultVal: "Hello từ EventAggregator!");
                 if (content == null) { Notify?.Warn("Đã hủy."); return; }
@@ -125,15 +110,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_REALTIME_INSPECT")]
         public void DemoRealtimeInspect()
         {
-            Notify?.Section("DEMO: IEVENTSERVICE — THEO DÕI SỰ KIỆN DATABASE THỜI GIAN THỰC");
-
             ExecuteCommand(() =>
             {
-                if (EventService == null)
-                {
-                    Notify?.Error("IEventService chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: IEVENTSERVICE — THEO DÕI SỰ KIỆN DATABASE THỜI GIAN THỰC");
 
                 if (!_isInspecting)
                 {

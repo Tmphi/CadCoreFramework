@@ -3,9 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
-using CadCoreFramework.Services;
-using CadCoreFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 // [assembly: CommandClass] được khai báo tập trung trong Properties/AssemblyInfo.cs
 
@@ -20,7 +17,7 @@ namespace CadCoreFramework.Commands
     {
         /// <summary>Dịch vụ quản lý Palette của AutoCAD.</summary>
         private IPaletteService PaletteService
-            => AppBootstrapper.ServiceProvider?.GetService<IPaletteService>();
+            => GetRequiredService<IPaletteService>();
 
         // ─── Danh Sách Lệnh ───────────────────────────────────────────────────
 
@@ -46,7 +43,7 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                GetRequiredService<IPaletteService>().TogglePalette(
+                PaletteService.TogglePalette(
                     "CadCoreFrameworkPalette",
                     () => new Samples.GridMarker.GridMarkerPalette(),
                     tabTitle: "Grid Marker"
@@ -63,7 +60,7 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                PaletteService?.TogglePalette(
+                PaletteService.TogglePalette(
                     "UiTemplateId",
                     () => new Views.CommonControlsPalette(),
                     tabTitle: "UI Template (WPF)"
@@ -80,7 +77,7 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                PaletteService?.TogglePalette(
+                PaletteService.TogglePalette(
                     "CadCoreFrameworkDebugInspector",
                     () => new Views.DebugInspectorPaletteControl(),
                     tabTitle: "Debug Inspector"
@@ -95,12 +92,11 @@ namespace CadCoreFramework.Commands
         [CommandMethod("CORE_TEST_ALL")]
         public void CoreTestAllCommand()
         {
-            var notify = AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
-
-            notify?.Section("KIỂM TRA HẠ TẦNG CADCOREFRAMEWORK");
-
             ExecuteWithScope(scope =>
             {
+                var notify = GetRequiredService<INotificationService>();
+                notify.Section("KIỂM TRA HẠ TẦNG CADCOREFRAMEWORK");
+
                 // 1. Tự động tạo Layer
                 ObjectId layerId = scope.EnsureLayer("CORE_TEST", colorIndex: 1);
                 notify?.Info($"Đã tạo Layer 'CORE_TEST': {layerId}");
@@ -141,9 +137,10 @@ namespace CadCoreFramework.Commands
                     if (readBack != null)
                         notify?.Info($"Đọc lại XData thành công: Version={readBack.Version}, Project={readBack.Project}");
                 }
-            });
 
-            notify?.Section("TẤT CẢ BÀI TEST HẠ TẦNG ĐÃ VƯỢT QUA");
+                // Chỉ in khi mọi bước trên không ném exception (smoke.scr dựa vào log này).
+                notify.Section("TẤT CẢ BÀI TEST HẠ TẦNG ĐÃ VƯỢT QUA");
+            });
         }
 
         /// <summary>
@@ -153,12 +150,10 @@ namespace CadCoreFramework.Commands
         [CommandMethod("DRAW_CIRCLE_SAMPLE")]
         public void DrawCircleSample()
         {
-            var notify = AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
-
             ExecuteWithScope(scope =>
             {
                 ObjectId circleId = scope.DrawCircle(new Point3d(0, 0, 0), radius: 10);
-                notify?.Info($"Đã vẽ đường tròn (ID: {circleId})");
+                GetRequiredService<INotificationService>().Info($"Đã vẽ đường tròn (ID: {circleId})");
             });
         }
     }

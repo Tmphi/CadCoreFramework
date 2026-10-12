@@ -1,7 +1,5 @@
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
-using CadCoreFramework.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands
 {
@@ -12,16 +10,16 @@ namespace CadCoreFramework.Commands
     public class DemoCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         /// <summary>
         /// DEMO_HELP — In ra danh sách toàn bộ các lệnh minh họa (Demos) phân theo từng chuyên mục.
         /// </summary>
         [CommandMethod("DEMO_HELP")]
-        public void DemoHelp()
-        {
-            if (Notify == null) return;
+        public void DemoHelp() => ExecuteCommand(PrintHelp);
 
+        private void PrintHelp()
+        {
             Notify.Section("DANH MỤC CÁC LỆNH MINH HỌA (DEMO SUITE)");
 
             Notify.Info("1. NHÓM VẼ HÌNH HỌC & CHỮ (DemoDrawingCommands):");
@@ -59,6 +57,10 @@ namespace CadCoreFramework.Commands
             Notify.Info("\n7. NHÓM GIAO DIỆN WPF (DemoUiCommands):");
             Notify.Info("   • DEMO_SHOW_LAYER_MANAGER: Mở Palette quản lý Layer theo mô hình MVVM");
             Notify.Info("   • DEMO_SHOW_WINDOW_DIALOG: Mở cửa sổ WPF Modal Dialog chuẩn AutoCAD Owner");
+
+            Notify.Info("\n8. GOLDEN SAMPLE — KHUÔN MẪU CHUẨN (Samples/GridMarker, docs/09):");
+            Notify.Info("   • SAMPLE_GRID           : Vẽ lưới ô đánh nhãn (prompt → validate → planner → service)");
+            Notify.Info("   • SHOW_PALETTE          : Palette Grid Marker (MVVM, validate, EventAggregator)");
 
             Notify.Section("GÕ BẤT KỲ TÊN LỆNH NÀO Ở TRÊN ĐỂ CHẠY MINH HỌA");
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using CadCoreFramework.Core;
 using CadCoreFramework.Models;
@@ -10,19 +9,22 @@ namespace CadCoreFramework.Services
     /// <summary>
     /// Triển khai dịch vụ thao tác Layer.
     /// Gọi các API AutoCAD an toàn thông qua ICadContext (tránh crash khi sai luồng).
+    /// Theo khuôn Golden Sample (docs/09): không prompt, đọc bằng ExecuteRead,
+    /// ghi bằng TryExecute + undo mark để dùng được cả từ Command lẫn Palette.
     /// </summary>
     public class LayerService : ILayerService
     {
+        /// <summary>Tên bước Undo khi bật/tắt layer từ Palette.</summary>
+        public const string ToggleUndoMarkName = "Layer On/Off";
+
         private readonly ICadContext _cadContext;
-        private readonly INotificationService _notify;
 
         /// <summary>
-        /// Khởi tạo một phiên bản của LayerService với các phụ thuộc CadContext và NotificationService.
+        /// Khởi tạo một phiên bản của LayerService với ICadContext được tiêm vào.
         /// </summary>
-        public LayerService(ICadContext cadContext, INotificationService notify)
+        public LayerService(ICadContext cadContext)
         {
-            _cadContext = cadContext;
-            _notify = notify;
+            _cadContext = cadContext ?? throw new ArgumentNullException(nameof(cadContext));
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace CadCoreFramework.Services
         {
             var layers = new List<LayerModel>();
 
-            // Thực thi đoạn code lấy dữ liệu trong CadScope (mở sẵn Transaction an toàn)
+            // ExecuteRead: transaction chỉ đọc, tự lock khi được gọi từ Palette.
             _cadContext.ExecuteRead(scope =>
             {
                 var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
@@ -51,34 +53,25 @@ namespace CadCoreFramework.Services
             return layers;
         }
 
-        /// <summary>
-        /// Bật hoặc tắt trạng thái hiển thị của một Layer một cách bất đồng bộ.
-        /// </summary>
-        public async Task<bool> ToggleLayerVisibilityAsync(string layerName, bool isOn)
+        /// <inheritdoc/>
+        public CadResult<bool> ToggleLayerVisibility(string layerName, bool isOn)
         {
-            bool success = false;
+            if (string.IsNullOrWhiteSpace(layerName)) throw new ArgumentException("Tên layer không được trống.", nameof(layerName));
 
-            await _cadContext.ExecuteAsync(() =>
+            // Thao tác ngắn, đồng bộ → TryExecute (không cần ExecuteAsync: không có gì để chờ).
+            // autoRegen: Palette là application context, màn hình không tự cập nhật trạng thái Off.
+            return _cadContext.TryExecute(scope =>
             {
-                Action<ICadScope> action = scope =>
-                {
-                    var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
+                var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
+                if (!layerTable.Has(layerName)) return false;
 
-                    if (layerTable.Has(layerName))
-                    {
-                        var layerRecord = (LayerTableRecord)scope.Transaction.GetObject(layerTable[layerName], OpenMode.ForWrite);
+                var layerRecord = (LayerTableRecord)scope.Transaction.GetObject(layerTable[layerName], OpenMode.ForWrite);
 
-                        // Off/On là hợp lệ kể cả với Current Layer.
-                        // Điều không thể là FREEZE Current Layer (IsFrozen) — không phải IsOff.
-                        layerRecord.IsOff = !isOn;
-                        success = true;
-                    }
-                };
-
-                return Task.FromResult(action);
-            });
-
-            return success;
+                // Off/On là hợp lệ kể cả với Current Layer.
+                // Điều không thể là FREEZE Current Layer (IsFrozen) — không phải IsOff.
+                layerRecord.IsOff = !isOn;
+                return true;
+            }, autoRegen: true, undoMarkName: ToggleUndoMarkName);
         }
     }
 }

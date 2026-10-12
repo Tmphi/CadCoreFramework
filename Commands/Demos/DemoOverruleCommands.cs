@@ -4,8 +4,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.GraphicsInterface;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
-using CadCoreFramework.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -61,10 +59,10 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoOverruleCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         private OverruleManager OverruleMgr
-            => AppBootstrapper.ServiceProvider?.GetService<OverruleManager>();
+            => GetRequiredService<OverruleManager>();
 
         private static bool _isEnabled = false;
 
@@ -75,15 +73,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_OVERRULE_TOGGLE")]
         public void DemoOverruleToggle()
         {
-            Notify?.Section("DEMO: OVERRULE MANAGER — CAN THIỆP HIỂN THỊ ĐỒ HỌA");
-
             ExecuteCommand(() =>
             {
-                if (OverruleMgr == null)
-                {
-                    Notify?.Error("OverruleManager chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: OVERRULE MANAGER — CAN THIỆP HIỂN THỊ ĐỒ HỌA");
 
                 if (!_isEnabled)
                 {

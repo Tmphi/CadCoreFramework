@@ -1,5 +1,4 @@
 using System.Windows;
-using Autodesk.AutoCAD.ApplicationServices;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace CadCoreFramework.Core

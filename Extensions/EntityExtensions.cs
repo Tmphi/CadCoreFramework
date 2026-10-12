@@ -33,6 +33,8 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Xoay đối tượng quanh một điểm gốc với trục Z.
         /// </summary>
+        /// <param name="entity">Đối tượng cần xoay (phải đang mở ForWrite).</param>
+        /// <param name="basePoint">Tâm xoay.</param>
         /// <param name="angleRadians">Góc xoay tính bằng Radian (Không phải độ).</param>
         public static void Rotate(this Entity entity, Point3d basePoint, double angleRadians)
         {
@@ -65,6 +67,7 @@ namespace CadCoreFramework.Extensions
         /// <summary>
         /// Xoay đối tượng quanh một trục bất kỳ trong không gian 3D.
         /// </summary>
+        /// <param name="entity">Đối tượng cần xoay (phải đang mở ForWrite).</param>
         /// <param name="basePoint">Điểm gốc trên trục xoay.</param>
         /// <param name="axis">Vector chỉ phương của trục xoay.</param>
         /// <param name="angleRadians">Góc xoay (Radian).</param>

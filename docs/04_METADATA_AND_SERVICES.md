@@ -72,24 +72,37 @@ public class LayerService : ILayerService
         _cadContext = cadContext;
     }
 
-    // Trả về danh sách C# thuần tuý, để UI (WPF) có thể Bind thẳng vào ComboBox
-    public List<LayerModel> GetLayers()
+    // ĐỌC: trả về danh sách C# thuần tuý, để UI (WPF) có thể Bind thẳng vào DataGrid
+    public List<LayerModel> GetAllLayers()
     {
         var layers = new List<LayerModel>();
 
-        // Gọi ExecuteRead (Không khoá bản vẽ, tốc độ nhanh)
+        // ExecuteRead: transaction chỉ đọc; tự lock khi được gọi từ Palette (application context)
         _cadContext.ExecuteRead(scope =>
         {
             var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
             foreach (ObjectId layerId in layerTable)
             {
                 var ltr = (LayerTableRecord)scope.Transaction.GetObject(layerId, OpenMode.ForRead);
-                layers.Add(new LayerModel { Name = ltr.Name, ColorIndex = ltr.Color.ColorIndex });
+                layers.Add(new LayerModel(ltr.Name, !ltr.IsOff, ltr.Color.ColorIndex));
             }
         });
 
         return layers;
     }
+
+    // GHI: TryExecute trả CadResult (không throw) + undo mark → dùng được từ Palette
+    public CadResult<bool> ToggleLayerVisibility(string layerName, bool isOn)
+        => _cadContext.TryExecute(scope =>
+        {
+            var lt = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
+            if (!lt.Has(layerName)) return false;
+            var ltr = (LayerTableRecord)scope.Transaction.GetObject(lt[layerName], OpenMode.ForWrite);
+            ltr.IsOff = !isOn;
+            return true;
+        }, autoRegen: true, undoMarkName: "Layer On/Off");
 }
 ```
-Sau đó, trong WPF ViewModel, bạn chỉ cần gọi `_layerService.GetLayers()` và gán vào thuộc tính hiển thị, tuyệt đối không đụng gì tới `Transaction` hay `OpenMode`.
+Sau đó, trong WPF ViewModel, bạn chỉ cần gọi `_layerService.GetAllLayers()` và gán vào thuộc tính hiển thị, tuyệt đối không đụng gì tới `Transaction` hay `OpenMode`.
+
+> **Quy ước lỗi của `ICadContext`:** `Execute*` ném exception · `TryExecute*` trả `CadResult`. Xem thêm [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md).

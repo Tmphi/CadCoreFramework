@@ -1,6 +1,5 @@
 using System;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace CadCoreFramework.Core
 {

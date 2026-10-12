@@ -28,7 +28,10 @@ namespace CadCoreFramework.Core
             IBusyIndicator busyIndicator, string tabTitle = null,
             DockSides defaultDock = DockSides.Right);
 
-        /// <summary>Bật/Tắt Palette với Lazy initialization (chỉ tạo View khi mở).</summary>
+        /// <summary>
+        /// Bật/Tắt Palette với Lazy initialization (chỉ tạo View khi mở).
+        /// Ghi log rồi NÉM LẠI exception (ví dụ contentFactory lỗi) — gọi bên trong ExecuteCommand.
+        /// </summary>
         void TogglePalette(string paletteName, Func<FrameworkElement> contentFactory,
             string tabTitle = null, DockSides defaultDock = DockSides.Right);
 

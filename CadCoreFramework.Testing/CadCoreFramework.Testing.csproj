@@ -3,24 +3,32 @@
   <PropertyGroup>
     <!--
       Test-double library: FakeCadScope + FakeCadContext.
-      net48 only — mirrors the test project target so CI needs no extra setup.
+      Same TFMs as the plugin and the test project (net48 → AutoCAD 2021–2024,
+      net8.0-windows → AutoCAD 2025+).
     -->
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <RootNamespace>CadCoreFramework.Testing</RootNamespace>
     <IsPackable>false</IsPackable>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!--
-      AutoCAD.NET compile-only: FakeCadScope/FakeCadContext only use AutoCAD types
-      as return types (all return null). ExcludeAssets="runtime" keeps the test
-      output clean — no AutoCAD DLLs copied into the Testing project's bin.
-    -->
+  <!--
+    AutoCAD.NET compile-only: FakeCadScope/FakeCadContext only use AutoCAD types
+    as return types (all return null). ExcludeAssets="runtime" keeps the test
+    output clean — no AutoCAD DLLs copied into the Testing project's bin.
+    Versions mirror CadCoreFramework.csproj per TFM (avoids NU1605 downgrade).
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <PackageReference Include="AutoCAD.NET"       Version="24.0.0" ExcludeAssets="runtime" />
     <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
     <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+    <PackageReference Include="AutoCAD.NET"       Version="25.0.1" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Core"  Version="25.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="25.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>

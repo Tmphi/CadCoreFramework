@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CadCoreFramework.Core;
@@ -22,6 +20,7 @@ namespace CadCoreFramework.ViewModels
     public partial class DebugInspectorViewModel : ViewModelBase
     {
         private readonly ICommandHistoryService? _history;
+        private readonly IEventAggregator? _events;
         private readonly IServiceCollection? _registeredServices;
 
         public ObservableCollection<CommandHistoryRow> CommandHistory { get; } = new ObservableCollection<CommandHistoryRow>();
@@ -31,9 +30,10 @@ namespace CadCoreFramework.ViewModels
         [ObservableProperty]
         private string _summary = string.Empty;
 
-        public DebugInspectorViewModel(ICommandHistoryService history)
+        public DebugInspectorViewModel(ICommandHistoryService history, IEventAggregator events)
         {
             _history = history;
+            _events = events;
             // AppBootstrapper exposes the IServiceCollection used to build the provider
             // via a static accessor (added separately — see AppBootstrapper.RegisteredServices).
             _registeredServices = AppBootstrapper.RegisteredServices;
@@ -73,8 +73,8 @@ namespace CadCoreFramework.ViewModels
 
             // ─── Event Subscribers ───────────────────────────────────────────
             EventSubscribers.Clear();
-            var aggregator = AppBootstrapper.ServiceProvider?.GetService<IEventAggregator>() as EventAggregator;
-            if (aggregator != null)
+            // Snapshot chỉ có ở implementation mặc định — aggregator khác (test double…) bỏ qua.
+            if (_events is EventAggregator aggregator)
             {
                 foreach (var line in aggregator.GetSubscriberSnapshot())
                 {

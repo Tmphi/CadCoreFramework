@@ -153,6 +153,9 @@ namespace CadCoreFramework.Core
             catch (Exception ex)
             {
                 _logger?.Error($"Lỗi khi bật/tắt PaletteSet '{paletteName}'.", ex);
+                // Ném lại để lệnh gọi (ExecuteCommand) báo lỗi cho người dùng và ghi FAIL vào
+                // CommandHistory, thay vì palette âm thầm không mở.
+                throw;
             }
         }
 

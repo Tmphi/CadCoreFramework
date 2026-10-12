@@ -19,7 +19,10 @@ namespace CadCoreFramework.Views
         public LayerManagerControl()
         {
             InitializeComponent();
-            this.DataContext = AppBootstrapper.ServiceProvider?.GetService<LayerManagerViewModel>();
+            // Fail loud: palette được tạo bên trong ExecuteCommand nên exception được bắt và ghi log.
+            this.DataContext = AppBootstrapper.ServiceProvider?.GetService<LayerManagerViewModel>()
+                ?? throw new InvalidOperationException(
+                    "LayerManagerViewModel chưa được đăng ký trong AppBootstrapper.ConfigureServices.");
         }
 
         private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)

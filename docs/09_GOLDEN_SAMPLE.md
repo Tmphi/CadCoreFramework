@@ -32,7 +32,7 @@ Các lệnh `DEMO_*` minh họa **từng API riêng lẻ**. Golden Sample thì k
                                             ▼
                  ┌─────────────────────────────────────────────────────────┐
                  │ IGridMarkerService → GridMarkerService                  │  ← VỎ AUTOCAD
-                 │  ICadContext.Execute<T>(…, undoMarkName) + XData        │
+                 │  ICadContext.TryExecute<T>(…, undoMarkName) + XData     │
                  │  publish GridDrawnMessage sau khi commit                │
                  └─────────────────────────────────────────────────────────┘
 ```
@@ -99,7 +99,9 @@ Service dùng chung cho cả hai vì nó **không prompt** và luôn truyền `u
 
 ## 9.5 Nguyên tắc #4 — Lỗi là giá trị, không phải bất ngờ
 
-- Service dùng `Execute<T>` → trả `CadResult<int>`. Lỗi AutoCAD (layer bị khóa, bản vẽ read-only) thành giá trị để caller quyết định.
+- **Quy ước của `ICadContext`:** `Execute*` ném exception · `TryExecute*` trả `CadResult`, không bao giờ throw.
+- Service dùng `TryExecute<T>` → trả `CadResult<int>`. Lỗi AutoCAD (layer bị khóa, bản vẽ read-only) thành giá trị để caller quyết định.
+- ⚠️ **Bẫy overload:** `Execute(scope => scope.DrawCircle(…))` — lambda biểu thức *trả về giá trị* nên C# chọn overload generic (trước đây là `Execute<T>`, nay đã `[Obsolete]` và có cảnh báo CS0618). Khi muốn ném lỗi, viết lambda dạng khối: `Execute(scope => { scope.DrawCircle(…); })`.
 - **Command** gặp `!result.IsSuccess` → `throw` lại để `ExecuteCommand` in lỗi, ghi log, đánh dấu FAIL trong CommandHistory.
 - **ViewModel** gặp `!result.IsSuccess` → `Status = Error` + thông báo. Exception bất ngờ được `RunSafe` bắt.
 - Command lấy service bằng `GetRequiredService<T>()` (ném exception có thông điệp rõ) thay vì `ServiceProvider?.GetService<T>()` (âm thầm trả null → lệnh không làm gì).
@@ -140,8 +142,10 @@ Code-behind chỉ làm hạ tầng: lấy ViewModel từ DI (fail-loud nếu thi
 | :--- | :---: | :--- |
 | `GridSpecTests` | 18 | Mọi luật validate, báo đủ nhiều lỗi cùng lúc |
 | `GridPlannerTests` | 18 | Số ô, tọa độ, thứ tự, nhãn A…Z/AA…/AAA, spec sai |
-| `GridMarkerServiceTests` | 8 | Một `Execute` + đúng undo mark, không mở transaction khi rỗng, publish khi thành công / không publish khi lỗi, subscriber lỗi không làm hỏng kết quả |
+| `GridMarkerServiceTests` | 8 | Một `TryExecute` + đúng undo mark, không mở transaction khi rỗng, publish khi thành công / không publish khi lỗi, subscriber lỗi không làm hỏng kết quả |
 | `GridMarkerViewModelTests` | 12 | `CanExecute` theo validate, truyền đúng spec/cells, trạng thái thành công/lỗi/exception, message → refresh, Dispose → ngừng nghe |
+
+Toàn bộ test chạy trên **cả `net48` và `net8.0-windows`** (hai runtime của AutoCAD 2021–2024 và 2025+).
 
 Tích hợp với AutoCAD thật: `tests/integration/smoke.scr` chạy `SAMPLE_GRID` với `0,0 · 2 hàng · 3 cột · khoảng cách 20`.
 
@@ -152,7 +156,7 @@ Tích hợp với AutoCAD thật: `tests/integration/smoke.scr` chạy `SAMPLE_G
 1. Copy `Samples/GridMarker/` → `Features/<TênTínhNăng>/` (hoặc thư mục bạn chọn), đổi tên class và namespace.
 2. **Model:** khai báo input bất biến + `Validate()` trả danh sách lỗi.
 3. **Planner:** đưa toàn bộ tính toán vào hàm thuần, không dùng kiểu AutoCAD.
-4. **Service:** interface chỉ dùng kiểu plugin; implementation gọi `ICadContext` với `undoMarkName`; không prompt, không `MdiActiveDocument` (CAD001 sẽ báo).
+4. **Service:** interface chỉ dùng kiểu plugin; implementation gọi `ICadContext` (`TryExecute` nếu muốn trả `CadResult`) với `undoMarkName`; không prompt, không `MdiActiveDocument` (CAD001 sẽ báo).
 5. **Command:** prompt → validate → plan → service → báo kết quả; bọc trong `ExecuteCommand`; dùng `GetRequiredService<T>()`.
 6. **ViewModel:** không dùng kiểu WPF/AutoCAD; `CanExecute` gắn với validate; subscription qua `TrackSubscription`.
 7. **Đăng ký:** `AppBootstrapper.ConfigureServices` (service Singleton, ViewModel Transient) + `[assembly: CommandClass]` trong `Properties/AssemblyInfo.cs`.

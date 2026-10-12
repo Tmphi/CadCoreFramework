@@ -1,7 +1,6 @@
 using System;
 using System.Windows;
 using System.Windows.Interop;
-using Autodesk.AutoCAD.ApplicationServices;
 
 namespace CadCoreFramework.Utils
 {

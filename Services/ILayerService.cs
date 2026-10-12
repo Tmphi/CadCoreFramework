@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using CadCoreFramework.Core;
 using CadCoreFramework.Models;
 
 namespace CadCoreFramework.Services
@@ -16,10 +16,14 @@ namespace CadCoreFramework.Services
         List<LayerModel> GetAllLayers();
 
         /// <summary>
-        /// Bật hoặc tắt trạng thái hiển thị của một Layer.
+        /// Bật hoặc tắt trạng thái hiển thị của một Layer (một bước Undo).
         /// </summary>
         /// <param name="layerName">Tên layer cần thay đổi</param>
         /// <param name="isOn">Trạng thái (true = bật, false = tắt)</param>
-        Task<bool> ToggleLayerVisibilityAsync(string layerName, bool isOn);
+        /// <returns>
+        /// Thành công với Value = true nếu đã đổi, false nếu không có layer tên đó;
+        /// thất bại (không throw) nếu thao tác với bản vẽ lỗi.
+        /// </returns>
+        CadResult<bool> ToggleLayerVisibility(string layerName, bool isOn);
     }
 }

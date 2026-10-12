@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -83,6 +82,24 @@ namespace CadCoreFramework.Utils
             }
 
             var result = Editor.GetDistance(options);
+            return result.Status == PromptStatus.OK ? result.Value : (double?)null;
+        }
+
+        /// <summary>
+        /// Yêu cầu người dùng nhập hoặc trỏ một góc (radian), có đường dóng cao su từ basePoint.
+        /// </summary>
+        public static double? GetAngle(string message, Point3d? basePoint = null)
+        {
+            if (Editor == null) return null;
+
+            var options = new PromptAngleOptions($"\n{message}");
+            if (basePoint.HasValue)
+            {
+                options.UseBasePoint = true;
+                options.BasePoint = CoordinateHelper.WcsToUcs(basePoint.Value);
+            }
+
+            var result = Editor.GetAngle(options);
             return result.Status == PromptStatus.OK ? result.Value : (double?)null;
         }
 

@@ -1,13 +1,10 @@
 using System;
-using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
-using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -18,7 +15,7 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoDrawingCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         /// <summary>
         /// DEMO_DRAW_SHAPES — Vẽ tổ hợp các hình học cơ bản và nâng cao: Line, Circle, Arc,
@@ -28,10 +25,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DRAW_SHAPES")]
         public void DemoDrawShapes()
         {
-            Notify?.Section("DEMO: VẼ HÌNH HỌC CƠ BẢN VÀ NÂNG CAO");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: VẼ HÌNH HỌC CƠ BẢN VÀ NÂNG CAO");
+
                 const string layer = "DEMO_SHAPES";
 
                 // 1. Tạo Layer chuyên dụng cho demo
@@ -158,9 +155,9 @@ namespace CadCoreFramework.Commands.Demos
                     rectToMirror?.Mirror(new Point3d(0, 0, 0), new Point3d(0, 200, 0));
                     Notify?.Info("14. EntityExtensions.Mirror: Đã lấy đối xứng hình chữ nhật qua trục thẳng đứng.");
                 }
-            });
 
-            Notify?.Section("HOÀN TẤT: Đã vẽ toàn bộ hình học cơ bản & nâng cao trên Layer DEMO_SHAPES");
+                Notify.Section("HOÀN TẤT: Đã vẽ toàn bộ hình học cơ bản & nâng cao trên Layer DEMO_SHAPES");
+            });
         }
 
         /// <summary>
@@ -170,10 +167,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DRAW_TEXTS")]
         public void DemoDrawTexts()
         {
-            Notify?.Section("DEMO: VẼ CHỮ VÀ BẢNG");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: VẼ CHỮ VÀ BẢNG");
+
                 const string layer = "DEMO_TEXTS";
                 scope.EnsureLayer(layer, colorIndex: 2); // Vàng
 
@@ -233,9 +230,9 @@ namespace CadCoreFramework.Commands.Demos
                     layer: layer
                 );
                 Notify?.Info($"5. DrawTable: Bảng 4x3 | ID: {tableId}");
-            });
 
-            Notify?.Section("HOÀN TẤT: Đã vẽ 5 loại chữ/bảng trên Layer DEMO_TEXTS");
+                Notify.Section("HOÀN TẤT: Đã vẽ 5 loại chữ/bảng trên Layer DEMO_TEXTS");
+            });
         }
 
         /// <summary>
@@ -245,10 +242,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DRAW_TABLE")]
         public void DemoDrawTable()
         {
-            Notify?.Section("DEMO: CADTABLEBUILDER — TẠO BẢNG DỮ LIỆU KỸ THUẬT");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: CADTABLEBUILDER — TẠO BẢNG DỮ LIỆU KỸ THUẬT");
+
                 const string layer = "DEMO_TABLES";
                 scope.EnsureLayer(layer, colorIndex: 4); // Cyan
 
@@ -276,9 +273,9 @@ namespace CadCoreFramework.Commands.Demos
 
                 Notify?.Info($"✔ Đã tạo bảng thành công với CadTableBuilder | ID: {tableId}");
                 Notify?.Info("  → Bảng gồm 5 cột, 5 dòng dữ liệu, định dạng tiêu đề và Header tự động.");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO TẠO BẢNG NÂNG CAO");
+                Notify.Section("HOÀN TẤT: DEMO TẠO BẢNG NÂNG CAO");
+            });
         }
 
         /// <summary>
@@ -287,10 +284,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DRAW_LEADER")]
         public void DemoDrawLeader()
         {
-            Notify?.Section("DEMO: VẼ ĐƯỜNG DẪN CHÚ THÍCH (MLEADER)");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: VẼ ĐƯỜNG DẪN CHÚ THÍCH (MLEADER)");
+
                 const string layer = "DEMO_LEADER";
                 scope.EnsureLayer(layer, colorIndex: 1); // Đỏ
 
@@ -311,9 +308,9 @@ namespace CadCoreFramework.Commands.Demos
                 );
 
                 Notify?.Info($"✔ Đã tạo 2 MLeader chỉ dẫn: {id1}, {id2}");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO MLEADER");
+                Notify.Section("HOÀN TẤT: DEMO MLEADER");
+            });
         }
     }
 }

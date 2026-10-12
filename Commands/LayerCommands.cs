@@ -1,7 +1,6 @@
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands
 {
@@ -12,7 +11,7 @@ namespace CadCoreFramework.Commands
     public class LayerCommands : CadCommandBase
     {
         /// <summary>Dịch vụ quản lý thanh công cụ neo (Palette).</summary>
-        private IPaletteService PaletteService => AppBootstrapper.ServiceProvider?.GetService<IPaletteService>();
+        private IPaletteService PaletteService => GetRequiredService<IPaletteService>();
 
         /// <summary>
         /// Lệnh CADCORE_LAYER_MANAGER: Bật/Tắt thanh công cụ Quản Lý Layer (WPF Palette).
@@ -23,7 +22,7 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                PaletteService?.TogglePalette(
+                PaletteService.TogglePalette(
                     "LayerManagerPaletteId",
                     () => new Views.LayerManagerControl(),
                     tabTitle: "Quản Lý Layer"
@@ -40,10 +39,8 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                var notify = AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
-                var layerService = AppBootstrapper.ServiceProvider?.GetService<ILayerService>();
-
-                if (layerService == null || notify == null) return;
+                var notify = GetRequiredService<INotificationService>();
+                var layerService = GetRequiredService<ILayerService>();
 
                 // Gọi trực tiếp Service
                 var layers = layerService.GetAllLayers();

@@ -1,8 +1,5 @@
-using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using CadCoreFramework.Core;
-using CadCoreFramework.Extensions;
 
 namespace CadCoreFramework.Utils
 {

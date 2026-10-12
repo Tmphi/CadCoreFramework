@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using CadCoreFramework.Core;
 using CadCoreFramework.Models;
 using CadCoreFramework.Services;
@@ -72,23 +71,21 @@ namespace CadCoreFramework.ViewModels
         /// Lệnh thay đổi trạng thái On/Off của một Layer.
         /// </summary>
         [RelayCommand]
-        private async Task ToggleLayerAsync(LayerModel layer)
+        private void ToggleLayer(LayerModel layer)
         {
             if (layer == null) return;
 
             bool newState = !layer.IsOn;
-            try
+            CadResult<bool> result = _layerService.ToggleLayerVisibility(layer.Name, newState);
+
+            if (!result.IsSuccess)
+                _notify.Error($"Lỗi khi đổi trạng thái layer: {layer.Name} — {result.ErrorMessage}", result.Exception);
+            else if (!result.Value)
+                _notify.Warn($"Không tìm thấy layer '{layer.Name}' (có thể đã bị xóa). Hãy làm mới danh sách.");
+            else
             {
-                bool success = await _layerService.ToggleLayerVisibilityAsync(layer.Name, newState);
-                if (success)
-                {
-                    layer.IsOn = newState;
-                    _notify.Info($"Đã {(newState ? "BẬT" : "TẮT")} layer: {layer.Name}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _notify.Error($"Lỗi khi đổi trạng thái layer: {layer.Name}", ex);
+                layer.IsOn = newState;
+                _notify.Info($"Đã {(newState ? "BẬT" : "TẮT")} layer: {layer.Name}");
             }
         }
     }

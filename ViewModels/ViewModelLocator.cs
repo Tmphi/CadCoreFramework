@@ -8,10 +8,12 @@ namespace CadCoreFramework.ViewModels
     /// Cho phép các file XAML lấy trực tiếp ViewModel từ DI container.
     /// 
     /// Cách dùng trong file XAML:
-    /// <UserControl.Resources>
-    ///     <viewmodels:ViewModelLocator x:Key="Locator" />
-    /// </UserControl.Resources>
-    /// <UserControl DataContext="{Binding Source={StaticResource Locator}, Path=MyViewModel}">
+    /// <code>
+    /// &lt;UserControl.Resources&gt;
+    ///     &lt;viewmodels:ViewModelLocator x:Key="Locator" /&gt;
+    /// &lt;/UserControl.Resources&gt;
+    /// &lt;UserControl DataContext="{Binding Source={StaticResource Locator}, Path=MyViewModel}"&gt;
+    /// </code>
     /// </summary>
     public class ViewModelLocator
     {

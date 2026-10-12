@@ -9,6 +9,26 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (Consistency pass — align the whole repo with the Golden Sample)
+- **`ICadContext` error convention:** `Execute*` throws · new `TryExecute(Action)` / `TryExecute<T>(Func)` return `CadResult` and never throw. `Execute<T>` (which returned `CadResult` despite its name) is now `[Obsolete]` and forwards to `TryExecute<T>`; `CadContext` now has a single throwing core that every overload wraps.
+- **`ExecuteRead`** locks the document when called from application context (palette / modeless), detected via `DocumentManager.IsApplicationContext`.
+- **`LayerService.ToggleLayerVisibility`** (was `ToggleLayerVisibilityAsync`) — synchronous `TryExecute` + undo mark + regen, returns `CadResult<bool>`; no more sync work wrapped in `ExecuteAsync`. `LayerManagerViewModel` reports missing-layer / CAD-failure cases.
+- **`scope.Ask*()`** prompt extensions marked `[Obsolete]` (they prompt while the transaction + lock are open); use `CadPromptHelper.Get*()` before `ICadContext`. Added `CadPromptHelper.GetAngle`.
+- **Fail-loud service resolution** across `Commands/` and `Commands/Demos/`: `GetRequiredService<T>()` instead of `ServiceProvider?.GetService<T>()`; `CadCommandBase.CadContext` throws when DI is unavailable. Section banners / "HOÀN TẤT" footers moved inside `ExecuteCommand` so they only print on success (fixes `CORE_TEST_ALL` printing "passed" after a failure — relevant to `smoke.scr` log parsing).
+- `PaletteService.TogglePalette` logs **and rethrows** instead of swallowing; `LayerManagerControl` / `DebugInspectorPaletteControl` fail loud when their ViewModel is missing; `DebugInspectorViewModel` takes `IEventAggregator` by constructor injection.
+- `DEMO_UNDO_GROUP` used expression lambdas that silently bound to the non-throwing generic overload — now block lambdas.
+- `.agents/rules/project_rules.md` updated to the Golden Sample conventions.
+
+### Fixed (build) — clean build is now **0 warnings** on both TFMs
+- **NU1608**: `AutoCAD.NET` 25.0.0 → 25.0.1 (25.0.0 pinned the pre-release `AutoCAD.NET.Core 25.0.0-V058`).
+- `GenerateDocumentationFile=true` (CS1591 suppressed) so IDE0005 runs on build; removed ~190 unused `using` directives across 40+ files (`dotnet format style --diagnostics IDE0005`).
+- Fixed malformed XML doc comments (CS1570: unescaped `&` / raw XAML in `<summary>`) and missing `<param>` tags (CS1573).
+- `Templates\**` excluded from the plugin compile — the `cad-command` item-template source was being built into `CadCoreFramework.dll`.
+
+### Added (tests)
+- `CadCoreFramework.Tests` / `CadCoreFramework.Testing` multi-target **`net48;net8.0-windows`** — the suite now runs on both AutoCAD runtimes (CI uses `LogFilePrefix` so the two `.trx` files don't collide).
+- `LayerManagerViewModelTests`, `DebugInspectorViewModelTests`, `TryExecute` tests; `LayerServiceTests` rewritten for the new API. 176 tests per TFM.
+
 ### Added (Golden Sample — Grid Marker)
 - **`Samples/GridMarker/`** — reference feature showing the canonical layering end-to-end: `GridSpec` (immutable model + validation) → `GridPlanner` (pure logic, no AutoCAD types) → `GridMarkerService` (thin AutoCAD shell: `Execute<T>` + UndoMark + XData, publishes `GridDrawnMessage`) → `GridMarkerCommands` (`SAMPLE_GRID`, prompts before the transaction) and `GridMarkerViewModel` / `GridMarkerPalette` (validation-driven `CanExecute`, enum status instead of `Brush`, `TrackSubscription`).
 - **`docs/09_GOLDEN_SAMPLE.md`** — layer-by-layer walkthrough, linked from `00_TOC.md`.

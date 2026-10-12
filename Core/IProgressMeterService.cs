@@ -1,5 +1,3 @@
-using System;
-
 namespace CadCoreFramework.Core
 {
     /// <summary>

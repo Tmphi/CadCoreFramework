@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using CadCoreFramework.Core;
 
 namespace CadCoreFramework.Extensions
 {

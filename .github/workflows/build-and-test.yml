@@ -29,16 +29,20 @@ jobs:
       - name: Restore dotnet tools (ReportGenerator)
         run: dotnet tool restore
 
-      - name: Build (Release)
-        run: dotnet build CadCoreFramework.sln -c Release -v minimal
+      # -warnaserror: the solution builds with 0 warnings — keep it that way.
+      # A new warning (unused using, malformed XML doc, obsolete API, CAD001…) fails CI.
+      - name: Build (Release, warnings as errors)
+        run: dotnet build CadCoreFramework.sln -c Release -v minimal -warnaserror
 
-      - name: Test with coverage
+      # Runs the suite twice: net48 (AutoCAD 2021–2024) and net8.0-windows (AutoCAD 2025+).
+      # LogFilePrefix (not LogFileName) so the two TFMs don't overwrite each other's .trx.
+      - name: Test with coverage (net48 + net8.0-windows)
         run: >
           dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj
           -c Release --no-build
           --collect:"XPlat Code Coverage"
           --results-directory coverage
-          --logger "trx;LogFileName=test-results.trx"
+          --logger "trx;LogFilePrefix=test-results"
           --logger "console;verbosity=normal"
 
       - name: Generate coverage report

@@ -34,23 +34,42 @@ namespace CadCoreFramework.Core
         /// Nếu để null, bên trong một command AutoCAD vẫn gom toàn bộ transaction thành 1 bước Undo —
         /// tham số này hữu ích nhất khi gọi từ Palette (application context).
         /// </param>
+        /// <remarks>
+        /// QUY ƯỚC XỬ LÝ LỖI của ICadContext:
+        ///   • Execute / ExecuteRead / ExecuteAsync / ExecuteBatch → NÉM exception khi lỗi.
+        ///   • TryExecute → KHÔNG throw, trả <see cref="CadResult"/> / <see cref="CadResult{T}"/>.
+        /// Dùng Execute trong Command (CadCommandBase bắt lỗi giúp); dùng TryExecute trong Service
+        /// khi muốn lỗi AutoCAD trở thành giá trị cho caller quyết định.
+        /// </remarks>
         void Execute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null);
 
         /// <summary>
-        /// Chạy một khối lệnh đồng bộ an toàn có giá trị trả về.
+        /// Biến thể KHÔNG throw của <see cref="Execute(Action{ICadScope}, bool, string)"/>.
+        /// Mọi lỗi (kể cả không có bản vẽ đang mở) được trả về trong CadResult.
+        /// </summary>
+        CadResult TryExecute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null);
+
+        /// <summary>
+        /// Chạy một khối lệnh ghi có giá trị trả về, KHÔNG throw.
         /// Tự động Lock Document, mở Transaction, và trả về CadResult&lt;T&gt;.
         /// </summary>
         /// <typeparam name="T">Kiểu dữ liệu kết quả trả về.</typeparam>
         /// <param name="cadFunc">Hàm cần thực thi, nhận ICadScope và trả về T.</param>
         /// <param name="autoRegen">Nếu true, tự động Regen sau khi commit. Mặc định FALSE.</param>
         /// <param name="undoMarkName">Nếu chỉ định, gom toàn bộ thao tác thành 1 bước Ctrl+Z.</param>
+        CadResult<T> TryExecute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null);
+
+        /// <summary>
+        /// Tên cũ của <see cref="TryExecute{T}"/> — trả CadResult dù tên là "Execute", trái quy ước.
+        /// </summary>
+        [Obsolete("Dùng TryExecute<T>() — cùng hành vi, tên thể hiện rõ việc trả CadResult thay vì throw.")]
         CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null);
 
         /// <summary>
         /// Chạy một khối lệnh ĐỌC đồng bộ an toàn.
-        /// KHÔNG lock document (không cần thiết khi chỉ đọc từ command context).
+        /// Chỉ lock document khi gọi từ application context (Palette/modeless); trong command
+        /// context document đã được lock sẵn.
         /// KHÔNG cho phép gọi AppendEntityToCurrentSpace bên trong scope này.
-        /// Hiệu năng cao hơn Execute() khi chỉ cần truy vấn dữ liệu.
         /// </summary>
         /// <param name="readAction">Khối lệnh đọc dữ liệu, nhận vào một ICadScope (IsReadOnly = true).</param>
         void ExecuteRead(Action<ICadScope> readAction);

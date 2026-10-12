@@ -36,7 +36,10 @@ namespace CadCoreFramework.Tests
                 }, undoMarkName: $"Vẽ {panelName} (async)");
 
             public CadResult<int> CountPanels()
-                => _ctx.Execute(_ => 42, undoMarkName: "Count");
+                => _ctx.TryExecute(_ => 42, undoMarkName: "Count");
+
+            public CadResult TryDrawPanel(string panelName)
+                => _ctx.TryExecute(_ => { }, undoMarkName: $"Vẽ {panelName}");
 
             public void DrawBatch(string[] names)
                 => _ctx.ExecuteBatch(names, (_, n) => { }, undoMarkName: "Batch Panels");
@@ -112,6 +115,40 @@ namespace CadCoreFramework.Tests
             var result = new PanelDrawService(ctx).CountPanels();
             result.IsSuccess.Should().BeFalse();
             result.ErrorMessage.Should().Contain("oops");
+        }
+
+        [Fact]
+        public void TryExecute_Void_WhenExceptionInjected_ReturnsFailure_DoesNotThrow()
+        {
+            var ctx = new FakeCadContext { ExceptionToThrow = new InvalidOperationException("locked") };
+
+            var result = new PanelDrawService(ctx).TryDrawPanel("MSB-01");
+
+            result.IsSuccess.Should().BeFalse();
+            result.ErrorMessage.Should().Be("locked");
+        }
+
+        [Fact]
+        public void TryExecute_Void_Success_CountsAsExecute()
+        {
+            var ctx = new FakeCadContext();
+
+            var result = new PanelDrawService(ctx).TryDrawPanel("MSB-01");
+
+            result.IsSuccess.Should().BeTrue();
+            ctx.ExecuteCount.Should().Be(1);
+            ctx.LastUndoMarkName.Should().Be("Vẽ MSB-01");
+        }
+
+        [Fact]
+        public void TryExecute_Generic_LambdaThrows_ReturnsFailure()
+        {
+            var ctx = new FakeCadContext();
+
+            var result = ctx.TryExecute<int>(_ => throw new InvalidOperationException("boom"));
+
+            result.IsSuccess.Should().BeFalse();
+            result.Exception.Should().BeOfType<InvalidOperationException>();
         }
     }
 }

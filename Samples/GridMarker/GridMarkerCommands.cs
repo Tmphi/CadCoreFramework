@@ -38,16 +38,16 @@ namespace CadCoreFramework.Samples.GridMarker
                 var notify = GetRequiredService<INotificationService>();
 
                 // ── 1. Input (ngoài transaction) ─────────────────────────────────
-                Point3d? origin = CadPromptHelper.GetPoint("\nChọn tâm ô đầu tiên (A1):");
+                Point3d? origin = CadPromptHelper.GetPoint("Chọn tâm ô đầu tiên (A1):");
                 if (origin == null) return;
 
-                int? rows = CadPromptHelper.GetInteger("\nSố hàng", defaultValue: 3, lowerLimit: 1, upperLimit: GridSpec.MaxDimension);
+                int? rows = CadPromptHelper.GetInteger("Số hàng", defaultValue: 3, lowerLimit: 1, upperLimit: GridSpec.MaxDimension);
                 if (rows == null) return;
 
-                int? columns = CadPromptHelper.GetInteger("\nSố cột", defaultValue: 4, lowerLimit: 1, upperLimit: GridSpec.MaxDimension);
+                int? columns = CadPromptHelper.GetInteger("Số cột", defaultValue: 4, lowerLimit: 1, upperLimit: GridSpec.MaxDimension);
                 if (columns == null) return;
 
-                double? spacing = CadPromptHelper.GetDouble("\nKhoảng cách tâm–tâm", defaultValue: 20);
+                double? spacing = CadPromptHelper.GetDouble("Khoảng cách tâm–tâm", defaultValue: 20);
                 if (spacing == null) return;
 
                 // ── 2. Validate ─────────────────────────────────────────────────

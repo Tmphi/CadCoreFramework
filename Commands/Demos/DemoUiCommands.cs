@@ -1,11 +1,8 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
-using CadCoreFramework.Services;
 using CadCoreFramework.Views;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -16,13 +13,13 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoUiCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         private IPaletteService PaletteService
-            => AppBootstrapper.ServiceProvider?.GetService<IPaletteService>();
+            => GetRequiredService<IPaletteService>();
 
         private IWindowManagerService WindowManager
-            => AppBootstrapper.ServiceProvider?.GetService<IWindowManagerService>();
+            => GetRequiredService<IWindowManagerService>();
 
         /// <summary>
         /// DEMO_SHOW_LAYER_MANAGER — Mở hoặc tắt thanh Palette Quản lý Layer chuẩn MVVM.
@@ -32,7 +29,7 @@ namespace CadCoreFramework.Commands.Demos
         {
             ExecuteCommand(() =>
             {
-                PaletteService?.TogglePalette(
+                PaletteService.TogglePalette(
                     "LayerManagerPaletteId",
                     () => new LayerManagerControl(),
                     tabTitle: "Quản Lý Layer"
@@ -49,12 +46,6 @@ namespace CadCoreFramework.Commands.Demos
         {
             ExecuteCommand(() =>
             {
-                if (WindowManager == null)
-                {
-                    Notify?.Error("IWindowManagerService chưa được đăng ký trong DI.");
-                    return;
-                }
-
                 // Tạo cửa sổ WPF đơn giản trực tiếp bằng C# code
                 var window = new Window
                 {
@@ -94,7 +85,7 @@ namespace CadCoreFramework.Commands.Demos
 
                 // Hiển thị modal dialog
                 bool? result = WindowManager.ShowModalDialog(window);
-                Notify?.Info($"Hộp thoại đã đóng với kết quả: {result}");
+                Notify.Info($"Hộp thoại đã đóng với kết quả: {result}");
             });
         }
     }

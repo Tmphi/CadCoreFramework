@@ -37,8 +37,13 @@ namespace CadCoreFramework.Commands
         /// <summary>Dịch vụ ghi log của plugin.</summary>
         protected ILoggerService Logger => _injectedLogger ?? _loggerLazy.Value;
 
-        /// <summary>Phiên làm việc và điều phối transaction AutoCAD an toàn.</summary>
-        protected ICadContext CadContext => _injectedCadContext ?? _cadContextLazy.Value;
+        /// <summary>
+        /// Phiên làm việc và điều phối transaction AutoCAD an toàn.
+        /// Ném InvalidOperationException nếu DI chưa sẵn sàng — dùng bên trong ExecuteCommand/ExecuteWithScope.
+        /// </summary>
+        protected ICadContext CadContext => _injectedCadContext ?? _cadContextLazy.Value
+            ?? throw new InvalidOperationException(
+                "ICadContext chưa được khởi tạo — kiểm tra lỗi khởi động plugin (AppBootstrapper.Initialize).");
 
         /// <summary>Lịch sử lệnh — tự động ghi lại mỗi ExecuteWithScope / ExecuteCommand.</summary>
         protected ICommandHistoryService CommandHistory => _historyLazy.Value;
@@ -131,7 +136,7 @@ namespace CadCoreFramework.Commands
         protected void ExecuteWithScope(Action<ICadScope> scopeAction, string undoMarkName = null,
             [CallerMemberName] string callerName = null)
         {
-            ExecuteCommand(() => RequireCadContext().Execute(scopeAction, false, undoMarkName), callerName);
+            ExecuteCommand(() => CadContext.Execute(scopeAction, false, undoMarkName), callerName);
         }
 
         /// <summary>
@@ -143,14 +148,6 @@ namespace CadCoreFramework.Commands
             => AppBootstrapper.ServiceProvider?.GetService<T>()
                ?? throw new InvalidOperationException(
                    $"Service {typeof(T).Name} chưa được đăng ký hoặc plugin chưa khởi tạo xong (AppBootstrapper.ConfigureServices).");
-
-        /// <summary>
-        /// Trả về ICadContext hoặc ném exception nếu DI chưa sẵn sàng (Initialize lỗi / chưa NETLOAD xong).
-        /// Tránh trường hợp lệnh âm thầm không làm gì nhưng vẫn bị ghi nhận là thành công.
-        /// </summary>
-        private ICadContext RequireCadContext()
-            => CadContext ?? throw new InvalidOperationException(
-                "ICadContext chưa được khởi tạo — kiểm tra lỗi khởi động plugin (AppBootstrapper.Initialize).");
 
         /// <summary>
         /// Biến thể Async (bất đồng bộ): Tải dữ liệu từ mạng hoặc tính toán nặng ở ngoài Transaction,
@@ -172,7 +169,7 @@ namespace CadCoreFramework.Commands
             bool record = true;
             try
             {
-                await RequireCadContext().ExecuteAsync(asyncPreparation, false, undoMarkName);
+                await CadContext.ExecuteAsync(asyncPreparation, false, undoMarkName);
                 success = true;
             }
             catch (Autodesk.AutoCAD.Runtime.Exception acEx)

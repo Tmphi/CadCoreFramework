@@ -32,7 +32,7 @@ namespace CadCoreFramework.Testing.Fakes
         private int _executeAsyncCount;
         private int _executeBatchCount;
 
-        /// <summary>Số lần Execute() (cả generic và void) được gọi.</summary>
+        /// <summary>Số lần Execute() hoặc TryExecute() (mọi overload) được gọi.</summary>
         public int ExecuteCount => _executeCount;
 
         /// <summary>Số lần ExecuteRead() được gọi.</summary>
@@ -81,7 +81,20 @@ namespace CadCoreFramework.Testing.Fakes
             cadAction(LastScope);
         }
 
-        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
+        public CadResult TryExecute(Action<ICadScope> cadAction, bool autoRegen = false, string? undoMarkName = null)
+        {
+            try
+            {
+                Execute(cadAction, autoRegen, undoMarkName);
+                return CadResult.Ok();
+            }
+            catch (Exception ex)
+            {
+                return CadResult.Fail(ex.Message, ex);
+            }
+        }
+
+        public CadResult<T> TryExecute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
         {
             _executeCount++;
             LastAutoRegen = autoRegen;
@@ -92,10 +105,21 @@ namespace CadCoreFramework.Testing.Fakes
             if (!ExecuteAction)
                 return CadResult<T>.Success(default!);
 
-            LastScope = new FakeCadScope();
-            var value = cadFunc(LastScope);
-            return CadResult<T>.Success(value);
+            // Giống CadContext thật: exception trong lambda trở thành CadResult thất bại.
+            try
+            {
+                LastScope = new FakeCadScope();
+                return CadResult<T>.Success(cadFunc(LastScope));
+            }
+            catch (Exception ex)
+            {
+                return CadResult<T>.Fail(ex.Message, ex);
+            }
         }
+
+        [Obsolete("Dùng TryExecute<T>().")]
+        public CadResult<T> Execute<T>(Func<ICadScope, T> cadFunc, bool autoRegen = false, string? undoMarkName = null)
+            => TryExecute(cadFunc, autoRegen, undoMarkName);
 
         public void ExecuteRead(Action<ICadScope> readAction)
         {

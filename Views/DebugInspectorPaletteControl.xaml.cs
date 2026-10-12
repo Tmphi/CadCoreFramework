@@ -15,9 +15,11 @@ namespace CadCoreFramework.Views
         public DebugInspectorPaletteControl()
         {
             InitializeComponent();
-            // Fail soft when the plugin is unloaded or DI not yet initialized —
-            // palette just shows empty data, no exceptions bubble up to AutoCAD.
-            DataContext = AppBootstrapper.ServiceProvider?.GetService<DebugInspectorViewModel>();
+            // Fail loud: palette được tạo bên trong ExecuteCommand (CORE_DEBUG → TogglePalette),
+            // nên exception được bắt, in ra và ghi log thay vì hiện một palette rỗng khó hiểu.
+            DataContext = AppBootstrapper.ServiceProvider?.GetService<DebugInspectorViewModel>()
+                ?? throw new System.InvalidOperationException(
+                    "DebugInspectorViewModel chưa được đăng ký trong AppBootstrapper.ConfigureServices.");
         }
     }
 }

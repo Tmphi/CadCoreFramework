@@ -1,14 +1,11 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
 using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -19,16 +16,16 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoServicesCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         private ISettingsService Settings
-            => AppBootstrapper.ServiceProvider?.GetService<ISettingsService>();
+            => GetRequiredService<ISettingsService>();
 
         private IProgressMeterService Progress
-            => AppBootstrapper.ServiceProvider?.GetService<IProgressMeterService>();
+            => GetRequiredService<IProgressMeterService>();
 
         private IPlotService Plot
-            => AppBootstrapper.ServiceProvider?.GetService<IPlotService>();
+            => GetRequiredService<IPlotService>();
 
         /// <summary>
         /// DEMO_SETTINGS — Minh họa cách lưu/đọc cài đặt người dùng qua ISettingsService.
@@ -37,15 +34,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_SETTINGS")]
         public void DemoSettings()
         {
-            Notify?.Section("DEMO: ISETTINGSSERVICE — LƯU/ĐỌC CÀI ĐẶT NGƯỜI DÙNG");
-
             ExecuteCommand(() =>
             {
-                if (Settings == null)
-                {
-                    Notify?.Error("ISettingsService chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: ISETTINGSSERVICE — LƯU/ĐỌC CÀI ĐẶT NGƯỜI DÙNG");
 
                 // 1. Ghi cài đặt chuỗi
                 Settings.SetSetting("Demo.LastUser", Environment.UserName);
@@ -82,9 +73,9 @@ namespace CadCoreFramework.Commands.Demos
                 // 7. Đọc giá trị chưa tồn tại (trả về defaultValue)
                 int missing = Settings.GetSetting<int>("Demo.NotExist", 42);
                 Notify?.Info($"  Demo.NotExist:     {missing} (giá trị mặc định)");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO SETTINGS");
+                Notify.Section("HOÀN TẤT: DEMO SETTINGS");
+            });
         }
 
         /// <summary>
@@ -94,15 +85,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_PROGRESS")]
         public void DemoProgress()
         {
-            Notify?.Section("DEMO: IPROGRESSMETERSERVICE — THANH TIẾN TRÌNH");
-
             ExecuteCommand(() =>
             {
-                if (Progress == null)
-                {
-                    Notify?.Error("IProgressMeterService chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: IPROGRESSMETERSERVICE — THANH TIẾN TRÌNH");
 
                 const int totalSteps = 100;
                 Notify?.Info($"Bắt đầu xử lý {totalSteps} bước. Theo dõi thanh tiến trình trên Status Bar...");
@@ -129,9 +114,9 @@ namespace CadCoreFramework.Commands.Demos
                 }
 
                 Notify?.Info("Đã hoàn tất 100%!");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO PROGRESS");
+                Notify.Section("HOÀN TẤT: DEMO PROGRESS");
+            });
         }
 
         /// <summary>
@@ -139,14 +124,10 @@ namespace CadCoreFramework.Commands.Demos
         /// Info, Warn, Error, Section, Confirm.
         /// </summary>
         [CommandMethod("DEMO_NOTIFICATION")]
-        public void DemoNotification()
-        {
-            if (Notify == null)
-            {
-                Editor?.WriteMessage("\n[Lỗi] INotificationService chưa được đăng ký trong DI.");
-                return;
-            }
+        public void DemoNotification() => ExecuteCommand(ShowNotificationKinds);
 
+        private void ShowNotificationKinds()
+        {
             // 1. Section — Phân đoạn rõ ràng
             Notify.Section("DEMO: INOTIFICATIONSERVICE — CÁC LOẠI THÔNG BÁO");
 
@@ -176,16 +157,14 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DI_RESOLVE")]
         public void DemoDiResolve()
         {
-            Notify?.Section("DEMO: DEPENDENCY INJECTION — RESOLVE SERVICES");
-
             ExecuteCommand(() =>
             {
-                var sp = AppBootstrapper.ServiceProvider;
-                if (sp == null)
-                {
-                    Notify?.Error("ServiceProvider is null — AppBootstrapper chưa được khởi tạo.");
-                    return;
-                }
+                Notify.Section("DEMO: DEPENDENCY INJECTION — RESOLVE SERVICES");
+
+                // Demo này CỐ Ý dùng ServiceProvider trực tiếp để liệt kê service nào thiếu
+                // (GetService trả null thay vì throw) — code nghiệp vụ hãy dùng GetRequiredService<T>().
+                var sp = AppBootstrapper.ServiceProvider
+                    ?? throw new InvalidOperationException("ServiceProvider is null — AppBootstrapper chưa được khởi tạo.");
 
                 Notify?.Info("─── KIỂM TRA CÁC SERVICE ĐÃ ĐĂNG KÝ ───");
 
@@ -231,9 +210,9 @@ namespace CadCoreFramework.Commands.Demos
                 }
 
                 Notify?.Info($"─── KẾT QUẢ: {found} service khả dụng, {missing} thiếu ───");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO DI RESOLVE");
+                Notify.Section("HOÀN TẤT: DEMO DI RESOLVE");
+            });
         }
 
         /// <summary>
@@ -242,15 +221,9 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_PLOT_PDF")]
         public void DemoPlotPdf()
         {
-            Notify?.Section("DEMO: IPLOTSERVICE — DỊCH VỤ IN ẤN TỰ ĐỘNG");
-
             ExecuteCommand(() =>
             {
-                if (Plot == null)
-                {
-                    Notify?.Error("IPlotService chưa được đăng ký trong DI.");
-                    return;
-                }
+                Notify.Section("DEMO: IPLOTSERVICE — DỊCH VỤ IN ẤN TỰ ĐỘNG");
 
                 var plotters = Plot.GetAvailablePlotters();
                 Notify?.Info("Danh sách Plotter có sẵn trong hệ thống:");
@@ -272,9 +245,9 @@ namespace CadCoreFramework.Commands.Demos
                     if (mCount++ < 4)
                         Notify?.Info($"  * {m}");
                 }
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO IPLOTSERVICE");
+                Notify.Section("HOÀN TẤT: DEMO IPLOTSERVICE");
+            });
         }
 
         /// <summary>
@@ -283,31 +256,21 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_UNDO_GROUP")]
         public void DemoUndoGroup()
         {
-            Notify?.Section("DEMO: UNDO GROUP");
-
-            // Mở Undo Mark
-            using (var undo = new UndoGroupManager())
+            ExecuteCommand(() =>
             {
-                // Hành động 1
-                ExecuteWithScope(scope =>
-                {
-                    scope.DrawCircle(new Point3d(0, 0, 0), 10, colorIndex: 1);
-                });
+                Notify.Section("DEMO: UNDO GROUP");
 
-                // Hành động 2
-                ExecuteWithScope(scope =>
+                // Mở Undo Mark — 3 transaction riêng biệt bên dưới được gom thành 1 bước Ctrl+Z.
+                using (var undo = new UndoGroupManager())
                 {
-                    scope.DrawCircle(new Point3d(25, 0, 0), 10, colorIndex: 2);
-                });
+                    // Lambda dạng khối { ...; } → chọn overload Execute(Action) (ném lỗi khi thất bại).
+                    CadContext.Execute(scope => { scope.DrawCircle(new Point3d(0, 0, 0), 10, colorIndex: 1); });
+                    CadContext.Execute(scope => { scope.DrawCircle(new Point3d(25, 0, 0), 10, colorIndex: 2); });
+                    CadContext.Execute(scope => { scope.DrawCircle(new Point3d(50, 0, 0), 10, colorIndex: 3); });
+                }
 
-                // Hành động 3
-                ExecuteWithScope(scope =>
-                {
-                    scope.DrawCircle(new Point3d(50, 0, 0), 10, colorIndex: 3);
-                });
-            }
-
-            Notify?.Info("Đã vẽ 3 đường tròn. Hãy thử nhấn Ctrl+Z (Undo) — cả 3 hình sẽ biến mất cùng lúc!");
+                Notify.Info("Đã vẽ 3 đường tròn. Hãy thử nhấn Ctrl+Z (Undo) — cả 3 hình sẽ biến mất cùng lúc!");
+            });
         }
 
         /// <summary>
@@ -319,29 +282,32 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_ASYNC_AWAIT")]
         public void DemoAsyncAwait()
         {
-            Notify?.Section("DEMO: ASYNC / AWAIT (Không treo CAD)");
-            Notify?.Info("Bắt đầu gọi API hoặc tải dữ liệu nặng (đợi 3 giây)... Bạn vẫn có thể pan/zoom bản vẽ!");
+            ExecuteCommand(() =>
+            {
+                Notify.Section("DEMO: ASYNC / AWAIT (Không treo CAD)");
+                Notify.Info("Bắt đầu gọi API hoặc tải dữ liệu nặng (đợi 3 giây)... Bạn vẫn có thể pan/zoom bản vẽ!");
 
-            // Fire-and-forget CÓ xử lý lỗi. ExecuteSafeAsync tự capture Main Thread context ngay tại đây.
-            CadAsyncHelper.ExecuteSafeAsync<string>(
-                async () =>
-                {
-                    // Mô phỏng tải dữ liệu (ví dụ gọi HTTP API) tốn 3 giây
-                    await Task.Delay(3000);
-                    return "Dữ liệu tải về từ máy chủ thành công!";
-                },
-                result =>
-                {
-                    // Trở lại Main Thread của AutoCAD an toàn
-                    Notify?.Info(result);
-                    
-                    ExecuteWithScope(scope =>
+                // Fire-and-forget CÓ xử lý lỗi. ExecuteSafeAsync tự capture Main Thread context ngay tại đây.
+                CadAsyncHelper.ExecuteSafeAsync<string>(
+                    async () =>
                     {
-                        scope.DrawCircle(new Point3d(0, 50, 0), 20, colorIndex: 4);
-                        Notify?.Info("Đã vẽ một đường tròn sau khi tải xong.");
-                    });
-                }
-            ).FireAndForget(ex => Notify?.Error("DEMO_ASYNC_AWAIT thất bại", ex));
+                        // Mô phỏng tải dữ liệu (ví dụ gọi HTTP API) tốn 3 giây
+                        await Task.Delay(3000);
+                        return "Dữ liệu tải về từ máy chủ thành công!";
+                    },
+                    result =>
+                    {
+                        // Trở lại Main Thread của AutoCAD an toàn
+                        Notify.Info(result);
+
+                        ExecuteWithScope(scope =>
+                        {
+                            scope.DrawCircle(new Point3d(0, 50, 0), 20, colorIndex: 4);
+                            Notify.Info("Đã vẽ một đường tròn sau khi tải xong.");
+                        });
+                    }
+                ).FireAndForget(ex => Notify.Error("DEMO_ASYNC_AWAIT thất bại", ex));
+            });
         }
     }
 }

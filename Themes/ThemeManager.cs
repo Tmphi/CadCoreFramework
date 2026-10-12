@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Windows;
-using CadCoreFramework.Core;
 using CadCoreFramework.Utils;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 

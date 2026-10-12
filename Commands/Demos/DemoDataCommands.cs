@@ -1,13 +1,10 @@
 using System;
-using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
-using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Commands.Demos
 {
@@ -19,7 +16,7 @@ namespace CadCoreFramework.Commands.Demos
     public class DemoDataCommands : CadCommandBase
     {
         private INotificationService Notify
-            => AppBootstrapper.ServiceProvider?.GetService<INotificationService>();
+            => GetRequiredService<INotificationService>();
 
         /// <summary>
         /// DEMO_XDATA — Minh họa cách ghi/đọc metadata JSON vào XData của Entity.
@@ -28,10 +25,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_XDATA")]
         public void DemoXData()
         {
-            Notify?.Section("DEMO: XDATA — GHI/ĐỌC METADATA JSON (GIỚI HẠN 16KB)");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: XDATA — GHI/ĐỌC METADATA JSON (GIỚI HẠN 16KB)");
+
                 // 1. Vẽ một hình chữ nhật làm đối tượng thử nghiệm
                 var p1 = new Point3d(0, 0, 0);
                 var p2 = new Point3d(80, 40, 0);
@@ -72,9 +69,9 @@ namespace CadCoreFramework.Commands.Demos
                 // 6. Kiểm tra HasMetadata
                 bool hasData = entity.HasMetadata(appName);
                 Notify?.Info($"4. HasMetadata('{appName}'): {hasData}");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO XDATA — GHI/ĐỌC METADATA JSON");
+                Notify.Section("HOÀN TẤT: DEMO XDATA — GHI/ĐỌC METADATA JSON");
+            });
         }
 
         /// <summary>
@@ -84,10 +81,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_XRECORD")]
         public void DemoXRecord()
         {
-            Notify?.Section("DEMO: XRECORD — METADATA LỚN KHÔNG GIỚI HẠN 16KB");
-
             ExecuteWithScope(scope =>
             {
+                Notify.Section("DEMO: XRECORD — METADATA LỚN KHÔNG GIỚI HẠN 16KB");
+
                 // 1. Vẽ hình tròn làm đối tượng thử nghiệm
                 ObjectId circleId = scope.DrawCircle(new Point3d(200, 0, 0), radius: 25, layer: "DEMO_XRECORD", colorIndex: 4);
                 Notify?.Info($"1. Đã vẽ hình tròn demo | ID: {circleId}");
@@ -140,9 +137,9 @@ namespace CadCoreFramework.Commands.Demos
                 XRecordHelper.RemoveMetadata(scope.Transaction, entity, xrecKey);
                 var afterRemove = XRecordHelper.GetMetadata<dynamic>(scope.Transaction, entity, xrecKey);
                 Notify?.Info($"4. RemoveMetadata → Đọc lại: {(afterRemove == null ? "null (đã xóa thành công)" : "vẫn còn!?")}");
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO XRECORD");
+                Notify.Section("HOÀN TẤT: DEMO XRECORD");
+            });
         }
 
         /// <summary>
@@ -152,10 +149,10 @@ namespace CadCoreFramework.Commands.Demos
         [CommandMethod("DEMO_DYNAMIC_BLOCK")]
         public void DemoDynamicBlock()
         {
-            Notify?.Section("DEMO: DYNAMICBLOCKHELPER — THAO TÁC BLOCK ĐỘNG");
-
             ExecuteCommand(() =>
             {
+                Notify.Section("DEMO: DYNAMICBLOCKHELPER — THAO TÁC BLOCK ĐỘNG");
+
                 var blockId = CadPromptHelper.GetEntity("Chọn một Block (BlockReference) trên bản vẽ:", typeof(BlockReference));
                 if (blockId == ObjectId.Null)
                 {
@@ -163,7 +160,7 @@ namespace CadCoreFramework.Commands.Demos
                     return;
                 }
 
-                CadContext?.ExecuteRead(scope =>
+                CadContext.ExecuteRead(scope =>
                 {
                     var blockRef = scope.Transaction.GetObject(blockId, OpenMode.ForRead) as BlockReference;
                     if (blockRef == null) return;
@@ -197,9 +194,9 @@ namespace CadCoreFramework.Commands.Demos
                         Notify?.Info("Đối tượng là Standard Block (không phải Dynamic Block).");
                     }
                 });
-            });
 
-            Notify?.Section("HOÀN TẤT: DEMO DYNAMIC BLOCK");
+                Notify.Section("HOÀN TẤT: DEMO DYNAMIC BLOCK");
+            });
         }
     }
 }
