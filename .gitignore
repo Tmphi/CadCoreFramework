@@ -47,3 +47,6 @@ desktop.ini
 
 # ─── nuget.exe binary (use NuGet CLI via dotnet instead) ─────────────────────
 nuget.exe
+
+# WPF temporary project files generated during XAML compilation
+*_wpftmp.csproj
