@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Roslyn analyzers MUST target netstandard2.0 so they can load into both
+      net48 (MSBuild on .NET Framework) and net8+ (MSBuild on modern .NET).
+      Microsoft.CodeAnalysis.CSharp 4.x works on netstandard2.0.
+    -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>CadCoreFramework.Analyzers</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+
+    <!-- Analyzer DLLs ship inside analyzers/dotnet/cs — mark so other
+         projects can consume with Pack=false, Analyzer=true. -->
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+    <!-- RS2007/RS2008: release-tracking file format is strict and brittle.
+         The analyzer works fine without them — suppress to keep build clean. -->
+    <NoWarn>$(NoWarn);RS2007;RS2008</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 4.6.0 ships with VS 2022 17.8+ and the .NET 8 SDK. Pin a version
+         that is a strict floor so analyzers don't accidentally require a
+         feature from a newer Roslyn than the user has installed. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"           Version="4.6.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.6.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

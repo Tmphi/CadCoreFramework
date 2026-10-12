@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>cadsvc — Service with DI</Title>
+      <Shortcut>cadsvc</Shortcut>
+      <Description>Insert a Service class + interface with ICadContext injected via constructor.</Description>
+      <Author>CadCoreFramework</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>Name</ID>
+          <ToolTip>Service name without 'Service' suffix (PascalCase).</ToolTip>
+          <Default>MyThing</Default>
+        </Literal>
+        <Literal>
+          <ID>Method</ID>
+          <ToolTip>First method name.</ToolTip>
+          <Default>DoWork</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[public interface I$Name$Service
+{
+    void $Method$();
+}
+
+public class $Name$Service : I$Name$Service
+{
+    private readonly ICadContext _cadContext;
+    private readonly ILoggerService _logger;
+
+    public $Name$Service(ICadContext cadContext, ILoggerService logger)
+    {
+        _cadContext = cadContext;
+        _logger = logger;
+    }
+
+    public void $Method$()
+    {
+        _cadContext.Execute(scope =>
+        {
+            $end$
+        });
+    }
+}]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

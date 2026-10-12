@@ -37,6 +37,14 @@ namespace CadCoreFramework.Core
         /// </summary>
         public static IServiceProvider? ServiceProvider { get; private set; }
 
+        /// <summary>
+        /// Snapshot của ServiceCollection ĐÃ dùng để build ServiceProvider.
+        /// Chỉ có giá trị sau khi Initialize() chạy xong. Dùng cho Debug Inspector
+        /// Palette để liệt kê các service đã đăng ký — không có public API nào
+        /// trên IServiceProvider để lấy danh sách này.
+        /// </summary>
+        public static IServiceCollection? RegisteredServices { get; private set; }
+
 #if DEBUG
         /// <summary>
         /// CHỈ DÙNG CHO KIỂM THỬ (TEST ONLY). Tiêm một IServiceProvider tùy chỉnh để các unit test xUnit
@@ -90,6 +98,7 @@ namespace CadCoreFramework.Core
             var services = new ServiceCollection();
             ConfigureServices(services);
             ServiceProvider = services.BuildServiceProvider();
+            RegisteredServices = services;  // keep snapshot for Debug Inspector
 
             // 2. Khởi động Event Service (lắng nghe các sự kiện AutoCAD)
             var eventService = ServiceProvider.GetService<IEventService>();
@@ -191,6 +200,7 @@ namespace CadCoreFramework.Core
             services.AddTransient<ViewModels.SampleViewModel>();
             services.AddTransient<ViewModels.CommonControlsViewModel>();
             services.AddTransient<ViewModels.LayerManagerViewModel>();
+            services.AddTransient<ViewModels.DebugInspectorViewModel>();
 
             // ─── Đăng ký các Service / ViewModel mới tại đây ──────────────────────
         }

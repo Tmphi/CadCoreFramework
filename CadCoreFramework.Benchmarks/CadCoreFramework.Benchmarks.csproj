@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Benchmark harness: BenchmarkDotNet requires a console .exe on a modern
+      .NET runtime. net8 gives us the fastest JIT + proper BDN diagnostics.
+      This is intentionally NOT multi-targeted — benchmarks are a dev tool,
+      not something shipped alongside the plugin.
+    -->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>CadCoreFramework.Benchmarks</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      BenchmarkDotNet spins up isolated processes per benchmark, so Release-
+      mode build is mandatory for valid numbers. The warning stays if someone
+      accidentally runs Debug.
+    -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Reference the main project so benchmarks exercise real production
+      implementations (SelectionFilterBuilder, XDataHelper chunking, CadResult).
+    -->
+    <ProjectReference Include="..\CadCoreFramework.csproj" />
+  </ItemGroup>
+
+</Project>

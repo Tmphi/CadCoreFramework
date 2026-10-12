@@ -31,5 +31,12 @@ Hãy duyệt qua các tài liệu dưới đây theo thứ tự từ cơ bản �
    - Xử lý sự cố kinh điển (Troubleshooting)
    - Tuyệt chiêu Hot-Reload WPF
    - Hướng dẫn Viết Unit Test cho AutoCAD
+   - CI/CD với GitHub Actions
    - Quy chuẩn Viết Code (Coding Conventions)
-   - Đóng gói Template
+7. [Phần 7: API Reference](07_API_REFERENCE.md)
+   - CadScopeDrawingExtensions, Utils, Builders
+8. [Phần 8: Cookbook — Công Thức Thực Chiến](08_COOKBOOK.md)
+   - Vẽ Title Block A3, Batch export PDF, Purge+Audit, XRef
+   - Jig vẽ Polyline tự do, Dynamic Block, Merge Layers
+   - Selection Filter patterns, XData round-trip, Subscription Dispose
+   - Chuyển thao tác nặng sang Async

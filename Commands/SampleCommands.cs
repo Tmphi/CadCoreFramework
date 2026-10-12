@@ -78,6 +78,23 @@ namespace CadCoreFramework.Commands
         }
 
         /// <summary>
+        /// CORE_DEBUG — Mở Debug Inspector Palette (xem Command History,
+        /// DI Services, Event Subscribers live). Gõ "CORE_DEBUG" trong AutoCAD.
+        /// </summary>
+        [CommandMethod("CORE_DEBUG")]
+        public void ShowDebugInspector()
+        {
+            ExecuteCommand(() =>
+            {
+                PaletteService?.TogglePalette(
+                    "CadCoreFrameworkDebugInspector",
+                    () => new Views.DebugInspectorPaletteControl(),
+                    tabTitle: "Debug Inspector"
+                );
+            });
+        }
+
+        /// <summary>
         /// CORE_TEST_ALL — Kiểm tra toàn bộ API vẽ hình, layer, XData và thông báo.
         /// Gõ "CORE_TEST_ALL" trên dòng lệnh AutoCAD.
         /// </summary>

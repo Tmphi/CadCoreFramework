@@ -64,6 +64,22 @@ namespace CadCoreFramework.Core
             }
         }
 
+        /// <summary>
+        /// Snapshot số lượng subscriber theo message type — dùng cho Debug Inspector
+        /// Palette để kiểm tra "ai đang nghe cái gì" tại thời điểm hiện tại.
+        /// Format: "MessageTypeName — N subscribers".
+        /// </summary>
+        public IReadOnlyList<string> GetSubscriberSnapshot()
+        {
+            lock (_lock)
+            {
+                return _subscribers
+                    .OrderBy(kv => kv.Key.Name)
+                    .Select(kv => $"{kv.Key.Name} — {kv.Value.Count} subscriber{(kv.Value.Count == 1 ? "" : "s")}")
+                    .ToList();
+            }
+        }
+
         /// <inheritdoc/>
         public void Publish<TMessage>(TMessage message)
         {

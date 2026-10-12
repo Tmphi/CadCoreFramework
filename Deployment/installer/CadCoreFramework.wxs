@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CadCoreFramework — WiX v4 installer
+  ===================================================================
+  Builds an MSI that installs the plugin .bundle into:
+      %APPDATA%\Autodesk\ApplicationPlugins\CadCoreFramework.bundle
+  AutoCAD scans that folder on startup and auto-loads any .bundle
+  it finds via LoadOnAutoCADStartup="True" in PackageContents.xml —
+  no NETLOAD, no AutoLoader entries in the registry.
+
+  BUILD (WiX 4+):
+      dotnet tool install --global wix
+      wix build Deployment/installer/CadCoreFramework.wxs ^
+                -arch x64 ^
+                -bindvariable BundleSourceDir=../../dist/CadCoreFramework.bundle ^
+                -o dist/CadCoreFramework.msi
+
+  Requires: dist/CadCoreFramework.bundle/ to exist (run package.ps1 first).
+
+  CUSTOMIZE BEFORE SHIPPING:
+      1. UpgradeCode — must be unique PER PRODUCT (never change for a product).
+      2. Manufacturer / ProductName — your name/branding.
+      3. Version — bump before every public release.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package Name="CadCoreFramework"
+           Manufacturer="CadCoreFramework"
+           Version="1.0.0.0"
+           UpgradeCode="7C5F7C3A-A212-4DE6-A6F9-183637C0C793"
+           Scope="perUser"
+           InstallerVersion="500"
+           Compressed="yes">
+
+    <!-- Upgrade: automatically remove any older version before installing this one. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+
+    <!--
+      Per-user install into AppData\Autodesk\ApplicationPlugins — AutoCAD's
+      standard auto-load location. No admin rights needed; nothing lands in
+      Program Files; uninstall cleans up fully.
+    -->
+    <StandardDirectory Id="AppDataFolder">
+      <Directory Id="AutodeskDir" Name="Autodesk">
+        <Directory Id="AppPluginsDir" Name="ApplicationPlugins">
+          <Directory Id="BundleDir" Name="CadCoreFramework.bundle">
+            <!--
+              The entire bundle folder is harvested from BundleSourceDir
+              (passed on the command line as a bindvariable). WiX 4's
+              Files element pulls every file recursively — no manual
+              Component listing needed.
+            -->
+            <Files Include="!(bindvar.BundleSourceDir)\**" />
+          </Directory>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Single feature: the plugin bundle. Users can't opt out of pieces. -->
+    <Feature Id="Main" Title="CadCoreFramework Plugin" Level="1" />
+
+    <!-- UI: WixUI_Minimal is a one-click Next→Install experience.
+         Swap for WixUI_InstallDir if you want a destination picker. -->
+    <ui:WixUI Id="WixUI_Minimal" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui" />
+
+    <!-- EULA: optional. Uncomment and point at your license .rtf when ready.
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    -->
+
+  </Package>
+</Wix>

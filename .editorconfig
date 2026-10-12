@@ -62,6 +62,66 @@ dotnet_naming_rule.types.style = pascal_case
 dotnet_naming_rule.types.severity = suggestion
 dotnet_naming_symbols.types.applicable_kinds = class, struct, enum, delegate
 
+# Async methods must end with Async
+dotnet_naming_rule.async_methods_end_in_async.severity = warning
+dotnet_naming_rule.async_methods_end_in_async.symbols  = async_methods
+dotnet_naming_rule.async_methods_end_in_async.style    = pascal_with_async_suffix
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_style.pascal_with_async_suffix.capitalization = pascal_case
+dotnet_naming_style.pascal_with_async_suffix.required_suffix = Async
+
+# ─── Analyzer severity ────────────────────────────────────────────────────────
+# CA1416: suppressed globally via SupportedOSPlatform in AssemblyInfo.cs — don't re-flag.
+dotnet_diagnostic.CA1416.severity = none
+# CA2007: ConfigureAwait(false) — WRONG for AutoCAD (we want the UI SyncContext). Disable.
+dotnet_diagnostic.CA2007.severity = none
+# CS1591: missing XML doc on public — not every public needs doc. Silence.
+dotnet_diagnostic.CS1591.severity = none
+# IDE0005: unused usings — surface so dead usings get cleaned.
+dotnet_diagnostic.IDE0005.severity = warning
+# CA1050: types must be in namespace — enforce, prevents accidental globals.
+dotnet_diagnostic.CA1050.severity = warning
+
+# ─── Analyzer tuning (noisy rules in a template context) ─────────────────────
+# These rules fire often but either have legitimate CAD-specific exceptions
+# or are too opinionated for a general-purpose starter. Users can tighten
+# individual rules in their own project's .editorconfig after fork.
+dotnet_diagnostic.CA1707.severity = none         # AutoCAD commands use UPPER_SNAKE_CASE
+dotnet_diagnostic.CA1822.severity = suggestion   # "can be static" — nice-to-know, not important
+dotnet_diagnostic.CA1031.severity = suggestion   # we DO catch Exception in CadCommandBase (policy)
+dotnet_diagnostic.CA1051.severity = none         # visible instance fields are fine in DTOs
+dotnet_diagnostic.CA1724.severity = suggestion   # types matching ns — stylistic
+dotnet_diagnostic.CA1819.severity = suggestion   # array-returning properties — common in AutoCAD data
+dotnet_diagnostic.CA2227.severity = none         # settable collections — needed for data binding
+dotnet_diagnostic.CA1848.severity = none         # LoggerMessage delegates — overkill for Serilog
+dotnet_diagnostic.CA2254.severity = suggestion   # Serilog interpolation — benign in this project
+dotnet_diagnostic.CA1725.severity = none         # parameter name matching — bikeshedding
+dotnet_diagnostic.CA1711.severity = none         # suffix rules — too many false positives
+dotnet_diagnostic.CA1056.severity = suggestion   # URI vs string — not relevant for file paths
+dotnet_diagnostic.CA1054.severity = suggestion   # URI parameters — same
+dotnet_diagnostic.CA1304.severity = suggestion   # CultureInfo — fine for Vietnamese UI
+dotnet_diagnostic.CA1305.severity = suggestion   # IFormatProvider — same
+dotnet_diagnostic.CA1310.severity = suggestion   # StringComparison — same
+dotnet_diagnostic.CA1507.severity = suggestion   # nameof — nice-to-have
+dotnet_diagnostic.CA2211.severity = none         # non-constant public fields — AppBootstrapper.ServiceProvider pattern
+dotnet_diagnostic.CA1816.severity = suggestion   # SuppressFinalize — nice-to-have, not shipping-blocking
+dotnet_diagnostic.CA1805.severity = suggestion   # redundant default init — stylistic
+dotnet_diagnostic.CA1825.severity = suggestion   # Array.Empty<T>() over new T[0] — minor perf
+dotnet_diagnostic.CA1716.severity = none         # VB.NET keyword conflicts — irrelevant for C#-only
+dotnet_diagnostic.CA1311.severity = none         # Specify culture for ToUpper — too strict for a template
+dotnet_diagnostic.CA1000.severity = none         # Static members on generic types — CadResult<T>.Success is intentional
+dotnet_diagnostic.CA1861.severity = suggestion   # Avoid constant arrays — minor perf
+dotnet_diagnostic.CA1859.severity = suggestion   # Use concrete types for perf — stylistic
+dotnet_diagnostic.CA1854.severity = suggestion   # Prefer TryGetValue — stylistic
+dotnet_diagnostic.CA1720.severity = none         # Identifier contains type name — too many false positives
+dotnet_diagnostic.CA1510.severity = suggestion   # ArgumentNullException.ThrowIfNull — net48 doesn't have it
+dotnet_diagnostic.CA2249.severity = suggestion   # string.Contains(char) — minor perf win
+dotnet_diagnostic.CA1866.severity = suggestion   # string method char overloads — minor perf
+
+# Build-time analyzer config messages — not actionable warnings.
+dotnet_diagnostic.EnableGenerateDocumentationFile.severity = none
+
 # ─── XAML ──────────────────────────────────────────────────────────────────────
 [*.xaml]
 indent_size = 4

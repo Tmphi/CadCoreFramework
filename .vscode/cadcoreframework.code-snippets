@@ -1,0 +1,160 @@
+{
+    "CadCoreFramework — Command (ExecuteWithScope)": {
+        "scope": "csharp",
+        "prefix": ["cadcmd", "cad-command"],
+        "description": "AutoCAD [CommandMethod] skeleton on CadCommandBase with ExecuteWithScope and auto-recorded CommandHistory.",
+        "body": [
+            "/// <summary>",
+            "/// ${3:One-line description of what this command does.}",
+            "/// </summary>",
+            "[CommandMethod(\"${1:MY_COMMAND}\")]",
+            "public void ${2:MyCommand}()",
+            "{",
+            "    ExecuteWithScope(scope =>",
+            "    {",
+            "        $0",
+            "    }, undoMarkName: \"${2:MyCommand}\");",
+            "}"
+        ]
+    },
+
+    "CadCoreFramework — Service (constructor injection)": {
+        "scope": "csharp",
+        "prefix": ["cadsvc", "cad-service"],
+        "description": "Service class with ICadContext injected via constructor. Pair with an I${1}Service interface.",
+        "body": [
+            "using CadCoreFramework.Core;",
+            "",
+            "namespace CadCoreFramework.Services",
+            "{",
+            "    public interface I${1:MyThing}Service",
+            "    {",
+            "        void ${2:DoWork}();",
+            "    }",
+            "",
+            "    public class ${1}Service : I${1}Service",
+            "    {",
+            "        private readonly ICadContext _cadContext;",
+            "        private readonly ILoggerService _logger;",
+            "",
+            "        public ${1}Service(ICadContext cadContext, ILoggerService logger)",
+            "        {",
+            "            _cadContext = cadContext;",
+            "            _logger = logger;",
+            "        }",
+            "",
+            "        public void ${2:DoWork}()",
+            "        {",
+            "            _cadContext.Execute(scope =>",
+            "            {",
+            "                $0",
+            "            });",
+            "        }",
+            "    }",
+            "}"
+        ]
+    },
+
+    "CadCoreFramework — ExecuteWithScope block": {
+        "scope": "csharp",
+        "prefix": ["cadscope", "cad-scope"],
+        "description": "Insert an inline ExecuteWithScope block (for use inside an existing command method).",
+        "body": [
+            "ExecuteWithScope(scope =>",
+            "{",
+            "    $0",
+            "}, undoMarkName: \"${1:Operation}\");"
+        ]
+    },
+
+    "CadCoreFramework — ExecuteAsync (two-phase)": {
+        "scope": "csharp",
+        "prefix": ["cadasync", "cad-async"],
+        "description": "Two-phase ExecuteAsync: phase 1 computes (off UI thread), phase 2 draws (inside transaction).",
+        "body": [
+            "await _cadContext.ExecuteAsync(async () =>",
+            "{",
+            "    // Phase 1 — background work (API calls, computation). No AutoCAD API here!",
+            "    var ${1:data} = await ${2:_someService}.FetchAsync();",
+            "",
+            "    // Phase 2 — the Action<ICadScope> that will run inside the transaction.",
+            "    Action<ICadScope> draw = scope =>",
+            "    {",
+            "        $0",
+            "    };",
+            "    return draw;",
+            "}, undoMarkName: \"${3:AsyncOp}\");"
+        ]
+    },
+
+    "CadCoreFramework — ViewModel with RelayCommand": {
+        "scope": "csharp",
+        "prefix": ["cadvm", "cad-viewmodel"],
+        "description": "ViewModel inheriting ViewModelBase with [ObservableProperty] and [RelayCommand] (CommunityToolkit.Mvvm).",
+        "body": [
+            "using CadCoreFramework.Core;",
+            "using CommunityToolkit.Mvvm.ComponentModel;",
+            "using CommunityToolkit.Mvvm.Input;",
+            "using System.Threading.Tasks;",
+            "",
+            "namespace CadCoreFramework.ViewModels",
+            "{",
+            "    public partial class ${1:MyPaletteViewModel} : ViewModelBase",
+            "    {",
+            "        private readonly I${2:MyThing}Service _service;",
+            "",
+            "        public ${1}(I${2}Service service)",
+            "        {",
+            "            _service = service;",
+            "            Title = \"${3:My Palette}\";",
+            "        }",
+            "",
+            "        [ObservableProperty]",
+            "        private string ${4:name} = string.Empty;",
+            "",
+            "        [RelayCommand]",
+            "        private async Task ${5:Submit}Async()",
+            "        {",
+            "            await RunSafeAsync(async () =>",
+            "            {",
+            "                $0",
+            "            }, errorPrefix: \"${5:Submit}\");",
+            "        }",
+            "    }",
+            "}"
+        ]
+    },
+
+    "CadCoreFramework — Selection filter (fluent)": {
+        "scope": "csharp",
+        "prefix": ["cadfilter", "cad-filter"],
+        "description": "Build a SelectionFilter using the fluent SelectionFilterBuilder.",
+        "body": [
+            "var filter = SelectionFilterBuilder.Create()",
+            "    .OfTypes(\"${1:LWPOLYLINE,LINE}\")",
+            "    .OnLayer(\"${2:MY_LAYER}\")",
+            "    .Build();"
+        ]
+    },
+
+    "CadCoreFramework — Draw inside scope": {
+        "scope": "csharp",
+        "prefix": ["caddraw", "cad-draw"],
+        "description": "Common one-liner draws inside an ICadScope lambda.",
+        "body": [
+            "scope.EnsureLayer(\"${1:MY_LAYER}\", colorIndex: ${2:7});",
+            "ObjectId rectId = scope.DrawRectangle(new Point3d(${3:0, 0, 0}), new Point3d(${4:100, 50, 0}), layer: \"${1}\");",
+            "ObjectId textId = scope.DrawMText(\"${5:Hello}\", new Point3d(${3:0, 0, 0}), textHeight: ${6:5}, layer: \"${1}\");$0"
+        ]
+    },
+
+    "CadCoreFramework — Guard precondition": {
+        "scope": "csharp",
+        "prefix": ["cadguard", "cad-guard"],
+        "description": "Precondition checks using Utils.Guard.",
+        "body": [
+            "Guard.NotNull(${1:param}, nameof(${1}));",
+            "Guard.NotEmpty(${2:name}, nameof(${2}));$0"
+        ]
+    }
+}

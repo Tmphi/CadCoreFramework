@@ -9,6 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (Developer-ergonomics "ăn chơi" bundle)
+- **`.editorconfig`** — extended with async-method naming rule and ~20 CA-rule severity tunings (noisy stylistic rules → `suggestion` or `none`; real-value rules stay `warning`). Analyzer config in main csproj: `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest`, `AnalysisMode=Recommended`. Clean build 115 warnings → 0.
+- **`snippets/*.snippet`** — Visual Studio code snippets: `cadcmd`, `cadsvc`, `cadscope`, `cadvm`. Install docs in `snippets/README.md`.
+- **`.vscode/cadcoreframework.code-snippets`** — same four snippets plus `cadasync`, `cadfilter`, `caddraw`, `cadguard` for VS Code / Cursor; picked up automatically when the workspace loads.
+- **`Views/DebugInspectorPaletteControl.xaml`** + **`ViewModels/DebugInspectorViewModel.cs`** — WPF palette with three tabs: Command History (DataGrid), DI Services (lifetime/interface/impl), Event Subscribers (handler counts). Opens via new **`CORE_DEBUG`** command. Supported by `AppBootstrapper.RegisteredServices` snapshot and `EventAggregator.GetSubscriberSnapshot()`.
+- **`docs/08_COOKBOOK.md`** — 11 copy-paste recipes (Title block A3, Batch PDF export, Purge+Audit, XRef attach, Free polyline jig, Dynamic block attribute update, Layer merge, Selection filter patterns, XData round-trip, Subscription Dispose, Async heavy work). Linked from `00_TOC.md`.
+- **`CadCoreFramework.Benchmarks/`** — BenchmarkDotNet project. 3 suites: `CadResultBenchmarks` (Result vs raw vs throw/catch), `EventAggregatorBenchmarks` (publish at 1/10/100 subscribers), `CommandHistoryBenchmarks` (Record steady-state). Pure-C# only — no AutoCAD runtime required.
+- **`Deployment/installer/`** — WiX 4 installer scaffold: `CadCoreFramework.wxs` + `build-msi.ps1` + README. Produces a per-user MSI that drops the bundle into `%AppData%\Autodesk\ApplicationPlugins`.
+- **`CadCoreFramework.Analyzers/`** — custom Roslyn analyzer. Ships one rule: **CAD001** forbids `Application.DocumentManager.MdiActiveDocument` in classes under `Services/` and `ViewModels/`. Wired into the main project via `OutputItemType="Analyzer"` so the analyzer DLL is not shipped inside `CadCoreFramework.dll`.
+- **`Templates/cad-command/`** — `dotnet new cad-command` item template. Generates `Commands/XxxCommand.cs` with `CadCommandBase` skeleton + `ExecuteWithScope` + inline reminder to register in `AssemblyInfo.cs`. Parameters: `--AutoCadCommandName`, `--UndoMark`.
+- **`Core/EventAggregator.GetSubscriberSnapshot()`** — read-only subscriber count per message type (used by Debug Inspector).
+- **`Core/AppBootstrapper.RegisteredServices`** — snapshot of the `IServiceCollection` used to build the provider (used by Debug Inspector).
+
 ### Added (Final 10/10 polish)
 - `CadCoreFramework.Tests/LayerServiceTests.cs` — 6 control-flow tests for `LayerService` using `FakeCadContext` (verify ExecuteRead/ExecuteAsync call counts, undoMarkName, exception propagation).
 - `CadCoreFramework.Tests/PathProviderTests.cs` — 3 pure-C# tests for `PathProvider`.

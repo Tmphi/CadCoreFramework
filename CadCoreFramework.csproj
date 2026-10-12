@@ -28,6 +28,18 @@
     <Nullable>annotations</Nullable>
 
     <!--
+      ANALYZER CONFIG
+      - EnforceCodeStyleInBuild: run IDExxxx code-style rules as part of `dotnet build`
+        (not just inside the IDE). Pairs with .editorconfig severities.
+      - AnalysisLevel=latest: pick up new rules automatically when SDK upgrades.
+      - AnalysisMode=Recommended: enable Microsoft's curated "worth it" rule set
+        for CA* diagnostics. Users can tighten to AllEnabledByDefault later.
+    -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+
+    <!--
       WPF HOT-RELOAD TRICK (Debug only):
       Append a timestamp to the AssemblyName on every Debug build so AutoCAD
       never holds a file lock on the previous DLL. Allows NETLOAD of the new
@@ -38,7 +50,7 @@
     <AssemblyName Condition="'$(Configuration)' == 'Debug' And '$(DesignTimeBuild)' != 'true'">CadCoreFramework_$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</AssemblyName>
     <AssemblyName Condition="'$(Configuration)' != 'Debug' Or '$(DesignTimeBuild)' == 'true'">CadCoreFramework</AssemblyName>
 
-    <DefaultItemExcludes>$(DefaultItemExcludes);CadCoreFramework.Tests\**;CadCoreFramework.Testing\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);CadCoreFramework.Tests\**;CadCoreFramework.Testing\**;CadCoreFramework.Benchmarks\**;CadCoreFramework.Analyzers\**</DefaultItemExcludes>
 
     <!--
       MSB3277: benign assembly-conflict warning triggered when dist/ packaging
@@ -81,6 +93,18 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <!-- ═══ Custom Analyzer ═══════════════════════════════════════════════
+       CadCoreFramework.Analyzers ships one rule — CAD001 — that forbids
+       MdiActiveDocument access inside Services/ViewModels. Referenced as
+       an analyzer only (OutputItemType=Analyzer, ReferenceOutputAssembly=false)
+       so the analyzer DLL does NOT ship inside CadCoreFramework.dll.
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <ItemGroup>
+    <ProjectReference Include="CadCoreFramework.Analyzers\CadCoreFramework.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <!-- ═══ WPF Hot-Reload Post-Build ══════════════════════════════════════

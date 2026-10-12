@@ -20,7 +20,12 @@ namespace CadCoreFramework.Core
 
         private static string Editor_Write(string msg)
         {
+            // NotificationService writes to whichever document is active — it does NOT
+            // mutate any entity, so bypassing ICadContext is intentional. CAD001 would
+            // normally flag this; the suppression documents the architectural exception.
+#pragma warning disable CAD001
             Application.DocumentManager.MdiActiveDocument?.Editor.WriteMessage(msg);
+#pragma warning restore CAD001
             return msg;
         }
 

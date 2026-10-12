@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>cadvm — ViewModel with RelayCommand</Title>
+      <Shortcut>cadvm</Shortcut>
+      <Description>Insert a ViewModel on ViewModelBase with [ObservableProperty] and [RelayCommand] (CommunityToolkit.Mvvm).</Description>
+      <Author>CadCoreFramework</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>Name</ID>
+          <Default>MyPalette</Default>
+        </Literal>
+        <Literal>
+          <ID>Service</ID>
+          <Default>MyThing</Default>
+        </Literal>
+        <Literal>
+          <ID>Title</ID>
+          <Default>My Palette</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[public partial class $Name$ViewModel : ViewModelBase
+{
+    private readonly I$Service$Service _service;
+
+    public $Name$ViewModel(I$Service$Service service)
+    {
+        _service = service;
+        Title = "$Title$";
+    }
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [RelayCommand]
+    private async Task SubmitAsync()
+    {
+        await RunSafeAsync(async () =>
+        {
+            $end$
+        }, errorPrefix: "Submit");
+    }
+}]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

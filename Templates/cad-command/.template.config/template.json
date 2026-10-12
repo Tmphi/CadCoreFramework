@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "CadCoreFramework",
+  "classifications": ["AutoCAD", "Plugin", "C#"],
+  "identity": "CadCoreFramework.Template.Command",
+  "name": "AutoCAD CommandMethod (CadCoreFramework)",
+  "shortName": "cad-command",
+  "description": "Generates a Commands/XxxCommand.cs skeleton with CadCommandBase + ExecuteWithScope, plus a one-line reminder to register in Properties/AssemblyInfo.cs.",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "XxxCommand",
+  "preferNameDirectory": false,
+
+  "symbols": {
+    "AutoCadCommandName": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "MY_COMMAND",
+      "replaces": "MY_COMMAND",
+      "description": "Tên lệnh người dùng gõ trong AutoCAD (UPPER_SNAKE_CASE). Mặc định: MY_COMMAND."
+    },
+    "UndoMark": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "MyCommand",
+      "replaces": "__UNDO_MARK__",
+      "description": "Tên bước Undo hiển thị trong AutoCAD UI. Mặc định: cùng tên method."
+    }
+  },
+
+  "primaryOutputs": [
+    { "path": "XxxCommand.cs" }
+  ]
+}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>cadcmd — AutoCAD CommandMethod</Title>
+      <Shortcut>cadcmd</Shortcut>
+      <Description>Insert an AutoCAD [CommandMethod] with ExecuteWithScope and auto-recorded CommandHistory.</Description>
+      <Author>CadCoreFramework</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>CommandName</ID>
+          <ToolTip>AutoCAD command name (UPPER_SNAKE_CASE).</ToolTip>
+          <Default>MY_COMMAND</Default>
+        </Literal>
+        <Literal>
+          <ID>MethodName</ID>
+          <ToolTip>C# method name (PascalCase).</ToolTip>
+          <Default>MyCommand</Default>
+        </Literal>
+        <Literal>
+          <ID>UndoMark</ID>
+          <ToolTip>Undo mark name shown in AutoCAD UI.</ToolTip>
+          <Default>MyCommand</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[[CommandMethod("$CommandName$")]
+public void $MethodName$()
+{
+    ExecuteWithScope(scope =>
+    {
+        $end$
+    }, undoMarkName: "$UndoMark$");
+}]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
