@@ -40,3 +40,8 @@ Hãy duyệt qua các tài liệu dưới đây theo thứ tự từ cơ bản �
    - Jig vẽ Polyline tự do, Dynamic Block, Merge Layers
    - Selection Filter patterns, XData round-trip, Subscription Dispose
    - Chuyển thao tác nặng sang Async
+9. [Phần 9: Golden Sample — Khuôn Mẫu Chuẩn](09_GOLDEN_SAMPLE.md)
+   - Tính năng Grid Marker đi qua đủ các tầng: Model → Planner → Service → Command / ViewModel → View
+   - Functional Core / Imperative Shell: tách logic thuần để test được kết quả
+   - Command context vs Application context (Palette)
+   - Checklist khi copy làm tính năng mới

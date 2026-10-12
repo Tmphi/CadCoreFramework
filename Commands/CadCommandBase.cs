@@ -135,6 +135,16 @@ namespace CadCoreFramework.Commands
         }
 
         /// <summary>
+        /// Lấy một service từ DI container, ném exception nếu chưa đăng ký hoặc DI chưa sẵn sàng.
+        /// Gọi BÊN TRONG ExecuteCommand/ExecuteWithScope để lỗi được bắt, in ra và ghi log —
+        /// thay cho pattern <c>ServiceProvider?.GetService&lt;T&gt;()</c> vốn âm thầm trả về null.
+        /// </summary>
+        protected static T GetRequiredService<T>() where T : class
+            => AppBootstrapper.ServiceProvider?.GetService<T>()
+               ?? throw new InvalidOperationException(
+                   $"Service {typeof(T).Name} chưa được đăng ký hoặc plugin chưa khởi tạo xong (AppBootstrapper.ConfigureServices).");
+
+        /// <summary>
         /// Trả về ICadContext hoặc ném exception nếu DI chưa sẵn sàng (Initialize lỗi / chưa NETLOAD xong).
         /// Tránh trường hợp lệnh âm thầm không làm gì nhưng vẫn bị ghi nhận là thành công.
         /// </summary>

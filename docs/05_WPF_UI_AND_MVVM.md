@@ -52,28 +52,30 @@ Cơ chế của `RunSafeAsync`:
 
 **Ví dụ Code ViewModel tương ứng:**
 ```csharp
-public class SampleViewModel : ViewModelBase
+public partial class TuDienViewModel : ViewModelBase
 {
+    private readonly ITuDienService _service;   // ViewModel KHÔNG gọi ICadContext trực tiếp
+
+    [ObservableProperty]
     private string _tenTu = "Tủ Nhánh";
-    public string TenTu 
-    {
-        get => _tenTu;
-        set => SetProperty(ref _tenTu, value);
-    }
+
+    public TuDienViewModel(ITuDienService service) => _service = service;
 
     [RelayCommand]
-    private async Task DrawAsync()
+    private void Draw()
     {
-        // Khi gọi RunSafeAsync, nút bấm trên màn hình tự khoá lại
-        await RunSafeAsync(async () => 
+        // RunSafe tự bật/tắt IsBusy và đưa exception vào ErrorMessage
+        RunSafe(() =>
         {
-            await _cadContext.ExecuteAsync(scope => {
-                // ... logic AutoCAD ...
-            });
+            CadResult<int> result = _service.Draw(TenTu);   // Service bọc ICadContext.Execute
+            if (!result.IsSuccess) ErrorMessage = result.ErrorMessage;
         });
     }
 }
 ```
+
+> Ví dụ đầy đủ (validate + `CanExecute`, trạng thái dạng enum, EventAggregator, unit test):
+> xem [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md) — `Samples/GridMarker/GridMarkerViewModel.cs`.
 
 ---
 

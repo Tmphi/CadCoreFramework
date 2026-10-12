@@ -87,3 +87,7 @@ using System.Runtime.InteropServices;
 
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(
     typeof(CadCoreFramework.Commands.Demos.DemoUiCommands))]
+
+// Golden Sample — xem docs/09_GOLDEN_SAMPLE.md
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
+    typeof(CadCoreFramework.Samples.GridMarker.GridMarkerCommands))]

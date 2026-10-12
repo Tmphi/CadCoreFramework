@@ -84,7 +84,7 @@ AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao di�
 ### Tuần 1: Tư Duy & Kiến Trúc
 - Đọc kỹ tài liệu này và Phần 2 (Kiến trúc cốt lõi). 
 - Mở [`AppBootstrapper.cs`](../Core/AppBootstrapper.cs) để xem "Menu" đăng ký các Services (`AddSingleton`, `AddTransient`).
-- Mở [`SampleCommands.cs`](../Commands/SampleCommands.cs) để chạy thử lệnh `SHOW_PALETTE`.
+- Đọc [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md) và chạy thử lệnh `SAMPLE_GRID` / `SHOW_PALETTE` — đây là khuôn mẫu chuẩn để copy khi viết tính năng mới.
 
 ### Tuần 2: Thực Hành "Vẽ Tủ Điện MSB"
 Đây là bài tập giúp bạn "chạm tay" vào toàn bộ luồng dữ liệu của Framework.

@@ -9,6 +9,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (Golden Sample — Grid Marker)
+- **`Samples/GridMarker/`** — reference feature showing the canonical layering end-to-end: `GridSpec` (immutable model + validation) → `GridPlanner` (pure logic, no AutoCAD types) → `GridMarkerService` (thin AutoCAD shell: `Execute<T>` + UndoMark + XData, publishes `GridDrawnMessage`) → `GridMarkerCommands` (`SAMPLE_GRID`, prompts before the transaction) and `GridMarkerViewModel` / `GridMarkerPalette` (validation-driven `CanExecute`, enum status instead of `Brush`, `TrackSubscription`).
+- **`docs/09_GOLDEN_SAMPLE.md`** — layer-by-layer walkthrough, linked from `00_TOC.md`.
+- **`CadCommandBase.GetRequiredService<T>()`** — fail-loud service resolution for command classes.
+- 56 tests under `CadCoreFramework.Tests/Samples/GridMarker/` (164 total). `SAMPLE_GRID` added to `tests/integration/smoke.scr`.
+
+### Changed (Golden Sample)
+- `SHOW_PALETTE` now opens the Grid Marker palette.
+
+### Removed (Golden Sample)
+- `ISampleDrawingService` / `SampleDrawingService`, `SampleViewModel`, `SamplePaletteControl` — superseded by the Golden Sample (they prompted from inside a service, wrapped sync work in `ExecuteAsync`, and kept WPF `Brush` in the ViewModel).
+
+### Fixed
+- `CadCommandBase.ExecuteWithScope[Async]` no longer reports success when `ICadContext` is unavailable; async variant writes errors to the originating document.
+- `CadContext.ExecuteAsync` aborts if the captured document was closed during the async phase.
+- `EventAggregator.Publish` invokes every subscriber even if one throws (then rethrows); subscription tokens are one-shot on Dispose.
+
 ### Added (Developer-ergonomics "ăn chơi" bundle)
 - **`.editorconfig`** — extended with async-method naming rule and ~20 CA-rule severity tunings (noisy stylistic rules → `suggestion` or `none`; real-value rules stay `warning`). Analyzer config in main csproj: `EnforceCodeStyleInBuild=true`, `AnalysisLevel=latest`, `AnalysisMode=Recommended`. Clean build 115 warnings → 0.
 - **`snippets/*.snippet`** — Visual Studio code snippets: `cadcmd`, `cadsvc`, `cadscope`, `cadvm`. Install docs in `snippets/README.md`.

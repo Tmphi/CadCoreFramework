@@ -30,6 +30,15 @@ CORE_TEST_ALL
 ; DRAW_CIRCLE_SAMPLE: minimal single-draw path. Exercises DrawCircle.
 DRAW_CIRCLE_SAMPLE
 
+; SAMPLE_GRID: Golden Sample end-to-end — prompts (point, rows, cols, spacing),
+; GridSpec validation, GridPlanner, GridMarkerService.Draw (Execute<T> + UndoMark
+; + XData), EventAggregator publish. Answers: origin 0,0 · 2 rows · 3 cols · spacing 20.
+SAMPLE_GRID
+0,0
+2
+3
+20
+
 ; ─── 3. Exit ────────────────────────────────────────────────────────────────
 QUIT
 Y

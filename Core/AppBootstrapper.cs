@@ -185,8 +185,10 @@ namespace CadCoreFramework.Core
 
             // ── Feature Services ──────────────────────────────────────────────────
             services.AddSingleton<IPlotService, PlotService>();
-            services.AddSingleton<ISampleDrawingService, SampleDrawingService>();
             services.AddSingleton<ILayerService, LayerService>();
+
+            // ── Golden Sample: Grid Marker (Samples/GridMarker) ───────────────────
+            services.AddSingleton<Samples.GridMarker.IGridMarkerService, Samples.GridMarker.GridMarkerService>();
 
             // ── Hạ tầng / Mở rộng (Infrastructure / Extensibility) ──────────────
             // OverruleManager BẮT BUỘC đăng ký dạng Singleton để có thể dispose
@@ -197,7 +199,7 @@ namespace CadCoreFramework.Core
 
             // ── ViewModels ────────────────────────────────────────────────────────
             // Transient: mỗi lần mở một Palette sẽ tạo một instance ViewModel mới.
-            services.AddTransient<ViewModels.SampleViewModel>();
+            services.AddTransient<Samples.GridMarker.GridMarkerViewModel>();
             services.AddTransient<ViewModels.CommonControlsViewModel>();
             services.AddTransient<ViewModels.LayerManagerViewModel>();
             services.AddTransient<ViewModels.DebugInspectorViewModel>();

@@ -38,7 +38,7 @@ namespace CadCoreFramework.Commands
         }
 
         /// <summary>
-        /// SHOW_PALETTE — Bật/Tắt thanh công cụ neo WPF chính.
+        /// SHOW_PALETTE — Bật/Tắt palette chính (Golden Sample: Grid Marker).
         /// Gõ "SHOW_PALETTE" trên dòng lệnh AutoCAD.
         /// </summary>
         [CommandMethod("SHOW_PALETTE")]
@@ -46,16 +46,10 @@ namespace CadCoreFramework.Commands
         {
             ExecuteCommand(() =>
             {
-                if (PaletteService == null)
-                {
-                    Editor?.WriteMessage("\n[Lỗi] IPaletteService chưa được khởi tạo. Kiểm tra AppBootstrapper.");
-                    return;
-                }
-
-                PaletteService.TogglePalette(
+                GetRequiredService<IPaletteService>().TogglePalette(
                     "CadCoreFrameworkPalette",
-                    () => new CadCoreFramework.Views.SamplePaletteControl(),
-                    tabTitle: "CAD Tools"
+                    () => new Samples.GridMarker.GridMarkerPalette(),
+                    tabTitle: "Grid Marker"
                 );
             });
         }

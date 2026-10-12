@@ -18,11 +18,6 @@ namespace CadCoreFramework.ViewModels
         // Thêm các property vào đây cho mỗi ViewModel mà bạn muốn XAML có thể gọi được
 
         /// <summary>
-        /// Lấy phiên bản SampleViewModel từ DI ServiceProvider.
-        /// </summary>
-        public SampleViewModel Sample => AppBootstrapper.ServiceProvider?.GetService<SampleViewModel>();
-
-        /// <summary>
         /// Lấy phiên bản CommonControlsViewModel từ DI ServiceProvider.
         /// </summary>
         public CommonControlsViewModel CommonControls => AppBootstrapper.ServiceProvider?.GetService<CommonControlsViewModel>();

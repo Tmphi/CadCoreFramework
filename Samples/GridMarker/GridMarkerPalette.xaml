@@ -1,0 +1,148 @@
+<UserControl x:Class="CadCoreFramework.Samples.GridMarker.GridMarkerPalette"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CadCoreFramework.Samples.GridMarker"
+             d:DataContext="{d:DesignInstance Type=local:GridMarkerViewModel}"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="320"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <!--
+        GOLDEN SAMPLE — TẦNG VIEW.
+        • Chỉ có Binding — không có logic trong code-behind.
+        • Dùng DynamicResource: Styles.xaml + theme Dark/Light được nạp lúc runtime
+          (tên assembly đổi theo mỗi bản Debug nên không hardcode pack URI ở đây).
+        • Màu trạng thái do View quyết định qua DataTrigger trên enum Status —
+          ViewModel không biết gì về Brush.
+    -->
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static local:GridMarkerStatus.Success}">
+                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static local:GridMarkerStatus.Error}">
+                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Overlay bận — tự hiện khi ViewModel.IsBusy = true -->
+        <Grid Panel.ZIndex="99" Background="#AA1E1E2E"
+              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="Đang vẽ..." HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"/>
+        </Grid>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="16">
+
+                <TextBlock Text="Grid Marker" Style="{DynamicResource HeaderStyle}"/>
+                <TextBlock Text="Golden Sample — tham khảo cấu trúc chuẩn Model → Planner → Service → ViewModel → View."
+                           Style="{DynamicResource LabelStyle}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                <!-- Kích thước lưới -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="SỐ HÀNG" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="SỐ CỘT" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="KHOẢNG CÁCH" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding Spacing, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="CỠ Ô" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding CellSize, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="CAO CHỮ" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding TextHeight, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="LAYER" Style="{DynamicResource LabelStyle}"/>
+                <TextBox Style="{DynamicResource InputStyle}"
+                         Text="{Binding LayerName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <TextBlock Text="KIỂU NHÃN" Style="{DynamicResource LabelStyle}"/>
+                <ComboBox Style="{DynamicResource ComboBoxStyle}"
+                          ItemsSource="{Binding LabelStyles}"
+                          SelectedItem="{Binding LabelStyle}"/>
+
+                <!-- Gốc tọa độ: palette không prompt; muốn pick bằng chuột hãy dùng lệnh SAMPLE_GRID -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="TÂM A1 — X" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding OriginX, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="TÂM A1 — Y" Style="{DynamicResource LabelStyle}"/>
+                        <TextBox Style="{DynamicResource InputStyle}"
+                                 Text="{Binding OriginY, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Lỗi validate — nút Vẽ tự disable khi có lỗi -->
+                <TextBlock Text="{Binding ValidationSummary}" Foreground="{DynamicResource DangerBrush}"
+                           FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"
+                           Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVis}}"/>
+
+                <Button Content="▶  Vẽ lưới" Margin="0,16,0,4"
+                        Style="{DynamicResource PrimaryButton}"
+                        Command="{Binding DrawCommand}"/>
+                <Button Content="⟳  Đếm lại ô trong bản vẽ"
+                        Style="{DynamicResource SecondaryButton}"
+                        Command="{Binding RefreshCountCommand}"/>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,12,0,8"/>
+
+                <TextBlock Style="{DynamicResource LabelStyle}">
+                    <Run Text="Số ô trong bản vẽ:"/>
+                    <Run Text="{Binding MarkerCount, Mode=OneWay}" FontWeight="Bold"/>
+                </TextBlock>
+                <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource StatusText}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

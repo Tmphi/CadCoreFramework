@@ -205,7 +205,7 @@ namespace CadCoreFramework.Commands.Demos
                     ("IPathProvider",            typeof(IPathProvider)),
                     ("IWindowManagerService",    typeof(IWindowManagerService)),
                     ("IPlotService",             typeof(IPlotService)),
-                    ("ISampleDrawingService",    typeof(ISampleDrawingService)),
+                    ("IGridMarkerService",       typeof(Samples.GridMarker.IGridMarkerService)),
                     ("ILayerService",            typeof(ILayerService)),
                     ("ICommandHistoryService",   typeof(ICommandHistoryService)),
                     ("OverruleManager",          typeof(OverruleManager)),
