@@ -10,8 +10,9 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Styles loaded dynamically in code-behind via ThemeManager to support Debug hot-reload
-                     (assembly name changes each build, so the hardcoded pack URI would fail). -->
+                <!-- Styles loaded in code-behind (assembly name changes each Debug build, so a hardcoded
+                     pack URI would fail). They arrive AFTER InitializeComponent → every Styles.xaml key
+                     below MUST be {DynamicResource}; {StaticResource} only for keys declared in this file. -->
             </ResourceDictionary.MergedDictionaries>
 
             <viewmodels:ViewModelLocator x:Key="Locator"/>
@@ -19,78 +20,78 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid DataContext="{Binding Source={StaticResource Locator}, Path=CommonControls}" Background="{StaticResource BackgroundBrush}">
+    <Grid DataContext="{Binding Source={StaticResource Locator}, Path=CommonControls}" Background="{DynamicResource BackgroundBrush}">
         <!-- IsBusy Overlay -->
         <Grid Panel.ZIndex="99" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Background="#AA1E1E2E">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
-                <TextBlock Text="Đang xử lý..." Foreground="{StaticResource TextPrimaryBrush}" FontSize="13" HorizontalAlignment="Center"/>
+                <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                <TextBlock Text="Đang xử lý..." Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="16">
                 
-                <TextBlock Text="WPF Controls Showcase" Style="{StaticResource HeaderStyle}" Margin="0,0,0,4"/>
-                <TextBlock Text="Tổng hợp các WPF Controls thông dụng dùng trong AutoCAD Plugin." Style="{StaticResource LabelStyle}" Margin="0,0,0,16" TextWrapping="Wrap"/>
+                <TextBlock Text="WPF Controls Showcase" Style="{DynamicResource HeaderStyle}" Margin="0,0,0,4"/>
+                <TextBlock Text="Tổng hợp các WPF Controls thông dụng dùng trong AutoCAD Plugin." Style="{DynamicResource LabelStyle}" Margin="0,0,0,16" TextWrapping="Wrap"/>
 
-                <TabControl Background="{StaticResource SurfaceBrush}" BorderThickness="0" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" Style="{StaticResource TabControlStyle}">
+                <TabControl Background="{DynamicResource SurfaceBrush}" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16" Style="{DynamicResource TabControlStyle}">
                     <!-- Tab 1: Inputs & Selectors -->
-                    <TabItem Header="Basic" Style="{StaticResource TabItemStyle}">
+                    <TabItem Header="Basic" Style="{DynamicResource TabItemStyle}">
                         <StackPanel Margin="12">
                             <!-- TextBox -->
-                            <TextBlock Text="TextBox (Single Line)" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Style="{StaticResource InputStyle}" Text="{Binding SingleLineText, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="TextBox (Single Line)" Style="{DynamicResource LabelStyle}"/>
+                            <TextBox Style="{DynamicResource InputStyle}" Text="{Binding SingleLineText, UpdateSourceTrigger=PropertyChanged}"/>
                             
                             <!-- TextBox Multiline -->
-                            <TextBlock Text="TextBox (Multi Line)" Style="{StaticResource LabelStyle}"/>
-                            <TextBox Style="{StaticResource InputStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding MultiLineText, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="TextBox (Multi Line)" Style="{DynamicResource LabelStyle}"/>
+                            <TextBox Style="{DynamicResource InputStyle}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding MultiLineText, UpdateSourceTrigger=PropertyChanged}"/>
                             
                             <!-- PasswordBox (Cannot bind directly in standard WPF without behavior, just for show) -->
-                            <TextBlock Text="PasswordBox" Style="{StaticResource LabelStyle}"/>
-                            <PasswordBox Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="8,6" FontSize="13"/>
+                            <TextBlock Text="PasswordBox" Style="{DynamicResource LabelStyle}"/>
+                            <PasswordBox Background="{DynamicResource SurfaceBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="8,6" FontSize="13"/>
 
-                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,12"/>
 
                             <!-- ComboBox -->
-                            <TextBlock Text="ComboBox" Style="{StaticResource LabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding AvailableLayers}" SelectedItem="{Binding SelectedLayer}" Style="{StaticResource ComboBoxStyle}"/>
+                            <TextBlock Text="ComboBox" Style="{DynamicResource LabelStyle}"/>
+                            <ComboBox ItemsSource="{Binding AvailableLayers}" SelectedItem="{Binding SelectedLayer}" Style="{DynamicResource ComboBoxStyle}"/>
                             
                             <!-- Slider -->
-                            <TextBlock Text="Slider" Style="{StaticResource LabelStyle}"/>
-                            <Slider Minimum="0" Maximum="100" Value="{Binding SliderValue}" Style="{StaticResource SliderStyle}"/>
-                            <TextBlock Text="{Binding SliderValue, StringFormat=N0}" HorizontalAlignment="Right" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Slider" Style="{DynamicResource LabelStyle}"/>
+                            <Slider Minimum="0" Maximum="100" Value="{Binding SliderValue}" Style="{DynamicResource SliderStyle}"/>
+                            <TextBlock Text="{Binding SliderValue, StringFormat=N0}" HorizontalAlignment="Right" Foreground="{DynamicResource TextPrimaryBrush}"/>
                             
-                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,12"/>
 
                             <!-- CheckBox -->
-                            <TextBlock Text="CheckBoxes" Style="{StaticResource LabelStyle}"/>
-                            <CheckBox Content="Bật tính năng A" IsChecked="{Binding IsOptionAEnabled}" Style="{StaticResource CheckBoxStyle}"/>
-                            <CheckBox Content="Bật tính năng B" IsChecked="{Binding IsOptionBEnabled}" Style="{StaticResource CheckBoxStyle}"/>
+                            <TextBlock Text="CheckBoxes" Style="{DynamicResource LabelStyle}"/>
+                            <CheckBox Content="Bật tính năng A" IsChecked="{Binding IsOptionAEnabled}" Style="{DynamicResource CheckBoxStyle}"/>
+                            <CheckBox Content="Bật tính năng B" IsChecked="{Binding IsOptionBEnabled}" Style="{DynamicResource CheckBoxStyle}"/>
                             
-                            <TextBlock Text="Radio Buttons" Style="{StaticResource LabelStyle}" Margin="0,12,0,4"/>
-                            <RadioButton Content="Tùy chọn 1" IsChecked="True" GroupName="R1" Style="{StaticResource RadioButtonStyle}"/>
-                            <RadioButton Content="Tùy chọn 2" GroupName="R1" Style="{StaticResource RadioButtonStyle}"/>
+                            <TextBlock Text="Radio Buttons" Style="{DynamicResource LabelStyle}" Margin="0,12,0,4"/>
+                            <RadioButton Content="Tùy chọn 1" IsChecked="True" GroupName="R1" Style="{DynamicResource RadioButtonStyle}"/>
+                            <RadioButton Content="Tùy chọn 2" GroupName="R1" Style="{DynamicResource RadioButtonStyle}"/>
                         </StackPanel>
                     </TabItem>
                     
                     <!-- Tab 2: Layouts & Lists -->
-                    <TabItem Header="Advanced" Style="{StaticResource TabItemStyle}">
+                    <TabItem Header="Advanced" Style="{DynamicResource TabItemStyle}">
                         <StackPanel Margin="12">
                             <!-- Expander -->
-                            <Expander Header="Mở rộng để xem thêm" Foreground="{StaticResource TextPrimaryBrush}" Style="{StaticResource ExpanderStyle}">
+                            <Expander Header="Mở rộng để xem thêm" Foreground="{DynamicResource TextPrimaryBrush}" Style="{DynamicResource ExpanderStyle}">
                                 <StackPanel Margin="8">
-                                    <TextBlock Text="Nội dung bị ẩn đi" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    <Button Content="Nút phụ" Style="{StaticResource SecondaryButton}" Margin="0,8,0,0"/>
+                                    <TextBlock Text="Nội dung bị ẩn đi" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <Button Content="Nút phụ" Style="{DynamicResource SecondaryButton}" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </Expander>
 
-                            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,12"/>
+                            <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,12"/>
 
                             <!-- DataGrid -->
-                            <TextBlock Text="DataGrid (Bảng dữ liệu)" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Text="DataGrid (Bảng dữ liệu)" Style="{DynamicResource LabelStyle}"/>
                             <DataGrid ItemsSource="{Binding DataItems}" AutoGenerateColumns="False" 
-                                      Style="{StaticResource DataGridStyle}">
+                                      Style="{DynamicResource DataGridStyle}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                                     <DataGridTextColumn Header="Thiết Bị" Binding="{Binding Name}" Width="*"/>
@@ -102,7 +103,7 @@
                 </TabControl>
 
                 <!-- Actions -->
-                <Button Content="Submit Data" Style="{StaticResource PrimaryButton}" Command="{Binding SubmitDataCommand}"/>
+                <Button Content="Submit Data" Style="{DynamicResource PrimaryButton}" Command="{Binding SubmitDataCommand}"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

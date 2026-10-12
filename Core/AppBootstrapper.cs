@@ -64,7 +64,7 @@ namespace CadCoreFramework.Core
         public void Initialize()
         {
             // BẮT BUỘC: Đăng ký AssemblyResolve TRƯỚC KHI gọi bất cứ code nào
-            // sử dụng các DLL phụ thuộc (DI, MVVM Toolkit, Serilog...).
+            // sử dụng các DLL phụ thuộc (DI, MVVM Toolkit, Newtonsoft...).
             // Lý do: CLR cố gắng JIT-compile InitializeCore() trước khi chạy nó,
             // và trong lúc đó sẽ tìm các DLL. Nếu chưa register handler → FileNotFoundException.
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -210,17 +210,24 @@ namespace CadCoreFramework.Core
         // ─── Assembly Resolution ──────────────────────────────────────────────────
 
         /// <summary>
-        /// Giúp CLR tìm các DLL phụ thuộc (DependencyInjection, MVVM Toolkit, Serilog...)
+        /// Giúp CLR tìm các DLL phụ thuộc (DependencyInjection, MVVM Toolkit, Newtonsoft...)
         /// nằm cùng thư mục với Plugin DLL khi AutoCAD (.NET Framework 4.8) không tìm thấy chúng.
         ///
-        /// QUAN TRỌNG: Xử lý cả trường hợp assembly được load dưới dạng byte array
-        /// (không có Location) — trả về null để handler khác xử lý.
+        /// THỨ TỰ:
+        ///   1. Assembly ĐÃ NẠP khớp tên + version → trả lại chính nó (xem <see cref="FindLoadedAssembly"/>).
+        ///   2. Plugin nạp từ byte array (không có Location) → trả null để handler khác xử lý.
+        ///   3. Tìm file .dll cùng thư mục với plugin.
         /// </summary>
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             try
             {
-                string dllName = new AssemblyName(args.Name).Name + ".dll";
+                var requested = new AssemblyName(args.Name);
+
+                Assembly alreadyLoaded = FindLoadedAssembly(requested, AppDomain.CurrentDomain.GetAssemblies());
+                if (alreadyLoaded != null) return alreadyLoaded;
+
+                string dllName = requested.Name + ".dll";
                 string executingLoc = Assembly.GetExecutingAssembly().Location;
 
                 // Location trống khi load từ byte array (ví dụ CadDebugCompanion)
@@ -239,6 +246,36 @@ namespace CadCoreFramework.Core
             catch
             {
                 // Bỏ qua mọi lỗi trong AssemblyResolve — không được throw
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Tìm trong các assembly đã nạp một bản khớp tên (và version, nếu yêu cầu có version).
+        ///
+        /// VÌ SAO CẦN: khi plugin được nạp từ byte array (tool trung gian chống khóa DLL, hot-reload),
+        /// assembly nằm ngoài mọi load context nên CLR KHÔNG tự tìm thấy nó theo tên. WPF gọi
+        /// Assembly.Load("CadCoreFramework_…") trong InitializeComponent() để lấy BAML → AssemblyResolve.
+        /// Nếu để handler khác nạp thêm bản thứ hai từ đĩa, kiểu UserControl (bản 1) và BAML (bản 2)
+        /// không khớp → "The component '…' does not have a resource identified by the URI '…'".
+        /// </summary>
+        internal static Assembly FindLoadedAssembly(AssemblyName requested, System.Collections.Generic.IEnumerable<Assembly> loaded)
+        {
+            if (requested == null || loaded == null) return null;
+
+            foreach (Assembly candidate in loaded)
+            {
+                AssemblyName name;
+                try { name = candidate.GetName(); }
+                catch { continue; }
+
+                if (!string.Equals(name.Name, requested.Name, StringComparison.OrdinalIgnoreCase)) continue;
+
+                // Yêu cầu có version thì phải khớp chính xác — không "ép" sang bản khác version
+                // (ví dụ không trả Newtonsoft 12 của AutoCAD cho yêu cầu Newtonsoft 13 của plugin).
+                if (requested.Version != null && name.Version != requested.Version) continue;
+
+                return candidate;
             }
             return null;
         }

@@ -9,6 +9,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed (first real AutoCAD run)
+- **Plugin failed to initialize on AutoCAD 2024** with `MissingMethodException` in `Serilog.Sinks.File`. AutoCAD 2024 ships and preloads Serilog 2.9 / Serilog.Sinks.File 4.1; Serilog keeps AssemblyVersion 2.0.0.0 across 2.x/3.x, so the plugin was bound to AutoCAD's copy. **Serilog removed**; `LoggerService` is now a dependency-free file logger (same `log-yyyyMMdd.txt` files and line format, `FileShare.ReadWrite`, 31-day retention, never throws). 10 new tests.
+- **net8.0-windows output contained only `CadCoreFramework.dll`** (no DI / MVVM / Newtonsoft) → would fail to NETLOAD on AutoCAD 2025+. Enabled `EnableDynamicLoading` for that TFM so dependencies are copied (AutoCAD assemblies still excluded).
+- net48: explicit `Microsoft.CSharp` reference (needed by `dynamic` COM calls; previously arrived transitively via Serilog).
+- **Palettes failed with "The component '…' does not have a resource identified by the URI '…'"** when the plugin is loaded from a byte array (anti-lock loader / hot-reload). WPF resolves the plugin assembly by name for BAML; the byte-loaded assembly is invisible to the CLR binder, so a second copy got loaded from disk. `AssemblyResolve` now first returns an already-loaded assembly with the same name + version (`AppBootstrapper.FindLoadedAssembly`, 5 tests).
+- **`SHOW_UI_TEMPLATE` failed with "Provide value on StaticResourceExtension threw an exception"**: `CommonControlsPalette` referenced 33 `Styles.xaml` keys via `{StaticResource}`, but the styles are merged in code-behind *after* `InitializeComponent`. Switched those to `{DynamicResource}` and load styles right after `InitializeComponent` (no unstyled flash).
+- **New `XamlPaletteTests`**: instantiate all 4 palettes for real on an STA thread (DI with mocks, no AutoCAD) — catches XAML/resource/DI-registration errors at test time. Verified it reproduces the exact `SHOW_UI_TEMPLATE` error on the old markup. Test project now `UseWPF`.
+
 ### Changed (Consistency pass — align the whole repo with the Golden Sample)
 - **`ICadContext` error convention:** `Execute*` throws · new `TryExecute(Action)` / `TryExecute<T>(Func)` return `CadResult` and never throw. `Execute<T>` (which returned `CadResult` despite its name) is now `[Obsolete]` and forwards to `TryExecute<T>`; `CadContext` now has a single throwing core that every overload wraps.
 - **`ExecuteRead`** locks the document when called from application context (palette / modeless), detected via `DocumentManager.IsApplicationContext`.

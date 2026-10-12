@@ -421,5 +421,5 @@ private async Task GenerateReportAsync()
   `IProgress<int>` báo tiến trình.
 - Prompt (`GetPoint`, `GetEntity`) **ngoài** `Execute()` nếu gọi từ palette
   context — xem Phần 3 để biết chi tiết application vs command context.
-- Khi doubt: xem log tại `%appdata%\CadCoreFramework\logs\` — Serilog ghi lại
-  mọi `ILoggerService.Error()` và `ExecuteCommand`-level exception.
+- Khi doubt: xem log tại `%appdata%\CadCoreFramework\Logs\log-yyyyMMdd.txt` — `LoggerService`
+  ghi lại mọi `ILoggerService.Error()` và `ExecuteCommand`-level exception (giữ 31 ngày).

@@ -7,6 +7,8 @@
       against FakeCadContext, view-models) needs no AutoCAD install on either runtime.
     -->
     <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <!-- WPF: XamlPaletteTests dựng thật các palette để bắt lỗi XAML/resource trước khi vào AutoCAD. -->
+    <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Nullable>enable</Nullable>
