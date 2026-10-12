@@ -32,6 +32,53 @@ namespace CadCoreFramework.Tests
         }
 
         [Fact]
+        public void Publish_WhenOneSubscriberThrows_ShouldStillNotifyOthersAndRethrow()
+        {
+            var aggregator = new EventAggregator();
+            var received = new List<int>();
+
+            aggregator.Subscribe<OrderCreated>(msg => received.Add(1));
+            aggregator.Subscribe<OrderCreated>(msg => throw new InvalidOperationException("boom"));
+            aggregator.Subscribe<OrderCreated>(msg => received.Add(3));
+
+            Action act = () => aggregator.Publish(new OrderCreated());
+
+            act.Should().Throw<InvalidOperationException>().WithMessage("boom");
+            received.Should().BeEquivalentTo(new[] { 1, 3 });
+        }
+
+        [Fact]
+        public void Publish_WhenMultipleSubscribersThrow_ShouldThrowAggregateException()
+        {
+            var aggregator = new EventAggregator();
+
+            aggregator.Subscribe<OrderCreated>(msg => throw new InvalidOperationException("a"));
+            aggregator.Subscribe<OrderCreated>(msg => throw new ArgumentException("b"));
+
+            Action act = () => aggregator.Publish(new OrderCreated());
+
+            act.Should().Throw<AggregateException>()
+                .Which.InnerExceptions.Should().HaveCount(2);
+        }
+
+        [Fact]
+        public void Dispose_Twice_ShouldNotRemoveOtherSubscriptionOfSameDelegate()
+        {
+            var aggregator = new EventAggregator();
+            int count = 0;
+            Action<OrderCreated> handler = msg => count++;
+
+            var first = aggregator.Subscribe(handler);
+            aggregator.Subscribe(handler);
+
+            first!.Dispose();
+            first.Dispose();
+            aggregator.Publish(new OrderCreated());
+
+            count.Should().Be(1);
+        }
+
+        [Fact]
         public void Publish_WithDifferentMessageTypes_ShouldOnlyNotifyCorrectSubscribers()
         {
             var aggregator = new EventAggregator();

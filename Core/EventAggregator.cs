@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 
 namespace CadCoreFramework.Core
 {
@@ -33,7 +34,7 @@ namespace CadCoreFramework.Core
 
         private class Unsubscriber : IDisposable
         {
-            private readonly Action _unsubscribeAction;
+            private Action? _unsubscribeAction;
             public Unsubscriber(Action unsubscribeAction)
             {
                 _unsubscribeAction = unsubscribeAction;
@@ -41,7 +42,9 @@ namespace CadCoreFramework.Core
 
             public void Dispose()
             {
-                _unsubscribeAction?.Invoke();
+                // One-shot: Dispose nhiều lần chỉ unsubscribe đúng 1 lần — tránh gỡ nhầm
+                // một bản đăng ký khác của cùng delegate.
+                System.Threading.Interlocked.Exchange(ref _unsubscribeAction, null)?.Invoke();
             }
         }
 
@@ -94,13 +97,28 @@ namespace CadCoreFramework.Core
                 }
             }
 
-            if (targets != null)
+            if (targets == null) return;
+
+            // Cô lập lỗi: một subscriber ném exception KHÔNG được chặn các subscriber còn lại.
+            // Lỗi được gom lại và ném ra SAU KHI mọi subscriber đã nhận message.
+            List<Exception>? errors = null;
+            foreach (var action in targets.Cast<Action<TMessage>>())
             {
-                foreach (var action in targets.Cast<Action<TMessage>>())
+                try
                 {
                     action.Invoke(message);
                 }
+                catch (Exception ex)
+                {
+                    (errors ??= new List<Exception>()).Add(ex);
+                }
             }
+
+            if (errors == null) return;
+            if (errors.Count == 1)
+                ExceptionDispatchInfo.Capture(errors[0]).Throw(); // giữ nguyên kiểu + stack trace
+            throw new AggregateException(
+                $"{errors.Count} subscriber của {messageType.Name} đã ném exception.", errors);
         }
     }
 }

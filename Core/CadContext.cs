@@ -228,6 +228,11 @@ namespace CadCoreFramework.Core
             Action<ICadScope> drawAction = await asyncPreparation();
             cancellationToken.ThrowIfCancellationRequested();
 
+            // User có thể đã đóng bản vẽ trong lúc await — LockDocument() trên Document đã dispose
+            // sẽ gây Fatal Error, nên phải kiểm tra trước khi vào giai đoạn vẽ.
+            if (doc.IsDisposed)
+                throw new InvalidOperationException("Bản vẽ đã bị đóng trong lúc chuẩn bị dữ liệu — hủy thao tác vẽ.");
+
             ExecuteCore(doc, drawAction, autoRegen, undoMarkName);
         }
 

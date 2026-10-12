@@ -131,8 +131,16 @@ namespace CadCoreFramework.Commands
         protected void ExecuteWithScope(Action<ICadScope> scopeAction, string undoMarkName = null,
             [CallerMemberName] string callerName = null)
         {
-            ExecuteCommand(() => CadContext?.Execute(scopeAction, false, undoMarkName), callerName);
+            ExecuteCommand(() => RequireCadContext().Execute(scopeAction, false, undoMarkName), callerName);
         }
+
+        /// <summary>
+        /// Trả về ICadContext hoặc ném exception nếu DI chưa sẵn sàng (Initialize lỗi / chưa NETLOAD xong).
+        /// Tránh trường hợp lệnh âm thầm không làm gì nhưng vẫn bị ghi nhận là thành công.
+        /// </summary>
+        private ICadContext RequireCadContext()
+            => CadContext ?? throw new InvalidOperationException(
+                "ICadContext chưa được khởi tạo — kiểm tra lỗi khởi động plugin (AppBootstrapper.Initialize).");
 
         /// <summary>
         /// Biến thể Async (bất đồng bộ): Tải dữ liệu từ mạng hoặc tính toán nặng ở ngoài Transaction,
@@ -144,15 +152,17 @@ namespace CadCoreFramework.Commands
             string undoMarkName = null,
             [CallerMemberName] string callerName = null)
         {
-            if (Document == null) return;
+            // Capture Editor TRƯỚC await: sau khoảng chờ, MdiActiveDocument có thể đã là bản vẽ khác,
+            // và lỗi phải được in ra đúng bản vẽ đã khởi chạy lệnh.
+            Document doc = Document;
+            if (doc == null) return;
 
             var sw = Stopwatch.StartNew();
             bool success = false;
             bool record = true;
             try
             {
-                if (CadContext != null)
-                    await CadContext.ExecuteAsync(asyncPreparation, false, undoMarkName);
+                await RequireCadContext().ExecuteAsync(asyncPreparation, false, undoMarkName);
                 success = true;
             }
             catch (Autodesk.AutoCAD.Runtime.Exception acEx)
@@ -164,13 +174,13 @@ namespace CadCoreFramework.Commands
                 }
                 else
                 {
-                    Editor?.WriteMessage($"\n[Lỗi AutoCAD] {acEx.ErrorStatus}: {acEx.Message}");
+                    WriteMessageSafe(doc, $"\n[Lỗi AutoCAD] {acEx.ErrorStatus}: {acEx.Message}");
                     Logger?.Error("Ngoại lệ AutoCAD trong lệnh async.", acEx);
                 }
             }
             catch (System.Exception ex)
             {
-                Editor?.WriteMessage($"\n[Lỗi Hệ Thống]: {ex.Message}");
+                WriteMessageSafe(doc, $"\n[Lỗi Hệ Thống]: {ex.Message}");
                 Logger?.Error("Ngoại lệ hệ thống trong lệnh async.", ex);
             }
             finally
@@ -179,6 +189,13 @@ namespace CadCoreFramework.Commands
                 if (record)
                     CommandHistory?.Record(callerName ?? GetType().Name, sw.Elapsed, success);
             }
+        }
+
+        /// <summary>Ghi ra command line của bản vẽ đã capture, bỏ qua nếu bản vẽ đã bị đóng.</summary>
+        private static void WriteMessageSafe(Document doc, string message)
+        {
+            if (doc.IsDisposed) return;
+            try { doc.Editor?.WriteMessage(message); } catch { /* bản vẽ đang đóng */ }
         }
     }
 }

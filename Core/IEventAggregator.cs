@@ -21,6 +21,8 @@ namespace CadCoreFramework.Core
 
         /// <summary>
         /// Phát hành (Publish) một thông điệp tới tất cả những ai đã đăng ký kiểu thông điệp này.
+        /// Mọi subscriber đều được gọi kể cả khi một subscriber ném exception; sau đó exception
+        /// được ném lại (1 lỗi → giữ nguyên kiểu, nhiều lỗi → AggregateException).
         /// </summary>
         void Publish<TMessage>(TMessage message);
     }
