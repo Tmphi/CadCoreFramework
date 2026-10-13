@@ -28,7 +28,7 @@ Exit code: `0` mọi kiểm thử PASS · `1` có FAIL / thiếu kết quả / b
 CI (GitHub Actions) không có AutoCAD nên chỉ **biên dịch** lab (nó nằm trong `CadCoreFramework.sln`):
 ai làm `Utils/`/`Extensions/` phụ thuộc UI sẽ làm hỏng build ngay.
 
-Các kiểm thử hiện có (16, đều PASS trên AutoCAD 2024 — mục backlog ở `docs/training/T09` §3):
+Các kiểm thử hiện có (17, đều PASS trên AutoCAD 2024 — mục backlog ở `docs/training/T09` §3):
 
 | Kiểm thử | Bảo vệ |
 | :-- | :-- |
@@ -40,6 +40,7 @@ Các kiểm thử hiện có (16, đều PASS trên AutoCAD 2024 — mục backl
 | `ATTRIBUTE_REALIGNED_AFTER_SET` | Attribute căn giữa được căn lại sau khi đổi giá trị (B-25) |
 | `ENSURE_LAYER_REJECTS_INVALID_NAME` | Tên ký hiệu sai → `ArgumentException` rõ ràng (B-16) |
 | `CREATE_BLOCKDEF_EXISTING_DISPOSES` | Entity không dùng tới được Dispose (B-12) |
+| `INSERTBLOCK_MISSING_RETURNS_NULL` | Block không tồn tại → Null; cảnh báo chỉ ghi khi bản vẽ đang active (B-30 — nhánh bản vẽ không active cần nhiều bản vẽ, chỉ kiểm được trong GUI) |
 | `DRAW_CONFIGURE_THROWS_DISPOSES` | `configure` ném lỗi → entity được Dispose (B-14) |
 | `FILTER_ONLAYERS_IS_WILDCARD`, `FILTER_EXACT_MATCHES_LITERALLY` | Wildcard của filter / `OnLayersExact` (B-17) |
 | `PLOT_LAYOUT_TO_PDF`, `PLOT_MULTIPLE_LAYOUTS_TO_PDF`, `PLOT_UNKNOWN_LAYOUT_FAILS_CLEANLY` | In PDF thật, khôi phục `BACKGROUNDPLOT` + layout hiện hành (B-10) |

@@ -92,6 +92,14 @@ namespace CadCoreFramework.HeadlessLab
                 AssertOwnAttribute(scope, src, mirror, "V2");
             }),
 
+            // B-30: InsertBlock với block không tồn tại → trả Null, cảnh báo (bản vẽ đang active) không ném lỗi.
+            // Nhánh "bản vẽ KHÔNG active" (Editor ném eNotApplicable) cần nhiều bản vẽ → chỉ kiểm được trong GUI.
+            ("INSERTBLOCK_MISSING_RETURNS_NULL", scope =>
+            {
+                ObjectId id = scope.InsertBlock("LAB_BLOCK_KHONG_CO", Point3d.Origin);
+                Assert(id.IsNull, "InsertBlock với block không tồn tại phải trả ObjectId.Null");
+            }),
+
             // B-25: đổi giá trị attribute căn giữa → hình học phải căn lại quanh điểm căn chỉnh.
             ("ATTRIBUTE_REALIGNED_AFTER_SET", scope =>
             {

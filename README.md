@@ -254,7 +254,7 @@ CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(blockRef); });
 Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockViolation`, `eNotOpenForWrite`, v.v.
 👉 **Hướng dẫn cứu hộ:**
 - [T04: Debug & chẩn đoán](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md): cây quyết định từ triệu chứng tới nguyên nhân, đọc log, attach debugger, phân tích crash.
-- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 30 bẫy AutoCAD API kinh điển.
+- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 31 bẫy AutoCAD API kinh điển.
 - [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [DevOps & Standards](docs/06_DEVOPS_AND_STANDARDS.md)
 
 ---

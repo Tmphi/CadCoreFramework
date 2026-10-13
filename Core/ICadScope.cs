@@ -31,6 +31,13 @@ namespace CadCoreFramework.Core
         BlockTableRecord CurrentSpace { get; }
 
         /// <summary>Trình soạn thảo, dùng để Prompt hỏi điểm, hỏi text, ghi Log.</summary>
+        /// <remarks>
+        /// ⚠️ Chỉ dùng được khi <see cref="Document"/> là bản vẽ ĐANG ACTIVE. Editor của bản vẽ không active
+        /// ném <c>eNotApplicable</c> — kể cả <c>WriteMessage</c> (đã kiểm chứng trên AutoCAD 2024). Trường hợp
+        /// điển hình: giai đoạn vẽ của <c>ICadContext.ExecuteAsync</c>, khi người dùng đã chuyển sang bản vẽ
+        /// khác trong lúc chờ — vẽ vào <see cref="Database"/> vẫn được, nhưng đừng gọi Editor; báo kết quả
+        /// SAU khi Execute xong, qua INotificationService (bản vẽ đang active).
+        /// </remarks>
         Editor Editor { get; }
 
         /// <summary>

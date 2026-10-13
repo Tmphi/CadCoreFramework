@@ -20,7 +20,7 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | :--- | :--- | :---: |
 | [T01 — Nền tảng AutoCAD .NET](T01_AUTOCAD_NET_FOUNDATIONS.md) | Object model, Database, Transaction, Lock, Command/Application context, Prompt & UCS, Threading, bộ nhớ, Events, Undo, vòng đời plugin, accoreconsole | Fresher → Junior |
 | [T02 — Mổ xẻ kiến trúc CadCoreFramework](T02_ARCHITECTURE_DEEP_DIVE.md) | Đọc code từng tầng: Bootstrapper, DI, `ICadContext`, `CadCommandBase`, Extensions, EventAggregator, Palette, Ribbon, Theme, Logger, Golden Sample | Fresher → Middle |
-| [T03 — Sổ tay sự cố & bẫy](T03_PITFALLS_CASEBOOK.md) | 16 sự cố thật của dự án + 30 bẫy API kinh điển. Format: Triệu chứng → Gốc rễ → Sửa → Phòng ngừa | Junior → Senior |
+| [T03 — Sổ tay sự cố & bẫy](T03_PITFALLS_CASEBOOK.md) | 16 sự cố thật của dự án + 31 bẫy API kinh điển. Format: Triệu chứng → Gốc rễ → Sửa → Phòng ngừa | Junior → Senior |
 | [T04 — Debug & chẩn đoán](T04_DEBUGGING_TROUBLESHOOTING.md) | Attach debugger, log, Debug Inspector, đọc `ErrorStatus`, phân tích crash (Event Viewer, mã lỗi), Fusion log, cây quyết định | Junior → Senior |
 | [T05 — Chiến lược kiểm thử](T05_TESTING_STRATEGY.md) | Kim tự tháp test cho plugin CAD, `FakeCadContext`, test ViewModel, test XAML trên STA, smoke test thủ công | Junior → Middle |
 | [T06 — Build, phát hành & DevOps](T06_BUILD_RELEASE_DEVOPS.md) | Giải phẫu `.csproj`, CI, quy trình release theo tag, bundle Autoloader, template `dotnet new`, chính sách dependency | Junior → Senior |

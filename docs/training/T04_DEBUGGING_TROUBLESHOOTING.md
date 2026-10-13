@@ -274,6 +274,7 @@ Mục "Vì sao không bị phát hiện sớm hơn" là mục **quan trọng nh�
 | 13 | Crash | §5.2: đọc exception code. Nghi B8 (thread), B5/B7 (đối tượng đã đóng), B25 (Overrule), B26 (finalizer) |
 | 14 | *"… được gọi từ thread N, không phải main thread của AutoCAD"* | Gọi `ICadContext` từ thread nền: `Task.Run`, `System.Timers.Timer`, `ConfigureAwait(false)`, hoặc phần sau `await` không có `SynchronizationContext` ([T03 B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền)). Đây là guard `CadThread` báo đúng chỗ — đừng tắt nó |
 | 15 | `ArgumentException` *"Tên ký hiệu '…' chứa ký tự không hợp lệ"* | Tên layer/block/style từ người dùng hoặc dữ liệu ngoài chứa `< > / \ " : ; ? * \| , = `` ` ``; validate ở tầng Model (`SymbolNameRules`) trước khi vẽ |
+| 16 | Lệnh async **không vẽ gì** khi người dùng chuyển bản vẽ trong lúc chờ (không chuyển thì chạy đúng) | Mở log hôm nay: `eNotApplicable` tại `Editor.WriteMessage` / `Regen` / `Get*` → code gọi Editor của bản vẽ không còn active trong giai đoạn vẽ ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)). Lỗi **không hiện** trên màn hình là manh mối: thông báo cũng bị ghi vào bản vẽ không active |
 
 ---
 

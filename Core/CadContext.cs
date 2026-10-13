@@ -72,8 +72,9 @@ namespace CadCoreFramework.Core
         }
 
         // ─── Private core — receives an already-resolved Document ──────────────
-        // ExecuteAsync captures the Document before await so the active document
-        // cannot change between the async preparation and the actual draw phase.
+        // ExecuteAsync captures the Document before await so the draw phase targets the drawing
+        // the operation started in — even if the user activated another drawing meanwhile. That
+        // document may then NOT be active: only its Database may be used, never its Editor.
         // MỘT core duy nhất cho mọi overload ghi: luôn throw khi lỗi; các biến thể
         // Try* bọc nó và chuyển exception thành CadResult.
 
@@ -113,7 +114,10 @@ namespace CadCoreFramework.Core
                             tr.Commit();
                         }
 
-                        if (autoRegen) doc.Editor.Regen();
+                        // Regen đi qua Editor, mà Editor của bản vẽ KHÔNG active ném eNotApplicable (đã kiểm chứng
+                        // trên AutoCAD 2024 — gặp ở ExecuteAsync khi người dùng đã chuyển bản vẽ trong lúc chờ).
+                        // Khi đó đã commit xong rồi: bỏ qua regen thay vì báo lỗi cho một thao tác đã thành công.
+                        if (autoRegen && doc == Application.DocumentManager.MdiActiveDocument) doc.Editor.Regen();
                         return result;
                     }
                     finally

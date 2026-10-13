@@ -79,9 +79,13 @@ namespace CadCoreFramework.Core
         /// <summary>
         /// Chạy một khối lệnh bất đồng bộ (tải dữ liệu không lock UI, sau đó vẽ đồng bộ vào CAD).
         /// Chia 2 giai đoạn: (1) tính toán/gọi API bên ngoài → (2) vẽ vào database trong transaction.
+        /// Giai đoạn 2 chạy trên bản vẽ đang active LÚC GỌI, kể cả khi người dùng đã chuyển sang bản vẽ
+        /// khác trong lúc chờ — khi đó bản vẽ đó không còn active: Action vẽ chỉ được thao tác database,
+        /// KHÔNG gọi <c>scope.Editor</c> (ném eNotApplicable, hủy cả transaction). Báo kết quả sau khi
+        /// Task hoàn tất, qua INotificationService.
         /// </summary>
         /// <param name="asyncPreparation">Hàm async trả về một Action vẽ sẽ chạy trong Transaction.</param>
-        /// <param name="autoRegen">Nếu true, tự động Regen sau khi commit. Mặc định FALSE.</param>
+        /// <param name="autoRegen">Nếu true, Regen sau khi commit — chỉ khi bản vẽ vẫn đang active. Mặc định FALSE.</param>
         /// <param name="undoMarkName">Nếu chỉ định, gom toàn bộ thao tác thành 1 bước Ctrl+Z.</param>
         /// <param name="cancellationToken">Token cho phép hủy giai đoạn chuẩn bị async.</param>
         Task ExecuteAsync(

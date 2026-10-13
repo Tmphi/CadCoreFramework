@@ -198,7 +198,10 @@ Task ExecuteAsync(Func<Task<Action<ICadScope>>> asyncPreparation, bool autoRegen
 5. Sau `await`: kiểm lại đang ở main thread (`CadThread`, [§4.6](#46-cadcontextguard-chặn-lồng-nhau)); nếu `doc.IsDisposed` (bản vẽ đã đóng) thì ném lỗi rõ ràng, thay vì `LockDocument()` trên đối tượng đã hủy.
 6. `ExecuteCore(doc, drawAction, …)` chạy giai đoạn vẽ như bình thường.
 
-Chỉ dùng khi **thật sự có việc async** (I/O, HTTP). Bọc code đồng bộ trong `Task.FromResult` để gọi `ExecuteAsync` là sai mục đích ([quy tắc dự án](../../.agents/rules/project_rules.md)). Mẫu gọi đúng từ một lệnh: [`DEMO_ASYNC_AWAIT`](../../Demos/DemoServicesCommands.cs) (`ExecuteWithScopeAsync`, thông báo sau `await` ghi qua `scope.Editor`).
+Chỉ dùng khi **thật sự có việc async** (I/O, HTTP). Bọc code đồng bộ trong `Task.FromResult` để gọi `ExecuteAsync` là sai mục đích ([quy tắc dự án](../../.agents/rules/project_rules.md)). Mẫu gọi đúng từ một lệnh: [`DEMO_ASYNC_AWAIT`](../../Demos/DemoServicesCommands.cs) — `ExecuteWithScopeAsync` (trả `Task<bool>`: đã vẽ và commit hay chưa); Action vẽ **chỉ thao tác database**; kết quả được báo **sau** đó qua `INotificationService` (bản vẽ đang active), kèm tên bản vẽ đã vẽ vào.
+
+> [!WARNING]
+> Trong Action vẽ của `ExecuteAsync`, **đừng gọi `scope.Editor`**: nếu người dùng đã chuyển bản vẽ, đó là Editor của bản vẽ không active và mọi lời gọi (kể cả `WriteMessage`) ném `eNotApplicable`, hủy cả transaction. Chính PR #6 đã mắc lỗi này và chỉ lộ ra khi kiểm trong AutoCAD GUI ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)). Framework tự xử lý phần của nó: `autoRegen` chỉ regen khi bản vẽ còn active; lỗi của lệnh async được báo lên bản vẽ đang active, kèm tên bản vẽ gốc (kể cả khi bản vẽ gốc đã bị đóng).
 
 ### 4.5 `ExecuteBatch`
 

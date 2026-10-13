@@ -42,6 +42,18 @@ namespace CadCoreFramework.Extensions
         }
 
         /// <summary>
+        /// Ghi lên command line CHỈ KHI bản vẽ của scope đang active. Editor của bản vẽ không active ném
+        /// eNotApplicable (đã kiểm chứng trên AutoCAD 2024 — vd. giai đoạn vẽ của ExecuteAsync sau khi người
+        /// dùng chuyển bản vẽ); một dòng cảnh báo không được phép làm hỏng cả transaction.
+        /// </summary>
+        internal static void WriteMessageIfActive(ICadScope scope, string message)
+        {
+            Autodesk.AutoCAD.ApplicationServices.Document doc = scope.Document;
+            if (doc != null && doc == Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument)
+                scope.Editor.WriteMessage(message);
+        }
+
+        /// <summary>
         /// Áp dụng Layer và Color cho entity. Tự động tạo Layer nếu chưa tồn tại.
         /// </summary>
         internal static void ApplyCommonProperties(ICadScope scope, Entity entity, string layer, short? colorIndex)
