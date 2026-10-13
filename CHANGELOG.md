@@ -9,6 +9,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+_Chưa có thay đổi._
+
+---
+
+## [1.0.0] — 2026-10-13
+
+Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi/CadCoreFramework/releases/tag/v1.0.0) (`CadCoreFramework_v1.0.0_Setup.zip`). Gồm toàn bộ các nhóm thay đổi dưới đây, cùng với nền tảng template ban đầu (nhóm "Added (initial template baseline)" ở cuối mục).
+
 ### Changed (template hygiene)
 - **Demo suite isolated in `Demos/`** (was `Commands/Demos/` + `Commands/DemoCommands.cs`), namespace `CadCoreFramework.Demos`. Its `CommandClass` registrations moved to `Demos/DemoAssemblyInfo.cs`. New MSBuild property **`IncludeDemos`** (default `true`): build with `/p:IncludeDemos=false` — or set it in the csproj — and every `DEMO_*` command drops out of the DLL. Golden Sample, `LayerManager` and `CommonControlsPalette` are unaffected.
 - **`CadCommandBase` injection constructor** now takes an optional `ICommandHistoryService` — with all three services injected, a command no longer touches the static `AppBootstrapper.ServiceProvider`.
@@ -142,11 +150,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `CadContext` COM UndoMark — silently failed on non-standard AutoCAD installations; now uses the stable managed API.
 - Build portability — `HintPath` for `Newtonsoft.Json` pointed to a machine-specific path, breaking CI builds and developer onboarding.
 
----
-
-## [1.0.0] — Initial release
-
-### Added
+### Added (initial template baseline)
 - `AppBootstrapper` — `IExtensionApplication` entry point with proper `AssemblyResolve` ordering to prevent JIT FileNotFoundException.
 - `ICadContext` / `CadContext` — transaction management abstraction with `Execute`, `ExecuteRead`, and `ExecuteAsync` (2-phase async pattern).
 - `CadCommandBase` — base class for all command handlers with built-in error catching, distinguishing `UserBreak` (ESC) from real exceptions.
@@ -163,5 +167,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - WPF Hot-Reload trick via timestamped `AssemblyName` in Debug builds.
 - Jig system: `CadDrawJigBase`, `CadEntityJigBase`, `BlockPlacementJig`, `RectangleJig`.
 - `OverruleManager` — safe registration and cleanup of AutoCAD Overrules.
-- Serilog file logging via `ILoggerService` / `LoggerService`.
+- File logging via `ILoggerService` / `LoggerService` (originally Serilog; replaced by a self-written file logger because AutoCAD 2024 preloads an incompatible Serilog — see "Fixed (first real AutoCAD run)").
 - `ThemeManager` — automatic WPF theme switching following AutoCAD Dark/Light mode.
+
+[Unreleased]: https://github.com/Tmphi/CadCoreFramework/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Tmphi/CadCoreFramework/releases/tag/v1.0.0
