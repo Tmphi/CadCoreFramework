@@ -535,10 +535,11 @@ Khi method của lệnh chạm tới `await` đầu tiên và trả quyền, Aut
 2. Bản vẽ active có thể **đã đổi**. Phải chụp `Document` trước `await` (đúng điều `ExecuteAsync` làm).
 3. Bản vẽ có thể **đã bị đóng**. Kiểm tra `doc.IsDisposed` trước khi lock (cũng có trong `ExecuteAsync`).
 4. `CommandHistory` ghi nhận lệnh "thành công" ngay khi phần đồng bộ xong, trước khi phần async chạy.
+5. Bản vẽ đã chụp có thể **không còn active**: vẽ vào `Database` của nó vẫn được, nhưng **Editor** của nó (`WriteMessage`, prompt, `Regen`) ném `eNotApplicable` — và lỗi đó hủy luôn transaction đang vẽ (đã xảy ra thật với `DEMO_ASYNC_AWAIT`, [T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)). Báo kết quả **sau** khi vẽ xong, lên bản vẽ đang active (`INotificationService`), kèm tên bản vẽ đã vẽ vào.
 
-So sánh hai cách trong chính repo:
+So sánh hai cách trong chính repo, như ở v1.0.0 (từ PR #6/#7 demo đã dùng `ExecuteWithScopeAsync` → `ExecuteAsync`):
 
-| | `DEMO_ASYNC_AWAIT` ([`Demos/DemoServicesCommands.cs`](../../Demos/DemoServicesCommands.cs)) | `ICadContext.ExecuteAsync` ([`Core/CadContext.cs`](../../Core/CadContext.cs)) |
+| | `DEMO_ASYNC_AWAIT` trên v1.0.0 ([`Demos/DemoServicesCommands.cs`](../../Demos/DemoServicesCommands.cs)) | `ICadContext.ExecuteAsync` ([`Core/CadContext.cs`](../../Core/CadContext.cs)) |
 | :--- | :--- | :--- |
 | Chụp Document trước `await` | ❌ phần sau `await` gọi `ExecuteWithScope`, tức đọc `MdiActiveDocument` *lúc đó* | ✅ |
 | Kiểm tra bản vẽ đã đóng | ❌ | ✅ `doc.IsDisposed` |

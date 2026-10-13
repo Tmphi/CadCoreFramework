@@ -4,7 +4,7 @@
 
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
 - **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
-- **Phần B:** 30 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh.
+- **Phần B:** 31 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh.
 
 Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùng khi viết báo cáo sự cố ([T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report)):
 
@@ -162,7 +162,7 @@ Prompt (`GetPoint`…) **bên trong** transaction/lock. → HỎI trước, VẼ
 Giữ `Line`/`Entity` trong field để dùng lại. → Giữ `ObjectId` (trong phiên) / `Handle` (bền vững).
 
 ### B6. Vẽ nhầm bản vẽ sau `await`
-Đọc `MdiActiveDocument` *sau* `await`: người dùng có thể đã đổi tab. → Chụp `Document` trước `await` như `CadContext.ExecuteAsync` và `CadCommandBase.ExecuteWithScopeAsync`. Ví dụ phản diện có thật: `DEMO_ASYNC_AWAIT` trên v1.0.0 (B-08) — từ PR #6 nó là ví dụ **đúng** (xem `Demos/DemoServicesCommands.cs`). [T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)
+Đọc `MdiActiveDocument` *sau* `await`: người dùng có thể đã đổi tab. → Chụp `Document` trước `await` như `CadContext.ExecuteAsync` và `CadCommandBase.ExecuteWithScopeAsync`. Ví dụ phản diện có thật: `DEMO_ASYNC_AWAIT` trên v1.0.0 (B-08). Bản sửa ở PR #6 lại mắc [B31](#b31-gọi-editor-của-bản-vẽ-không-active); từ PR #7 nó là ví dụ **đúng** (xem `Demos/DemoServicesCommands.cs`). [T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)
 
 ### B7. Fatal error khi bản vẽ bị đóng trong lúc chờ
 `LockDocument()` trên Document đã hủy. → Kiểm tra `doc.IsDisposed` sau `await` (có trong `ExecuteAsync`).
@@ -237,6 +237,9 @@ Không kiểm tra `PlotFactory.ProcessPlotState` (đang có plot khác thì khô
 
 ### B30. `Assembly.Location` rỗng
 Khi nạp từ byte array, `Assembly.Location == ""`, và `Path.GetDirectoryName("")` ném `ArgumentException` trên .NET Framework (đã kiểm chứng). → Không suy ra thư mục plugin từ `Location` mà không kiểm tra. `AppBootstrapper` có kiểm tra; `PathProvider` từ PR #6 ném lỗi nói rõ nguyên nhân (B-11).
+
+### B31. Gọi Editor của bản vẽ không active
+Mọi lời gọi `Editor` — **kể cả `WriteMessage`**, không chỉ prompt — trên một `Document` không phải bản vẽ đang active ném `eNotApplicable` (từ `AcMgUserInteraction`; đã kiểm chứng trên AutoCAD 2024). Gặp ngay ở giai đoạn vẽ của `ExecuteAsync` khi người dùng chuyển bản vẽ trong lúc chờ: Document đã chụp vẫn đúng để **vẽ** (`Database`, lock, transaction đều được), nhưng một dòng `scope.Editor.WriteMessage` làm hủy cả transaction — không có hình nào được vẽ. Tệ hơn, nếu cả thông báo lỗi cũng được ghi vào Editor của bản vẽ gốc thì nó cũng bị nuốt: người dùng không thấy gì. (Đây là lỗi PR #6 đưa vào `DEMO_ASYNC_AWAIT`, phát hiện khi người dùng kiểm trong GUI 2026-10-14, nhờ log có đủ stack trace.) → Giai đoạn vẽ chỉ thao tác database; báo kết quả **sau** khi vẽ xong, lên bản vẽ **đang active** (`INotificationService`), kèm tên bản vẽ đã vẽ vào. Framework (PR #7): `CadCommandBase` báo lỗi lệnh async lên bản vẽ đang active (kể cả khi bản vẽ gốc đã bị đóng); `autoRegen` chỉ regen bản vẽ đang active; cảnh báo của `InsertBlock` chỉ ghi khi bản vẽ đang active. So sánh hai `Document`: dùng `==` (`DisposableWrapper` có `op_Equality`).
 
 ---
 

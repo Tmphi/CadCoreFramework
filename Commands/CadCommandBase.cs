@@ -157,17 +157,25 @@ namespace CadCoreFramework.Commands
         /// <summary>
         /// Biến thể Async (bất đồng bộ): Tải dữ liệu từ mạng hoặc tính toán nặng ở ngoài Transaction,
         /// sau khi có dữ liệu mới khóa bản vẽ và vẽ bên trong Transaction.
-        /// Tự động ghi CommandHistory với tên method gọi lệnh.
+        /// Tự động ghi CommandHistory với tên method gọi lệnh. Lỗi được bắt, báo người dùng, ghi log.
         /// </summary>
-        protected async Task ExecuteWithScopeAsync(
+        /// <returns>true nếu giai đoạn vẽ đã chạy xong và commit; false nếu lỗi, bị hủy, hoặc không có bản vẽ.
+        /// Dùng để chỉ báo kết quả khi thật sự đã vẽ (xem DEMO_ASYNC_AWAIT).</returns>
+        /// <remarks>
+        /// Giai đoạn vẽ chạy trên bản vẽ đã chụp lúc gọi — có thể KHÔNG còn active nếu người dùng chuyển
+        /// bản vẽ trong lúc chờ: lambda vẽ chỉ được thao tác database, không gọi <c>scope.Editor</c>
+        /// (ném eNotApplicable). Báo kết quả sau khi hàm này trả về, qua INotificationService.
+        /// </remarks>
+        protected async Task<bool> ExecuteWithScopeAsync(
             Func<Task<Action<ICadScope>>> asyncPreparation,
             string undoMarkName = null,
             [CallerMemberName] string callerName = null)
         {
-            // Capture Editor TRƯỚC await: sau khoảng chờ, MdiActiveDocument có thể đã là bản vẽ khác,
-            // và lỗi phải được in ra đúng bản vẽ đã khởi chạy lệnh.
+            // Capture Document (và tên của nó) TRƯỚC await: sau khoảng chờ, MdiActiveDocument có thể đã là bản
+            // vẽ khác, hoặc bản vẽ gốc đã bị đóng — lỗi vẫn phải đến được người dùng (xem WriteMessageSafe).
             Document doc = Document;
-            if (doc == null) return;
+            if (doc == null) return false;
+            string docName = System.IO.Path.GetFileName(doc.Name);
 
             var sw = Stopwatch.StartNew();
             bool success = false;
@@ -186,13 +194,13 @@ namespace CadCoreFramework.Commands
                 }
                 else
                 {
-                    WriteMessageSafe(doc, $"\n[Lỗi AutoCAD] {acEx.ErrorStatus}: {acEx.Message}");
+                    WriteMessageSafe(doc, docName, $"[Lỗi AutoCAD] {acEx.ErrorStatus}: {acEx.Message}");
                     Logger?.Error("Ngoại lệ AutoCAD trong lệnh async.", acEx);
                 }
             }
             catch (System.Exception ex)
             {
-                WriteMessageSafe(doc, $"\n[Lỗi Hệ Thống]: {ex.Message}");
+                WriteMessageSafe(doc, docName, $"[Lỗi Hệ Thống]: {ex.Message}");
                 Logger?.Error("Ngoại lệ hệ thống trong lệnh async.", ex);
             }
             finally
@@ -201,13 +209,25 @@ namespace CadCoreFramework.Commands
                 if (record)
                     CommandHistory?.Record(callerName ?? GetType().Name, sw.Elapsed, success);
             }
+            return success;
         }
 
-        /// <summary>Ghi ra command line của bản vẽ đã capture, bỏ qua nếu bản vẽ đã bị đóng.</summary>
-        private static void WriteMessageSafe(Document doc, string message)
+        /// <summary>
+        /// Báo một thông điệp của lệnh async cho người dùng, trên command line của bản vẽ ĐANG ACTIVE.
+        /// Không ghi vào Editor của bản vẽ đã chạy lệnh nếu nó không còn active: Editor của bản vẽ không
+        /// active ném eNotApplicable (đã kiểm chứng trên AutoCAD 2024 — T03 B31), và bản vẽ đó có thể đã
+        /// bị đóng. Khi người dùng đã chuyển bản vẽ, thông điệp được ghi kèm tên bản vẽ gốc.
+        /// </summary>
+        private static void WriteMessageSafe(Document doc, string docName, string message)
         {
-            if (doc.IsDisposed) return;
-            try { doc.Editor?.WriteMessage(message); } catch { /* bản vẽ đang đóng */ }
+            try
+            {
+                Document active = Application.DocumentManager.MdiActiveDocument;
+                if (active == null) return;
+                bool sameDrawing = !doc.IsDisposed && doc == active;
+                active.Editor.WriteMessage(sameDrawing ? $"\n{message}" : $"\n[{docName}] {message}");
+            }
+            catch { /* không để việc báo lỗi gây thêm lỗi */ }
         }
     }
 }

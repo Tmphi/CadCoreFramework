@@ -43,7 +43,7 @@ flowchart TB
 | HeadlessLab | 1 / hành vi API đáng ngờ | giây | Hành vi **thật** của API AutoCAD (Erase, DeepClone, căn attribute, wildcard, in PDF…) | Lệnh, palette, Ribbon, `CadContext`; chỉ chạy trên máy có AutoCAD ([§9](#9-integration-test-headless-hiện-trạng-và-hướng-đi)) |
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
-Tổng hiện tại: **275 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **16 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
+Tổng hiện tại: **275 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **17 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
 
 ---
 
@@ -186,7 +186,7 @@ Chạy checklist này **trên phiên AutoCAD sạch** trước mỗi release và
 | 13 | Mở `SHOW_PALETTE`, `SHOW_UI_TEMPLATE`, `CADCORE_LAYER_MANAGER`, `CORE_DEBUG` ở theme tối (`COLORTHEME` = 0), rồi đổi sang sáng (`COLORTHEME` = 1) **khi palette đang mở** | Palette theo theme AutoCAD, đổi màu ngay khi đổi theme; chữ đọc rõ ở cả hai theme |
 | 14 | Tab Ribbon **"CadCore"**: NETLOAD khi AutoCAD đã mở; chạy `CUI` rồi đóng; nạp lúc khởi động (bundle) | Tab xuất hiện cả ba trường hợp, **không** nhân đôi nút; mỗi nút chạy đúng lệnh |
 | 15 | Dời / đổi kích thước palette Grid Marker → đóng AutoCAD → mở lại → `SHOW_PALETTE` | Palette ở đúng vị trí, kích thước cũ |
-| 16 | `DEMO_ASYNC_AWAIT`, **chuyển sang bản vẽ khác** trong 3 giây chờ | Đường tròn và thông báo xuất hiện ở bản vẽ **ban đầu** |
+| 16 | `DEMO_ASYNC_AWAIT` ở bản vẽ A, **chuyển sang bản vẽ B** trong 3 giây chờ; lần sau thì **đóng A** trong lúc chờ | Đường tròn ở bản vẽ **A**; ở B (đang mở) hiện "… Đã vẽ một đường tròn … vào bản vẽ 'A'". Đóng A: ở B hiện lỗi "[A] … Bản vẽ đã bị đóng …", không crash. Log không có `eNotApplicable` ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)) |
 
 Ghi kết quả vào mô tả PR, ví dụ: *"Smoke 1–16 pass trên AutoCAD 2024, commit abc1234"*.
 

@@ -106,7 +106,8 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 ### L10 — Async đúng chuẩn
 
 - **Đề bài:** (1) sửa **B-08**: `DEMO_ASYNC_AWAIT` dùng `CadContext.ExecuteAsync` (hoặc chụp Document trước `await`); (2) sửa **B-06**: `ExecuteAsync` kiểm tra `SynchronizationContext.Current` lúc bắt đầu, ném lỗi rõ ràng nếu thiếu.
-- **DoD:** chạy demo, **chuyển sang bản vẽ khác trong 3 giây chờ**, hình tròn xuất hiện ở bản vẽ **ban đầu**; đóng bản vẽ ban đầu trong lúc chờ thì có thông báo lỗi rõ ràng, không crash.
+- **DoD:** chạy demo, **chuyển sang bản vẽ khác trong 3 giây chờ**, hình tròn xuất hiện ở bản vẽ **ban đầu** và thông báo kết quả hiện ở bản vẽ đang mở (nêu tên bản vẽ ban đầu); đóng bản vẽ ban đầu trong lúc chờ thì có thông báo lỗi rõ ràng, không crash.
+- **Cạm bẫy (chính dự án đã mắc — B-30):** ghi thông báo bằng `scope.Editor` trong giai đoạn vẽ. Nó chạy được khi bạn *không* chuyển bản vẽ, nên chỉ kiểm kịch bản "không chuyển" là chưa đủ. Kiểm cả hai, và đọc log.
 
 ### L11 — Ribbon
 

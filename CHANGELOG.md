@@ -9,6 +9,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed (PR #7 — hồi quy của PR #6, phát hiện khi kiểm trong AutoCAD GUI)
+- **`DEMO_ASYNC_AWAIT` không vẽ gì khi người dùng chuyển sang bản vẽ khác trong lúc chờ** (B-30). Bản sửa B-08 ở PR #6 ghi thông báo bằng `scope.Editor` trong giai đoạn vẽ; Editor của bản vẽ không active ném `eNotApplicable` (kể cả `WriteMessage`) và hủy cả transaction. Giờ Action vẽ chỉ thao tác database, kết quả được báo sau đó lên bản vẽ đang active, kèm tên bản vẽ đã vẽ vào.
+- Lỗi của lệnh async (`CadCommandBase.ExecuteWithScopeAsync`) **không đến được người dùng** nếu họ đã chuyển bản vẽ hoặc đóng bản vẽ gốc: thông báo được ghi vào Editor bản vẽ gốc (bị nuốt), hoặc bỏ qua hẳn khi bản vẽ đã đóng. Giờ ghi lên bản vẽ đang active, kèm tên bản vẽ gốc.
+- `autoRegen` sau commit gọi `Editor.Regen` cả khi bản vẽ không còn active → báo lỗi cho một thao tác đã thành công; cảnh báo "không tìm thấy block" của `InsertBlock` có thể hủy transaction tương tự. Cả hai giờ chỉ chạm Editor khi bản vẽ đang active.
+- `ExecuteWithScopeAsync` trả `Task<bool>` (đã vẽ và commit hay chưa); `ICadScope.Editor`/`ICadContext.ExecuteAsync` ghi rõ giới hạn. T03 B31 (bẫy mới), T09 B-30.
+
 ### Added (PR #6 — sửa backlog T09 §3)
 - **HeadlessLab** (`tests/integration/HeadlessLab`, `run-headless-lab.ps1`): DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`, nên chạy được trong accoreconsole (profile `/isolate`, không đụng thiết lập AutoCAD thật). 16 kiểm thử trên AutoCAD 2024 thật, đều PASS; 7 trong số đó FAIL trên v1.0.0. Lab nằm trong solution nên CI luôn biên dịch nó (ADR-015). Plugin vẫn là một DLL.
 - **Tab Ribbon "CadCore"** (`Commands/CadCoreRibbon.cs`): Grid Marker, palette, Layer Manager, Debug Inspector, CORE_INFO. `IRibbonService.RemoveTab`.

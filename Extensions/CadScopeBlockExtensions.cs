@@ -29,7 +29,8 @@ namespace CadCoreFramework.Extensions
             {
                 // BlockHelper.InsertBlock() trả về Null khi block không tồn tại trong DB.
                 // Ghi cảnh báo ra Command Line để dev biết ngay, thay vì âm thầm fail.
-                scope.Editor.WriteMessage("\n[InsertBlock Cảnh báo]: Block '" + blockName + "' không tìm thấy trong cơ sở dữ liệu bản vẽ.");
+                CadScopeDrawingHelpers.WriteMessageIfActive(scope,
+                    "\n[InsertBlock Cảnh báo]: Block '" + blockName + "' không tìm thấy trong cơ sở dữ liệu bản vẽ.");
                 return ObjectId.Null;
             }
 
