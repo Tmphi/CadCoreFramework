@@ -5,28 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="500" d:DesignWidth="640"
-             Background="#1E1E2E">
+             Background="{DynamicResource BackgroundBrush}">
 
+    <!-- Màu + Styles đến từ ThemeManager.Attach (code-behind) và đổi theo COLORTHEME →
+         mọi key màu/style là {DynamicResource}; không viết mã màu cứng. -->
     <UserControl.Resources>
-        <!-- Minimal design tokens so this palette is self-contained — doesn't
-             depend on Themes/Styles.xaml being loaded. -->
-        <SolidColorBrush x:Key="AccentBrush"       Color="#7C3AED"/>
-        <SolidColorBrush x:Key="SurfaceBrush"      Color="#2A2A3E"/>
-        <SolidColorBrush x:Key="SurfaceAltBrush"   Color="#3D3D5C"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush"  Color="#F1F0FF"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9693AC"/>
-        <SolidColorBrush x:Key="SuccessBrush"      Color="#22C55E"/>
-        <SolidColorBrush x:Key="DangerBrush"       Color="#EF4444"/>
-
         <!-- Shared DataGrid style -->
         <Style x:Key="DebugDataGrid" TargetType="DataGrid">
-            <Setter Property="Background"      Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground"      Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="RowBackground"   Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="AlternatingRowBackground" Value="#242436"/>
-            <Setter Property="BorderBrush"     Value="{StaticResource SurfaceAltBrush}"/>
+            <Setter Property="Background"      Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground"      Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="RowBackground"   Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource SurfaceAltBrush}"/>
+            <Setter Property="BorderBrush"     Value="{DynamicResource BorderBrush}"/>
             <Setter Property="GridLinesVisibility" Value="Horizontal"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#2F2F44"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="IsReadOnly" Value="True"/>
@@ -52,28 +44,27 @@
             <StackPanel Grid.Column="0">
                 <TextBlock Text="🔍 Debug Inspector"
                            FontSize="18" FontWeight="Bold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <TextBlock Text="{Binding Summary}"
                            FontSize="11"
-                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,4,0,0"/>
             </StackPanel>
             <Button Grid.Column="1"
                     Content="↻  Refresh"
                     Command="{Binding RefreshCommand}"
-                    Background="{StaticResource AccentBrush}" Foreground="White"
-                    BorderThickness="0" Padding="12,6" Cursor="Hand"
-                    FontWeight="SemiBold"/>
+                    Style="{DynamicResource PrimaryButton}"
+                    Padding="12,6" VerticalAlignment="Top"/>
         </Grid>
 
         <!-- Tabs -->
         <TabControl Grid.Row="1"
                     Background="Transparent"
-                    BorderBrush="{StaticResource SurfaceAltBrush}"
-                    Foreground="{StaticResource TextPrimaryBrush}">
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    Foreground="{DynamicResource TextPrimaryBrush}">
 
             <!-- Tab 1: Command History -->
-            <TabItem Header="Command History" Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextPrimaryBrush}">
+            <TabItem Header="Command History" Style="{DynamicResource TabItemStyle}">
                 <DataGrid Style="{StaticResource DebugDataGrid}"
                           ItemsSource="{Binding CommandHistory}">
                     <DataGrid.Columns>
@@ -83,18 +74,20 @@
                         <DataGridTemplateColumn Header="Result" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock HorizontalAlignment="Center"
-                                               Text="{Binding Success, StringFormat='{}{0}'}"
-                                               Foreground="{StaticResource TextPrimaryBrush}">
+                                    <!-- Text/Foreground mặc định đặt TRONG Style: giá trị local (Text="…" trên thẻ)
+                                         luôn thắng setter của DataTrigger → trigger sẽ không bao giờ có tác dụng. -->
+                                    <TextBlock HorizontalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Success, StringFormat='{}{0}'}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Success}" Value="True">
-                                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                                                         <Setter Property="Text" Value="✓ OK"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Success}" Value="False">
-                                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
                                                         <Setter Property="Text" Value="✗ Fail"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -109,7 +102,7 @@
             </TabItem>
 
             <!-- Tab 2: DI Services -->
-            <TabItem Header="DI Services" Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextPrimaryBrush}">
+            <TabItem Header="DI Services" Style="{DynamicResource TabItemStyle}">
                 <DataGrid Style="{StaticResource DebugDataGrid}"
                           ItemsSource="{Binding Services}">
                     <DataGrid.Columns>
@@ -121,10 +114,10 @@
             </TabItem>
 
             <!-- Tab 3: Event Subscribers -->
-            <TabItem Header="Event Subscribers" Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextPrimaryBrush}">
+            <TabItem Header="Event Subscribers" Style="{DynamicResource TabItemStyle}">
                 <ListBox ItemsSource="{Binding EventSubscribers}"
-                         Background="{StaticResource SurfaceBrush}"
-                         Foreground="{StaticResource TextPrimaryBrush}"
+                         Background="{DynamicResource SurfaceBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
                          BorderThickness="0" FontFamily="Consolas" FontSize="12"/>
             </TabItem>
         </TabControl>
@@ -132,7 +125,7 @@
         <!-- Footer -->
         <TextBlock Grid.Row="2"
                    Text="Nhấn Refresh để cập nhật dữ liệu mới nhất."
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="10" Margin="0,8,0,0"/>
     </Grid>
 </UserControl>

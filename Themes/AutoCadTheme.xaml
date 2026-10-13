@@ -4,21 +4,38 @@
 
     <!--
     ╔══════════════════════════════════════════════════════════════════════╗
-    ║              AutoCAD Theme Resource Dictionary                       ║
+    ║              AutoCAD Theme Resource Dictionary — DARK                ║
     ║                                                                      ║
-    ║  Tự động adapt theo AutoCAD Dark/Light theme.                        ║
-    ║  ThemeManager.cs sẽ swap giữa AutoCadDarkTheme.xaml                 ║
-    ║  và AutoCadLightTheme.xaml khi DARKMODE sysvar thay đổi.            ║
+    ║  ThemeManager.cs swap giữa AutoCadTheme.xaml (tối) và                ║
+    ║  AutoCadLightTheme.xaml (sáng) theo sysvar COLORTHEME (0 = tối).     ║
+    ║  HAI FILE PHẢI ĐỊNH NGHĨA CÙNG BỘ KEY (test XamlThemeTests kiểm).    ║
     ║                                                                      ║
-    ║  CÁCH DÙNG trong App.xaml hoặc UserControl.Resources:               ║
-    ║  <ResourceDictionary.MergedDictionaries>                             ║
-    ║    <ResourceDictionary Source="/Themes/AutoCadTheme.xaml"/>          ║
-    ║  </ResourceDictionary.MergedDictionaries>                            ║
+    ║  CÁCH DÙNG: trong code-behind palette, sau InitializeComponent():    ║
+    ║      ThemeManager.Attach(this);                                      ║
+    ║  và trong XAML tham chiếu mọi key bằng {DynamicResource …}.          ║
     ╚══════════════════════════════════════════════════════════════════════╝
     -->
 
     <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!--  DARK THEME (Default — AutoCAD 2024 dark palette)                 -->
+    <!--  DESIGN TOKENS — dùng bởi Styles.xaml và các palette              -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="AccentBrush"        Color="#7C3AED"/>
+    <SolidColorBrush x:Key="AccentHoverBrush"   Color="#6D28D9"/>
+    <SolidColorBrush x:Key="OnAccentBrush"      Color="#FFFFFF"/>   <!-- chữ trên nền Accent -->
+    <SolidColorBrush x:Key="BackgroundBrush"    Color="#1E1E2E"/>
+    <SolidColorBrush x:Key="SurfaceBrush"       Color="#2A2A3E"/>
+    <SolidColorBrush x:Key="SurfaceAltBrush"    Color="#242436"/>   <!-- hàng xen kẽ -->
+    <SolidColorBrush x:Key="SurfaceHoverBrush"  Color="#383850"/>
+    <SolidColorBrush x:Key="BorderBrush"        Color="#3D3D5C"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#E8E8F0"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9693AC"/>
+    <SolidColorBrush x:Key="DangerBrush"        Color="#EF4444"/>
+    <SolidColorBrush x:Key="SuccessBrush"       Color="#22C55E"/>
+    <SolidColorBrush x:Key="WarningBrush"       Color="#F59E0B"/>
+    <SolidColorBrush x:Key="OverlayBrush"       Color="#AA1E1E2E"/> <!-- lớp phủ "đang xử lý" -->
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!--  Cad* — bảng màu theo AutoCAD 2024 dark                           -->
     <!-- ══════════════════════════════════════════════════════════════════ -->
 
     <!-- === Background Colors === -->

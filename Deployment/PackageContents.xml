@@ -28,10 +28,18 @@
         AppDescription="CadCoreFramework AutoCAD Plugin (.NET 4.8)"
         LoadOnAutoCADStartup="True">
 
+      <!-- MỌI [CommandMethod] không phải demo (DEMO_* là tùy chọn IncludeDemos nên không liệt kê).
+           Cần đủ khi chuyển sang nạp theo lệnh (LoadOnCommandInvocation). Test PackageManifestTests kiểm. -->
       <Commands GroupName="CadCoreFramework">
-        <Command Local="SHOW_PALETTE" Global="SHOW_PALETTE" />
-        <Command Local="CORE_INFO"    Global="CORE_INFO" />
-        <Command Local="CORE_TEST_ALL" Global="CORE_TEST_ALL" />
+        <Command Local="CORE_INFO"             Global="CORE_INFO" />
+        <Command Local="CORE_TEST_ALL"         Global="CORE_TEST_ALL" />
+        <Command Local="CORE_DEBUG"            Global="CORE_DEBUG" />
+        <Command Local="DRAW_CIRCLE_SAMPLE"    Global="DRAW_CIRCLE_SAMPLE" />
+        <Command Local="SHOW_PALETTE"          Global="SHOW_PALETTE" />
+        <Command Local="SHOW_UI_TEMPLATE"      Global="SHOW_UI_TEMPLATE" />
+        <Command Local="SAMPLE_GRID"           Global="SAMPLE_GRID" />
+        <Command Local="CADCORE_LAYER_MANAGER" Global="CADCORE_LAYER_MANAGER" />
+        <Command Local="CADCORE_COUNT_LAYERS"  Global="CADCORE_COUNT_LAYERS" />
       </Commands>
 
     </ComponentEntry>
@@ -53,9 +61,15 @@
         LoadOnAutoCADStartup="True">
 
       <Commands GroupName="CadCoreFramework">
-        <Command Local="SHOW_PALETTE" Global="SHOW_PALETTE" />
-        <Command Local="CORE_INFO"    Global="CORE_INFO" />
-        <Command Local="CORE_TEST_ALL" Global="CORE_TEST_ALL" />
+        <Command Local="CORE_INFO"             Global="CORE_INFO" />
+        <Command Local="CORE_TEST_ALL"         Global="CORE_TEST_ALL" />
+        <Command Local="CORE_DEBUG"            Global="CORE_DEBUG" />
+        <Command Local="DRAW_CIRCLE_SAMPLE"    Global="DRAW_CIRCLE_SAMPLE" />
+        <Command Local="SHOW_PALETTE"          Global="SHOW_PALETTE" />
+        <Command Local="SHOW_UI_TEMPLATE"      Global="SHOW_UI_TEMPLATE" />
+        <Command Local="SAMPLE_GRID"           Global="SAMPLE_GRID" />
+        <Command Local="CADCORE_LAYER_MANAGER" Global="CADCORE_LAYER_MANAGER" />
+        <Command Local="CADCORE_COUNT_LAYERS"  Global="CADCORE_COUNT_LAYERS" />
       </Commands>
 
     </ComponentEntry>

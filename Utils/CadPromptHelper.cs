@@ -1,8 +1,10 @@
 using System;
-using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+// Core.Application (AcCoreMgd), không phải Application của AcMgd (UI): helper lõi không được kéo theo AcMgd
+// — nhờ vậy nó chạy được cả trong accoreconsole (tests/integration/HeadlessLab).
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace CadCoreFramework.Utils
 {

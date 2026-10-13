@@ -35,9 +35,15 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // CA1416: Suppress Windows-platform warnings on .NET 8 — this plugin only targets AutoCAD on Windows.
+// The two marker lines keep this conditional block intact in projects created with `dotnet new` (the
+// template engine otherwise treats preprocessor directives as template conditions — unknown symbol =
+// false — and drops the block). Never write a hash sign directly followed by "if" inside a .cs comment:
+// the engine scans comments too and fails with "Index was out of range".
+//-:cnd:noEmit
 #if NET
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
+//+:cnd:noEmit
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  ĐĂNG KÝ PLUGIN AUTOCAD (AUTOCAD PLUGIN REGISTRATION)

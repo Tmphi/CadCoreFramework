@@ -79,6 +79,7 @@ namespace CadCoreFramework.Core
 
         private T ExecuteCore<T>(Document doc, Func<ICadScope, T> cadFunc, bool autoRegen, string? undoMarkName)
         {
+            CadThread.EnsureMainThread("CadContext.Execute");
             bool useUndoMark = !string.IsNullOrEmpty(undoMarkName);
             dynamic comDoc = null;
 
@@ -132,8 +133,12 @@ namespace CadCoreFramework.Core
             => ExecuteCore<object?>(doc, scope => { cadAction(scope); return null; }, autoRegen, undoMarkName);
 
         private static Document RequireActiveDocument()
-            => Application.DocumentManager.MdiActiveDocument
-               ?? throw new InvalidOperationException(NoActiveDocumentMessage);
+        {
+            // Điểm vào chung của mọi Execute*/ExecuteRead/ExecuteAsync — kiểm thread TRƯỚC khi chạm MdiActiveDocument.
+            CadThread.EnsureMainThread("CadContext");
+            return Application.DocumentManager.MdiActiveDocument
+                   ?? throw new InvalidOperationException(NoActiveDocumentMessage);
+        }
 
         // ─── Public API ─────────────────────────────────────────────────────────
         // QUY ƯỚC: Execute* ném exception khi lỗi · TryExecute* trả CadResult, không bao giờ throw.
@@ -194,8 +199,13 @@ namespace CadCoreFramework.Core
         /// Thực thi một hành động chỉ đọc (read-only) đồng bộ.
         /// Lock document CHỈ khi đang ở application context (Palette, modeless dialog) — nơi AutoCAD
         /// không tự lock. Trong command context, document đã được command lock sẵn → bỏ qua.
-        /// KHÔNG cho phép gọi AppendEntityToCurrentSpace bên trong scope này.
+        /// KHÔNG cho phép gọi AppendEntityToCurrentSpace / SetXRecord / RemoveXRecord bên trong scope này.
         /// </summary>
+        /// <remarks>
+        /// "Read-only" là HỢP ĐỒNG, chỉ được chặn một phần lúc chạy: transaction kết thúc bằng Commit
+        /// (rẻ hơn Abort), nên nếu lambda tự <c>GetObject(…, OpenMode.ForWrite)</c> / <c>UpgradeOpen()</c> rồi sửa,
+        /// thay đổi SẼ được ghi. Analyzer CAD003 báo lỗi các lời gọi đó ngay lúc build.
+        /// </remarks>
         public void ExecuteRead(Action<ICadScope> readAction)
         {
             if (readAction == null) throw new ArgumentNullException(nameof(readAction));
@@ -233,12 +243,26 @@ namespace CadCoreFramework.Core
             string? undoMarkName = null,
             CancellationToken cancellationToken = default)
         {
+            if (asyncPreparation == null) throw new ArgumentNullException(nameof(asyncPreparation));
+
             // Capture document before the async gap — user may switch drawings during await
             Document doc = RequireActiveDocument();
+
+            // Không có SynchronizationContext → phần sau await chạy trên ThreadPool (trừ khi task xong đồng bộ).
+            // Báo lỗi NGAY, trước khi làm việc nặng, thay vì để kết quả phụ thuộc thời điểm.
+            if (SynchronizationContext.Current == null)
+                throw new InvalidOperationException(
+                    "CadContext.ExecuteAsync cần SynchronizationContext của main thread (gọi từ command handler hoặc " +
+                    "event handler của Palette, không đi qua ConfigureAwait(false)) — nếu không, phần vẽ sau await " +
+                    "sẽ chạy trên thread nền.");
 
             cancellationToken.ThrowIfCancellationRequested();
             Action<ICadScope> drawAction = await asyncPreparation();
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Phần tiếp theo của await chỉ quay về main thread nếu lúc gọi có SynchronizationContext.
+            // Không có → đang ở ThreadPool: dừng ở đây với thông điệp rõ thay vì vẽ từ thread nền.
+            CadThread.EnsureMainThread("CadContext.ExecuteAsync (sau await)");
 
             // User có thể đã đóng bản vẽ trong lúc await — LockDocument() trên Document đã dispose
             // sẽ gây Fatal Error, nên phải kiểm tra trước khi vào giai đoạn vẽ.

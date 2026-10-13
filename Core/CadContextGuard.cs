@@ -6,11 +6,13 @@ namespace CadCoreFramework.Core
     /// Phát hiện và ngăn chặn lời gọi lồng nhau (nested) vào CadContext.Execute / ExecuteRead
     /// trên cùng một thread.
     ///
-    /// TẠI SAO CẦN:
-    /// Khi một lambda đang chạy bên trong Execute() (document đã được LockDocument và transaction
-    /// đã được mở), nếu lambda đó gọi một Service khác mà Service đó cũng gọi Execute(),
-    /// AutoCAD sẽ ném eLockViolation hoặc gây deadlock. Lỗi này rất khó debug vì không có
-    /// stack trace rõ ràng. Guard này biến lỗi ngầm thành exception có message mô tả rõ ràng.
+    /// TẠI SAO CẦN (quy tắc THIẾT KẾ, không phải giới hạn của AutoCAD):
+    /// AutoCAD cho phép lock document lồng nhau (đếm số lần) và transaction lồng nhau. Nhưng trong
+    /// framework, MỘT lần gọi Execute là MỘT đơn vị công việc: một lock, một transaction, một bước Undo,
+    /// một kết quả. Execute lồng nhau gần như luôn là dấu hiệu một Service gọi Service khác BÊN TRONG
+    /// lambda, và làm mờ ranh giới commit/undo (transaction trong đã commit mà transaction ngoài
+    /// rollback thì sao? undo mark lồng nhau tính thế nào?). Guard biến lỗi thiết kế đó thành một
+    /// exception có hướng dẫn cách sửa. (docs/training/T02 §4.6)
     ///
     /// CÁCH DÙNG (CadContext tự gọi, không cần gọi thủ công):
     /// <code>

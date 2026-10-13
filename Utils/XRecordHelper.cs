@@ -104,19 +104,27 @@ namespace CadCoreFramework.Utils
         }
 
         /// <summary>
-        /// Xóa dữ liệu Metadata (XRecord) khỏi Extension Dictionary.
+        /// Xóa dữ liệu Metadata (XRecord) khỏi Extension Dictionary: gỡ mục khỏi dictionary
+        /// VÀ <c>Erase</c> chính Xrecord.
         /// </summary>
+        /// <remarks>
+        /// <c>DBDictionary.Remove(key)</c> chỉ gỡ MỤC — Xrecord vẫn nằm trong database dưới dạng đối tượng
+        /// "mồ côi" (đã kiểm chứng trên AutoCAD 2024 bằng tests/integration/HeadlessLab, XRECORD_REMOVE_ERASES).
+        /// </remarks>
         public static void RemoveMetadata(Transaction tr, DBObject obj, string key)
         {
             if (obj == null || string.IsNullOrWhiteSpace(key)) return;
             if (obj.ExtensionDictionary == ObjectId.Null) return;
 
             var extDict = (DBDictionary)tr.GetObject(obj.ExtensionDictionary, OpenMode.ForRead);
-            if (extDict.Contains(key))
-            {
-                extDict.UpgradeOpen();
-                extDict.Remove(key);
-            }
+            if (!extDict.Contains(key)) return;
+
+            ObjectId xrecId = extDict.GetAt(key);
+            extDict.UpgradeOpen();
+            extDict.Remove(key);
+
+            DBObject xrec = tr.GetObject(xrecId, OpenMode.ForWrite);
+            if (!xrec.IsErased) xrec.Erase();
         }
     }
 }

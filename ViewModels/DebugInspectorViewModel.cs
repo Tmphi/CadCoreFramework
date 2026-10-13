@@ -30,7 +30,8 @@ namespace CadCoreFramework.ViewModels
         [ObservableProperty]
         private string _summary = string.Empty;
 
-        public DebugInspectorViewModel(ICommandHistoryService history, IEventAggregator events)
+        public DebugInspectorViewModel(ICommandHistoryService history, IEventAggregator events, ILoggerService? logger = null)
+            : base(logger)
         {
             _history = history;
             _events = events;

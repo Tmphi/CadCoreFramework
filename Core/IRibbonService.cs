@@ -15,8 +15,14 @@ namespace CadCoreFramework.Core
         /// <summary>Hủy đăng ký sự kiện và dọn dẹp Ribbon để tránh memory leak.</summary>
         void Shutdown();
 
-        /// <summary>Thêm một Tab mới lên thanh Ribbon.</summary>
+        /// <summary>Thêm một Tab mới lên thanh Ribbon (đã có Tab cùng Id thì dùng lại).</summary>
         void AddTab(string tabName, string tabTitle, string tabId = null);
+
+        /// <summary>
+        /// Gỡ Tab có Id (hoặc Name) chỉ định khỏi Ribbon, nếu có. Gọi đầu hàm build để việc dựng lại
+        /// (sau CUI/WSCURRENT…) luôn cho ra đúng một bản, không nhân đôi Panel/Button.
+        /// </summary>
+        void RemoveTab(string tabId);
 
         /// <summary>Thêm một Panel vào Tab chỉ định trên Ribbon.</summary>
         void AddPanel(string tabName, string panelName, string panelTitle);
@@ -28,7 +34,10 @@ namespace CadCoreFramework.Core
         void AddSplitButton(string tabName, string panelName, string text, IEnumerable<(string text, string command, string iconPath)> items);
 
         /// <summary>
-        /// Đăng ký hàm dựng lại Ribbon. Sẽ được gọi tự động sau khi người dùng reset giao diện (CUI, MENULOAD...).
+        /// Đăng ký hàm dựng Ribbon. Được gọi ngay khi Ribbon sẵn sàng (lúc này hoặc khi AutoCAD tạo xong
+        /// Ribbon — thứ tự gọi so với <see cref="InitializeRibbon"/> không quan trọng), và tự động gọi lại
+        /// sau khi người dùng reset giao diện (CUI, MENULOAD, WSCURRENT...). Hàm build nên idempotent:
+        /// bắt đầu bằng <see cref="RemoveTab"/>.
         /// </summary>
         void RegisterBuildAction(Action buildAction);
     }

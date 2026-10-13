@@ -43,7 +43,8 @@
     "3EC4391F-7A91-47ED-A5A7-830EC76ECA94",
     "1EA85531-2E7E-49E8-984E-EF37A79DB98A",
     "FF9622DB-9E9C-4A98-8822-4E84C4F00DC2",
-    "7C5F7C3A-A212-4DE6-A6F9-183637C0C793"
+    "7C5F7C3A-A212-4DE6-A6F9-183637C0C793",
+    "64361CF9-77E8-4099-AF88-5724FF03E45B"
   ],
 
   "sources": [
@@ -62,6 +63,7 @@
             "packages/**",
             "nuget.exe",
             "*.log",
+            "**/*.log",
             "build_log.txt",
             "*.user",
             "*.suo",

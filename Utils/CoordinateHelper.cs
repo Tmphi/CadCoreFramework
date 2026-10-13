@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Geometry;
+// Core.Application (AcCoreMgd) — helper lõi không phụ thuộc AcMgd (UI).
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace CadCoreFramework.Utils
 {

@@ -8,10 +8,11 @@
              d:DataContext="{d:DesignInstance Type=viewmodels:LayerManagerViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="300"
-             Background="{DynamicResource Brush.Surface.Default}"
-             Foreground="{DynamicResource Brush.Text.Default}"
+             Background="{DynamicResource BackgroundBrush}"
+             Foreground="{DynamicResource TextPrimaryBrush}"
              Loaded="UserControl_Loaded">
 
+    <!-- Styles + theme nạp trong code-behind (ThemeManager.Attach) → mọi key màu/style là {DynamicResource}. -->
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <local:BooleanToOnOffConverter x:Key="BooleanToOnOffConverter"/>
@@ -26,16 +27,16 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{DynamicResource Brush.Surface.Elevated}" Padding="10">
-            <TextBlock Text="Danh sách Layers" FontWeight="Bold" FontSize="14" />
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Padding="10">
+            <TextBlock Text="Danh sách Layers" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
         </Border>
 
         <!-- Danh sách Layer -->
         <!-- Đặt IsEnabled binding với IsLoading để ngăn click khi đang lấy dữ liệu -->
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Layers}" AutoGenerateColumns="False" 
-                  CanUserAddRows="False" HeadersVisibility="Column"
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Layers}" AutoGenerateColumns="False"
+                  CanUserAddRows="False"
                   IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBooleanConverter}}"
-                  Background="Transparent" BorderThickness="0">
+                  Style="{DynamicResource DataGridStyle}" BorderThickness="0">
             <DataGrid.Columns>
                 
                 <!-- Cột Tên Layer -->
@@ -50,10 +51,10 @@
                         <DataTemplate>
                             <!-- Sử dụng Command từ ViewModel chính thay vì của Item -->
                             <!-- Truyền đối tượng LayerModel làm CommandParameter -->
-                            <Button Content="{Binding IsOn, Converter={StaticResource BooleanToOnOffConverter}}" 
+                            <Button Content="{Binding IsOn, Converter={StaticResource BooleanToOnOffConverter}}"
                                     Command="{Binding DataContext.ToggleLayerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}" 
-                                    Padding="5,2" Margin="2" />
+                                    CommandParameter="{Binding}"
+                                    Style="{DynamicResource SecondaryButton}" FontSize="11" Padding="6,2" Margin="2" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -62,11 +63,11 @@
         </DataGrid>
 
         <!-- Loading Overlay (Chỉ hiện khi IsLoading = true) -->
-        <Border Grid.Row="1" Background="#80000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <TextBlock Text="Đang tải dữ liệu..." Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Border Grid.Row="1" Background="{DynamicResource OverlayBrush}" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Text="Đang tải dữ liệu..." Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Border>
 
         <!-- Nút Refresh -->
-        <Button Grid.Row="2" Content="Làm mới" Command="{Binding LoadLayersCommand}" Margin="10" Padding="10,5" />
+        <Button Grid.Row="2" Content="Làm mới" Command="{Binding LoadLayersCommand}" Style="{DynamicResource PrimaryButton}" Margin="10" />
     </Grid>
 </UserControl>

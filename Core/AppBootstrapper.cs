@@ -25,8 +25,8 @@ namespace CadCoreFramework.Core
     ///   1. RegisterAssemblyResolver → đảm bảo DLL phụ thuộc được tìm thấy
     ///   2. BuildServiceProvider → tạo DI container
     ///   3. EventService.Initialize() → bắt đầu lắng nghe events
-    ///   4. RibbonService.InitializeRibbon() → tạo UI Ribbon
-    ///   5. ThemeManager.Initialize() → áp dụng WPF theme
+    ///   4. RibbonService.RegisterBuildAction(CadCoreRibbon.Build) rồi InitializeRibbon() → tab "CadCore"
+    ///   5. ThemeManager.Initialize() → áp dụng WPF theme (COLORTHEME)
     /// </summary>
     public class AppBootstrapper : IExtensionApplication
     {
@@ -45,6 +45,10 @@ namespace CadCoreFramework.Core
         /// </summary>
         public static IServiceCollection? RegisteredServices { get; private set; }
 
+        // Hai dòng marker bên dưới giữ nguyên khối biên dịch có điều kiện khi tạo dự án bằng `dotnet new`
+        // (template engine coi chỉ thị tiền xử lý là điều kiện TEMPLATE và sẽ xóa cả khối khỏi dự án sinh ra).
+        // KHÔNG viết dấu thăng + "if" liền nhau trong comment của file .cs: template engine dò cả trong comment.
+//-:cnd:noEmit
 #if DEBUG
         /// <summary>
         /// CHỈ DÙNG CHO KIỂM THỬ (TEST ONLY). Tiêm một IServiceProvider tùy chỉnh để các unit test xUnit
@@ -54,6 +58,7 @@ namespace CadCoreFramework.Core
         internal static void SetServiceProviderForTesting(IServiceProvider provider)
             => ServiceProvider = provider;
 #endif
+//+:cnd:noEmit
 
         // ─── IExtensionApplication ────────────────────────────────────────────────
 
@@ -68,6 +73,9 @@ namespace CadCoreFramework.Core
             // Lý do: CLR cố gắng JIT-compile InitializeCore() trước khi chạy nó,
             // và trong lúc đó sẽ tìm các DLL. Nếu chưa register handler → FileNotFoundException.
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
+            // AutoCAD luôn gọi Initialize trên main thread → ghi nhận để ICadContext chặn lời gọi từ thread khác.
+            CadThread.CaptureMainThread();
 
             try
             {
@@ -104,15 +112,21 @@ namespace CadCoreFramework.Core
             var eventService = ServiceProvider.GetService<IEventService>();
             eventService?.Initialize();
 
-            // 3. Khởi động Ribbon Service (tạo menu và nút bấm trên Ribbon)
+            // 3. Khởi động Ribbon Service + tab "CadCore". Đăng ký build action TRƯỚC: RibbonService dựng
+            //    ngay nếu Ribbon đã có (NETLOAD muộn), hoặc khi AutoCAD tạo xong Ribbon (nạp lúc khởi động),
+            //    và dựng lại sau CUI/WSCURRENT.
             var ribbonService = ServiceProvider.GetService<IRibbonService>();
-            ribbonService?.InitializeRibbon();
+            if (ribbonService != null)
+            {
+                ribbonService.RegisterBuildAction(() => Commands.CadCoreRibbon.Build(ribbonService));
+                ribbonService.InitializeRibbon();
+            }
 
-            // 4. Khởi động WPF Theme Manager (tự động theo AutoCAD Dark/Light mode)
-            ThemeManager.Initialize();
+            // 4. Khởi động WPF Theme Manager (tự động theo AutoCAD Dark/Light mode — sysvar COLORTHEME)
+            var logger = ServiceProvider.GetService<ILoggerService>();
+            ThemeManager.Initialize(logger);
 
             // 5. Ghi log khởi động thành công
-            var logger = ServiceProvider.GetService<ILoggerService>();
             logger?.Info($"CadCoreFramework initialized. Version: {Assembly.GetExecutingAssembly().GetName().Version}");
         }
 

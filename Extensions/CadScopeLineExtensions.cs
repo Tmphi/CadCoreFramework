@@ -19,13 +19,11 @@ namespace CadCoreFramework.Extensions
             string layer = null, short? colorIndex = null, LineWeight lineWeight = LineWeight.ByLayer,
             Action<Line> configure = null)
         {
-            var line = new Line(startPoint, endPoint);
-            line.SetDatabaseDefaults(scope.Database);
-            line.LineWeight = lineWeight;
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, line, layer, colorIndex);
-            configure?.Invoke(line);
-            return scope.AppendEntityToCurrentSpace(line);
+            return CadScopeDrawingHelpers.AppendNew(scope, new Line(startPoint, endPoint), line =>
+            {
+                line.SetDatabaseDefaults(scope.Database);
+                line.LineWeight = lineWeight;
+            }, layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -38,18 +36,16 @@ namespace CadCoreFramework.Extensions
             var ptList = points?.ToList();
             if (ptList == null || ptList.Count < 2) return ObjectId.Null;
 
-            var pline = new Polyline();
-            pline.SetDatabaseDefaults(scope.Database);
-            for (int i = 0; i < ptList.Count; i++)
+            return CadScopeDrawingHelpers.AppendNew(scope, new Polyline(), pline =>
             {
-                pline.AddVertexAt(i, ptList[i], 0, constantWidth, constantWidth);
-            }
-            pline.Closed = isClosed;
-            pline.Elevation = elevation;
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, pline, layer, colorIndex);
-            configure?.Invoke(pline);
-            return scope.AppendEntityToCurrentSpace(pline);
+                pline.SetDatabaseDefaults(scope.Database);
+                for (int i = 0; i < ptList.Count; i++)
+                {
+                    pline.AddVertexAt(i, ptList[i], 0, constantWidth, constantWidth);
+                }
+                pline.Closed = isClosed;
+                pline.Elevation = elevation;
+            }, layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -62,18 +58,16 @@ namespace CadCoreFramework.Extensions
             var vList = vertices?.ToList();
             if (vList == null || vList.Count < 2) return ObjectId.Null;
 
-            var pline = new Polyline();
-            pline.SetDatabaseDefaults(scope.Database);
-            for (int i = 0; i < vList.Count; i++)
+            return CadScopeDrawingHelpers.AppendNew(scope, new Polyline(), pline =>
             {
-                pline.AddVertexAt(i, vList[i].Point, vList[i].Bulge, vList[i].StartWidth, vList[i].EndWidth);
-            }
-            pline.Closed = isClosed;
-            pline.Elevation = elevation;
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, pline, layer, colorIndex);
-            configure?.Invoke(pline);
-            return scope.AppendEntityToCurrentSpace(pline);
+                pline.SetDatabaseDefaults(scope.Database);
+                for (int i = 0; i < vList.Count; i++)
+                {
+                    pline.AddVertexAt(i, vList[i].Point, vList[i].Bulge, vList[i].StartWidth, vList[i].EndWidth);
+                }
+                pline.Closed = isClosed;
+                pline.Elevation = elevation;
+            }, layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -96,18 +90,16 @@ namespace CadCoreFramework.Extensions
                 new Point2d(minX, maxY)
             };
 
-            var rect = new Polyline();
-            rect.SetDatabaseDefaults(scope.Database);
-            for (int i = 0; i < vertices.Count; i++)
+            return CadScopeDrawingHelpers.AppendNew(scope, new Polyline(), rect =>
             {
-                rect.AddVertexAt(i, vertices[i], 0, lineWidth, lineWidth);
-            }
-            rect.Closed = true;
-            rect.Elevation = corner1.Z;
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, rect, layer, colorIndex);
-            configure?.Invoke(rect);
-            return scope.AppendEntityToCurrentSpace(rect);
+                rect.SetDatabaseDefaults(scope.Database);
+                for (int i = 0; i < vertices.Count; i++)
+                {
+                    rect.AddVertexAt(i, vertices[i], 0, lineWidth, lineWidth);
+                }
+                rect.Closed = true;
+                rect.Elevation = corner1.Z;
+            }, layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -217,11 +209,8 @@ namespace CadCoreFramework.Extensions
             Vector3d? normal = null, string layer = null, short? colorIndex = null,
             Action<Circle> configure = null)
         {
-            var circle = new Circle(center, normal ?? Vector3d.ZAxis, radius);
-            circle.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, circle, layer, colorIndex);
-            configure?.Invoke(circle);
-            return scope.AppendEntityToCurrentSpace(circle);
+            return CadScopeDrawingHelpers.AppendNew(scope, new Circle(center, normal ?? Vector3d.ZAxis, radius),
+                circle => circle.SetDatabaseDefaults(scope.Database), layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -231,11 +220,8 @@ namespace CadCoreFramework.Extensions
             double startAngleRad, double endAngleRad, Vector3d? normal = null, string layer = null, short? colorIndex = null,
             Action<Arc> configure = null)
         {
-            var arc = new Arc(center, normal ?? Vector3d.ZAxis, radius, startAngleRad, endAngleRad);
-            arc.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, arc, layer, colorIndex);
-            configure?.Invoke(arc);
-            return scope.AppendEntityToCurrentSpace(arc);
+            return CadScopeDrawingHelpers.AppendNew(scope, new Arc(center, normal ?? Vector3d.ZAxis, radius, startAngleRad, endAngleRad),
+                arc => arc.SetDatabaseDefaults(scope.Database), layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -246,11 +232,8 @@ namespace CadCoreFramework.Extensions
             double minorToMajorRatio = 0.5, Vector3d? normal = null, string layer = null, short? colorIndex = null,
             Action<Ellipse> configure = null)
         {
-            var ellipse = new Ellipse(center, normal ?? Vector3d.ZAxis, majorAxis, minorToMajorRatio, 0, Math.PI * 2);
-            ellipse.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, ellipse, layer, colorIndex);
-            configure?.Invoke(ellipse);
-            return scope.AppendEntityToCurrentSpace(ellipse);
+            return CadScopeDrawingHelpers.AppendNew(scope, new Ellipse(center, normal ?? Vector3d.ZAxis, majorAxis, minorToMajorRatio, 0, Math.PI * 2),
+                ellipse => ellipse.SetDatabaseDefaults(scope.Database), layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -263,11 +246,8 @@ namespace CadCoreFramework.Extensions
             if (pts == null || pts.Count < 2) return ObjectId.Null;
 
             var ptCollection = new Point3dCollection(pts.ToArray());
-            var spline = new Spline(ptCollection, 0, 0.0);
-            spline.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, spline, layer, colorIndex);
-            configure?.Invoke(spline);
-            return scope.AppendEntityToCurrentSpace(spline);
+            return CadScopeDrawingHelpers.AppendNew(scope, new Spline(ptCollection, 0, 0.0),
+                spline => spline.SetDatabaseDefaults(scope.Database), layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -291,17 +271,11 @@ namespace CadCoreFramework.Extensions
                 new Point2d(minX, minY) // Wipeout yêu cầu vòng lặp khép kín
             };
 
-            var wipeout = new Wipeout();
-            wipeout.SetDatabaseDefaults(scope.Database);
-            wipeout.SetFrom(pts, Vector3d.ZAxis);
-
-            if (!string.IsNullOrWhiteSpace(layer))
+            return CadScopeDrawingHelpers.AppendNew(scope, new Wipeout(), wipeout =>
             {
-                scope.EnsureLayer(layer);
-                wipeout.Layer = layer;
-            }
-
-            return scope.AppendEntityToCurrentSpace(wipeout);
+                wipeout.SetDatabaseDefaults(scope.Database);
+                wipeout.SetFrom(pts, Vector3d.ZAxis);
+            }, layer, colorIndex: null, configure: null);
         }
     }
 }

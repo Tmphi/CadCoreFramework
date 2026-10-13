@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
 using CadCoreFramework.Core;
+using CadCoreFramework.Themes;
 using CadCoreFramework.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,7 @@ namespace CadCoreFramework.Views
         public LayerManagerControl()
         {
             InitializeComponent();
+            ThemeManager.Attach(this);
             // Fail loud: palette được tạo bên trong ExecuteCommand nên exception được bắt và ghi log.
             this.DataContext = AppBootstrapper.ServiceProvider?.GetService<LayerManagerViewModel>()
                 ?? throw new InvalidOperationException(

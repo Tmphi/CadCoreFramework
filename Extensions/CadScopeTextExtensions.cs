@@ -18,23 +18,21 @@ namespace CadCoreFramework.Extensions
             string layer = null, short? colorIndex = null, string textStyle = null,
             Action<MText> configure = null)
         {
-            var mtext = new MText();
-            mtext.SetDatabaseDefaults(scope.Database);
-            mtext.Location = location;
-            mtext.Contents = text;
-            mtext.TextHeight = textHeight;
-            if (width > 0) mtext.Width = width;
-            mtext.Attachment = attachment;
-
-            if (!string.IsNullOrWhiteSpace(textStyle))
+            return CadScopeDrawingHelpers.AppendNew(scope, new MText(), mtext =>
             {
-                ObjectId styleId = scope.EnsureTextStyle(textStyle);
-                if (!styleId.IsNull) mtext.TextStyleId = styleId;
-            }
+                mtext.SetDatabaseDefaults(scope.Database);
+                mtext.Location = location;
+                mtext.Contents = text;
+                mtext.TextHeight = textHeight;
+                if (width > 0) mtext.Width = width;
+                mtext.Attachment = attachment;
 
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, mtext, layer, colorIndex);
-            configure?.Invoke(mtext);
-            return scope.AppendEntityToCurrentSpace(mtext);
+                if (!string.IsNullOrWhiteSpace(textStyle))
+                {
+                    ObjectId styleId = scope.EnsureTextStyle(textStyle);
+                    if (!styleId.IsNull) mtext.TextStyleId = styleId;
+                }
+            }, layer, colorIndex, configure);
         }
 
         /// <summary>
@@ -48,36 +46,35 @@ namespace CadCoreFramework.Extensions
             Action<DBText> configure = null)
         {
             var dtext = new DBText();
-            dtext.SetDatabaseDefaults(scope.Database);
-            dtext.TextString = text;
-            dtext.Height = height;
-            dtext.Rotation = rotation;
-            dtext.HorizontalMode = justification;
-
-            // Theo tài liệu Autodesk chính thức:
-            // - Khi HorizontalMode == TextLeft (default): dùng Position để xác định tọa độ.
-            // - Khi HorizontalMode != TextLeft: AutoCAD bỏ qua Position và chỉ dùng AlignmentPoint.
-            //   Position phải được set về Point3d.Origin để tránh AutoCAD tính toán sai vị trí.
-            //   Sau khi set xong, PHẢI gọi AdjustAlignment(Database) để geometry được tính lại.
-            if (justification == TextHorizontalMode.TextLeft)
+            ObjectId textId = CadScopeDrawingHelpers.AppendNew(scope, dtext, t =>
             {
-                dtext.Position = position;
-            }
-            else
-            {
-                dtext.Position = Point3d.Origin;   // Bắt buộc reset theo API spec
-                dtext.AlignmentPoint = position;   // Điểm căn chỉnh thực sự
-            }
+                t.SetDatabaseDefaults(scope.Database);
+                t.TextString = text;
+                t.Height = height;
+                t.Rotation = rotation;
+                t.HorizontalMode = justification;
 
-            if (!string.IsNullOrWhiteSpace(textStyle))
-            {
-                ObjectId styleId = scope.EnsureTextStyle(textStyle);
-                if (!styleId.IsNull) dtext.TextStyleId = styleId;
-            }
+                // Theo tài liệu Autodesk chính thức:
+                // - Khi HorizontalMode == TextLeft (default): dùng Position để xác định tọa độ.
+                // - Khi HorizontalMode != TextLeft: AutoCAD bỏ qua Position và chỉ dùng AlignmentPoint.
+                //   Position phải được set về Point3d.Origin để tránh AutoCAD tính toán sai vị trí.
+                //   Sau khi set xong, PHẢI gọi AdjustAlignment(Database) để geometry được tính lại.
+                if (justification == TextHorizontalMode.TextLeft)
+                {
+                    t.Position = position;
+                }
+                else
+                {
+                    t.Position = Point3d.Origin;   // Bắt buộc reset theo API spec
+                    t.AlignmentPoint = position;   // Điểm căn chỉnh thực sự
+                }
 
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dtext, layer, colorIndex);
-            configure?.Invoke(dtext);
-            ObjectId textId = scope.AppendEntityToCurrentSpace(dtext);
+                if (!string.IsNullOrWhiteSpace(textStyle))
+                {
+                    ObjectId styleId = scope.EnsureTextStyle(textStyle);
+                    if (!styleId.IsNull) t.TextStyleId = styleId;
+                }
+            }, layer, colorIndex, configure);
 
             // AdjustAlignment() PHẢI được gọi SAU KHI entity đã được thêm vào Database,
             // vì hàm này cần Database context để tính toán lại geometry của text.
@@ -95,45 +92,42 @@ namespace CadCoreFramework.Extensions
         public static ObjectId DrawMLeader(this ICadScope scope, string text, Point3d arrowPoint, Point3d textPoint,
             string styleName = null, string layer = null, short? colorIndex = null, Action<MLeader> configure = null)
         {
-            var mleader = new MLeader();
-            mleader.SetDatabaseDefaults(scope.Database);
-
-            if (!string.IsNullOrWhiteSpace(styleName))
+            return CadScopeDrawingHelpers.AppendNew(scope, new MLeader(), mleader =>
             {
-                var mlst = (DBDictionary)scope.Transaction.GetObject(scope.Database.MLeaderStyleDictionaryId, OpenMode.ForRead);
-                if (mlst.Contains(styleName))
+                mleader.SetDatabaseDefaults(scope.Database);
+
+                if (!string.IsNullOrWhiteSpace(styleName))
                 {
-                    mleader.MLeaderStyle = mlst.GetAt(styleName);
+                    var mlst = (DBDictionary)scope.Transaction.GetObject(scope.Database.MLeaderStyleDictionaryId, OpenMode.ForRead);
+                    if (mlst.Contains(styleName))
+                    {
+                        mleader.MLeaderStyle = mlst.GetAt(styleName);
+                    }
                 }
-            }
-            else
-            {
-                mleader.MLeaderStyle = scope.Database.MLeaderstyle;
-            }
+                else
+                {
+                    mleader.MLeaderStyle = scope.Database.MLeaderstyle;
+                }
 
-            mleader.ContentType = ContentType.MTextContent;
+                mleader.ContentType = ContentType.MTextContent;
 
-            // Tạo MText tạm để thiết lập nội dung cho MLeader.
-            // MLeader.MText property setter tự clone MText nội bộ,
-            // do đó đối tượng MText này KHÔNG được AddNewlyCreatedDBObject.
-            // Phải Dispose() để giải phóng wrapper managed object sau khi assign.
-            var mtext = new MText();
-            mtext.SetDatabaseDefaults(scope.Database);
-            mtext.Contents = text;
-            mtext.Annotative = AnnotativeStates.True;
-            mleader.MText = mtext;
-            mtext.Dispose(); // Giải phóng wrapper, AutoCAD đã clone nội bộ
+                // MText TẠM để thiết lập nội dung: setter MLeader.MText tự clone nội bộ, nên đối tượng này
+                // KHÔNG vào database (không AddNewlyCreatedDBObject) → using để luôn Dispose, kể cả khi lỗi.
+                using (var mtext = new MText())
+                {
+                    mtext.SetDatabaseDefaults(scope.Database);
+                    mtext.Contents = text;
+                    mtext.Annotative = AnnotativeStates.True;
+                    mleader.MText = mtext;
+                }
 
-            mleader.TextLocation = textPoint;
+                mleader.TextLocation = textPoint;
 
-            int leaderIndex = mleader.AddLeader();
-            int leaderLineIndex = mleader.AddLeaderLine(leaderIndex);
-            mleader.AddFirstVertex(leaderLineIndex, arrowPoint);
-            mleader.AddLastVertex(leaderLineIndex, textPoint);
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, mleader, layer, colorIndex);
-            configure?.Invoke(mleader);
-            return scope.AppendEntityToCurrentSpace(mleader);
+                int leaderIndex = mleader.AddLeader();
+                int leaderLineIndex = mleader.AddLeaderLine(leaderIndex);
+                mleader.AddFirstVertex(leaderLineIndex, arrowPoint);
+                mleader.AddLastVertex(leaderLineIndex, textPoint);
+            }, layer, colorIndex, configure);
         }
     }
 }

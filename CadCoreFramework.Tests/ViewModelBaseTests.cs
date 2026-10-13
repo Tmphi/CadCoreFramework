@@ -1,6 +1,7 @@
 using System;
 using CadCoreFramework.ViewModels;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace CadCoreFramework.Tests
@@ -148,6 +149,52 @@ namespace CadCoreFramework.Tests
 
             vm.ErrorMessage.Should().Contain("async failure");
             vm.IsBusy.Should().BeFalse();
+        }
+
+        // ─── Logger (B-24): exception phải vào log kèm stack trace, không chỉ ErrorMessage ──
+
+        private class LoggedViewModel : ViewModelBase
+        {
+            public LoggedViewModel(CadCoreFramework.Core.ILoggerService logger) : base(logger) { }
+
+            public void InvokeRunSafe(Action action, string? errorPrefix = null) => RunSafe(action, errorPrefix);
+
+            public System.Threading.Tasks.Task InvokeRunSafeAsync(Func<System.Threading.Tasks.Task> asyncAction)
+                => RunSafeAsync(asyncAction);
+        }
+
+        [Fact]
+        public void RunSafe_FailingAction_LogsExceptionWithPrefix()
+        {
+            var logger = new Moq.Mock<CadCoreFramework.Core.ILoggerService>();
+            var vm = new LoggedViewModel(logger.Object);
+            var boom = new InvalidOperationException("boom");
+
+            vm.InvokeRunSafe(() => throw boom, "Tải layer");
+
+            vm.ErrorMessage.Should().Be("Tải layer: boom");
+            logger.Verify(l => l.Error(It.Is<string>(m => m.Contains(nameof(LoggedViewModel)) && m.Contains("Tải layer")), boom), Moq.Times.Once());
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task RunSafeAsync_FailingAction_LogsException()
+        {
+            var logger = new Moq.Mock<CadCoreFramework.Core.ILoggerService>();
+            var vm = new LoggedViewModel(logger.Object);
+            var boom = new InvalidOperationException("async boom");
+
+            await vm.InvokeRunSafeAsync(async () => { await System.Threading.Tasks.Task.Yield(); throw boom; });
+
+            logger.Verify(l => l.Error(It.IsAny<string>(), boom), Moq.Times.Once());
+        }
+
+        [Fact]
+        public void RunSafe_SuccessfulAction_DoesNotLog()
+        {
+            var logger = new Moq.Mock<CadCoreFramework.Core.ILoggerService>();
+            new LoggedViewModel(logger.Object).InvokeRunSafe(() => { });
+
+            logger.Verify(l => l.Error(It.IsAny<string>(), It.IsAny<Exception>()), Moq.Times.Never());
         }
     }
 }

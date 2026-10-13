@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CadCoreFramework.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -44,7 +45,8 @@ namespace CadCoreFramework.ViewModels
         /// <summary>
         /// Khởi tạo một phiên bản CommonControlsViewModel với dữ liệu mẫu.
         /// </summary>
-        public CommonControlsViewModel()
+        public CommonControlsViewModel(ILoggerService? logger = null)
+            : base(logger)
         {
             Title = "UI Controls Showcase";
             

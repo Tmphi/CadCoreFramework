@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CadCoreFramework.Utils;
 
 namespace CadCoreFramework.Samples.GridMarker
 {
@@ -29,9 +30,6 @@ namespace CadCoreFramework.Samples.GridMarker
 
         /// <summary>Tổng số ô tối đa — chặn việc vô tình tạo hàng chục nghìn entity.</summary>
         public const int MaxCells = 2500;
-
-        /// <summary>Ký tự không hợp lệ trong tên Layer của AutoCAD.</summary>
-        private static readonly char[] InvalidLayerChars = { '<', '>', '/', '\\', '"', ':', ';', '?', '*', '|', ',', '=', '`' };
 
         public int Rows { get; }
         public int Columns { get; }
@@ -91,7 +89,7 @@ namespace CadCoreFramework.Samples.GridMarker
 
             if (string.IsNullOrWhiteSpace(LayerName))
                 errors.Add("Tên Layer không được để trống.");
-            else if (LayerName.IndexOfAny(InvalidLayerChars) >= 0)
+            else if (SymbolNameRules.ContainsInvalidCharacter(LayerName))   // cùng luật với EnsureLayer
                 errors.Add("Tên Layer chứa ký tự không hợp lệ (< > / \\ \" : ; ? * | , = `).");
 
             return errors;

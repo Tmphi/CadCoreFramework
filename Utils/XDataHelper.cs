@@ -37,6 +37,7 @@ namespace CadCoreFramework.Utils
             if (string.IsNullOrWhiteSpace(appName)) throw new ArgumentNullException(nameof(appName));
             if (db == null) throw new ArgumentNullException(nameof(db));
             if (tr == null) throw new ArgumentNullException(nameof(tr));
+            SymbolNameRules.Validate(appName, nameof(appName));   // RegApp cũng là tên ký hiệu
 
             var regTable = (RegAppTable)tr.GetObject(db.RegAppTableId, OpenMode.ForRead);
             if (!regTable.Has(appName))

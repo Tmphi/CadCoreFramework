@@ -69,7 +69,9 @@ namespace CadCoreFramework.Core
         /// Chạy một khối lệnh ĐỌC đồng bộ an toàn.
         /// Chỉ lock document khi gọi từ application context (Palette/modeless); trong command
         /// context document đã được lock sẵn.
-        /// KHÔNG cho phép gọi AppendEntityToCurrentSpace bên trong scope này.
+        /// KHÔNG cho phép gọi AppendEntityToCurrentSpace / SetXRecord / RemoveXRecord bên trong scope này.
+        /// "Read-only" là hợp đồng: transaction được Commit, nên tự mở <c>ForWrite</c> rồi sửa vẫn được ghi —
+        /// analyzer CAD003 chặn việc đó lúc build.
         /// </summary>
         /// <param name="readAction">Khối lệnh đọc dữ liệu, nhận vào một ICadScope (IsReadOnly = true).</param>
         void ExecuteRead(Action<ICadScope> readAction);

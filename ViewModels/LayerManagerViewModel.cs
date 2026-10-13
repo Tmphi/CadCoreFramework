@@ -32,7 +32,8 @@ namespace CadCoreFramework.ViewModels
         /// <summary>
         /// Khởi tạo một phiên bản LayerManagerViewModel với các phụ thuộc ILayerService và INotificationService.
         /// </summary>
-        public LayerManagerViewModel(ILayerService layerService, INotificationService notify)
+        public LayerManagerViewModel(ILayerService layerService, INotificationService notify, ILoggerService? logger = null)
+            : base(logger)
         {
             _layerService = layerService;
             _notify = notify;

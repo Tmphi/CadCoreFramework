@@ -1,5 +1,6 @@
 using System.Windows.Controls;
 using CadCoreFramework.Core;
+using CadCoreFramework.Themes;
 using CadCoreFramework.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,7 @@ namespace CadCoreFramework.Views
         public DebugInspectorPaletteControl()
         {
             InitializeComponent();
+            ThemeManager.Attach(this);
             // Fail loud: palette được tạo bên trong ExecuteCommand (CORE_DEBUG → TogglePalette),
             // nên exception được bắt, in ra và ghi log thay vì hiện một palette rỗng khó hiểu.
             DataContext = AppBootstrapper.ServiceProvider?.GetService<DebugInspectorViewModel>()

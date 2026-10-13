@@ -41,6 +41,45 @@ namespace CadCoreFramework.Tests
         }
 
         [Fact]
+        public void WriteAllText_OverwritesExistingFile_AndLeavesNoTempFiles()
+        {
+            var dir = NewTempDir();
+            try
+            {
+                var fs = new FileSystemService();
+                var file = Path.Combine(dir, "settings.json");
+                fs.WriteAllText(file, "v1");
+                fs.WriteAllText(file, "v2 — tiếng Việt");   // nhánh File.Replace
+
+                fs.ReadAllText(file).Should().Be("v2 — tiếng Việt");
+                Directory.GetFiles(dir).Should().ContainSingle("ghi atomic qua tệp tạm không được để lại rác");
+            }
+            finally { Directory.Delete(dir, recursive: true); }
+        }
+
+        [Fact]
+        public void WriteAllText_FailedWrite_KeepsOldContentAndLeavesNoTempFiles()
+        {
+            var dir = NewTempDir();
+            try
+            {
+                var fs = new FileSystemService();
+                var file = Path.Combine(dir, "locked.json");
+                fs.WriteAllText(file, "old");
+
+                // Tệp đích bị tiến trình khác mở độc quyền → thay thế thất bại.
+                using (new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    fs.Invoking(f => f.WriteAllText(file, "new")).Should().Throw<IOException>();
+                }
+
+                fs.ReadAllText(file).Should().Be("old", "thất bại giữa chừng không được làm hỏng tệp cũ");
+                Directory.GetFiles(dir).Should().ContainSingle();
+            }
+            finally { Directory.Delete(dir, recursive: true); }
+        }
+
+        [Fact]
         public void DeleteFile_IsIdempotent_WhenFileMissing()
         {
             var fs = new FileSystemService();

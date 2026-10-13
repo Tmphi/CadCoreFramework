@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 
@@ -30,8 +32,11 @@ namespace CadCoreFramework.Utils
         }
 
         /// <summary>
-        /// Lọc theo tên Layer. Hỗ trợ ký tự đại diện wildcard (ví dụ: "EQUIP_*").
-        /// Nhiều tên layer được nối bằng dấu phẩy (tương đương logic OR).
+        /// Lọc theo MẪU tên Layer — giá trị là wildcard của AutoCAD (ví dụ: "EQUIP_*").
+        /// Nhiều mẫu được nối bằng dấu phẩy (tương đương logic OR).
+        /// ⚠️ Ký tự HỢP LỆ trong tên layer nhưng là wildcard (<c># @ . ~ [ ] -</c>) bị hiểu theo nghĩa wildcard:
+        /// "LAB#1" KHÔNG khớp layer "LAB#1" (# = một chữ số), "M.EQUIP" khớp cả "M-EQUIP".
+        /// Cần khớp đúng nguyên văn tên → dùng <see cref="OnLayersExact"/>.
         /// </summary>
         public SelectionFilterBuilder OnLayers(params string[] layerNames)
         {
@@ -41,14 +46,47 @@ namespace CadCoreFramework.Utils
         }
 
         /// <summary>
-        /// Lọc các thực thể INSERT (tham chiếu khối - BlockReference) theo tên khối.
-        /// Hỗ trợ ký tự đại diện wildcard (ví dụ: "ACB_*", "MCCB"). Phải kết hợp cùng OfTypes("INSERT").
+        /// Lọc theo TÊN Layer chính xác (escape mọi ký tự wildcard). Nhiều tên = logic OR.
+        /// </summary>
+        public SelectionFilterBuilder OnLayersExact(params string[] layerNames)
+            => OnLayers(layerNames?.Select(EscapeWildcards).ToArray());
+
+        /// <summary>
+        /// Lọc các thực thể INSERT (tham chiếu khối - BlockReference) theo MẪU tên khối (wildcard,
+        /// ví dụ: "ACB_*", "MCCB"). Phải kết hợp cùng OfTypes("INSERT").
+        /// ⚠️ Dynamic block đã chỉnh tham số mang tên ẩn danh "*U…" — tên gốc KHÔNG khớp; thêm mẫu
+        /// <c>"`*U*"</c> rồi lọc lại bằng <c>DynamicBlockHelper.GetEffectiveName</c>.
         /// </summary>
         public SelectionFilterBuilder WithBlockNames(params string[] blockNames)
         {
             if (blockNames == null || blockNames.Length == 0) return this;
             _values.Add(new TypedValue((int)DxfCode.BlockName, string.Join(",", blockNames)));
             return this;
+        }
+
+        /// <summary>
+        /// Lọc theo TÊN khối chính xác (escape mọi ký tự wildcard). Xem lưu ý dynamic block ở <see cref="WithBlockNames"/>.
+        /// </summary>
+        public SelectionFilterBuilder WithBlockNamesExact(params string[] blockNames)
+            => WithBlockNames(blockNames?.Select(EscapeWildcards).ToArray());
+
+        /// <summary>Các ký tự có nghĩa đặc biệt trong wildcard của AutoCAD (wcmatch).</summary>
+        private const string WildcardChars = "#@.*?~[]-,`";
+
+        /// <summary>
+        /// Escape mọi ký tự wildcard bằng dấu backquote (<c>`</c>) để AutoCAD khớp đúng nguyên văn.
+        /// Ví dụ: <c>"LAB#1"</c> → <c>"LAB`#1"</c>.
+        /// </summary>
+        public static string EscapeWildcards(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            var sb = new StringBuilder(value.Length + 4);
+            foreach (char c in value)
+            {
+                if (WildcardChars.IndexOf(c) >= 0) sb.Append('`');
+                sb.Append(c);
+            }
+            return sb.ToString();
         }
 
         /// <summary>

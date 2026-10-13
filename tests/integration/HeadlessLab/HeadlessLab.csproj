@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    HEADLESS LAB — DLL CHỈ DÙNG CHO TEST, KHÔNG phát hành.
+
+    Plugin chính tham chiếu AcMgd (PaletteSet, Ribbon, COM UndoMark) nên không nạp được trong
+    accoreconsole (crash 0xC00000FD — xem docs/training/T03 A5). Project này LINK lại mã nguồn
+    KHÔNG phụ thuộc UI của framework (Extensions/, Utils/ trừ WpfCadHelper, một số file Core/)
+    và chỉ tham chiếu AcDbMgd + AcCoreMgd → chạy được trong accoreconsole để kiểm chứng hành vi
+    của các helper trên AutoCAD THẬT (headless). Plugin vẫn là MỘT DLL (ADR-001 không đổi).
+    Chạy: tests/integration/run-headless-lab.ps1
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>annotations</Nullable>
+    <RootNamespace>CadCoreFramework.HeadlessLab</RootNamespace>
+    <AssemblyName>CadCoreFramework.HeadlessLab</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CHỈ Core + Model: KHÔNG tham chiếu package AutoCAD.NET (AcMgd). -->
+    <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Newtonsoft.Json"   Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Mã nguồn framework được LINK (không copy) — lab luôn kiểm đúng code đang có trong repo. -->
+    <Compile Include="..\..\..\Core\ICadScope.cs" Link="Linked\Core\ICadScope.cs" />
+    <Compile Include="..\..\..\Core\CadResult.cs" Link="Linked\Core\CadResult.cs" />
+    <Compile Include="..\..\..\Core\ILoggerService.cs" Link="Linked\Core\ILoggerService.cs" />
+    <Compile Include="..\..\..\Core\INotificationService.cs" Link="Linked\Core\INotificationService.cs" />
+    <!-- PlotService: mọi kiểu Plot* nằm trong AcCoreMgd → kiểm được headless. -->
+    <Compile Include="..\..\..\Services\IPlotService.cs" Link="Linked\Services\IPlotService.cs" />
+    <Compile Include="..\..\..\Services\PlotService.cs" Link="Linked\Services\PlotService.cs" />
+    <Compile Include="..\..\..\Services\IFileSystemService.cs" Link="Linked\Services\IFileSystemService.cs" />
+    <Compile Include="..\..\..\Services\FileSystemService.cs" Link="Linked\Services\FileSystemService.cs" />
+    <Compile Include="..\..\..\Extensions\**\*.cs" Link="Linked\Extensions\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\..\..\Utils\**\*.cs" Exclude="..\..\..\Utils\WpfCadHelper.cs" Link="Linked\Utils\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

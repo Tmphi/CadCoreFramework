@@ -71,25 +71,17 @@ public sealed class MdiActiveDocumentInServiceAnalyzer : DiagnosticAnalyzer
         var classDecl = memberAccess.FirstAncestorOrSelf<ClassDeclarationSyntax>();
         if (classDecl is null) return;
 
-        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl);
+        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
         if (classSymbol is null) return;
-
-        string className = classSymbol.Name;
-        string ns = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
 
         // Only flag classes inside Services or ViewModels namespaces, or whose name
         // ends with "Service"/"ViewModel". Commands + Core + Extensions legitimately
-        // need MdiActiveDocument for infrastructure plumbing.
-        bool isService = ns.Contains(".Services")  || className.EndsWith("Service");
-        bool isViewModel = ns.Contains(".ViewModels") || className.EndsWith("ViewModel");
-        if (!isService && !isViewModel) return;
+        // need MdiActiveDocument for infrastructure plumbing; CadContext (the ICadContext
+        // implementation) is the one place MdiActiveDocument IS the right call.
+        string? tier = ArchitectureLayers.TierOf(classSymbol);
+        if (tier is null) return;
 
-        // Skip the ICadContext implementation itself — it's the one place
-        // MdiActiveDocument IS the right call.
-        if (className is "CadContext" or "AppBootstrapper") return;
-
-        string tier = isService ? "Services" : "ViewModels";
-        var diagnostic = Diagnostic.Create(Rule, memberAccess.GetLocation(), className, tier);
+        var diagnostic = Diagnostic.Create(Rule, memberAccess.GetLocation(), classSymbol.Name, tier);
         context.ReportDiagnostic(diagnostic);
     }
 }

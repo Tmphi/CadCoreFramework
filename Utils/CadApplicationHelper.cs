@@ -55,7 +55,7 @@ namespace CadCoreFramework.Utils
 
         /// <summary>
         /// Lấy giá trị System Variable dưới dạng kiểu T.
-        /// Ví dụ: GetSystemVariable&lt;int&gt;("DARKMODE") → 0 hoặc 1.
+        /// Ví dụ: GetSystemVariable&lt;int&gt;("COLORTHEME") → 0 (tối) hoặc 1 (sáng).
         /// </summary>
         public static T GetSystemVariable<T>(string sysVarName, T defaultValue = default)
         {
@@ -82,12 +82,27 @@ namespace CadCoreFramework.Utils
 
         // ─── Dark Mode ────────────────────────────────────────────────────────────
 
+        /// <summary>Tên sysvar quyết định theme giao diện AutoCAD: 0 = tối (mặc định), 1 = sáng.</summary>
+        public const string ColorThemeVariable = "COLORTHEME";
+
         /// <summary>
-        /// Kiểm tra AutoCAD đang ở Dark Mode hay không.
-        /// Đọc System Variable DARKMODE: 0 = Light, 1 = Dark.
+        /// Kiểm tra giao diện AutoCAD đang ở theme TỐI hay không — đọc sysvar <c>COLORTHEME</c>.
+        /// (AutoCAD KHÔNG có sysvar "DARKMODE": đọc nó trả về null — đã kiểm chứng trên AutoCAD 2024,
+        /// docs/training/T03 A13.)
         /// </summary>
         public static bool IsDarkMode
-            => GetSystemVariable<int>("DARKMODE", 0) == 1;
+            => IsDarkColorTheme(GetSystemVariable(ColorThemeVariable));
+
+        /// <summary>
+        /// Quy đổi giá trị <c>COLORTHEME</c>: 1 = sáng; 0 = tối. Thiếu hoặc lạ → tối (mặc định của AutoCAD).
+        /// Hàm thuần — unit test được.
+        /// </summary>
+        public static bool IsDarkColorTheme(object colorTheme)
+        {
+            if (colorTheme == null) return true;
+            try { return Convert.ToInt32(colorTheme, System.Globalization.CultureInfo.InvariantCulture) != 1; }
+            catch (Exception) { return true; }
+        }
 
         // ─── Units & Measurement ──────────────────────────────────────────────────
 
