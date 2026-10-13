@@ -1,9 +1,9 @@
 @echo off
-title Go Bo CadCoreFramework v2.0 khoi AutoCAD
+title Go Bo CadCoreFramework khoi AutoCAD
 cls
 
 echo ======================================================================
-echo    GO BO CadCoreFramework v2.0 KHOI AUTOCAD
+echo    GO BO CadCoreFramework KHOI AUTOCAD
 echo ======================================================================
 echo.
 

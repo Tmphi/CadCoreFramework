@@ -113,13 +113,10 @@ Dự án có hai workflow trong `.github/workflows/`:
 
 | File | Kích hoạt | Mục đích |
 | :--- | :--- | :--- |
-| `build-and-test.yml` | Push/PR vào `main` | Build Release → chạy 90+ tests → thu thập coverage → upload báo cáo HTML |
+| `build-and-test.yml` | Push/PR vào `main` | Build Release `-warnaserror` → chạy toàn bộ unit test trên net48 + net8 → thu thập coverage → upload báo cáo HTML |
 | `release.yml` | Tag `v*` (ví dụ `v1.2.0`) | Build → Test → `package.ps1` → tạo GitHub Release với `.bundle` đính kèm |
 
-**Coverage badge** có thể thêm vào `README.md` bằng cách thay `YOUR_ORG/YOUR_REPO` với đường dẫn GitHub thật của bạn:
-```markdown
-[![Build and Test](https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/build-and-test.yml/badge.svg)](...)
-```
+**Badge CI** đã có sẵn ở đầu `README.md`. Dự án tạo từ template nhận đúng repo của bạn khi truyền `--GitHubRepo owner/name` (`dotnet new`) hoặc `-GitHubRepo owner/name` (`init-template.ps1`); bỏ trống thì badge là placeholder `YOUR_ORG/YOUR_REPO` — thay bằng tay sau.
 
 ---
 

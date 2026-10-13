@@ -78,6 +78,18 @@ $deployDir = Join-Path $workspaceRoot "Deployment"
 
 Copy-Item (Join-Path $deployDir "PackageContents.xml") -Destination $bundleDir -Force
 
+# Dong dau version vao manifest cua bundle (AppVersion + Version cua tung ComponentEntry)
+# de AutoCAD Autoloader nhan dung ban moi khi cap nhat. "2.0" -> "2.0.0".
+$parts = @($Version.Split('.'))
+while ($parts.Count -lt 3) { $parts += '0' }
+$semver = ($parts[0..2] -join '.')
+$manifest = Join-Path $bundleDir "PackageContents.xml"
+$xml = [System.IO.File]::ReadAllText($manifest)
+# -creplace (phan biet hoa/thuong): -replace se an ca <?xml version="1.0"?> -> manifest hong.
+$xml = $xml -creplace 'AppVersion="[^"]*"', "AppVersion=""$semver""" -creplace '(\s)Version="[^"]*"', "`$1Version=""$semver"""
+[System.IO.File]::WriteAllText($manifest, $xml, (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "   PackageContents.xml version = $semver" -ForegroundColor Gray
+
 foreach ($f in @("Install.bat", "Uninstall.bat", "HDSD.txt")) {
     $src = Join-Path $deployDir $f
     if (Test-Path $src) { Copy-Item $src -Destination $releaseStaging -Force }
