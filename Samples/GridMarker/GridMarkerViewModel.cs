@@ -66,7 +66,8 @@ namespace CadCoreFramework.Samples.GridMarker
         public IReadOnlyList<GridLabelStyle> LabelStyles { get; } =
             new[] { GridLabelStyle.LetterNumber, GridLabelStyle.Sequential };
 
-        public GridMarkerViewModel(IGridMarkerService service, IEventAggregator events)
+        public GridMarkerViewModel(IGridMarkerService service, IEventAggregator events, ILoggerService? logger = null)
+            : base(logger)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             if (events == null) throw new ArgumentNullException(nameof(events));

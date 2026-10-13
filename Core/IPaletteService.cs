@@ -12,12 +12,16 @@ namespace CadCoreFramework.Core
     public interface IPaletteService
     {
         /// <summary>
-        /// Lấy hoặc tạo một PaletteSet. Dùng Guid ổn định để AutoCAD lưu vị trí qua các lần load.
+        /// Lấy hoặc tạo một PaletteSet, LUÔN với Guid ổn định để AutoCAD lưu vị trí qua các lần load.
+        /// <paramref name="guid"/> = null → Guid dẫn xuất từ <c>[assembly: Guid]</c> + tên palette.
         /// </summary>
         PaletteSet GetOrCreatePaletteSet(string name, Guid? guid = null,
             DockSides defaultDock = DockSides.Right);
 
-        /// <summary>Hiển thị một Palette với content WPF.</summary>
+        /// <summary>
+        /// Hiển thị một Palette với content WPF.
+        /// Ghi log rồi NÉM LẠI exception (giống TogglePalette) — gọi bên trong ExecuteCommand.
+        /// </summary>
         void ShowPalette(string paletteName, FrameworkElement content,
             string tabTitle = null, DockSides defaultDock = DockSides.Right);
 

@@ -40,7 +40,8 @@ namespace CadCoreFramework.Services
         string ReadAllText(string path);
 
         /// <summary>
-        /// Ghi chuỗi nội dung vào tệp văn bản.
+        /// Ghi chuỗi nội dung vào tệp văn bản (UTF-8). Bản triển khai chuẩn ghi ATOMIC: tệp tạm cùng
+        /// thư mục rồi thay thế tệp đích — không bao giờ để lại tệp ghi dở.
         /// </summary>
         void WriteAllText(string path, string content);
 

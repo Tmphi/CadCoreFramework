@@ -12,8 +12,9 @@
     <!--
         GOLDEN SAMPLE — TẦNG VIEW.
         • Chỉ có Binding — không có logic trong code-behind.
-        • Dùng DynamicResource: Styles.xaml + theme Dark/Light được nạp lúc runtime
-          (tên assembly đổi theo mỗi bản Debug nên không hardcode pack URI ở đây).
+        • Dùng DynamicResource: Styles.xaml + theme Dark/Light được nạp lúc runtime bởi
+          ThemeManager.Attach (tên assembly đổi theo mỗi bản Debug nên không hardcode pack URI ở đây),
+          và được swap khi người dùng đổi COLORTHEME. Không viết mã màu cứng.
         • Màu trạng thái do View quyết định qua DataTrigger trên enum Status —
           ViewModel không biết gì về Brush.
     -->
@@ -38,7 +39,7 @@
 
     <Grid>
         <!-- Overlay bận — tự hiện khi ViewModel.IsBusy = true -->
-        <Grid Panel.ZIndex="99" Background="#AA1E1E2E"
+        <Grid Panel.ZIndex="99" Background="{DynamicResource OverlayBrush}"
               Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
             <TextBlock Text="Đang vẽ..." HorizontalAlignment="Center" VerticalAlignment="Center"
                        Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"/>

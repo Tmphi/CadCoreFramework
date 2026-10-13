@@ -125,5 +125,47 @@ namespace CadCoreFramework.Tests
 
             act.Should().NotThrow(because: "tất cả các phương thức fluent phải kết hợp được mà không gây lỗi");
         }
+
+        // ─── Exact match (B-17) ──────────────────────────────────────────────────
+        // Hành vi wildcard đã kiểm chứng trên AutoCAD 2024 bằng HeadlessLab
+        // (FILTER_ONLAYERS_IS_WILDCARD, FILTER_EXACT_MATCHES_LITERALLY).
+
+        [Theory]
+        [InlineData("LAB#1", "LAB`#1")]
+        [InlineData("M.EQUIP", "M`.EQUIP")]
+        [InlineData("E-POWER", "E`-POWER")]
+        [InlineData("A@B~C", "A`@B`~C")]
+        [InlineData("[X]", "`[X`]")]
+        [InlineData("PLAIN_NAME 01", "PLAIN_NAME 01")]
+        public void EscapeWildcards_EscapesEveryWildcardCharacter(string input, string expected)
+        {
+            CadCoreFramework.Utils.SelectionFilterBuilder.EscapeWildcards(input).Should().Be(expected);
+        }
+
+        [Fact]
+        public void EscapeWildcards_EscapesPatternOnlyCharactersToo()
+        {
+            // * ? , ` không hợp lệ trong tên ký hiệu nhưng vẫn phải được escape nếu xuất hiện (vd. tên lấy từ người dùng).
+            CadCoreFramework.Utils.SelectionFilterBuilder.EscapeWildcards("*?,`").Should().Be("`*`?`,``");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void EscapeWildcards_NullOrEmpty_ReturnedUnchanged(string? input)
+        {
+            CadCoreFramework.Utils.SelectionFilterBuilder.EscapeWildcards(input!).Should().Be(input);
+        }
+
+        [Fact]
+        public void ExactMethods_NullOrEmpty_ReturnSameBuilder()
+        {
+            var builder = CadCoreFramework.Utils.SelectionFilterBuilder.Create();
+
+            builder.OnLayersExact(null!).Should().BeSameAs(builder);
+            builder.OnLayersExact().Should().BeSameAs(builder);
+            builder.WithBlockNamesExact(null!).Should().BeSameAs(builder);
+            builder.WithBlockNamesExact("A#1").Should().BeSameAs(builder);
+        }
     }
 }

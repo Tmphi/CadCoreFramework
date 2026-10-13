@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using CadCoreFramework.Core;
@@ -18,7 +17,9 @@ namespace CadCoreFramework.Samples.GridMarker
         public GridMarkerPalette()
         {
             InitializeComponent();
-            LoadStyles();
+
+            // Styles + theme hiện hành; tự áp lại khi người dùng đổi COLORTHEME lúc palette đang mở.
+            ThemeManager.Attach(this);
 
             // Fail loud: palette không có ViewModel là lỗi cấu hình DI, không được hiện UI "chết".
             DataContext = AppBootstrapper.ServiceProvider?.GetService<GridMarkerViewModel>()
@@ -32,17 +33,6 @@ namespace CadCoreFramework.Samples.GridMarker
         {
             if (DataContext is GridMarkerViewModel vm && vm.RefreshCountCommand.CanExecute(null))
                 vm.RefreshCountCommand.Execute(null);
-        }
-
-        private void LoadStyles()
-        {
-            // Tên assembly có hậu tố timestamp ở bản Debug (hot-reload) → dựng pack URI lúc runtime.
-            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-            Resources.MergedDictionaries.Add(new ResourceDictionary
-            {
-                Source = new Uri($"/{assemblyName};component/Themes/Styles.xaml", UriKind.Relative)
-            });
-            ThemeManager.ApplyThemeTo(Resources);
         }
     }
 }

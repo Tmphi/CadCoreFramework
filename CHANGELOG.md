@@ -9,7 +9,58 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-_Chưa có thay đổi._
+### Added (PR #6 — sửa backlog T09 §3)
+- **HeadlessLab** (`tests/integration/HeadlessLab`, `run-headless-lab.ps1`): DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`, nên chạy được trong accoreconsole (profile `/isolate`, không đụng thiết lập AutoCAD thật). 16 kiểm thử trên AutoCAD 2024 thật, đều PASS; 7 trong số đó FAIL trên v1.0.0. Lab nằm trong solution nên CI luôn biên dịch nó (ADR-015). Plugin vẫn là một DLL.
+- **Tab Ribbon "CadCore"** (`Commands/CadCoreRibbon.cs`): Grid Marker, palette, Layer Manager, Debug Inspector, CORE_INFO. `IRibbonService.RemoveTab`.
+- **Analyzer CAD002** (không prompt — `CadPromptHelper.*`, `Editor.Get*` — trong Service/ViewModel) và **CAD003** (không `OpenMode.ForWrite`/`UpgradeOpen()` trong lambda của `ExecuteRead`), kèm `AnalyzerTests` (biên dịch mẫu bằng Roslyn, cả CAD001).
+- `Utils/SymbolNameRules` (luật tên ký hiệu thuần .NET); `SelectionFilterBuilder.OnLayersExact` / `WithBlockNamesExact` / `EscapeWildcards`; `ThemeManager.Attach(palette)`; `Core/CadThread`; `Core/PaletteGuids`; `ViewModelBase(ILoggerService?)`; token màu `OnAccentBrush`, `SurfaceAltBrush`, `SurfaceHoverBrush`, `OverlayBrush`.
+- Test: 196 → **275 × 2 TFM** — theme (cùng bộ key ở hai theme, mọi key XAML resolve ở cả hai theme, đổi theme khi palette đang mở), manifest lệnh, Guid palette, thread guard, settings nhiều phiên, ghi atomic, analyzer…
+
+### Changed (PR #6) — lưu ý khi nâng cấp dự án dựng từ template
+- **Một nguồn màu:** `Themes/Styles.xaml` chỉ còn Style; màu chuyển sang `AutoCadTheme.xaml`/`AutoCadLightTheme.xaml` (cùng bộ key). XAML tự viết chỉ nạp `Styles.xaml` sẽ **không còn màu** → gọi `ThemeManager.Attach(this)` sau `InitializeComponent()`.
+- **Bỏ `ViewModelLocator`**: `CommonControlsPalette` lấy ViewModel từ DI trong code-behind, gán cho chính UserControl (B-26).
+- `Ensure*`, `CreateBlockDefinition`, `EnsureRegApp` **validate tên**: tên sai ném `ArgumentException` nêu rõ ký tự (trước: `eInvalidInput` của AutoCAD). `Ensure*` mở bảng ForRead, `UpgradeOpen` chỉ khi thêm.
+- `PaletteService`: mọi PaletteSet có Guid ổn định (từ `[assembly: Guid]` + tên) — đổi tên palette là mất vị trí đã lưu; `ShowPalette` ném lại lỗi như `TogglePalette`.
+- `ICadContext`: gọi từ thread khác main thread → `InvalidOperationException` có hướng dẫn; `ExecuteAsync` ném sớm nếu không có `SynchronizationContext`.
+- `FileSystemService.WriteAllText` ghi atomic (tệp tạm + `File.Replace`); `SettingsService.Save` đọc lại tệp, chỉ áp các key phiên này đã đổi, named mutex giữa các tiến trình AutoCAD.
+- `PlotService`: chỉ in bản vẽ đang làm việc; vùng in `Extents` (trước: theo layout/Display), fit + center; tạm `BACKGROUNDPLOT = 0` và chuyển layout hiện hành, rồi khôi phục.
+- `Deployment/PackageContents.xml` liệt kê đủ 9 lệnh không phải demo (test `PackageManifestTests`).
+- Nút Primary chữ trắng (`OnAccentBrush`; chữ đen cũ tương phản ~3:1). Template `TabItem` theo theme; nút Secondary có viền.
+
+### Fixed (PR #6)
+- **Theme:** `IsDarkMode` đọc `COLORTHEME` thay vì sysvar không tồn tại `DARKMODE` (B-01); hai hệ màu → một (B-02); `LayerManagerControl` dùng 3 key không tồn tại (B-03); palette đang mở không đổi theo theme (B-23); theme sáng thiếu `CadComboBox`.
+- **Ribbon:** không ai dựng; NETLOAD muộn không build; `AddButton` nhân đôi nút khi dựng lại (B-05).
+- **Palette** không nhớ vị trí (B-04).
+- `DEMO_ASYNC_AWAIT` vẽ vào `MdiActiveDocument` sau `await` → dùng `ExecuteWithScopeAsync` (B-08).
+- `XRecordHelper.RemoveMetadata` để lại Xrecord mồ côi (B-09).
+- **`PlotService.PlotLayoutToPdf`/`PlotMultipleLayouts` luôn thất bại** (B-28, do HeadlessLab phát hiện): `InvalidCastException` (`StringCollection`), `eInvalidInput` ở `SetPlotCentered` với layout giấy, `eLayoutNotCurrent`, số trang truyền vào tham số copies; cùng B-10 (`ProcessPlotState`, `BACKGROUNDPLOT`, Dispose `PlotEngine`).
+- `PathProvider.GetPluginDirectory` khi nạp từ byte array (B-11); `CreateBlockDefinition` không Dispose entity không dùng (B-12); `Draw*` rò rỉ entity khi `configure` ném lỗi (B-14); `SelectionFilterBuilder` không escape wildcard (B-17).
+- `CopyEntity`/`MirrorEntity` làm **mất Extension Dictionary** (metadata XRecord) → `DeepCloneObjects` (B-13).
+- Attribute căn khác Left lệch sau `InsertBlock`/`SetBlockAttribute` (B-25, đã kiểm chứng: tâm X 42.507 thay vì 20).
+- `RunSafe`/`RunSafeAsync` không log exception (B-24); comment sai lý do ở `CadContextGuard`/`EnsureLayer` (B-19).
+- Debug Inspector: cột Result luôn "True/False" (giá trị local thắng DataTrigger); chữ trong tab đang chọn bị đậm (B-29).
+- `CadPromptHelper`, `CoordinateHelper` phụ thuộc ngầm `AcMgd` (namespace `ApplicationServices` thay vì `ApplicationServices.Core`) — lộ ra khi dựng HeadlessLab.
+- **Template (`dotnet new cad-plugin`) cắt mất mọi khối `#if`** trong dự án sinh ra (template engine coi chúng là điều kiện template): `SetServiceProviderForTesting`, mức log Debug của bản Debug, `[assembly: SupportedOSPlatform]` — lỗi có từ trước. Các khối giờ được bao bằng `//-:cnd:noEmit` … `//+:cnd:noEmit` (T03 A15). Mẫu loại trừ `**/*.log` (log trong thư mục con từng bị chép vào dự án mới).
+- Test theme phụ thuộc thứ tự chạy (chỉ pass nếu test dựng palette chạy trước; lộ ra khi tên test đổi trong dự án sinh ra) — T03 A16.
+- Kiểm chứng: cả `dotnet new cad-plugin` (hive cô lập) lẫn `init-template.ps1` (bản sao repo) cho dự án build `-warnaserror` 0 cảnh báo, 275 test pass × 2 TFM, HeadlessLab 16/16 PASS sau khi đổi tên.
+
+### Fixed (docs, PR #6)
+- **Đính chính B-13:** `Clone()` **không** làm mất attribute (giả thuyết cũ sai, HeadlessLab chứng minh); cái mất là Extension Dictionary. Đính chính ví dụ wildcard: layer `A*B` không thể tồn tại; ví dụ thật là `LAB#1`, `M.EQUIP`/`M-EQUIP`.
+- T01–T10, Phần 3/5/9, README cập nhật theo hành vi mới; T09 §3 có cột Trạng thái (giữ nguyên lịch sử), thêm B-28/B-29, ADR-015; lab sửa backlog làm trên tag `v1.0.0` rồi đối chiếu với PR #6.
+
+### Added
+- **🎓 Học viện CadCoreFramework (`docs/training/`)**: bộ tài liệu đào tạo chuyên sâu cho người kế thừa dự án, từ Fresher lên Senior. Gồm lộ trình 12 tuần + khung năng lực 4 cấp (README); T01 Nền tảng AutoCAD .NET; T02 Mổ xẻ kiến trúc; T03 Sổ tay sự cố (14 sự cố thật của dự án + 30 bẫy API); T04 Debug & chẩn đoán; T05 Kiểm thử; T06 Build/phát hành/DevOps; T07 Hiệu năng; T08 Công thức mở rộng; T09 Sổ tay Senior (14 ADR, checklist review, **backlog kỹ thuật 27 mục đã kiểm chứng**); T10 16 bài lab + đồ án + đề đánh giá lên cấp; Thuật ngữ Anh–Việt. Tên API AutoCAD trong tài liệu được đối chiếu với metadata `AcDbMgd`/`AcCoreMgd` 24.0; giá trị sysvar được kiểm bằng accoreconsole `/isolate`; toàn bộ link/anchor được kiểm bằng script (0 lỗi).
+
+### Fixed (docs)
+- Phần 1: lộ trình Fresher từng dạy prompt **trong Service** và `ExecuteAsync` cho thao tác đồng bộ (anti-pattern), nay theo đúng tầng Golden Sample; thông điệp `CORE_INFO` đúng với code.
+- Phần 2: "quên `Commit()` thì AutoCAD crash" → thực tế là Abort âm thầm; Undo gom theo lệnh (UndoMark cần cho application context); lý do cần `AssemblyResolve`; ESC khi prompt trả `PromptStatus.Cancel`, không phải exception.
+- Phần 3: ví dụ "Vẽ Tủ Điện" **không biên dịch được** (`style:` → `textStyle:`; chuỗi bị truyền vào tham số `bool autoRegen` → `undoMarkName:`); Jig chạy tuần tự (không "song song") với constructor `RectangleJig(corner1, polyline)` thật + `Dispose` khi hủy; bỏ lập luận `eVetoed`.
+- Phần 4: giới hạn XData 16 KB tính **mỗi đối tượng** (không phải toàn bản vẽ); sơ đồ Xrecord đúng với `XRecordHelper`.
+- Phần 5: `RunSafeAsync` không dùng `Dispatcher.Invoke`; resource key có thật; cảnh báo lỗi theme `DARKMODE`; công thức Ribbon.
+- Phần 6: không có kiểu `UserBreakException`; prompt thuộc về lệnh chứ không thuộc Service; ví dụ Moq dùng `GetAllLayers`; giải thích đúng gốc rễ của hot-reload.
+- Phần 7: viết lại theo chữ ký thật (`InsertBlock` thay cho `DrawBlockReference` không tồn tại; EventAggregator giữ tham chiếu **mạnh**; extension methods **không** tự mở transaction; bỏ `IsAlmostEqualTo` không tồn tại).
+- Phần 9: `smoke.scr` không chạy được trong accoreconsole; kiểm tra trên AutoCAD thật là thủ công.
+- CHANGELOG: đính chính hai dòng lịch sử mô tả API `Database.BeginUndoMark()` không tồn tại.
 
 ---
 
@@ -135,7 +186,7 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 
 ### Changed
 - **`EventService`** — fixed lambda event subscription bug. Delegate references are now stored in `Dictionary<Document, Handler>` enabling proper `UnhookDocument` via `-=`. Previously, anonymous lambdas could not be unsubscribed, causing permanent event handler accumulation over long sessions.
-- **`CadContext`** — replaced brittle COM `dynamic` UndoMark (`AcadApplication.StartUndoMark()`) with the managed `Database.BeginUndoMark()` / `EndUndoMark()` API. `EndUndoMark` is now in a `finally` block to guarantee pairing even when the action throws.
+- **`CadContext`** — `EndUndoMark` is now in a `finally` block to guarantee pairing even when the action throws. *(Đính chính 2026-10-13: dòng này từng ghi UndoMark được chuyển sang API managed `Database.BeginUndoMark()`. API đó **không tồn tại** trong AutoCAD .NET; UndoMark luôn dùng COM `StartUndoMark`/`EndUndoMark` qua `dynamic`. Xem [T03 A14](docs/training/T03_PITFALLS_CASEBOOK.md#a14-changelog-mô-tả-một-api-không-tồn-tại).)*
 - **`.csproj`** — multi-target `net48` (AutoCAD 2021–2024) + `net8.0-windows` (AutoCAD 2025+) with version-gated AutoCAD NuGet references (24.x vs 25.x). Removed hard-coded `HintPath` pointing to `C:\Program Files\Autodesk\AutoCAD 2021\`.
 - **`AppBootstrapper`** — `OverruleManager` and `ICommandHistoryService` registered in the DI container. `OverruleManager.Dispose()` now called explicitly in `Terminate()` before the DI container is disposed.
 - `CadCoreFramework.Tests.csproj` — upgraded from bare skeleton to full xUnit + FluentAssertions + Moq setup.
@@ -147,7 +198,7 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 
 ### Fixed
 - `EventService` lambda leak — handlers were permanently attached to `Database.ObjectAppended` / `ObjectErased` and could never be removed.
-- `CadContext` COM UndoMark — silently failed on non-standard AutoCAD installations; now uses the stable managed API.
+- `CadContext` COM UndoMark — `EndUndoMark` guaranteed in `finally`. *(Đính chính 2026-10-13: không có "managed API" thay thế; vẫn là COM, và từ v1.0.0 lỗi COM được ghi log thay vì bị nuốt.)*
 - Build portability — `HintPath` for `Newtonsoft.Json` pointed to a machine-specific path, breaking CI builds and developer onboarding.
 
 ### Added (initial template baseline)

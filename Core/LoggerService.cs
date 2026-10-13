@@ -49,11 +49,15 @@ namespace CadCoreFramework.Core
         /// </summary>
         public LoggerService()
             : this(DefaultLogDirectory(),
+                   // Hai dòng marker: template engine của `dotnet new` coi chỉ thị tiền xử lý là điều kiện
+                   // TEMPLATE (ký hiệu lạ = false) và sẽ cắt mất nhánh DEBUG khỏi dự án sinh ra.
+//-:cnd:noEmit
 #if DEBUG
                    LogSeverity.Debug,
 #else
                    LogSeverity.Information,
 #endif
+//+:cnd:noEmit
                    () => DateTimeOffset.Now)
         {
         }

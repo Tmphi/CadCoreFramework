@@ -54,11 +54,26 @@ namespace CadCoreFramework.Utils
                         attRef.SetAttributeFromBlock(attDef, blockRef.BlockTransform);
                         blockRef.AttributeCollection.AppendAttribute(attRef);
                         tr.AddNewlyCreatedDBObject(attRef, true);
+                        RefreshAlignment(attRef);
                     }
                 }
             }
 
             return refId;
+        }
+
+        /// <summary>
+        /// Tính lại hình học của attribute sau khi tạo / đổi chữ. Attribute căn lề khác BaseLeft (giữa, phải,
+        /// Fit, Aligned…) giữ nguyên vị trí cũ cho tới lần regen nếu không gọi AdjustAlignment — chữ bị lệch
+        /// khỏi điểm căn (đã kiểm chứng trên AutoCAD 2024 bằng tests/integration/HeadlessLab,
+        /// ATTRIBUTE_REALIGNED_AFTER_SET). Attribute nhiều dòng (MText) cần UpdateMTextAttribute.
+        /// </summary>
+        private static void RefreshAlignment(AttributeReference attRef)
+        {
+            if (attRef.IsMTextAttribute)
+                attRef.UpdateMTextAttribute();
+            else if (attRef.Justify != AttachmentPoint.BaseLeft)
+                attRef.AdjustAlignment(attRef.Database);
         }
 
         /// <summary>
@@ -86,13 +101,14 @@ namespace CadCoreFramework.Utils
         {
             foreach (ObjectId attId in blockRef.AttributeCollection)
             {
-                if (tr.GetObject(attId, OpenMode.ForWrite) is AttributeReference attRef)
+                // Mở ForRead để so Tag; chỉ nâng quyền attribute cần sửa (không ghi undo cho mọi attribute).
+                if (tr.GetObject(attId, OpenMode.ForRead) is AttributeReference attRef
+                    && string.Equals(attRef.Tag, tag, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (string.Equals(attRef.Tag, tag, StringComparison.OrdinalIgnoreCase))
-                    {
-                        attRef.TextString = value;
-                        return true;
-                    }
+                    attRef.UpgradeOpen();
+                    attRef.TextString = value;
+                    RefreshAlignment(attRef);
+                    return true;
                 }
             }
             return false;

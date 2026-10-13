@@ -73,41 +73,39 @@ namespace CadCoreFramework.Extensions
             double rowHeight = 8.0, double colWidth = 30.0, string title = "BOM", string[,] data = null, string layer = null,
             Action<Table> configure = null)
         {
-            var table = new Table();
-            table.SetDatabaseDefaults(scope.Database);
-            table.TableStyle = scope.Database.Tablestyle;
-
-            table.SetSize(rows, columns);
-            table.SetRowHeight(rowHeight);
-            table.SetColumnWidth(colWidth);
-            table.Position = insertPoint;
-
-            table.GenerateLayout();
-
-            if (!string.IsNullOrWhiteSpace(title) && rows > 0 && columns > 0)
+            return CadScopeDrawingHelpers.AppendNew(scope, new Table(), table =>
             {
-                table.Cells[0, 0].TextString = title;
-            }
+                table.SetDatabaseDefaults(scope.Database);
+                table.TableStyle = scope.Database.Tablestyle;
 
-            if (data != null)
-            {
-                int maxRow = Math.Min(rows, data.GetLength(0));
-                int maxCol = Math.Min(columns, data.GetLength(1));
+                table.SetSize(rows, columns);
+                table.SetRowHeight(rowHeight);
+                table.SetColumnWidth(colWidth);
+                table.Position = insertPoint;
 
-                int startRow = rows > 1 ? 1 : 0;
-                for (int r = 0; r < maxRow; r++)
+                table.GenerateLayout();
+
+                if (!string.IsNullOrWhiteSpace(title) && rows > 0 && columns > 0)
                 {
-                    if (r + startRow >= rows) break;
-                    for (int c = 0; c < maxCol; c++)
+                    table.Cells[0, 0].TextString = title;
+                }
+
+                if (data != null)
+                {
+                    int maxRow = Math.Min(rows, data.GetLength(0));
+                    int maxCol = Math.Min(columns, data.GetLength(1));
+
+                    int startRow = rows > 1 ? 1 : 0;
+                    for (int r = 0; r < maxRow; r++)
                     {
-                        table.Cells[r + startRow, c].TextString = data[r, c] ?? "";
+                        if (r + startRow >= rows) break;
+                        for (int c = 0; c < maxCol; c++)
+                        {
+                            table.Cells[r + startRow, c].TextString = data[r, c] ?? "";
+                        }
                     }
                 }
-            }
-
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, table, layer, null);
-            configure?.Invoke(table);
-            return scope.AppendEntityToCurrentSpace(table);
+            }, layer, colorIndex: null, configure);
         }
 
         #endregion
@@ -126,14 +124,16 @@ namespace CadCoreFramework.Extensions
             if (boundaryId.IsNull) return ObjectId.Null;
 
             var hatch = new Hatch();
-            hatch.SetDatabaseDefaults(scope.Database);
-            if (normal.HasValue) hatch.Normal = normal.Value;
-            hatch.SetHatchPattern(patternType, patternName);
-            hatch.HatchStyle = HatchStyle.Normal;
-            hatch.PatternScale = scale;
-            hatch.PatternAngle = angle;
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, hatch, layer, colorIndex);
-            ObjectId hatchId = scope.AppendEntityToCurrentSpace(hatch);
+            // configure chạy SAU AppendLoop (cần hatch đã nằm trong database) → không truyền vào AppendNew.
+            ObjectId hatchId = CadScopeDrawingHelpers.AppendNew(scope, hatch, h =>
+            {
+                h.SetDatabaseDefaults(scope.Database);
+                if (normal.HasValue) h.Normal = normal.Value;
+                h.SetHatchPattern(patternType, patternName);
+                h.HatchStyle = HatchStyle.Normal;
+                h.PatternScale = scale;
+                h.PatternAngle = angle;
+            }, layer, colorIndex, configure: null);
 
             // BẮT BUỘC theo API AutoCAD: Associative và AppendLoop PHẢI được gọi SAU KHI
             // Hatch đã được thêm vào Database (CurrentSpace.AppendEntity + AddNewlyCreatedDBObject).
@@ -184,19 +184,19 @@ namespace CadCoreFramework.Extensions
 
         /// <summary>
         /// Tạo bản sao của một đối tượng bị dịch chuyển theo một vector. Trả về ObjectId của đối tượng mới.
+        /// Sao chép SÂU (<c>DeepCloneObjects</c>): giữ Extension Dictionary (metadata XRecord), XData và
+        /// attribute của block — <c>Entity.Clone()</c> làm MẤT Extension Dictionary (đã kiểm chứng trên
+        /// AutoCAD 2024 bằng tests/integration/HeadlessLab, COPY_KEEPS_METADATA).
         /// </summary>
         public static ObjectId CopyEntity(this ICadScope scope, ObjectId sourceId, Vector3d displacement)
         {
             if (sourceId.IsNull) return ObjectId.Null;
 
-            var source = scope.Transaction.GetObject(sourceId, OpenMode.ForRead) as Entity;
-            if (source == null) return ObjectId.Null;
-
-            var clone = source.Clone() as Entity;
+            Entity clone = DeepCloneToCurrentSpace(scope, sourceId);
             if (clone == null) return ObjectId.Null;
 
             clone.TransformBy(Matrix3d.Displacement(displacement));
-            return scope.AppendEntityToCurrentSpace(clone);
+            return clone.ObjectId;
         }
 
         /// <summary>
@@ -207,33 +207,46 @@ namespace CadCoreFramework.Extensions
 
         /// <summary>
         /// Tạo bản sao lấy đối xứng (Mirror) của đối tượng qua trục đối xứng xác định bởi 2 điểm.
-        /// Nếu eraseSource là true, đối tượng gốc sẽ bị xóa.
+        /// Nếu eraseSource là true, đối tượng gốc sẽ bị xóa. Sao chép SÂU như <see cref="CopyEntity(ICadScope, ObjectId, Vector3d)"/>.
         /// </summary>
         public static ObjectId MirrorEntity(this ICadScope scope, ObjectId sourceId,
             Point3d mirrorLineStart, Point3d mirrorLineEnd, bool eraseSource = false)
         {
             if (sourceId.IsNull) return ObjectId.Null;
 
-            // Theo Autodesk Managed .NET Developer's Guide: 
-            // Nếu cần xóa đối tượng gốc (eraseSource = true), mở ForWrite ngay từ đầu.
-            // Tránh mở ForRead rồi gọi GetObject lại ForWrite (gây double open không cần thiết).
-            var mode = eraseSource ? OpenMode.ForWrite : OpenMode.ForRead;
-            var source = scope.Transaction.GetObject(sourceId, mode) as Entity;
-            if (source == null) return ObjectId.Null;
-
-            var clone = source.Clone() as Entity;
+            Entity clone = DeepCloneToCurrentSpace(scope, sourceId);
             if (clone == null) return ObjectId.Null;
 
-            var mirrorMatrix = Matrix3d.Mirroring(new Line3d(mirrorLineStart, mirrorLineEnd));
-            clone.TransformBy(mirrorMatrix);
-            ObjectId mirrorId = scope.AppendEntityToCurrentSpace(clone);
+            clone.TransformBy(Matrix3d.Mirroring(new Line3d(mirrorLineStart, mirrorLineEnd)));
 
             if (eraseSource)
             {
+                var source = (Entity)scope.Transaction.GetObject(sourceId, OpenMode.ForWrite);
                 source.Erase();
             }
 
-            return mirrorId;
+            return clone.ObjectId;
+        }
+
+        /// <summary>
+        /// Deep clone một entity vào không gian hiện hành. Trả về bản sao (mở ForWrite) hoặc null nếu
+        /// <paramref name="sourceId"/> không phải Entity.
+        /// </summary>
+        private static Entity DeepCloneToCurrentSpace(ICadScope scope, ObjectId sourceId)
+        {
+            if (scope.IsReadOnly)
+                throw new InvalidOperationException("Không thể sao chép đối tượng trong scope ExecuteRead.");
+            if (!(scope.Transaction.GetObject(sourceId, OpenMode.ForRead) is Entity)) return null;
+
+            // CurrentSpace được CadContext mở ForRead — nâng quyền trước khi AutoCAD thêm bản sao vào nó.
+            if (!scope.CurrentSpace.IsWriteEnabled) scope.CurrentSpace.UpgradeOpen();
+
+            using (var mapping = new IdMapping())
+            {
+                scope.Database.DeepCloneObjects(new ObjectIdCollection { sourceId }, scope.CurrentSpace.ObjectId, mapping, false);
+                ObjectId cloneId = mapping[sourceId].Value;
+                return (Entity)scope.Transaction.GetObject(cloneId, OpenMode.ForWrite);
+            }
         }
 
         #endregion

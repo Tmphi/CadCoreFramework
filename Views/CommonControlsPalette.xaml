@@ -4,25 +4,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewmodels="clr-namespace:CadCoreFramework.ViewModels"
+             d:DataContext="{d:DesignInstance Type=viewmodels:CommonControlsViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="400">
 
+    <!-- DataContext (CommonControlsViewModel) được gán cho CHÍNH UserControl trong code-behind, từ DI —
+         để PaletteService Dispose được ViewModel khi thay content (docs/training/T09 B-26).
+         Styles + theme nạp trong code-behind (ThemeManager.Attach) SAU InitializeComponent → mọi key
+         màu/style dưới đây PHẢI là {DynamicResource}; {StaticResource} chỉ cho key khai báo trong file này. -->
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <!-- Styles loaded in code-behind (assembly name changes each Debug build, so a hardcoded
-                     pack URI would fail). They arrive AFTER InitializeComponent → every Styles.xaml key
-                     below MUST be {DynamicResource}; {StaticResource} only for keys declared in this file. -->
-            </ResourceDictionary.MergedDictionaries>
-
-            <viewmodels:ViewModelLocator x:Key="Locator"/>
-            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        </ResourceDictionary>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Grid DataContext="{Binding Source={StaticResource Locator}, Path=CommonControls}" Background="{DynamicResource BackgroundBrush}">
+    <Grid Background="{DynamicResource BackgroundBrush}">
         <!-- IsBusy Overlay -->
-        <Grid Panel.ZIndex="99" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Background="#AA1E1E2E">
+        <Grid Panel.ZIndex="99" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Background="{DynamicResource OverlayBrush}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
                 <TextBlock Text="Đang xử lý..." Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" HorizontalAlignment="Center"/>

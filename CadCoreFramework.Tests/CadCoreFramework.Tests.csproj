@@ -64,6 +64,9 @@
     <ProjectReference Include="..\CadCoreFramework.csproj" />
     <!-- Test doubles: FakeCadContext, FakeCadScope -->
     <ProjectReference Include="..\CadCoreFramework.Testing\CadCoreFramework.Testing.csproj" />
+    <!-- AnalyzerTests: tham chiếu analyzer như THƯ VIỆN (không chạy nó trên project test) + Roslyn để biên dịch mẫu. -->
+    <ProjectReference Include="..\CadCoreFramework.Analyzers\CadCoreFramework.Analyzers.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" />
   </ItemGroup>
 
 </Project>

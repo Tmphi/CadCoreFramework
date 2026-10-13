@@ -33,6 +33,9 @@ namespace CadCoreFramework.Core
 
         private readonly ILoggerService _logger;
 
+        /// <summary>Định danh plugin dùng để dẫn xuất Guid ổn định cho từng palette.</summary>
+        private static readonly Guid PluginId = PaletteGuids.PluginIdOf(typeof(PaletteService).Assembly);
+
         public PaletteService(ILoggerService logger)
         {
             _logger = logger;
@@ -62,8 +65,10 @@ namespace CadCoreFramework.Core
         /// Khởi tạo hoặc lấy ra một PaletteSet đã có sẵn.
         /// Tự động setup các thuộc tính tiêu chuẩn (Kích thước tối thiểu, nút Close, AutoHide).
         ///
-        /// QUAN TRỌNG: Dùng Guid ổn định (guid) để AutoCAD lưu lại vị trí Palette
-        /// qua các lần load plugin. Nếu không có Guid, AutoCAD sẽ quên vị trí mỗi lần.
+        /// QUAN TRỌNG: PaletteSet LUÔN có Guid ổn định để AutoCAD lưu lại vị trí/kích thước/dock
+        /// qua các lần khởi động. Không truyền <paramref name="guid"/> → Guid được dẫn xuất từ
+        /// <c>[assembly: Guid]</c> + tên palette (<see cref="PaletteGuids"/>). Chỉ truyền guid khi cần
+        /// giữ Guid cũ của một palette đã phát hành.
         /// </summary>
         public PaletteSet GetOrCreatePaletteSet(string name, Guid? guid = null,
             DockSides defaultDock = DockSides.Right)
@@ -73,9 +78,7 @@ namespace CadCoreFramework.Core
             if (_palettes.TryGetValue(name, out PaletteSet existingPs))
                 return existingPs;
 
-            PaletteSet ps = guid.HasValue
-                ? new PaletteSet(name, guid.Value)
-                : new PaletteSet(name);
+            var ps = new PaletteSet(name, guid ?? PaletteGuids.For(PluginId, name));
 
             ps.Style = PaletteSetStyles.ShowAutoHideButton
                      | PaletteSetStyles.ShowCloseButton
@@ -110,6 +113,8 @@ namespace CadCoreFramework.Core
             catch (Exception ex)
             {
                 _logger?.Error($"Lỗi khi hiển thị PaletteSet '{paletteName}'.", ex);
+                // Cùng chính sách với TogglePalette: ném lại để lệnh gọi báo lỗi cho người dùng.
+                throw;
             }
         }
 
@@ -135,8 +140,11 @@ namespace CadCoreFramework.Core
         {
             try
             {
+                bool isNew = !_palettes.ContainsKey(paletteName);
                 var ps = GetOrCreatePaletteSet(paletteName, defaultDock: defaultDock);
-                if (ps.Visible)
+                // PaletteSet vừa tạo (có Guid) có thể được AutoCAD khôi phục trạng thái từ phiên trước
+                // nhưng CHƯA có nội dung → lần bật đầu tiên luôn là "hiện + nạp content", không phải "ẩn".
+                if (!isNew && ps.Visible)
                 {
                     ps.Visible = false;
                 }

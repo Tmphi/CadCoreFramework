@@ -1,3 +1,4 @@
+using System;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using CadCoreFramework.Core;
@@ -10,6 +11,36 @@ namespace CadCoreFramework.Extensions
     /// </summary>
     internal static class CadScopeDrawingHelpers
     {
+        /// <summary>
+        /// Hoàn tất một entity MỚI tạo và đưa vào không gian hiện hành:
+        /// <paramref name="setup"/> (hình học, SetDatabaseDefaults…) → layer + màu → <paramref name="configure"/>
+        /// của caller → append. Bất kỳ bước nào ném lỗi TRƯỚC khi entity vào database thì entity được
+        /// Dispose rồi ném lại — đối tượng ngoài database phải tự giải phóng (T01 §9; HeadlessLab
+        /// DRAW_CONFIGURE_THROWS_DISPOSES).
+        /// </summary>
+        internal static ObjectId AppendNew<T>(ICadScope scope, T entity, Action<T> setup,
+            string layer, short? colorIndex, Action<T> configure) where T : Entity
+        {
+            try
+            {
+                setup?.Invoke(entity);
+                ApplyCommonProperties(scope, entity, layer, colorIndex);
+                configure?.Invoke(entity);
+                return scope.AppendEntityToCurrentSpace(entity);
+            }
+            catch
+            {
+                DisposeIfNotInDatabase(entity);
+                throw;
+            }
+        }
+
+        /// <summary>Dispose một đối tượng chưa được thêm vào database (ObjectId còn Null).</summary>
+        internal static void DisposeIfNotInDatabase(DBObject obj)
+        {
+            if (obj != null && !obj.IsDisposed && obj.ObjectId.IsNull) obj.Dispose();
+        }
+
         /// <summary>
         /// Áp dụng Layer và Color cho entity. Tự động tạo Layer nếu chưa tồn tại.
         /// </summary>

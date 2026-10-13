@@ -28,7 +28,37 @@ namespace CadCoreFramework.Services
 
         public string ReadAllText(string path) => File.ReadAllText(path);
 
-        public void WriteAllText(string path, string content) => File.WriteAllText(path, content);
+        public void WriteAllText(string path, string content)
+        {
+            // Ghi ATOMIC: ghi ra tệp tạm CÙNG thư mục (cùng ổ đĩa) rồi thay thế tệp đích. Người đọc — hoặc
+            // AutoCAD bị tắt ngang — không bao giờ thấy tệp ghi dở. Tên tạm duy nhất: hai tiến trình ghi
+            // cùng lúc không giẫm lên tệp tạm của nhau.
+            string full = Path.GetFullPath(path);
+            string tmp = full + "." + System.Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                File.WriteAllText(tmp, content);
+                if (File.Exists(full))
+                {
+                    ReplaceFile(tmp, full);
+                }
+                else
+                {
+                    try { File.Move(tmp, full); }
+                    catch (IOException) when (File.Exists(full)) { ReplaceFile(tmp, full); } // tiến trình khác vừa tạo
+                }
+            }
+            finally
+            {
+                if (File.Exists(tmp)) File.Delete(tmp); // chỉ còn khi có bước lỗi
+            }
+        }
+
+        private static void ReplaceFile(string source, string destination)
+        {
+            try { File.Replace(source, destination, null); }
+            catch (System.PlatformNotSupportedException) { File.Copy(source, destination, true); } // ổ không hỗ trợ (FAT…)
+        }
 
         public IEnumerable<string> GetFiles(string path, string searchPattern = "*.*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {

@@ -48,7 +48,13 @@ namespace CadCoreFramework.Core
                 _ribbon = ComponentManager.Ribbon;
                 if (_ribbon == null)
                 {
+                    // Ribbon chưa được tạo (AutoCAD đang khởi động, hoặc người dùng đã RIBBONCLOSE) →
+                    // dựng khi nó xuất hiện.
                     ComponentManager.ItemInitialized += ComponentManager_ItemInitialized;
+                }
+                else
+                {
+                    TryBuild("InitializeRibbon");   // NETLOAD muộn: Ribbon đã có sẵn
                 }
 
                 // Hook CommandEnded để phát hiện khi người dùng chạy lệnh CUI/MENULOAD.
@@ -80,10 +86,9 @@ namespace CadCoreFramework.Core
                 {
                     doc.CommandEnded -= OnCommandEnded;
                 }
-                if (ComponentManager.Ribbon != null)
-                {
-                    ComponentManager.ItemInitialized -= ComponentManager_ItemInitialized;
-                }
+                // Gỡ vô điều kiện (gỡ handler chưa đăng ký là vô hại).
+                ComponentManager.ItemInitialized -= ComponentManager_ItemInitialized;
+                Application.Idle -= OnApplicationIdleRebuildRibbon;
                 _ribbon = null;
             }
             catch (Exception ex)
@@ -107,19 +112,34 @@ namespace CadCoreFramework.Core
                 _ribbon = ComponentManager.Ribbon;
                 ComponentManager.ItemInitialized -= ComponentManager_ItemInitialized;
                 // Build ribbon now that it's available (deferred from InitializeRibbon)
-                try { _buildRibbonAction?.Invoke(); }
-                catch (Exception ex) { _logger?.Error("Lỗi khi dựng Ribbon sau ItemInitialized", ex); }
+                TryBuild("ItemInitialized");
             }
         }
 
         /// <summary>
-        /// Đăng ký hàm dựng lại Ribbon (buildAction) sẽ được gọi tự động sau khi CUI/MENULOAD reset giao diện.
-        /// Gọi hàm này ngay sau khi bạn xây dựng xong Ribbon lần đầu.
+        /// Đăng ký hàm dựng Ribbon (buildAction). Ribbon đã sẵn sàng → dựng ngay; chưa → dựng khi AutoCAD
+        /// tạo xong Ribbon. Tự động gọi lại sau khi CUI/MENULOAD/WSCURRENT reset giao diện.
         /// </summary>
-        /// <param name="buildAction">Lambda chứa toàn bộ lệnh AddTab/AddPanel/AddButton của bạn.</param>
+        /// <param name="buildAction">Lambda chứa toàn bộ lệnh RemoveTab/AddTab/AddPanel/AddButton của bạn.</param>
         public void RegisterBuildAction(Action buildAction)
         {
             _buildRibbonAction = buildAction;
+            if (_ribbon != null) TryBuild("RegisterBuildAction");
+        }
+
+        private void TryBuild(string trigger)
+        {
+            if (_buildRibbonAction == null) return;
+            try { _buildRibbonAction(); }
+            catch (Exception ex) { _logger?.Error($"Lỗi khi dựng Ribbon ({trigger})", ex); }
+        }
+
+        /// <summary>Gỡ một thẻ (Tab) khỏi Ribbon theo Id hoặc Name; không có thì bỏ qua.</summary>
+        public void RemoveTab(string tabId)
+        {
+            if (_ribbon == null || string.IsNullOrEmpty(tabId)) return;
+            foreach (RibbonTab tab in _ribbon.Tabs.Where(t => t.Id == tabId || t.Name == tabId).ToList())
+                _ribbon.Tabs.Remove(tab);
         }
 
         private void OnCommandEnded(object sender, CommandEventArgs e)
@@ -187,10 +207,12 @@ namespace CadCoreFramework.Core
         {
             if (_ribbon == null) return;
             var panelSource = GetPanelSource(tabName, panelName);
-            if (panelSource != null)
+            // Idempotent: panel đã có nút cho lệnh này (build gọi lại mà không RemoveTab) → không thêm bản thứ hai.
+            if (panelSource != null && !panelSource.Items.Any(i => i.Id == commandName))
             {
                 var button = new RibbonButton
                 {
+                    Id = commandName,
                     Text = buttonText,
                     ShowText = true,
                     ShowImage = !string.IsNullOrEmpty(iconPath),

@@ -16,12 +16,8 @@ namespace CadCoreFramework.Extensions
         public static ObjectId DrawAlignedDimension(this ICadScope scope, Point3d point1, Point3d point2,
             Point3d dimLinePoint, string dimStyle = null, string layer = null, Action<AlignedDimension> configure = null)
         {
-            var dim = new AlignedDimension(point1, point2, dimLinePoint, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new AlignedDimension(point1, point2, dimLinePoint, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -30,12 +26,8 @@ namespace CadCoreFramework.Extensions
         public static ObjectId DrawLinearDimension(this ICadScope scope, Point3d point1, Point3d point2,
             Point3d dimLinePoint, double rotation = 0.0, string dimStyle = null, string layer = null, Action<RotatedDimension> configure = null)
         {
-            var dim = new RotatedDimension(rotation, point1, point2, dimLinePoint, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new RotatedDimension(rotation, point1, point2, dimLinePoint, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -46,12 +38,8 @@ namespace CadCoreFramework.Extensions
             Point3d chordPoint, Point3d farChordPoint, double leaderLength = 5.0,
             string dimStyle = null, string layer = null, Action<DiametricDimension> configure = null)
         {
-            var dim = new DiametricDimension(chordPoint, farChordPoint, leaderLength, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new DiametricDimension(chordPoint, farChordPoint, leaderLength, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -62,12 +50,8 @@ namespace CadCoreFramework.Extensions
             Point3d center, Point3d chordPoint, double leaderLength = 5.0,
             string dimStyle = null, string layer = null, Action<RadialDimension> configure = null)
         {
-            var dim = new RadialDimension(center, chordPoint, leaderLength, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new RadialDimension(center, chordPoint, leaderLength, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -81,12 +65,8 @@ namespace CadCoreFramework.Extensions
             Action<RadialDimensionLarge> configure = null)
         {
             var oc = overrideCenter ?? center;
-            var dim = new RadialDimensionLarge(center, chordPoint, oc, jogPoint, jogAngle, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new RadialDimensionLarge(center, chordPoint, oc, jogPoint, jogAngle, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -97,12 +77,8 @@ namespace CadCoreFramework.Extensions
             Point3d vertex, Point3d firstPoint, Point3d secondPoint, Point3d arcPoint,
             string dimStyle = null, string layer = null, Action<LineAngularDimension2> configure = null)
         {
-            var dim = new LineAngularDimension2(vertex, firstPoint, vertex, secondPoint, arcPoint, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new LineAngularDimension2(vertex, firstPoint, vertex, secondPoint, arcPoint, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
 
         /// <summary>
@@ -113,12 +89,17 @@ namespace CadCoreFramework.Extensions
             Point3d definingPoint, Point3d leaderEndPoint, bool useXAxis = true,
             string dimStyle = null, string layer = null, Action<OrdinateDimension> configure = null)
         {
-            var dim = new OrdinateDimension(useXAxis, definingPoint, leaderEndPoint, string.Empty, scope.Database.Dimstyle);
-            dim.SetDatabaseDefaults(scope.Database);
-            CadScopeDrawingHelpers.ApplyDimStyle(scope, dim, dimStyle);
-            CadScopeDrawingHelpers.ApplyCommonProperties(scope, dim, layer, null);
-            configure?.Invoke(dim);
-            return scope.AppendEntityToCurrentSpace(dim);
+            return AppendDimension(scope, new OrdinateDimension(useXAxis, definingPoint, leaderEndPoint, string.Empty, scope.Database.Dimstyle),
+                dimStyle, layer, configure);
         }
+
+        /// <summary>Đuôi chung của mọi hàm vẽ kích thước: defaults → dimstyle → layer → configure → append (Dispose nếu lỗi).</summary>
+        private static ObjectId AppendDimension<T>(ICadScope scope, T dim, string dimStyle, string layer, Action<T> configure)
+            where T : Dimension
+            => CadScopeDrawingHelpers.AppendNew(scope, dim, d =>
+            {
+                d.SetDatabaseDefaults(scope.Database);
+                CadScopeDrawingHelpers.ApplyDimStyle(scope, d, dimStyle);
+            }, layer, colorIndex: null, configure);
     }
 }

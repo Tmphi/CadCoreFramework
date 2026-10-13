@@ -1,7 +1,9 @@
-using System.Reflection;
-using System.Windows;
+using System;
 using System.Windows.Controls;
+using CadCoreFramework.Core;
 using CadCoreFramework.Themes;
+using CadCoreFramework.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CadCoreFramework.Views
 {
@@ -16,23 +18,15 @@ namespace CadCoreFramework.Views
         public CommonControlsPalette()
         {
             InitializeComponent();
-            LoadStyles();
-        }
 
-        private void LoadStyles()
-        {
-            // Load Styles.xaml using the actual runtime assembly name.
-            // In Debug builds the assembly name has a timestamp suffix, so the hardcoded
-            // pack URI in XAML would fail — loading here ensures both Debug and Release work.
-            // Runs right after InitializeComponent: the XAML therefore references these keys
-            // with {DynamicResource} ({StaticResource} would be resolved too early and throw).
-            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-            var stylesUri = new System.Uri($"/{assemblyName};component/Themes/Styles.xaml", System.UriKind.Relative);
-            this.Resources.MergedDictionaries.Clear();
-            this.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = stylesUri });
+            // Styles + theme hiện hành, tự áp lại khi người dùng đổi COLORTHEME.
+            ThemeManager.Attach(this);
 
-            // Apply the current AutoCAD theme (dark/light) on top of the styles
-            ThemeManager.ApplyThemeTo(this.Resources);
+            // DataContext gán cho CHÍNH UserControl (không phải một Grid con) để PaletteService
+            // Dispose được ViewModel khi thay content. Fail loud: thiếu đăng ký DI là lỗi cấu hình.
+            DataContext = AppBootstrapper.ServiceProvider?.GetService<CommonControlsViewModel>()
+                ?? throw new InvalidOperationException(
+                    "CommonControlsViewModel chưa được đăng ký trong AppBootstrapper.ConfigureServices.");
         }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

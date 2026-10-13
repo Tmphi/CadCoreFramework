@@ -1,55 +1,65 @@
 # API Reference
 
-Tài liệu tham khảo nhanh các hàm và lớp cốt lõi của CadCoreFramework.
+Tài liệu tham khảo nhanh các hàm và lớp cốt lõi của CadCoreFramework. Chữ ký dưới đây khớp với code v1.0.0. Đọc kỹ cách các lớp này phối hợp ở [T02: Mổ xẻ kiến trúc](training/T02_ARCHITECTURE_DEEP_DIVE.md).
 
-## 1. CadScopeDrawingExtensions
+## 1. Extension methods trên `ICadScope` (`CadScope*Extensions`)
 
-Bộ mở rộng trên `ICadScope` hỗ trợ vẽ nhanh 1-dòng. Tất cả đều tự động:
-- Khởi tạo đối tượng hình học với DatabaseDefaults.
-- Bọc trong transaction an toàn.
-- Cấu hình Layer, Color, Linetype (chỉ cần truyền tên chuỗi).
-- Action `<T>` (configure lambda) cho phép cấu hình chi tiết (vd. `LineWeight`).
+Bộ hàm vẽ một dòng, nằm trong namespace `CadCoreFramework.Extensions` (chia theo file `CadScopeLineExtensions`, `CadScopeTextExtensions`, `CadScopeBlockExtensions`, `CadScopeDimensionExtensions`, `CadScopeLayerExtensions`, `CadScopeQueryExtensions`). Đặc điểm chung:
+- Là extension của `ICadScope`, nên **chạy bên trong transaction của scope** mà `ICadContext.Execute*` đã mở. Các hàm này **không** tự mở transaction hay lock.
+- Gọi `SetDatabaseDefaults`, gán **layer** (tự `EnsureLayer` nếu chưa có) và **màu ACI** khi được truyền.
+- Tham số `configure` (`Action<T>`) để chỉnh mọi thuộc tính khác trước khi append.
+- Tọa độ là **WCS**. Trả `ObjectId`, hoặc `ObjectId.Null` khi input không hợp lệ.
 
 **Phương thức nổi bật:**
-- `ObjectId DrawLine(Point3d p1, Point3d p2, string layer, ...)`
-- `ObjectId DrawCircle(Point3d center, double radius, string layer, ...)`
-- `ObjectId DrawRectangle(Point3d p1, Point3d p2, string layer, ...)`
-- `ObjectId DrawMText(string text, Point3d location, ...)`
-- `ObjectId DrawBlockReference(Point3d position, string blockName, ...)`
+- `ObjectId DrawLine(Point3d startPoint, Point3d endPoint, string layer = null, short? colorIndex = null, LineWeight lineWeight = ByLayer, Action<Line> configure = null)`
+- `ObjectId DrawCircle(Point3d center, double radius, …)`
+- `ObjectId DrawRectangle(Point3d corner1, Point3d corner2, string layer = null, short? colorIndex = null, double lineWidth = 0, Action<Polyline> configure = null)`
+- `ObjectId DrawPolyline(IEnumerable<Point2d> points, bool isClosed = true, …)` / `DrawPolyline(IEnumerable<PolylineVertex> vertices, …)` (có bulge)
+- `ObjectId DrawText(string text, Point3d position, double height = 2.5, …, TextHorizontalMode justification = TextLeft, Action<DBText> configure = null)`
+- `ObjectId DrawMText(string text, Point3d location, double textHeight = 2.5, double width = 0, AttachmentPoint attachment = BottomLeft, string layer = null, short? colorIndex = null, string textStyle = null, Action<MText> configure = null)`
+- `ObjectId InsertBlock(string blockName, Point3d position, double rotation = 0, double scale = 1, Dictionary<string,string> attributes = null, Dictionary<string,object> dynamicProperties = null, string layer = null)`: tạo đủ `AttributeReference`; trả `ObjectId.Null` (kèm cảnh báo) nếu block không có
+- `ObjectId DrawHatch(ObjectId boundaryId, …)`, `DrawTable(…)`, `CreateGroup(…)`, `CopyEntity(…)`, `MirrorEntity(…)`
+- `ObjectId EnsureLayer(string layerName, short colorIndex = 7, string linetypeName = null)`, `EnsureTextStyle`, `EnsureLinetype`, `EnsureDimStyle`
+- `void SetXRecord<T>(ObjectId entityId, string key, T data)`, `T GetXRecord<T>(…)`, `void RemoveXRecord(…)`
+- `List<T> GetEntities<T>(string layer = null)`. Các `Ask*()` đã **[Obsolete]** (prompt trong transaction), dùng `CadPromptHelper` trước khi mở transaction.
 
-## 2. EventAggregator (IEventAggregator)
+## 2. EventAggregator (`IEventAggregator`)
 
-Cơ chế WeakReference an toàn, IDisposable để tránh memory leak.
-- `IDisposable Subscribe<T>(Action<T> action)`
-- `void Unsubscribe<T>(Action<T> action)`
-- `void Publish<T>(T message)`
+Pub/sub trong tiến trình. Giữ **tham chiếu mạnh** tới subscriber (không phải WeakReference), nên **bắt buộc** Dispose subscription khi không còn dùng. Trong ViewModel, dùng `TrackSubscription(...)`.
+- `IDisposable? Subscribe<T>(Action<T>? action)`: Dispose một lần là gỡ (one-shot).
+- `void Unsubscribe<T>(Action<T>? action)`
+- `void Publish<T>(T message)`: gọi **đồng bộ** trên thread hiện tại; gọi đủ mọi subscriber rồi mới ném lại lỗi (1 lỗi giữ nguyên kiểu, nhiều lỗi thành `AggregateException`).
 
-## 3. Lọc chọn (SelectionFilterBuilder)
+## 3. Lọc chọn (`SelectionFilterBuilder`)
 
-Fluent API tạo TypeValue array cho AutoCAD SelectionFilter.
+Fluent API tạo mảng `TypedValue` cho `SelectionFilter`: `OfTypes`, `OnLayers`, `WithBlockNames`, `WithColor`, `WithXData`, `Custom`, `Build`.
 ```csharp
 var filter = SelectionFilterBuilder.Create()
     .OfTypes("LINE", "CIRCLE")
     .OnLayers("DIMENSIONS")
     .Build();
 ```
+Lưu ý: giá trị được ghép bằng dấu phẩy và **không** escape ký tự wildcard. `WithBlockNames` **không** bắt được dynamic block đã chỉnh tham số (tên ẩn danh `*U…`), xem [T03 B12](training/T03_PITFALLS_CASEBOOK.md#b12-lọc-block-theo-tên-bỏ-sót-dynamic-block).
 
 ## 4. Metadata (XData & XRecord)
 
-- **XDataHelper**: Ghi dữ liệu JSON <= 16KB.
-- **XRecordHelper**: Ghi dữ liệu lớn không giới hạn.
+- **`XDataHelper`** / `entity.SetMetadata(tr, appName, data)`: JSON chia khúc 250 ký tự trong XData. Chặn ở **15.000 ký tự** vì giới hạn XData là 16 KB **mỗi đối tượng**. Tự đăng ký RegApp.
+- **`XRecordHelper`** / `scope.SetXRecord(...)`: JSON chia khúc 2.000 ký tự trong Xrecord của Extension Dictionary. Dùng cho dữ liệu lớn.
+- Chọn loại nào: [T08 §8](training/T08_RECIPES_EXTENDING.md#8-lưu-metadata-xdata-hay-xrecord).
 
 ## 5. UI (Ribbon & Palette)
 
-- **RibbonService**: Tự động tạo Tab & Panel, dọn dẹp event khi Shutdown.
-- **PaletteService**: Quản lý PaletteSet (Dockable) với WPF UserControl.
+- **`RibbonService`**: API `AddTab/AddPanel/AddButton/AddSplitButton` + `RegisterBuildAction` (tự dựng lại sau `CUI`/`MENULOAD`); gỡ event khi Shutdown. Dự án v1.0.0 **chưa dựng tab nào**, công thức ở [T08 §6](training/T08_RECIPES_EXTENDING.md#6-thêm-ribbon-tab).
+- **`PaletteService`**: `TogglePalette(name, Func<FrameworkElement> contentFactory, tabTitle)` (tạo content lười, Dispose ViewModel cũ khi thay), `ShowPalette`, `GetOrCreatePaletteSet(name, Guid?)` (Guid ổn định thì AutoCAD nhớ vị trí palette).
 
 ## 6. Utilities
 
-- **CadPromptHelper**: Wrappers cho Editor inputs (GetPoint, GetString, GetDistance).
-- **CoordinateHelper**: Tính toán MidPoint, Distance, Transform.
-- **GeometryExtensions**: Các phương thức IsAlmostEqualTo (so sánh sai số), Transform, v.v.
-- **Guard**: Lớp hỗ trợ Validation (NotNull, NotEmpty, IsTrue).
-- **DimensionHelper**: Trợ giúp Dimension.
-- **TableHelper (CadTableBuilder)**: Hỗ trợ Fluent tạo CAD Table.
-- **TextStyleHelper**: Quản lý TextStyle trong Database.
+- **`CadPromptHelper`**: `GetPoint`, `GetCorner`, `GetDistance`, `GetAngle`, `GetString`, `GetKeywords`, `GetInteger`, `GetDouble`, `GetEntity`, `GetSelection`. Hủy (ESC) thì trả `null` / `ObjectId.Null` / mảng rỗng. Điểm trả về được đổi **UCS → WCS**.
+- **`CoordinateHelper`**: `UcsToWcs` / `WcsToUcs` (điểm, vector, danh sách điểm), `GetCurrentMatrices()`.
+- **`GeometryExtensions`**: `MidPointTo`, `Offset`, `ToPoint2d` / `ToPoint3d`, `AngleTo2D`, `Perpendicular2D`, `NormalizeSafe`, và cho `Extents3d`: `Width`, `Height`, `Center`, `Expand`, `UnionWith`.
+- **`Guard`**: `NotNull`, `NotEmpty`, `IsTrue`.
+- **`DynamicBlockHelper`**: `GetEffectiveName`, `GetDynamicProperties`, `GetDynamicProperty<T>`, `SetDynamicProperty`, `GetVisibilityStates`, `GetVisibilityState`, `SetVisibilityState`.
+- **`DimensionHelper`**: `CreateAlignedDimension`, `CreateLinearDimension`.
+- **`TableHelper` (`CadTableBuilder`)**: Fluent `SetTitle/SetPosition/SetRowHeight/SetTextHeight/AddColumn/AddRow/FromCollection/Build`.
+- **`TextStyleHelper`**: `EnsureTextStyle`, `SetCurrentTextStyle`, `GetAllTextStyleNames`.
+- **`CadAsyncHelper`**: `ExecuteSafeAsync` (việc nặng trên ThreadPool, kết quả được marshal tường minh về main thread) và `FireAndForget(onError)`.

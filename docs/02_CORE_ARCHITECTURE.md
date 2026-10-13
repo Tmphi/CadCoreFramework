@@ -25,11 +25,11 @@ using (doc.LockDocument()) // Phải tự LockDocument
             btr.AppendEntity(myLine);
             tr.AddNewlyCreatedDBObject(myLine, true);
             
-            tr.Commit(); // NẾU QUÊN GỌI DÒNG NÀY -> AutoCAD CRASH NGAY LẬP TỨC.
+            tr.Commit(); // QUÊN DÒNG NÀY → không crash, nhưng MỌI THAY ĐỔI BỊ HỦY ÂM THẦM (Dispose = Abort)
         }
         catch (Exception ex)
         {
-            tr.Abort(); // Phải tự handle rollback
+            tr.Abort(); // Thừa: thoát khỏi using mà chưa Commit thì transaction tự Abort
             throw;
         }
     }
@@ -52,9 +52,9 @@ _cadContext.Execute(scope =>
 Nếu bạn mò vào mã nguồn của lớp [`CadContext`](../Core/CadContext.cs), bạn sẽ thấy một kỹ thuật xử lý Undo cực kỳ đặc biệt liên quan đến **COM Object**.
 
 > [!NOTE]
-> **Sự thật về Undo trong .NET API:** Trong AutoCAD .NET thuần, `TransactionManager.StartTransaction()` KHÔNG HỀ gộp các thao tác lại thành một bước Undo. Nếu bạn chạy 1 vòng lặp vẽ 100 đường Line trong 1 Transaction, khi bấm **Ctrl+Z**, AutoCAD sẽ xoá từng đường Line một (100 lần nhấn Ctrl+Z).
-> 
-> **Cách Framework giải quyết:** Framework truy cập ngược xuống tầng sâu hơn của AutoCAD thông qua giao diện COM: `(AcadDocument)AcadApplication.ActiveDocument`. Bằng cách gọi `comDoc.StartUndoMark()` trước khi mở Transaction và `comDoc.EndUndoMark()` sau khi Commit, Framework ép AutoCAD phải gói gọn 100 đường Line đó thành đúng 1 bước Ctrl+Z. Bạn chỉ có thể tìm thấy kỹ thuật "đắt giá" này trong các dự án Enterprise.
+> **Sự thật về Undo:** *Bên trong một lệnh*, AutoCAD tự gom mọi thay đổi của lệnh (kể cả nhiều transaction) thành **một** bước Ctrl+Z. Vấn đề nằm ở **application context** (nút bấm trên Palette): ở đó mỗi lần lock/transaction có thể thành một bước Undo riêng.
+>
+> **Cách Framework giải quyết:** AutoCAD .NET API **không có** hàm UndoMark managed (không tồn tại `Database.BeginUndoMark`). Framework dùng COM: `doc.GetAcadDocument()` (kiểu `dynamic`), gọi `StartUndoMark()` trước transaction và `EndUndoMark()` trong `finally`, khi bạn truyền `undoMarkName`. Đó là lý do mọi Service của Golden Sample luôn truyền `undoMarkName`: Service dùng chung cho cả lệnh lẫn palette. Chi tiết: [T01 §11](training/T01_AUTOCAD_NET_FOUNDATIONS.md#11-undo).
 
 ---
 
@@ -79,9 +79,9 @@ public void Initialize()
 
 > [!WARNING]
 > **Under the hood (JIT Compiler):** Trình biên dịch JIT (Just-In-Time) của .NET hoạt động theo cơ chế "Quét trước khi chạy". Ngay khi nó chuẩn bị bước vào một hàm (ví dụ `Initialize()`), nó sẽ quét toàn bộ biến và lời gọi hàm bên trong. Nếu bên trong chứa một class thuộc file DLL khác (ví dụ `ServiceCollection` của Microsoft.DI), nó sẽ cố gắng tìm file DLL đó.
-> Vì AutoCAD không tự động quét thư mục của Plugin để tìm file DLL phụ thuộc, JIT Compiler sẽ quăng ra lỗi `FileNotFoundException` và huỷ luôn hàm `Initialize()` trước khi cả đoạn code đầu tiên kịp chạy!
-> 
-> **Giải pháp:** Phải gắn sự kiện `AssemblyResolve` (Hướng dẫn AutoCAD biết chỗ tìm DLL) ở hàm vỏ, và **tách toàn bộ logic** sử dụng DI sang một hàm khác (`InitializeCore()`). Đây là kỹ thuật vô cùng quan trọng mà 90% Fresher đều mắc phải khi tự setup plugin.
+> Trong nhiều kịch bản nạp, CLR **không tự tìm được** DLL phụ thuộc cạnh plugin. Điển hình là khi plugin được nạp **từ byte array** (tool chống khóa DLL / hot-reload), lúc đó `Assembly.Location` rỗng nên không có thư mục để dò. Khi đó JIT ném `FileNotFoundException` và hủy luôn `Initialize()` trước khi dòng code đầu tiên kịp chạy!
+>
+> **Giải pháp:** Gắn sự kiện `AssemblyResolve` ở hàm vỏ, và **tách toàn bộ logic** dùng DI sang một hàm khác (`InitializeCore()`). Handler của dự án còn ưu tiên trả về **assembly đã nạp** khớp tên + version. Điều này sửa lỗi palette khi nạp bằng byte array ([T03 A2](training/T03_PITFALLS_CASEBOOK.md#a2-palette-lỗi-does-not-have-a-resource-identified-by-the-uri)). Chi tiết cơ chế phân giải: [T01 §12.4](training/T01_AUTOCAD_NET_FOUNDATIONS.md#124-phân-giải-assembly-phụ-thuộc).
 
 ---
 
@@ -100,8 +100,10 @@ public class SampleCommands : CadCommandBase
         // ExecuteCommand sẽ tự động bọc try-catch, bắt các lỗi văng CAD
         ExecuteCommand(() => 
         {
-            // Nếu người dùng ấn ESC khi đang chọn điểm, AutoCAD sẽ quăng lỗi UserBreak.
-            // Framework tự động nuốt (swallow) lỗi này và kết thúc lệnh êm đẹp.
+            // ESC khi đang prompt → AutoCAD trả PromptStatus.Cancel (KHÔNG ném exception);
+            // CadPromptHelper quy về null → chỉ cần return.
+            // (Một số API khác ném Runtime.Exception với ErrorStatus.UserBreak khi bị ESC —
+            //  ExecuteCommand bắt riêng trường hợp đó: không in lỗi, không ghi lịch sử lệnh.)
             var pt = CadPromptHelper.GetPoint("Chọn điểm:");
             if (pt == null) return;
             

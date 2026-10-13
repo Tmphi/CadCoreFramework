@@ -275,40 +275,42 @@ namespace CadCoreFramework.Demos
         }
 
         /// <summary>
-        /// DEMO_ASYNC_AWAIT — Minh họa chạy ngầm (không treo AutoCAD) và vẽ khi xong.
-        /// Sử dụng CadAsyncHelper để chuyển luồng an toàn.
-        /// [CommandMethod] không thể là 'async Task', nên ta dùng FireAndForget(onError)
-        /// để mọi exception đều được log và hiển thị thay vì bị nuốt mất.
+        /// DEMO_ASYNC_AWAIT — Minh họa chạy ngầm (không treo AutoCAD) rồi vẽ khi xong, ĐÚNG bản vẽ.
+        ///
+        /// Mẫu đúng: <see cref="CadCommandBase.ExecuteWithScopeAsync"/> (→ ICadContext.ExecuteAsync)
+        /// chụp Document TRƯỚC await; phần chuẩn bị chỉ tính toán / I-O (không chạm AutoCAD);
+        /// phần vẽ là lambda trả về, chạy trên main thread trong transaction của bản vẽ đã chụp —
+        /// kể cả khi người dùng chuyển sang bản vẽ khác trong 3 giây chờ.
+        /// SAI (bản cũ của demo này): sau await gọi lại ExecuteWithScope / Notify → chúng dùng
+        /// MdiActiveDocument, tức bản vẽ ĐANG mở lúc đó, không phải bản vẽ đã chạy lệnh (T03 B6).
+        ///
+        /// [CommandMethod] không thể là 'async Task': ExecuteWithScopeAsync tự bắt lỗi, in ra bản vẽ gốc
+        /// và ghi CommandHistory; FireAndForget chỉ là lưới an toàn cuối.
         /// </summary>
         [CommandMethod("DEMO_ASYNC_AWAIT")]
         public void DemoAsyncAwait()
         {
-            ExecuteCommand(() =>
+            Notify.Section("DEMO: ASYNC / AWAIT (Không treo CAD)");
+            Notify.Info("Bắt đầu tải dữ liệu nặng (đợi 3 giây)... Bạn vẫn có thể pan/zoom hoặc chuyển bản vẽ!");
+
+            ExecuteWithScopeAsync(async () =>
             {
-                Notify.Section("DEMO: ASYNC / AWAIT (Không treo CAD)");
-                Notify.Info("Bắt đầu gọi API hoặc tải dữ liệu nặng (đợi 3 giây)... Bạn vẫn có thể pan/zoom bản vẽ!");
+                // Giai đoạn 1 — thread nền, KHÔNG chạm AutoCAD (mô phỏng gọi HTTP API tốn 3 giây).
+                string message = await Task.Run(async () =>
+                {
+                    await Task.Delay(3000).ConfigureAwait(false);
+                    return "Dữ liệu tải về từ máy chủ thành công!";
+                });
 
-                // Fire-and-forget CÓ xử lý lỗi. ExecuteSafeAsync tự capture Main Thread context ngay tại đây.
-                CadAsyncHelper.ExecuteSafeAsync<string>(
-                    async () =>
-                    {
-                        // Mô phỏng tải dữ liệu (ví dụ gọi HTTP API) tốn 3 giây
-                        await Task.Delay(3000);
-                        return "Dữ liệu tải về từ máy chủ thành công!";
-                    },
-                    result =>
-                    {
-                        // Trở lại Main Thread của AutoCAD an toàn
-                        Notify.Info(result);
-
-                        ExecuteWithScope(scope =>
-                        {
-                            scope.DrawCircle(new Point3d(0, 50, 0), 20, colorIndex: 4);
-                            Notify.Info("Đã vẽ một đường tròn sau khi tải xong.");
-                        });
-                    }
-                ).FireAndForget(ex => Notify.Error("DEMO_ASYNC_AWAIT thất bại", ex));
-            });
+                // Giai đoạn 2 — trả về hành động vẽ; framework chạy nó trên main thread, trong bản vẽ đã chụp.
+                // Ghi thông báo qua scope.Editor (bản vẽ đã chụp), không qua Notify (MdiActiveDocument).
+                return scope =>
+                {
+                    scope.Editor.WriteMessage($"\n[DEMO_ASYNC_AWAIT] {message}");
+                    scope.DrawCircle(new Point3d(0, 50, 0), 20, colorIndex: 4);
+                    scope.Editor.WriteMessage("\n[DEMO_ASYNC_AWAIT] Đã vẽ một đường tròn sau khi tải xong.");
+                };
+            }).FireAndForget(ex => Logger?.Error("DEMO_ASYNC_AWAIT thất bại ngoài ExecuteWithScopeAsync.", ex));
         }
     }
 }

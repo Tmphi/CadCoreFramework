@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CadCoreFramework.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadCoreFramework.ViewModels
@@ -47,9 +48,21 @@ namespace CadCoreFramework.ViewModels
         private bool _disposed;
 
         /// <summary>
+        /// Logger nhận MỌI exception mà RunSafe/RunSafeAsync bắt được (null = chỉ hiện ErrorMessage).
+        /// ErrorMessage chỉ có message — stack trace cần cho việc điều tra nằm trong log.
+        /// </summary>
+        protected ILoggerService? Logger { get; }
+
+        /// <summary>
         /// Khởi tạo một phiên bản ViewModelBase.
         /// </summary>
         protected ViewModelBase() { }
+
+        /// <summary>
+        /// Khởi tạo ViewModelBase có logger. Lớp con nhận <c>ILoggerService? logger = null</c> trong
+        /// constructor rồi chuyển vào đây — DI tự inject, unit test có thể bỏ qua.
+        /// </summary>
+        protected ViewModelBase(ILoggerService? logger) { Logger = logger; }
 
         /// <summary>
         /// Đăng ký một IDisposable (thường là EventAggregator subscription) để tự động
@@ -99,9 +112,7 @@ namespace CadCoreFramework.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = string.IsNullOrEmpty(errorPrefix)
-                    ? ex.Message
-                    : $"{errorPrefix}: {ex.Message}";
+                ReportError(ex, errorPrefix);
             }
             finally
             {
@@ -109,7 +120,11 @@ namespace CadCoreFramework.ViewModels
             }
         }
 
-        /// <summary>Biến thể đồng bộ của RunSafeAsync cho các thao tác không async.</summary>
+        /// <summary>
+        /// Biến thể đồng bộ của RunSafeAsync cho các thao tác không async.
+        /// ⚠️ IsBusy bật rồi tắt trong CÙNG một lượt chạy của UI thread → WPF không kịp vẽ spinner.
+        /// Cần hiển thị trạng thái bận cho việc lâu → dùng RunSafeAsync với phần nặng chạy ngoài UI thread.
+        /// </summary>
         protected void RunSafe(Action action, string? errorPrefix = null)
         {
             ErrorMessage = string.Empty;
@@ -120,14 +135,20 @@ namespace CadCoreFramework.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = string.IsNullOrEmpty(errorPrefix)
-                    ? ex.Message
-                    : $"{errorPrefix}: {ex.Message}";
+                ReportError(ex, errorPrefix);
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        private void ReportError(Exception ex, string? errorPrefix)
+        {
+            ErrorMessage = string.IsNullOrEmpty(errorPrefix)
+                ? ex.Message
+                : $"{errorPrefix}: {ex.Message}";
+            Logger?.Error($"{GetType().Name}: {(string.IsNullOrEmpty(errorPrefix) ? "lỗi trong RunSafe" : errorPrefix)}", ex);
         }
     }
 }
