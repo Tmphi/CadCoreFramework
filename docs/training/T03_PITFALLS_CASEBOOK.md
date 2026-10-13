@@ -2,6 +2,8 @@
 
 # T03 — Sổ Tay Sự Cố & Bẫy (Casebook)
 
+> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md) · **Trong lộ trình:** tuần 8 (Phần B) và 9 (Phần A); sau đó dùng như sổ tra cứu ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
 - **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
 - **Phần B:** 31 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh.

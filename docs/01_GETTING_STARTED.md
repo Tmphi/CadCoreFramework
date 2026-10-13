@@ -2,6 +2,9 @@
 
 Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫu (Template) chuyên nghiệp dành cho việc phát triển các ứng dụng/plugin AutoCAD bằng C# (.NET). Cuốn tài liệu này được viết theo dạng "Giáo trình thực chiến", giải thích *tại sao* kiến trúc lại được thiết kế như vậy.
 
+> [!NOTE]
+> Phần 1–9 giả định bạn đã biết C# cơ bản. **Chưa biết lập trình hoặc chưa biết C#?** Học Giai đoạn 0 trước: [C00 — Bắt đầu từ đây](training/C00_START_HERE.md) (6 tuần, không cần AutoCAD, dạy C# trên chính code của dự án).
+
 ---
 
 ## 1.1 Khởi Động Nhanh (Quickstart)
@@ -82,7 +85,7 @@ AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao di�
 ## 1.3 Lộ Trình Cho Người Mới (Fresher Roadmap) & Bài Toán Thực Tế
 
 > [!TIP]
-> Lộ trình **đầy đủ 12 tuần** từ Fresher đến Senior (khung năng lực, 16 bài lab, đồ án, đề đánh giá) nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần.
+> Lộ trình **đầy đủ** — Giai đoạn 0 nhập môn C# (6 tuần, cho người chưa biết lập trình) rồi 12 tuần từ Fresher đến Senior (khung năng lực, 16 bài lab, đồ án, đề đánh giá) — nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần cho người đã biết C#.
 
 Để nhanh chóng làm chủ Framework, Fresher nên tự thực hành bài toán **Vẽ Tủ Điện MSB** với lộ trình 3 tuần sau:
 

@@ -1,5 +1,5 @@
 > **📚 Hệ Sinh Thái Tài Liệu CadCoreFramework:**  
-> [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md) \| [🎓 Học viện (Fresher → Senior)](docs/training/README.md)
+> [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md) \| [🎓 Học viện (Nhập môn → Senior)](docs/training/README.md)
 > ---
 
 # 🚀 CadCoreFramework - AutoCAD .NET Plugin Template
@@ -28,7 +28,7 @@ Chúng tôi đã cấu trúc lại toàn bộ tài liệu thành một bộ giá
 | **Phần 7** | [07_API_REFERENCE.md](docs/07_API_REFERENCE.md) | Tài liệu tham khảo nhanh API, CadScopeDrawingExtensions, Utils, Builders. |
 | **Phần 8** | [08_COOKBOOK.md](docs/08_COOKBOOK.md) | Công thức giải quyết các bài toán thường gặp. |
 | **Phần 9** | [09_GOLDEN_SAMPLE.md](docs/09_GOLDEN_SAMPLE.md) | Golden Sample — khuôn mẫu chuẩn để copy khi làm tính năng mới. |
-| **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án**: lộ trình 12 tuần, khung năng lực Fresher → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 16 bài lab, đề đánh giá. |
+| **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án, kể cả người chưa biết lập trình**: Giai đoạn 0 dạy C# theo quy tắc 20/80 trên chính code dự án ([bắt đầu từ đây](docs/training/C00_START_HERE.md)), rồi lộ trình 12 tuần; khung năng lực 5 cấp Nhập môn → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 16 bài lab, đề đánh giá. |
 
 ---
 
