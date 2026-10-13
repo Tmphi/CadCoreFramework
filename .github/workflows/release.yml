@@ -8,6 +8,10 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    # GITHUB_TOKEN mặc định chỉ đọc (repo mới) → tạo GitHub Release báo 403
+    # "Resource not accessible by integration". Cần quyền ghi contents.
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
