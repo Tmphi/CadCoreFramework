@@ -125,4 +125,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - Tài liệu sống cùng code: **PR thay đổi hành vi phải cập nhật T-module liên quan** (checklist review có mục này).
 - Khi gặp sự cố mới: thêm một mục vào [T03](T03_PITFALLS_CASEBOOK.md) theo đúng format, *sau khi* đã có cách tái hiện.
 - Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó.
-- Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 (sửa backlog, HeadlessLab — 2026-10-13/14). Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0".
+- Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab — 2026-10-13/14). Các mục chỉ AutoCAD GUI kiểm được (T05 smoke 13–16: theme, Ribbon, vị trí palette, async nhiều bản vẽ) đã được kiểm trên AutoCAD 2024 ngày 2026-10-14. Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0".
