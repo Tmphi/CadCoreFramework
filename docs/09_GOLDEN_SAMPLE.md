@@ -2,6 +2,8 @@
 
 Các lệnh `DEMO_*` minh họa **từng API riêng lẻ**. Golden Sample thì khác: nó là **một tính năng hoàn chỉnh** đi qua đủ mọi tầng, viết đúng chuẩn, có test. Khi bắt đầu một tính năng mới, hãy **copy thư mục `Samples/GridMarker/`** và đổi tên — đừng copy từ demo.
 
+> Các lệnh `DEMO_*` nằm gọn trong thư mục `Demos/`. Khi dựng dự án thật từ template, đặt `<IncludeDemos>false</IncludeDemos>` trong `CadCoreFramework.csproj` (hoặc build `dotnet build -p:IncludeDemos=false`) để loại toàn bộ demo khỏi DLL — không cần sửa file nào khác.
+
 **Tính năng:** vẽ một lưới các ô vuông đánh nhãn (A1, A2, …, B1…). Mỗi ô có khung + chữ, khung được gắn XData để đọc lại sau.
 
 | Điểm vào | Cách dùng |

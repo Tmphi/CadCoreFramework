@@ -26,6 +26,7 @@ namespace CadCoreFramework.Commands
 
         private readonly ILoggerService _injectedLogger;
         private readonly ICadContext _injectedCadContext;
+        private readonly ICommandHistoryService _injectedHistory;
 
         private readonly Lazy<ILoggerService> _loggerLazy =
             new Lazy<ILoggerService>(() => AppBootstrapper.ServiceProvider?.GetService<ILoggerService>());
@@ -46,7 +47,7 @@ namespace CadCoreFramework.Commands
                 "ICadContext chưa được khởi tạo — kiểm tra lỗi khởi động plugin (AppBootstrapper.Initialize).");
 
         /// <summary>Lịch sử lệnh — tự động ghi lại mỗi ExecuteWithScope / ExecuteCommand.</summary>
-        protected ICommandHistoryService CommandHistory => _historyLazy.Value;
+        protected ICommandHistoryService CommandHistory => _injectedHistory ?? _historyLazy.Value;
 
         /// <summary>Bản vẽ AutoCAD đang được kích hoạt (Active Document).</summary>
         protected Document Document => Application.DocumentManager.MdiActiveDocument;
@@ -65,12 +66,16 @@ namespace CadCoreFramework.Commands
 
         /// <summary>
         /// Constructor Injection — khuyến khích dùng cho code mới và unit test.
-        /// Bypass hoàn toàn static ServiceProvider, cải thiện testability.
+        /// Bypass static ServiceProvider cho cả ba service (logger, CadContext, CommandHistory),
+        /// cải thiện testability. <paramref name="commandHistory"/> null → không ghi lịch sử
+        /// trừ khi DI có sẵn (fallback về ServiceProvider như constructor không tham số).
         /// </summary>
-        protected CadCommandBase(ILoggerService logger, ICadContext cadContext)
+        protected CadCommandBase(ILoggerService logger, ICadContext cadContext,
+            ICommandHistoryService? commandHistory = null)
         {
             _injectedLogger = logger;
             _injectedCadContext = cadContext;
+            _injectedHistory = commandHistory;
         }
 
         // ── Execution Helpers ───────────────────────────────────────────────────────

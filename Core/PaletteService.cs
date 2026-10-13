@@ -45,9 +45,15 @@ namespace CadCoreFramework.Core
             if (_paletteContent.TryGetValue(paletteName, out var old) &&
                 old?.DataContext is IDisposable vm)
             {
-                try { vm.Dispose(); } catch { }
+                DisposeViewModel(paletteName, vm);
             }
             _paletteContent.Remove(paletteName);
+        }
+
+        private void DisposeViewModel(string paletteName, IDisposable vm)
+        {
+            try { vm.Dispose(); }
+            catch (Exception ex) { _logger?.Error($"Lỗi khi Dispose ViewModel của palette '{paletteName}'.", ex); }
         }
 
         // ─── PaletteSet Management ────────────────────────────────────────────────
@@ -224,7 +230,7 @@ namespace CadCoreFramework.Core
 
             foreach (var kvp in _paletteContent)
                 if (kvp.Value?.DataContext is IDisposable vm)
-                    try { vm.Dispose(); } catch { }
+                    DisposeViewModel(kvp.Key, vm);
             _paletteContent.Clear();
         }
     }

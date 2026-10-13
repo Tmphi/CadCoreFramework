@@ -64,29 +64,8 @@ using System.Runtime.InteropServices;
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(
     typeof(CadCoreFramework.Commands.LayerCommands))]
 
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.DemoCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoDrawingCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoInteractionCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoDataCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoServicesCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoEventCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoOverruleCommands))]
-
-[assembly: Autodesk.AutoCAD.Runtime.CommandClass(
-    typeof(CadCoreFramework.Commands.Demos.DemoUiCommands))]
+// Bộ lệnh demo (DEMO_*) tự đăng ký CommandClass trong Demos/DemoAssemblyInfo.cs —
+// build với /p:IncludeDemos=false là toàn bộ demo biến mất khỏi DLL (xem CadCoreFramework.csproj).
 
 // Golden Sample — xem docs/09_GOLDEN_SAMPLE.md
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(
