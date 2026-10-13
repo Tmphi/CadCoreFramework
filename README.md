@@ -1,5 +1,5 @@
 > **📚 Hệ Sinh Thái Tài Liệu CadCoreFramework:**  
-> [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md)
+> [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md) \| [🎓 Học viện (Fresher → Senior)](docs/training/README.md)
 > ---
 
 # 🚀 CadCoreFramework - AutoCAD .NET Plugin Template
@@ -28,6 +28,7 @@ Chúng tôi đã cấu trúc lại toàn bộ tài liệu thành một bộ giá
 | **Phần 7** | [07_API_REFERENCE.md](docs/07_API_REFERENCE.md) | Tài liệu tham khảo nhanh API, CadScopeDrawingExtensions, Utils, Builders. |
 | **Phần 8** | [08_COOKBOOK.md](docs/08_COOKBOOK.md) | Công thức giải quyết các bài toán thường gặp. |
 | **Phần 9** | [09_GOLDEN_SAMPLE.md](docs/09_GOLDEN_SAMPLE.md) | Golden Sample — khuôn mẫu chuẩn để copy khi làm tính năng mới. |
+| **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án**: lộ trình 12 tuần, khung năng lực Fresher → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 16 bài lab, đề đánh giá. |
 
 ---
 
@@ -79,8 +80,8 @@ graph TD
 ## 🧠 2. Triết Lý Thiết Kế (Tại sao phải làm thế này?)
 
 1. **Bọc kín mọi giao dịch (Transaction Management)**
-   - *Tại sao?* AutoCAD yêu cầu mọi thao tác tạo/sửa bản vẽ phải được khóa (Lock Document) và đưa vào Transaction. Nếu bạn mở Transaction mà quên `Commit()` hoặc `Dispose()`, AutoCAD sẽ bị treo hoặc văng lỗi.
-   - *Giải pháp:* Bạn bắt buộc phải gọi logic vẽ bên trong `ICadContext.ExecuteAsync(scope => { ... })` hoặc `CadCommandBase.ExecuteWithScope(...)`. Khung mẫu sẽ tự động khóa và dọn dẹp Transaction cho bạn!
+   - *Tại sao?* Mọi thao tác tạo/sửa bản vẽ phải nằm trong Transaction. Từ Palette (application context), bạn còn phải tự khóa bản vẽ (Lock Document), nếu không sẽ gặp `eLockViolation`. Quên `Commit()` thì **mọi thay đổi bị hủy âm thầm**. Quên `Dispose()` thì đối tượng không được đóng đúng cách, gây lỗi khó lường.
+   - *Giải pháp:* Gọi logic vẽ bên trong `ICadContext.Execute(scope => { ... })` (ném lỗi), `ICadContext.TryExecute(...)` (trả `CadResult`), hoặc `CadCommandBase.ExecuteWithScope(...)` trong lệnh. Khung mẫu tự động khóa, mở/commit Transaction, gom Undo khi có `undoMarkName`. `ExecuteAsync` chỉ dùng khi **thật sự có việc async** (I/O, API).
 
 2. **Cấm "Hỏi đáp" (Prompt) bên trong Transaction**
    - *Tại sao?* Khi bạn yêu cầu người dùng nhấp chuột chọn điểm (`Editor.GetPoint()`) khi đang mở Transaction, AutoCAD sẽ đứng hình chờ người dùng. Nếu người dùng nhấn ESC hoặc chuyển sang phần mềm khác, Transaction bị kẹt vô thời hạn!
@@ -98,90 +99,119 @@ Trước khi code, hãy đảm bảo bạn setup đúng môi trường:
 
 ### Yêu cầu hệ thống
 - Visual Studio 2022 (khuyến nghị).
-- AutoCAD 2021-2024: Sử dụng **.NET Framework 4.8**.
-- AutoCAD 2025+: Phải nâng cấp lên **.NET 8.0**.
+- AutoCAD 2021-2024: Sử dụng **.NET Framework 4.8** (target `net48`, đã kiểm chứng trên AutoCAD 2024).
+- AutoCAD 2025+: target **`net8.0-windows`** đã có sẵn trong dự án (build + test được) nhưng **chưa chạy thử trên AutoCAD thật**.
 
 ### Cấu hình file `.csproj` (Cực Kỳ Quan Trọng)
-Nếu cấu hình sai, AutoCAD sẽ "văng" (Fatal Error) ngay lập tức khi bạn chạy lệnh `NETLOAD`. Hãy mở file `.csproj` và đảm bảo:
+Nếu cấu hình sai, plugin có thể không nạp được hoặc gây lỗi khó chẩn đoán khi `NETLOAD`. Giải phẫu từng dòng `.csproj`: [T06 §2](docs/training/T06_BUILD_RELEASE_DEVOPS.md#2-giải-phẫu-cadcoreframeworkcsproj). Hãy đảm bảo:
 
 1. **`<ExcludeAssets>runtime</ExcludeAssets>`**: Toàn bộ thư viện cốt lõi của AutoCAD như `AcDbMgd.dll`, `AcMgd.dll`, `AcCoreMgd.dll` bắt buộc phải thêm `<ExcludeAssets>runtime</ExcludeAssets>` trong PackageReference (SDK-style). Nếu không, NuGet sẽ chép đè DLL của Autodesk ra thư mục output và tranh chấp bộ nhớ!
 2. Dự án đã cấu hình **multi-targeting** sẵn: `<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>` — tự động build cả hai TFM cùng lúc.
 
 ### Hỗ trợ AutoCAD 2025+ (.NET 8.0)
-Dự án đã **multi-target** sẵn cả `net48` (AutoCAD 2021–2024) lẫn `net8.0-windows` (AutoCAD 2025+). Một lần `dotnet build` sinh ra cả hai TFM, `package.ps1` đóng gói vào bundle đúng thư mục. Không cần thay đổi thêm gì.
+Dự án đã **multi-target** sẵn cả `net48` (AutoCAD 2021–2024) lẫn `net8.0-windows` (AutoCAD 2025+). Một lần `dotnet build` sinh ra cả hai TFM, và `package.ps1` đóng gói cả hai vào bundle đúng thư mục. Bản `net8.0-windows` **chưa được chạy thử trên AutoCAD 2025** (ngoài phạm vi hiện tại).
 
 ### Chế độ Build (Debug vs Release)
-- **Chế độ Debug**: Dự án đã được thiết lập Post-build event sao chép file `.dll` thành tên ngẫu nhiên (ví dụ `CadCoreFramework_1234.dll`). Việc này cho phép bạn biên dịch lại mã và `NETLOAD` file mới vào AutoCAD mà không cần khởi động lại AutoCAD! Để Debug, mở Visual Studio -> `Debug` -> `Attach to Process` -> chọn `acad.exe`.
+- **Chế độ Debug**: tên assembly có **timestamp** (`CadCoreFramework_yyyyMMdd_HHmmss.dll`), và Post-build copy nó về tên cố định `CadCoreFramework.dll`. Mỗi lần build là một assembly mới, nên bạn `NETLOAD` lại được mà không cần khởi động lại AutoCAD. Để Debug: Visual Studio → `Debug` → `Attach to Process` → `acad.exe` (Managed .NET Framework 4.x). Chi tiết: [T04](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md).
 - **Chế độ Release**: Sau khi Build Release, chạy `.\package.ps1` để đóng gói thành thư mục `.bundle` đúng chuẩn Autodesk. Chép thư mục bundle vào `%APPDATA%\Autodesk\ApplicationPlugins` là plugin tự chạy.
 
 ---
 
 ## 🚀 4. Workflow: Quy Trình 7 Bước Tạo Chức Năng Mới
 
-Để tạo chức năng mới (VD: "Vẽ Tủ Điện") mà không vi phạm kiến trúc, hãy tuân thủ 7 bước:
+Để tạo chức năng mới (VD: "Vẽ Tủ Điện") mà không vi phạm kiến trúc, đi đúng **các tầng của [Golden Sample](docs/09_GOLDEN_SAMPLE.md)**. Khi phân vân, copy `Samples/GridMarker/`. Bản đầy đủ có checklist: [T08 §2](docs/training/T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn).
 
-**Bước 1: Khởi tạo Interface Service** (`Services/ITuDienService.cs`)
+**Bước 1: Model + logic thuần** (không kiểu AutoCAD → test được 100%)
 ```csharp
-public interface ITuDienService {
-    Task<bool> VeTuDienAsync(string tenTu);
-}
-```
-
-**Bước 2: Viết Logic AutoCAD** (`Services/TuDienService.cs`)
-Đặt toàn bộ lệnh `Prompt` và logic vẽ `ExecuteAsync` tại đây:
-```csharp
-public async Task<bool> VeTuDienAsync(string tenTu) {
-    var pt = CadPromptHelper.GetPoint("Chọn điểm đặt Tủ Điện:");
-    if (pt == null) return false;
-
-    // Sử dụng undoMarkName để AutoCAD gom toàn bộ thao tác vẽ vào 1 bước Ctrl+Z duy nhất
-    await _cadContext.ExecuteAsync(async () => {
-        Action<ICadScope> action = scope => {
-            scope.DrawRectangle(pt.Value, pt.Value + new Vector3d(100, 200, 0));
-        };
-        return Task.FromResult(action);
-    }, autoRegen: false, undoMarkName: "Vẽ Tủ Điện");
-    
-    return true;
-}
-```
-
-**Bước 3: Đăng ký Service** (`Core/AppBootstrapper.cs`)
-```csharp
-services.AddSingleton<ITuDienService, TuDienService>();
-```
-
-**Bước 4: Khởi tạo ViewModel** (`ViewModels/TuDienViewModel.cs`)
-Inject Service qua constructor, tuyệt đối không dùng namespace AutoCAD ở đây:
-```csharp
-public partial class TuDienViewModel : ViewModelBase {
-    private readonly ITuDienService _tuDienService;
-    public TuDienViewModel(ITuDienService tuDienService) { _tuDienService = tuDienService; }
-
-    [RelayCommand]
-    private async Task DrawAsync() {
-        await _tuDienService.VeTuDienAsync("Main Panel");
+public sealed class TuDienSpec
+{
+    public TuDienSpec(string tenTu, double rong, double cao) { TenTu = tenTu; Rong = rong; Cao = cao; }
+    public string TenTu { get; } public double Rong { get; } public double Cao { get; }
+    public IReadOnlyList<string> Validate()
+    {
+        var errors = new List<string>();
+        if (string.IsNullOrWhiteSpace(TenTu)) errors.Add("Tên tủ không được trống.");
+        if (Rong <= 0 || Cao <= 0) errors.Add("Kích thước phải lớn hơn 0.");
+        return errors;
     }
 }
 ```
 
-**Bước 5: Đăng ký ViewModel** (`Core/AppBootstrapper.cs`)
+**Bước 2: Interface Service** (chỉ kiểu của plugin, **không prompt**)
 ```csharp
-services.AddTransient<TuDienViewModel>();
+public interface ITuDienService
+{
+    CadResult<ObjectId> Draw(TuDienSpec spec, double x, double y);
+}
 ```
 
-**Bước 6: Xây dựng UI (WPF)** (`Views/TuDienControl.xaml`)
-Gắn DataContext trong code-behind bằng cách gọi `AppBootstrapper.ServiceProvider?.GetService<TuDienViewModel>()`.
+**Bước 3: Service**: vỏ mỏng quanh `ICadContext`, đồng bộ, luôn có `undoMarkName` (vì còn được gọi từ palette)
+```csharp
+public sealed class TuDienService : ITuDienService
+{
+    private readonly ICadContext _cad;
+    public TuDienService(ICadContext cad) => _cad = cad;
 
-**Bước 7: Kích hoạt từ AutoCAD CLI** (`Commands/TuDienCommands.cs`)
+    public CadResult<ObjectId> Draw(TuDienSpec spec, double x, double y)
+        => _cad.TryExecute(scope =>
+        {
+            ObjectId frame = scope.DrawRectangle(new Point3d(x, y, 0),
+                new Point3d(x + spec.Rong, y + spec.Cao, 0), layer: "E-PANEL");
+            scope.DrawMText(spec.TenTu, new Point3d(x, y + spec.Cao + 50, 0), textHeight: 50, layer: "E-PANEL");
+            return frame;
+        }, undoMarkName: "Vẽ Tủ Điện");
+}
+```
+
+**Bước 4: Lệnh**: prompt **trước**, rồi validate, rồi gọi service
 ```csharp
 [CommandMethod("VE_TU_DIEN")]
-public void VeTuDienCommand() {
-    ExecuteCommand(() => {
-        PaletteService.TogglePalette("TuDienUI", () => new Views.TuDienControl(), "Tủ Điện");
+public void VeTuDien()
+{
+    ExecuteCommand(() =>
+    {
+        Point3d? pt = CadPromptHelper.GetPoint("Chọn điểm đặt Tủ Điện:");   // đã đổi UCS → WCS
+        if (pt == null) return;                                               // ESC
+        var spec = new TuDienSpec("MSB-01", 600, 2000);
+        var errors = spec.Validate();
+        if (errors.Count > 0) { foreach (var e in errors) GetRequiredService<INotificationService>().Warn(e); return; }
+
+        var result = GetRequiredService<ITuDienService>().Draw(spec, pt.Value.X, pt.Value.Y);
+        if (!result.IsSuccess) throw new InvalidOperationException(result.ErrorMessage, result.Exception);
     });
 }
 ```
+
+**Bước 5: ViewModel**: không kiểu WPF/AutoCAD; nhập toạ độ trên form (palette không prompt)
+```csharp
+public partial class TuDienViewModel : ViewModelBase
+{
+    private readonly ITuDienService _service;
+    [ObservableProperty] private string _tenTu = "MSB-01";
+    [ObservableProperty] private double _x;
+    [ObservableProperty] private double _y;
+    public TuDienViewModel(ITuDienService service) => _service = service;
+
+    [RelayCommand]
+    private void Draw() => RunSafe(() =>
+    {
+        var result = _service.Draw(new TuDienSpec(TenTu, 600, 2000), X, Y);
+        if (!result.IsSuccess) ErrorMessage = result.ErrorMessage;
+    });
+}
+```
+
+**Bước 6: Palette WPF**: XAML chỉ có Binding, dùng `{DynamicResource …}` cho style. Code-behind copy mẫu [`GridMarkerPalette.xaml.cs`](Samples/GridMarker/GridMarkerPalette.xaml.cs): lấy ViewModel từ DI và **ném lỗi nếu thiếu** (`?? throw new InvalidOperationException(…)`), nạp `Styles.xaml` bằng pack URI dựng lúc runtime.
+
+**Bước 7: Đăng ký + test**
+```csharp
+// Core/AppBootstrapper.cs → ConfigureServices
+services.AddSingleton<ITuDienService, TuDienService>();
+services.AddTransient<TuDienViewModel>();
+// Properties/AssemblyInfo.cs
+[assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(MyPlugin.Commands.TuDienCommands))]
+```
+Test: `TuDienSpec` bằng xUnit thuần; `TuDienService` bằng `FakeCadContext { ExecuteAction = false }` (đúng một `TryExecute`, đúng undo mark); ViewModel bằng Mock `ITuDienService`; palette bằng `XamlPaletteTests` ([T05](docs/training/T05_TESTING_STRATEGY.md)).
 
 ---
 
@@ -197,19 +227,22 @@ scope.DrawRectangle(p1, p2, layer: "MyLayer", lineWidth: 2.0);
 scope.DrawMText("Nội dung...", p1, textHeight: 2.5, width: 50.0);
 ```
 
-### 2. Dữ Liệu Ẩn (XRecord JSON Metadata)
-Lưu trữ một đối tượng JSON vào bất cứ khối hình AutoCAD nào mà không sợ giới hạn 16KB của XData:
+### 2. Dữ Liệu Ẩn (JSON Metadata: XRecord hoặc XData)
+Dữ liệu lớn dùng **XRecord** (Extension Dictionary, không vướng giới hạn 16 KB/đối tượng của XData):
 ```csharp
-var myData = new { Name = "Máy bơm", Power = 55.0 };
-entity.SetMetadata(scope.Transaction, "APP_KEY", myData); // Lưu
-var data = entity.GetMetadata<dynamic>("APP_KEY"); // Đọc
+var myData = new { v = 1, Name = "Máy bơm", Power = 55.0 };
+scope.SetXRecord(entityId, "APP_KEY", myData);              // Lưu (XRecord)
+var data = scope.GetXRecord<dynamic>(entityId, "APP_KEY");  // Đọc
 ```
+Dữ liệu nhỏ, cần lọc chọn theo app (`SelectionFilterBuilder.WithXData`) thì dùng **XData**: `entity.SetMetadata(scope.Transaction, "APP_KEY", myData)` / `entity.GetMetadata<dynamic>("APP_KEY")` (≤ 15.000 ký tự JSON). So sánh: [T08 §8](docs/training/T08_RECIPES_EXTENDING.md#8-lưu-metadata-xdata-hay-xrecord).
 
 ### 3. Hiệu ứng Di Chuột (Jigs)
-Tạo hiệu ứng Preview mượt mà khi người dùng kéo chuột (kế thừa `CadEntityJigBase`):
+Jig xem trước khi người dùng kéo chuột. Entity của jig **chưa nằm trong database**: hủy thì phải `Dispose()`, chốt thì append. Ví dụ đầy đủ: lệnh `DEMO_JIG_BLOCK` ([`Demos/DemoInteractionCommands.cs`](Demos/DemoInteractionCommands.cs)).
 ```csharp
-var jig = new BlockPlacementJig(blockId);
-var result = Editor.Drag(jig);
+var blockRef = new BlockReference(Point3d.Origin, blockDefId);    // blockDefId: ObjectId của định nghĩa block
+var jig = new BlockPlacementJig(blockRef, "\nChọn vị trí đặt Block: ");
+if (Editor.Drag(jig).Status != PromptStatus.OK) { blockRef.Dispose(); return; }
+CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(blockRef); });
 ```
 
 ---
@@ -217,7 +250,10 @@ var result = Editor.Drag(jig);
 ## 💣 6. Xử Lý Sự Cố (Troubleshooting)
 
 Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockViolation`, `eNotOpenForWrite`, v.v.
-👉 **Hãy xem hướng dẫn cứu hộ tại:** [DevOps & Troubleshooting](docs/06_DEVOPS_AND_STANDARDS.md)
+👉 **Hướng dẫn cứu hộ:**
+- [T04: Debug & chẩn đoán](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md): cây quyết định từ triệu chứng tới nguyên nhân, đọc log, attach debugger, phân tích crash.
+- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 14 sự cố thật của dự án + 30 bẫy AutoCAD API kinh điển.
+- [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [DevOps & Standards](docs/06_DEVOPS_AND_STANDARDS.md)
 
 ---
 *Chúc bạn có một trải nghiệm lập trình AutoCAD dễ chịu, khoa học và đạt chuẩn kỹ nghệ phần mềm cùng CadCoreFramework!*

@@ -9,8 +9,8 @@ Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫ
 Tài liệu này hướng dẫn bạn từ lúc mở Visual Studio cho đến khi thấy kết quả đầu tiên bên trong AutoCAD. Không cần hiểu kiến trúc ngay — cứ chạy được cái đã.
 
 > [!IMPORTANT]
-> **Yêu cầu:** Visual Studio 2022, AutoCAD 2021–2024 (64-bit), .NET Framework 4.8. 
-> Nếu bạn dùng AutoCAD 2025+, vui lòng nâng cấp dự án lên **.NET 8.0**.
+> **Yêu cầu:** Visual Studio 2022, AutoCAD 2021–2024 (64-bit), .NET Framework 4.8 (target `net48`, đã kiểm chứng trên AutoCAD 2024).
+> Dự án cũng build sẵn `net8.0-windows` cho AutoCAD 2025+, nhưng bản đó **chưa được chạy thử trên AutoCAD thật**.
 > Đảm bảo AutoCAD đang **mở** và **có ít nhất 1 bản vẽ đang active** trước khi NETLOAD.
 
 ### Sơ đồ Cấu trúc Thư mục (Folder Tree)
@@ -46,7 +46,9 @@ dotnet build CadCoreFramework.sln -c Debug
 
 ### Bước 3: Kiểm Tra Plugin
 Gõ lệnh `CORE_INFO`. Nếu thành công, Command Line sẽ in ra:
-`[CadCoreFramework] Plugin infrastructure is ready.`
+`[CadCoreFramework] Hạ tầng plugin đã sẵn sàng.`
+
+Không thấy dòng này, hoặc lệnh báo `Unknown command`? Xem cây quyết định chẩn đoán ở [T04 §9](training/T04_DEBUGGING_TROUBLESHOOTING.md#9-cây-quyết-định-triệu-chứng--nguyên-nhân).
 
 ---
 
@@ -64,7 +66,7 @@ Khi bước vào .NET và **CadCoreFramework**, bạn đang xây dựng một **
 flowchart LR
     UI[Giao Diện\nWPF XAML] -->|Binding\nData| VM(ViewModel)
     VM -->|ICommand\nClick| Svc{Service Layer}
-    Svc -->|Transaction\nExecuteAsync| CAD[(AutoCAD\nDatabase)]
+    Svc -->|ICadContext\nTryExecute| CAD[(AutoCAD\nDatabase)]
 ```
 
 > [!CAUTION]
@@ -79,6 +81,9 @@ AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao di�
 
 ## 1.3 Lộ Trình Cho Người Mới (Fresher Roadmap) & Bài Toán Thực Tế
 
+> [!TIP]
+> Lộ trình **đầy đủ 12 tuần** từ Fresher đến Senior (khung năng lực, 16 bài lab, đồ án, đề đánh giá) nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần.
+
 Để nhanh chóng làm chủ Framework, Fresher nên tự thực hành bài toán **Vẽ Tủ Điện MSB** với lộ trình 3 tuần sau:
 
 ### Tuần 1: Tư Duy & Kiến Trúc
@@ -87,20 +92,22 @@ AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao di�
 - Đọc [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md) và chạy thử lệnh `SAMPLE_GRID` / `SHOW_PALETTE` — đây là khuôn mẫu chuẩn để copy khi viết tính năng mới.
 
 ### Tuần 2: Thực Hành "Vẽ Tủ Điện MSB"
-Đây là bài tập giúp bạn "chạm tay" vào toàn bộ luồng dữ liệu của Framework.
-1. **Tạo View & ViewModel:**
-   - Tạo file `TuDienViewModel.cs`. Thêm một Property `TenTu` (kiểu string) và `ChieuCao` (kiểu double).
-   - Tạo file `TuDienControl.xaml`. Kéo thả 2 TextBox (bind vào `TenTu` và `ChieuCao`) và 1 Button (bind vào lệnh `DrawCommand`).
-2. **Tạo Service Xử Lý:**
-   - Tạo `TuDienService.cs` (Kế thừa `ITuDienService`).
-   - Viết hàm `VeTuDienAsync(string tenTu, double chieuCao)`.
-   - Trong hàm này, gọi `CadPromptHelper.GetPoint("Chọn điểm đặt tủ")` để lấy toạ độ `(X, Y)`.
-   - Tiếp theo, gọi `_cadContext.ExecuteAsync(...)` mở Transaction.
-   - Bên trong `ExecuteAsync`, sử dụng `scope.DrawRectangle` để vẽ thân tủ, và `scope.DrawMText` để in Tên Tủ lên vị trí vừa chọn.
-3. **Đăng Ký Khởi Tạo:**
-   - Đăng ký `TuDienService` và `TuDienViewModel` vào `AppBootstrapper.cs`.
-   - Tạo một `CommandMethod` mới trong thư mục Commands để hiển thị Palette chứa `TuDienControl.xaml` của bạn.
+Đây là bài tập giúp bạn "chạm tay" vào toàn bộ luồng dữ liệu của Framework. Làm **đúng thứ tự tầng của Golden Sample**:
+1. **Model + logic thuần:**
+   - `TuDienSpec` (bất biến: `TenTu`, `ChieuRong`, `ChieuCao`) có `Validate()` trả về **danh sách** lỗi.
+   - `TuDienPlanner` tính toạ độ khung và vị trí chữ bằng `double`, **không** dùng kiểu AutoCAD.
+2. **Service (không prompt):**
+   - `ITuDienService` / `TuDienService` với hàm **đồng bộ** `CadResult<ObjectId> Draw(TuDienSpec spec, double x, double y)`.
+   - Bên trong: `_cadContext.TryExecute(scope => { scope.DrawRectangle(…); scope.DrawMText(…); }, undoMarkName: "Vẽ Tủ Điện")`.
+   - ⚠️ **Không** gọi `CadPromptHelper` trong Service: Service được gọi cả từ palette (application context), nơi không prompt được. **Không** dùng `ExecuteAsync` khi không có việc gì thật sự async.
+3. **Điểm vào:**
+   - Lệnh `VE_TU_DIEN`: `CadPromptHelper.GetPoint("Chọn điểm đặt tủ")` **trước**, rồi validate, rồi gọi service.
+   - `TuDienViewModel` + `TuDienControl.xaml`: nhập toạ độ trên form, nút *Vẽ* gắn `CanExecute` với `Validate()`.
+4. **Đăng Ký Khởi Tạo:**
+   - Service `AddSingleton`, ViewModel `AddTransient` trong `AppBootstrapper.ConfigureServices`.
+   - `[assembly: CommandClass]` trong `Properties/AssemblyInfo.cs` cho class lệnh mới.
 
 ### Tuần 3: Trở Thành Senior
-- Tìm hiểu về XRecord (Phần 4). Sau khi vẽ xong Tủ Điện MSB ở trên, hãy tự viết code đính kèm một cục dữ liệu JSON chứa giá trị `TenTu` và `ChieuCao` vào đúng cái Line của cái tủ vừa vẽ.
-- Viết Unit Test cho lớp `TuDienService` bằng cách Mock lại `ICadContext`.
+- Tìm hiểu về XRecord (Phần 4). Gắn dữ liệu JSON (`TenTu`, `ChieuRong`, `ChieuCao`, kèm trường version) vào **khung tủ** bằng `scope.SetXRecord(...)` ngay trong lambda của Service.
+- Viết Unit Test: `TuDienSpec`/`TuDienPlanner` bằng xUnit thuần (kiểm **kết quả**), `TuDienService` bằng `FakeCadContext { ExecuteAction = false }` (kiểm **hợp đồng**: đúng một `TryExecute`, đúng undo mark), ViewModel bằng Mock `ITuDienService`.
+- Phiên bản đồ án đầy đủ: [T10 §3: Bộ công cụ Tủ điện MSB](training/T10_LABS_AND_ASSESSMENT.md#3-đồ-án-cuối-khóa-bộ-công-cụ-tủ-điện-msb).

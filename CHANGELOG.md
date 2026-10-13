@@ -9,7 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-_Chưa có thay đổi._
+### Added
+- **🎓 Học viện CadCoreFramework (`docs/training/`)**: bộ tài liệu đào tạo chuyên sâu cho người kế thừa dự án, từ Fresher lên Senior. Gồm lộ trình 12 tuần + khung năng lực 4 cấp (README); T01 Nền tảng AutoCAD .NET; T02 Mổ xẻ kiến trúc; T03 Sổ tay sự cố (14 sự cố thật của dự án + 30 bẫy API); T04 Debug & chẩn đoán; T05 Kiểm thử; T06 Build/phát hành/DevOps; T07 Hiệu năng; T08 Công thức mở rộng; T09 Sổ tay Senior (14 ADR, checklist review, **backlog kỹ thuật 27 mục đã kiểm chứng**); T10 16 bài lab + đồ án + đề đánh giá lên cấp; Thuật ngữ Anh–Việt. Tên API AutoCAD trong tài liệu được đối chiếu với metadata `AcDbMgd`/`AcCoreMgd` 24.0; giá trị sysvar được kiểm bằng accoreconsole `/isolate`; toàn bộ link/anchor được kiểm bằng script (0 lỗi).
+
+### Fixed (docs)
+- Phần 1: lộ trình Fresher từng dạy prompt **trong Service** và `ExecuteAsync` cho thao tác đồng bộ (anti-pattern), nay theo đúng tầng Golden Sample; thông điệp `CORE_INFO` đúng với code.
+- Phần 2: "quên `Commit()` thì AutoCAD crash" → thực tế là Abort âm thầm; Undo gom theo lệnh (UndoMark cần cho application context); lý do cần `AssemblyResolve`; ESC khi prompt trả `PromptStatus.Cancel`, không phải exception.
+- Phần 3: ví dụ "Vẽ Tủ Điện" **không biên dịch được** (`style:` → `textStyle:`; chuỗi bị truyền vào tham số `bool autoRegen` → `undoMarkName:`); Jig chạy tuần tự (không "song song") với constructor `RectangleJig(corner1, polyline)` thật + `Dispose` khi hủy; bỏ lập luận `eVetoed`.
+- Phần 4: giới hạn XData 16 KB tính **mỗi đối tượng** (không phải toàn bản vẽ); sơ đồ Xrecord đúng với `XRecordHelper`.
+- Phần 5: `RunSafeAsync` không dùng `Dispatcher.Invoke`; resource key có thật; cảnh báo lỗi theme `DARKMODE`; công thức Ribbon.
+- Phần 6: không có kiểu `UserBreakException`; prompt thuộc về lệnh chứ không thuộc Service; ví dụ Moq dùng `GetAllLayers`; giải thích đúng gốc rễ của hot-reload.
+- Phần 7: viết lại theo chữ ký thật (`InsertBlock` thay cho `DrawBlockReference` không tồn tại; EventAggregator giữ tham chiếu **mạnh**; extension methods **không** tự mở transaction; bỏ `IsAlmostEqualTo` không tồn tại).
+- Phần 9: `smoke.scr` không chạy được trong accoreconsole; kiểm tra trên AutoCAD thật là thủ công.
+- CHANGELOG: đính chính hai dòng lịch sử mô tả API `Database.BeginUndoMark()` không tồn tại.
 
 ---
 
@@ -135,7 +147,7 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 
 ### Changed
 - **`EventService`** — fixed lambda event subscription bug. Delegate references are now stored in `Dictionary<Document, Handler>` enabling proper `UnhookDocument` via `-=`. Previously, anonymous lambdas could not be unsubscribed, causing permanent event handler accumulation over long sessions.
-- **`CadContext`** — replaced brittle COM `dynamic` UndoMark (`AcadApplication.StartUndoMark()`) with the managed `Database.BeginUndoMark()` / `EndUndoMark()` API. `EndUndoMark` is now in a `finally` block to guarantee pairing even when the action throws.
+- **`CadContext`** — `EndUndoMark` is now in a `finally` block to guarantee pairing even when the action throws. *(Đính chính 2026-10-13: dòng này từng ghi UndoMark được chuyển sang API managed `Database.BeginUndoMark()`. API đó **không tồn tại** trong AutoCAD .NET; UndoMark luôn dùng COM `StartUndoMark`/`EndUndoMark` qua `dynamic`. Xem [T03 A14](docs/training/T03_PITFALLS_CASEBOOK.md#a14-changelog-mô-tả-một-api-không-tồn-tại).)*
 - **`.csproj`** — multi-target `net48` (AutoCAD 2021–2024) + `net8.0-windows` (AutoCAD 2025+) with version-gated AutoCAD NuGet references (24.x vs 25.x). Removed hard-coded `HintPath` pointing to `C:\Program Files\Autodesk\AutoCAD 2021\`.
 - **`AppBootstrapper`** — `OverruleManager` and `ICommandHistoryService` registered in the DI container. `OverruleManager.Dispose()` now called explicitly in `Terminate()` before the DI container is disposed.
 - `CadCoreFramework.Tests.csproj` — upgraded from bare skeleton to full xUnit + FluentAssertions + Moq setup.
@@ -147,7 +159,7 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 
 ### Fixed
 - `EventService` lambda leak — handlers were permanently attached to `Database.ObjectAppended` / `ObjectErased` and could never be removed.
-- `CadContext` COM UndoMark — silently failed on non-standard AutoCAD installations; now uses the stable managed API.
+- `CadContext` COM UndoMark — `EndUndoMark` guaranteed in `finally`. *(Đính chính 2026-10-13: không có "managed API" thay thế; vẫn là COM, và từ v1.0.0 lỗi COM được ghi log thay vì bị nuốt.)*
 - Build portability — `HintPath` for `Newtonsoft.Json` pointed to a machine-specific path, breaking CI builds and developer onboarding.
 
 ### Added (initial template baseline)

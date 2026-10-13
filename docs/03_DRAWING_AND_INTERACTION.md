@@ -37,25 +37,23 @@ Khi thao tác với Database trong `ICadScope`, bạn cần nắm vững chế �
 - **`OpenMode.ForRead`**: Chỉ đọc dữ liệu. Rất an toàn, cho phép nhiều lệnh đọc cùng lúc.
 - **`OpenMode.ForWrite`**: Ghi/Sửa dữ liệu. Khoá độc quyền đối tượng đó, người khác không can thiệp được.
 
-**Anti-Pattern thường gặp (Lỗi eVetoed):**
-Nhiều người có thói quen mở bảng Layer (`LayerTable`) bằng `ForRead`, kiểm tra xem Layer tồn tại chưa. Nếu chưa, họ gọi `UpgradeOpen()` để chuyển sang `ForWrite` rồi thêm Layer mới.
-Nếu có một lệnh khác (hoặc Event listener) đang âm thầm khoá bảng Layer này, lệnh `UpgradeOpen()` sẽ thất bại và quăng lỗi `eVetoed` (Bị cấm quyền).
-
-**Pattern của Framework:**
-Hãy nhìn vào hàm `EnsureLayer()` trong [`CadScopeDrawingExtensions.cs`](../Extensions/CadScopeDrawingExtensions.cs). Framework mở bảng Layer bằng `ForWrite` **ngay từ đầu**:
+**Hai cách mở một bảng mà bạn có thể sẽ ghi:**
+1. Mở `ForRead`, kiểm tra `Has(name)`, chỉ khi cần thêm mới thì `UpgradeOpen()`. Rẻ hơn khi phần lớn lần gọi không ghi gì. Framework dùng cách này cho `CurrentSpace` (upgrade lười trong `AppendEntityToCurrentSpace`) và cho `RegAppTable` (`XDataHelper.EnsureRegApp`).
+2. Mở `ForWrite` ngay từ đầu. Đơn giản khi gần như chắc chắn sẽ ghi. Hàm `EnsureLayer()` trong [`CadScopeLayerExtensions.cs`](../Extensions/CadScopeLayerExtensions.cs) dùng cách này:
 ```csharp
 var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForWrite);
 ```
-Nếu bị khoá, nó sẽ ném Exception ngay lập tức trước khi logic vẽ bắt đầu, giúp huỷ lệnh an toàn thay vì vẽ hỏng nửa chừng.
+Trong **một** transaction, cả hai cách đều đúng. Comment trong `EnsureLayer` giải thích lựa chọn này bằng lỗi `eVetoed`. Đó không phải lý do chính, xem [T09 B-19](training/T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng). Lỗi bạn **thực sự** hay gặp là sửa đối tượng đang mở `ForRead`, gây `eNotOpenForWrite` ([T01 §4.2](training/T01_AUTOCAD_NET_FOUNDATIONS.md#42-openmode)).
 
 ---
 
 ## 3.3 Ví Dụ Thực Chiến Tủ Điện (Full Flow)
 
-Thay vì gọi lẻ tẻ, dưới đây là một luồng thực tế áp dụng Framework kết hợp: Prompt -> Layer -> Vẽ Khung -> Vẽ Text. 
+Thay vì gọi lẻ tẻ, dưới đây là một luồng thực tế áp dụng Framework kết hợp: Prompt -> Layer -> Vẽ Khung -> Vẽ Text. Đoạn code này có **prompt**, nên thuộc về **lệnh** (bên trong `ExecuteCommand`), không thuộc về Service ([Phần 9 §9.4](09_GOLDEN_SAMPLE.md)).
 
 ```csharp
-public void VeTuDien(string tenTu)
+// Thân của một [CommandMethod], bên trong ExecuteCommand(() => { … })
+void VeTuDien(string tenTu)
 {
     // Bước 1: Hỏi tọa độ chèn
     Point3d? pt = CadPromptHelper.GetPoint("Chọn vị trí đặt tủ:");
@@ -74,9 +72,9 @@ public void VeTuDien(string tenTu)
         // 2c. Viết Tên Tủ vào tâm
         var centerPt = new Point3d(pt.Value.X + 300, pt.Value.Y + 300, 0);
         scope.EnsureTextStyle("ARIAL_BOLD", "arialbd.ttf");
-        scope.DrawMText(tenTu, centerPt, textHeight: 50, layer: "ELEC_PANEL", style: "ARIAL_BOLD");
-        
-    }, "Vẽ Tủ Điện"); // 1 Bước Ctrl+Z
+        scope.DrawMText(tenTu, centerPt, textHeight: 50, layer: "ELEC_PANEL", textStyle: "ARIAL_BOLD");
+
+    }, undoMarkName: "Vẽ Tủ Điện"); // tham số thứ 2 theo vị trí là bool autoRegen → phải đặt TÊN tham số
 }
 ```
 
@@ -89,21 +87,23 @@ Khi bạn muốn hiển thị một cái Khung hình chữ nhật bám theo con 
 Dự án cung cấp sẵn [`RectangleJig.cs`](../Utils/Jigs/RectangleJig.cs).
 
 ### Giải phẫu cơ chế Jig
-Một vòng lặp Jig bao giờ cũng gồm 2 hàm chạy song song cực nhanh (hàng chục lần / giây) mỗi khi rê chuột:
-1. **`Sampler(JigPrompts prompts)`**: Lấy toạ độ chuột hiện tại. Nếu chuột không di chuyển so với vòng lặp trước, trả về `SamplerStatus.NoChange` để CAD khỏi mất công vẽ lại.
-2. **`Update()`**: Nếu chuột có di chuyển, cập nhật lại toạ độ các đỉnh của Entity (ở đây là cái Khung Hình Chữ Nhật) dựa trên toạ độ mới.
+Mỗi lần rê chuột, `Editor.Drag` gọi **lần lượt** (tuần tự, trên main thread, không song song) hai hàm:
+1. **`Sampler(JigPrompts prompts)`**: lấy toạ độ chuột hiện tại. Nếu không đổi so với lần trước, trả `SamplerStatus.NoChange` để AutoCAD khỏi vẽ lại.
+2. **`Update()`**: nếu toạ độ đã đổi, cập nhật hình học của entity tạm (ở đây là khung chữ nhật).
 
-Cách gọi Jig:
+Cách gọi Jig (constructor thật: `RectangleJig(Point3d corner1, Polyline polyline, string promptMessage = …)`):
 ```csharp
-Point3d startPoint = ...; // Lấy điểm 1
-var jig = new RectangleJig(startPoint);
+Point3d? start = CadPromptHelper.GetPoint("Góc thứ nhất:");     // WCS
+if (start == null) return;
 
-// Editor.Drag sẽ chặn màn hình và chạy vòng lặp Sampler/Update ở trên
-var result = Editor.Drag(jig);
+var pline = new Polyline();                  // entity TẠM, chưa nằm trong database
+var jig = new RectangleJig(start.Value, pline);
+PromptResult result = Editor.Drag(jig);      // chạy vòng lặp Sampler/Update cho tới khi click hoặc ESC
 
-if (result.Status == PromptStatus.OK)
+if (result.Status != PromptStatus.OK)
 {
-    // Người dùng đã Click chuột lần 2 (Chốt)
-    // Sau đó bạn gọi CadContext.Execute() để add hình chữ nhật đó vào Database
+    pline.Dispose();                         // BẮT BUỘC: đối tượng không vào DB thì phải tự Dispose
+    return;
 }
+CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(pline); });   // chốt: đưa vào database
 ```

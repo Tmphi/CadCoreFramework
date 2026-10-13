@@ -22,7 +22,7 @@ _paletteService.TogglePalette(
 ```
 
 ### Thanh Ribbon (`IRibbonService`)
-Ribbon là dải menu nằm ngang phía trên cùng. Bạn có thể tự động sinh Tab và Nút bấm (Button) bằng cách bổ sung hàm cấu hình vào [`RibbonService.cs`](../Core/RibbonService.cs).
+Ribbon là dải menu nằm ngang phía trên cùng. [`RibbonService.cs`](../Core/RibbonService.cs) cung cấp `AddTab/AddPanel/AddButton/AddSplitButton` và `RegisterBuildAction` (tự dựng lại sau `CUI`/`MENULOAD`). **Đừng sửa `RibbonService`** để thêm nút: hãy viết một hàm build riêng rồi đăng ký nó. Ở v1.0.0, dự án **chưa dựng tab nào**. Công thức đúng (thứ tự đăng ký, tránh nhân đôi nút): [T08 §6](training/T08_RECIPES_EXTENDING.md#6-thêm-ribbon-tab).
 
 ---
 
@@ -35,15 +35,17 @@ Lớp nền tảng [`ViewModelBase`](../ViewModels/ViewModelBase.cs) giải quy�
 ### Phân tích `RunSafeAsync`
 Bình thường, nếu bạn gọi một `Task.Run()` trong WPF và Task đó bị lỗi, lỗi sẽ văng ra luồng nền (Background thread) và "nuốt" mất (bạn không hề biết có lỗi xảy ra). Nếu bạn cố gọi `MessageBox.Show` từ luồng nền, phần mềm sẽ crash vì can thiệp vào UI Thread.
 
-Cơ chế của `RunSafeAsync`:
-1. Bật cờ `IsBusy = true` (Giao diện hiện xoay xoay vòng Loading).
-2. Chạy hàm bạn cung cấp (bên trong `try-catch`).
-3. Tự bắt lỗi, và nếu có lỗi, nó dùng `Dispatcher.Invoke` để ép lỗi được hiển thị một cách an toàn trên màn hình chính.
-4. Cuối cùng ở `finally`, tắt cờ `IsBusy = false`.
+Cơ chế của `RunSafeAsync` (và bản đồng bộ `RunSafe`), đúng như code hiện tại:
+1. Xóa `ErrorMessage`, bật cờ `IsBusy = true`.
+2. `await` hàm bạn cung cấp, bên trong `try-catch`.
+3. Có lỗi thì **gán `ErrorMessage`** (kèm tiền tố nếu có). Không có `Dispatcher.Invoke` hay MessageBox nào: UI tự hiển thị lỗi nhờ binding vào `ErrorMessage`.
+4. `finally`: tắt `IsBusy = false`.
+
+Lưu ý: với `RunSafe` (đồng bộ), `IsBusy` bật rồi tắt **trước khi UI kịp vẽ lại**, nên spinner chỉ có ý nghĩa với thao tác async. Lỗi cũng chỉ vào `ErrorMessage`, không được ghi log ([T09 B-24](training/T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
 
 **Ví dụ Code XAML (Cần Binding):**
 ```xml
-<!-- Nút bấm sẽ tự động bị Disable nếu IsBusy = true -->
+<!-- Nút chỉ bị disable khi CanExecute của lệnh trả false — ví dụ GridMarkerViewModel.CanDraw() kiểm !IsBusy -->
 <Button Command="{Binding DrawCommand}" Content="Vẽ Ngay" />
 
 <!-- Khung nhập liệu Tên Tủ -->
@@ -81,13 +83,21 @@ public partial class TuDienViewModel : ViewModelBase
 
 ## 5.3 AutoCAD Theme Tự Động (Dark/Light)
 
-AutoCAD có chế độ Dark Mode. Giao diện tĩnh (hardcode màu Trắng/Đen) sẽ rất chói mắt. Framework giải quyết bằng [`ThemeManager.cs`](../Themes/ThemeManager.cs). Nó lắng nghe biến `COLORTHEME` của hệ thống.
+AutoCAD có chế độ Dark Mode. Giao diện tĩnh (hardcode màu Trắng/Đen) sẽ rất chói mắt. Framework dự định giải quyết bằng [`ThemeManager.cs`](../Themes/ThemeManager.cs): đọc theme của AutoCAD, nạp `AutoCadTheme.xaml` (tối) hoặc `AutoCadLightTheme.xaml` (sáng), và nghe `SystemVariableChanged` để đổi theo lúc đang chạy.
 
-Để áp dụng màu này, trong file XAML của View, hãy dùng `DynamicResource` cho màu nền và màu chữ:
+> [!WARNING]
+> **Hiện trạng v1.0.0 (đã kiểm chứng trên AutoCAD 2024):** `CadApplicationHelper.IsDarkMode` đọc sysvar **`DARKMODE`**, mà biến này **không tồn tại** (`getvar` trả `nil`). Biến đúng là **`COLORTHEME`** (0 = tối, 1 = sáng). Hệ quả: theme `Cad*` luôn ra bản sáng và không đổi theo AutoCAD. Đồng thời `Styles.xaml` cố định một bảng màu tối riêng. Chi tiết và hướng sửa: [T03 A13](training/T03_PITFALLS_CASEBOOK.md#a13-palette-luôn-theme-sáng-dù-autocad-đang-tối), backlog B-01/B-02/B-23, Lab L12.
+
+Trong XAML của View, luôn dùng `DynamicResource` với **key có thật**. Hai nhóm key hiện có:
+- `Themes/Styles.xaml` (palette dùng chủ yếu): `BackgroundBrush`, `SurfaceBrush`, `TextPrimaryBrush`, `TextSecondaryBrush`, `AccentBrush`, `DangerBrush`, `SuccessBrush`, `WarningBrush`, cùng các style `LabelStyle`, `InputStyle`, `PrimaryButton`…
+- `Themes/AutoCadTheme.xaml` / `AutoCadLightTheme.xaml`: `CadBackground.Primary`, `CadForeground.Primary`, `CadAccent.Blue`, `CadButton`, `CadTextBox`…
+
 ```xml
 <!-- Tuyệt đối không viết Background="White" hay Foreground="Black" -->
-<UserControl Background="{DynamicResource PaletteBackground}"
-             Foreground="{DynamicResource TextBrush}">
+<UserControl Background="{DynamicResource BackgroundBrush}"
+             Foreground="{DynamicResource TextPrimaryBrush}">
     <!-- Các thành phần bên trong sẽ tự thừa kế màu -->
 </UserControl>
 ```
+
+`DynamicResource` với key **không tồn tại** sẽ không báo lỗi, chỉ âm thầm dùng màu mặc định (đã xảy ra ở `LayerManagerControl.xaml`, backlog B-03).

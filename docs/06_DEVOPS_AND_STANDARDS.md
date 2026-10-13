@@ -7,12 +7,13 @@ Phần cuối cùng này hướng dẫn các kỹ thuật bảo trì cấp độ
 ## 6.1 Tuyệt Chiêu Hot-Reload WPF ("Lời Nguyền BAML Cache")
 
 WPF dịch các file XAML sang dạng nhị phân (BAML) và load thẳng vào RAM của tiến trình AutoCAD thông qua `PresentationFramework.dll`.
-- **Vấn đề:** AutoCAD sử dụng cơ chế Reflection để load các DLL. Khi DLL tên là `MyPlugin.dll` được load vào, BAML của nó bị Cache lại. Nếu bạn thoát Visual Studio, sửa một cái Nút Bấm, Build lại, và đè file mới (cùng tên) vào thư mục CAD, sau đó load lại -> CAD thấy tên Assembly vẫn vậy, nó sẽ lôi cái giao diện cũ rích trong Cache ra để hiện -> Type Mismatch -> Crash.
+- **Vấn đề (gốc rễ):** .NET Framework **không gỡ (unload) được** assembly khỏi AppDomain. Khi bạn NETLOAD lại một DLL **cùng identity** (cùng tên assembly + version), CLR trả về chính assembly **đã nạp từ trước**: code cũ, BAML cũ. Ngoài ra, file DLL nạp bằng NETLOAD bị khóa nên không ghi đè được khi build. Kết quả là bạn sửa XAML, build lại, nạp lại mà vẫn thấy giao diện cũ, hoặc gặp lỗi lệch kiểu giữa hai bản.
 - **Cách thợ vườn:** Tắt hẳn AutoCAD, build lại, mở AutoCAD (Mất 3 phút cho 1 lần sửa màu chữ).
 - **Cách của Framework (cấu hình trong `.csproj`):**
   1. MSBuild tự sinh `AssemblyName` kèm Timestamp khi build Debug: `CadCoreFramework_20261010_120000.dll`.
   2. PostBuild event copy file đó về tên chuẩn `CadCoreFramework.dll` để NETLOAD script vẫn dùng được.
-  3. Khi NETLOAD, WPF nhận thấy tên Assembly đã khác, nó sẽ nạp bản BAML mới tinh. Bạn tha hồ chỉnh sửa giao diện XAML liên tục mà không cần tắt AutoCAD.
+  3. Mỗi lần build là một **identity mới**, nên NETLOAD nạp đúng code + BAML mới. Bạn sửa XAML liên tục mà không cần tắt AutoCAD.
+  4. Lưu ý: các bản cũ **vẫn nằm trong AppDomain** (event đã hook, `Initialize` đã chạy). Khi sửa code khởi động, event, Overrule, Ribbon, hoặc khi thấy hành vi lạ, hãy khởi động lại AutoCAD ([T04 §2](training/T04_DEBUGGING_TROUBLESHOOTING.md#2-vòng-lặp-phát-triển-build--nạp--thử)). Hệ quả kỹ thuật: pack URI của WPF phải dựng tên assembly **lúc runtime**.
 
 Build bình thường bằng:
 ```powershell
@@ -78,13 +79,13 @@ using Xunit;
 public class LayerServiceTests
 {
     [Fact]
-    public void GetLayers_ReturnsNonNull()
+    public void GetAllLayers_ReturnsNonNull()
     {
         var mockContext = new Mock<ICadContext>();
-        mockContext.Setup(c => c.ExecuteRead(It.IsAny<Action<ICadScope>>()));
+        mockContext.Setup(c => c.ExecuteRead(It.IsAny<Action<ICadScope>>()));   // không chạy lambda
 
         var service = new LayerService(mockContext.Object);
-        var layers = service.GetLayers();
+        var layers = service.GetAllLayers();
 
         Assert.NotNull(layers);
     }
@@ -143,5 +144,6 @@ Thứ tự khai báo trong một Class bắt buộc phải tuân theo thứ tự
 5. **Private Methods**: Các hàm hỗ trợ ẩn ở dưới cùng.
 
 ### 3. Quy Tắc Kiến Trúc
-- **Không nhét logic CAD vào ViewModels**: ViewModels (kể cả hàm Command) chỉ lo chuẩn bị dữ liệu và gọi Service. Việc lấy tọa độ (Prompt) và mở Transaction phải đẩy xuống Service (hoặc lớp Command Base).
-- **Không dùng `System.Exception` chung chung**: Hãy bắt các loại Exception cụ thể (như `ArgumentNullException`, `InvalidOperationException`). Framework đã bắt riêng `UserBreakException` (khi nhấn ESC) để tránh in lỗi rác ra màn hình.
+- **Không nhét logic CAD vào ViewModels**: ViewModels (kể cả hàm Command) chỉ lo chuẩn bị dữ liệu và gọi Service. **Prompt** (lấy tọa độ…) thuộc về **lệnh** (`[CommandMethod]` trong `ExecuteCommand`), làm *trước* khi mở transaction. **Không bao giờ** prompt trong Service hay ViewModel, vì Service còn được gọi từ palette (application context). **Transaction** đi qua `ICadContext` bên trong Service ([Phần 9 §9.4](09_GOLDEN_SAMPLE.md)).
+- **Không bắt `System.Exception` tràn lan trong code nghiệp vụ**: bắt kiểu cụ thể khi bạn *xử lý được* nó. Việc bắt mọi lỗi chỉ làm ở **biên** (`ExecuteCommand`, `RunSafe`). Framework xử lý riêng `Autodesk.AutoCAD.Runtime.Exception` có `ErrorStatus.UserBreak` (khi nhấn ESC) để không in lỗi rác. Không có kiểu nào tên `UserBreakException`. Lưu ý: ESC *khi đang prompt* không ném exception mà trả `PromptStatus.Cancel`.
+- Chi tiết quy tắc review: [T09 §2](training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review).
