@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Initializes a cloned CadCoreFramework template: regenerates GUIDs and optionally
@@ -23,17 +23,30 @@
     Optional. New project/assembly name (e.g. "MyElectricalPlugin").
     Must start with a letter and contain only letters, digits, underscores, or dots.
 
+.PARAMETER GitHubRepo
+    Optional. "owner/name" of your GitHub repo — replaces the YOUR_ORG/YOUR_REPO
+    placeholder in the README CI badge and the CAD001 analyzer help link.
+
+.PARAMETER RemoveDemos
+    Optional. Deletes the Demos/ folder (all DEMO_* commands). Same effect as
+    `dotnet new cad-plugin --IncludeDemos false`.
+
 .EXAMPLE
     # Regenerate GUIDs only (keep "CadCoreFramework" as the name):
     .\init-template.ps1
 
 .EXAMPLE
-    # Full rename + GUID regeneration:
-    .\init-template.ps1 -ProjectName "MyElectricalPlugin"
+    # Full rename + GUID regeneration, real project without demos:
+    .\init-template.ps1 -ProjectName "MyElectricalPlugin" -GitHubRepo "acme/electrical-plugin" -RemoveDemos
 #>
 param(
     [ValidatePattern('^[A-Za-z][A-Za-z0-9_.]*$')]
-    [string]$ProjectName = ''
+    [string]$ProjectName = '',
+
+    [ValidatePattern('^$|^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
+    [string]$GitHubRepo = '',
+
+    [switch]$RemoveDemos
 )
 
 Set-StrictMode -Version Latest
@@ -72,6 +85,15 @@ if (Test-Path $pkgFile) {
     [System.IO.File]::WriteAllText($pkgFile, $c, [System.Text.Encoding]::UTF8)
     Write-Host "  PackageContents.xml  ProductCode={$newProduct}"
     Write-Host "  PackageContents.xml  UpgradeCode={$newUpgrade}"
+
+    # WiX installer shares the bundle's UpgradeCode — keep them in sync
+    $wxsFile = Join-Path $Root "Deployment\installer\$SourceName.wxs"
+    if (Test-Path $wxsFile) {
+        $w = Get-Content $wxsFile -Raw -Encoding UTF8
+        $w = $w -replace 'UpgradeCode="[0-9A-Fa-f\-]{36}"', "UpgradeCode=""$newUpgrade"""
+        [System.IO.File]::WriteAllText($wxsFile, $w, [System.Text.Encoding]::UTF8)
+        Write-Host "  $SourceName.wxs  UpgradeCode=$newUpgrade"
+    }
 }
 
 # AssemblyInfo.cs — [assembly: Guid("...")]
@@ -99,6 +121,26 @@ if ($slnFile) {
     }
     [System.IO.File]::WriteAllText($slnFile.FullName, $c, [System.Text.Encoding]::UTF8)
     Write-Host "  $($slnFile.Name)  — $($matches.Count) project/solution GUIDs refreshed"
+}
+
+# ─── 1b. GitHub repo placeholder (README badge, analyzer help link) ──────────
+if ($GitHubRepo) {
+    Write-Host ""
+    Write-Host "Setting GitHub repo → $GitHubRepo..."
+    Get-ChildItem -Path $Root -Recurse -Include $TextExts -File |
+        Where-Object { -not (Should-Skip $_.FullName) } |
+        ForEach-Object {
+            $raw = Get-Content -Path $_.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($null -eq $raw -or -not $raw.Contains('YOUR_ORG/YOUR_REPO')) { return }
+            [System.IO.File]::WriteAllText($_.FullName, $raw.Replace('YOUR_ORG/YOUR_REPO', $GitHubRepo), [System.Text.Encoding]::UTF8)
+            Write-Host "  content  $($_.FullName.Substring($Root.Length + 1))"
+        }
+}
+
+# ─── 1c. Demo suite (Demos/ is self-contained — nothing else references it) ──
+if ($RemoveDemos) {
+    $demos = Join-Path $Root 'Demos'
+    if (Test-Path $demos) { Remove-Item $demos -Recurse -Force; Write-Host "  removed  Demos\ (DEMO_* commands)" }
 }
 
 # ─── 2. Full rename (only when -ProjectName is supplied) ─────────────────────

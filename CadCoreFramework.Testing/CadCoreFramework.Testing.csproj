@@ -11,6 +11,8 @@
     <IsPackable>false</IsPackable>
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
+    <!-- x64 như plugin — AnyCPU + AcSeamless.dll (AMD64) gây MSB3270 khi build -warnaserror. -->
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <!--

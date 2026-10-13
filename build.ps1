@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # PowerShell Build Script for CadCoreFramework AutoCAD Plugin
 # Usage:
 #   .\build.ps1                          # Debug build (net48 default)

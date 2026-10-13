@@ -137,6 +137,9 @@ indent_size = 2
 # ─── PowerShell ────────────────────────────────────────────────────────────────
 [*.ps1]
 indent_size = 4
+# BOM BẮT BUỘC: Windows PowerShell 5.1 đọc file không BOM theo ANSI (cp1252) — "—" (E2 80 94)
+# chứa byte 0x94 = dấu ngoặc kép cong → chuỗi bị cắt, script lỗi parse.
+charset = utf-8-bom
 
 # ─── Markdown ──────────────────────────────────────────────────────────────────
 [*.md]

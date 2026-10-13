@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Builds an MSI installer for CadCoreFramework from the packaged .bundle.

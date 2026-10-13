@@ -26,6 +26,27 @@ Chúng tôi đã cấu trúc lại toàn bộ tài liệu thành một bộ giá
 | **Phần 5** | [05_WPF_UI_AND_MVVM.md](docs/05_WPF_UI_AND_MVVM.md) | MVVM Palette, Ribbon, Theme Động (Dark/Light), EventAggregator. |
 | **Phần 6** | [06_DEVOPS_AND_STANDARDS.md](docs/06_DEVOPS_AND_STANDARDS.md) | Bắt lỗi (Troubleshooting), WPF Hot-Reload, Unit Test, Coding Conventions. |
 | **Phần 7** | [07_API_REFERENCE.md](docs/07_API_REFERENCE.md) | Tài liệu tham khảo nhanh API, CadScopeDrawingExtensions, Utils, Builders. |
+| **Phần 8** | [08_COOKBOOK.md](docs/08_COOKBOOK.md) | Công thức giải quyết các bài toán thường gặp. |
+| **Phần 9** | [09_GOLDEN_SAMPLE.md](docs/09_GOLDEN_SAMPLE.md) | Golden Sample — khuôn mẫu chuẩn để copy khi làm tính năng mới. |
+
+---
+
+## 🧩 0. Tạo Dự Án Mới Từ Template
+
+**Cách 1 — `dotnet new` (khuyến nghị):**
+
+```powershell
+dotnet new install .                      # chạy trong thư mục repo này, một lần
+dotnet new cad-plugin -n MyElectricalPlugin --GitHubRepo acme/electrical-plugin --IncludeDemos false
+```
+
+**Cách 2 — clone trực tiếp rồi chạy script:**
+
+```powershell
+.\init-template.ps1 -ProjectName "MyElectricalPlugin" -GitHubRepo "acme/electrical-plugin" -RemoveDemos
+```
+
+Cả hai cách đều: đổi tên toàn bộ project/namespace/file, sinh GUID mới (assembly, solution, ProductCode/UpgradeCode của bundle và MSI), điền repo vào badge CI, và — nếu chọn — bỏ thư mục `Demos/` (lệnh `DEMO_*`). Golden Sample (`Samples/GridMarker`) luôn được giữ lại làm khuôn mẫu.
 
 ---
 
