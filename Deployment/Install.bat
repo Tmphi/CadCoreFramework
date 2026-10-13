@@ -1,10 +1,10 @@
 @echo off
 setlocal
-title Cai Dat CadCoreFramework v2.0 cho AutoCAD
+title Cai Dat CadCoreFramework cho AutoCAD
 cls
 
 echo ======================================================================
-echo    CAI DAT CadCoreFramework v2.0 - PLUGIN QUAN LY THIET BI DIEN AUTOCAD
+echo    CAI DAT CadCoreFramework - PLUGIN AUTOCAD .NET
 echo ======================================================================
 echo.
 
@@ -42,11 +42,14 @@ echo Vi tri cai dat:
 echo   %BUNDLE_DEST%
 echo.
 echo HUONG DAN SU DUNG:
-echo 1. Khoi dong AutoCAD (phien ban 2021 den 2025).
+echo 1. Khoi dong AutoCAD (phien ban 2021 tro len).
 echo 2. Plugin se tu dong duoc AutoCAD nap qua Autoloader.
 echo 3. Go cac lenh sau tren thanh Command Line cua AutoCAD:
 echo    - CORE_INFO    : Kiem tra trang thai khoi tao cua plugin
-echo    - SHOW_PALETTE   : Mo bang Palette cong cu
+echo    - SHOW_PALETTE : Mo Palette Grid Marker
+echo    - SAMPLE_GRID  : Ve luoi o danh nhan (Golden Sample)
+echo    - DEMO_HELP    : Danh sach lenh minh hoa (neu ban build co kem demo)
+echo    Xem day du trong HDSD.txt
 echo ======================================================================
 echo.
 echo Thong bao: Cua so nay se tu dong dong lai sau khi ban nhan phim bat ky.
@@ -59,7 +62,7 @@ echo NGUYEN NHAN:
 echo Ban co the dang mo truc tiep file tu trong file nen ZIP ma chua giai nen.
 echo.
 echo HUONG DAN KHAC PHUC:
-echo 1. Nhan chuot phai vao file CadCoreFramework_v2.0_Setup.zip.
+echo 1. Nhan chuot phai vao file CadCoreFramework_v..._Setup.zip.
 echo 2. Chon Extract All de giai nen toan bo ra thu muc roi moi chay Install.bat.
 goto FINISH
 

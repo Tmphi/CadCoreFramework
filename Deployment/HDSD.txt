@@ -1,22 +1,20 @@
 ======================================================================
- CadCoreFramework v2.0 - PLUGIN QUẢN TRỊ THIẾT BỊ ĐIỆN & CHÈN CAD TỰ ĐỘNG
+ CadCoreFramework - PLUGIN AUTOCAD .NET (KHUNG MẪU + LỆNH MINH HỌA)
 ======================================================================
 
 1. CÀI ĐẶT:
-- Giải nén toàn bộ thư mục file ZIP.
+- Giải nén toàn bộ file ZIP ra một thư mục (KHÔNG chạy trực tiếp trong file ZIP).
 - Nhấp đúp chuột vào file "Install.bat" để cài đặt tự động vào AutoCAD.
-- Mở AutoCAD (Tương thích AutoCAD 2021 đến 2025).
+- Mở AutoCAD (tương thích AutoCAD 2021 trở lên). Plugin được Autoloader tự nạp.
 
 2. CÁC LỆNH SỬ DỤNG TRONG AUTOCAD:
-- CORE_INFO    : Kiểm tra trạng thái khởi tạo và sẵn sàng của plugin.
-- SHOW_PALETTE   : Mở bảng thanh công cụ dạng Palette gắn cạnh màn hình CAD.
+- CORE_INFO          : Kiểm tra plugin đã khởi tạo và sẵn sàng.
+- CORE_TEST_ALL      : Tự kiểm tra hạ tầng (tạo layer, vẽ hình chữ nhật, chữ, XData).
+- SAMPLE_GRID        : Vẽ lưới ô đánh nhãn A1, A2, ... (khuôn mẫu Golden Sample).
+- SHOW_PALETTE       : Mở Palette Grid Marker gắn cạnh màn hình CAD.
+- CADCORE_LAYER_MANAGER : Mở Palette quản lý Layer.
+- CORE_DEBUG         : Mở Debug Inspector (lịch sử lệnh, service, sự kiện).
+- DEMO_HELP          : Danh sách toàn bộ lệnh minh họa DEMO_* (nếu bản build có kèm demo).
 
-3. TÍNH NĂNG NỔI BẬT:
-- Gói cơ sở dữ liệu 1 file duy nhất: device_library.json.
-- Xuất / Nhập gói thư viện dạng ZIP (bao gồm cấu hình JSON và toàn bộ file DWG Blocks) để chia sẻ giữa các máy tính.
-- Tìm kiếm thiết bị thông minh đa từ khóa (Multi-token AND search), không dấu tiếng Việt.
-- Lọc theo trạng thái file DWG (Đã có DWG / Thiếu DWG).
-- Nhập/Xuất Excel (.xlsx) chuẩn OpenXML thuần túy không cần cài Microsoft Office.
-
-4. GỠ BỎ:
-- Nhấp đúp chuột vào file "Uninstall.bat".
+3. GỠ BỎ:
+- Tắt AutoCAD, rồi nhấp đúp chuột vào file "Uninstall.bat".

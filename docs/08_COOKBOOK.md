@@ -237,7 +237,7 @@ public void UpdatePanelLabels(Dictionary<ObjectId, string> labelMap)
             }
 
             // Cập nhật Dynamic Property (ví dụ Visibility State).
-            DynamicBlockHelper.SetProperty(blockRef, "Visibility1", "ShowLabel");
+            DynamicBlockHelper.SetVisibilityState(blockRef, "ShowLabel");
         }
     }, undoMarkName: $"Update {labelMap.Count} panels");
 }
