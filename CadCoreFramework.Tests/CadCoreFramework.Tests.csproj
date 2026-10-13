@@ -13,6 +13,11 @@
     <IsTestProject>true</IsTestProject>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
+    <!--
+      x64 như plugin: AutoCAD.NET (net47) chứa AcSeamless.dll AMD64 — test AnyCPU gây MSB3270
+      (processor-architecture mismatch), thành lỗi khi build -warnaserror.
+    -->
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

@@ -60,5 +60,6 @@ Dự án này sử dụng kiến trúc đóng gói các API thô của AutoCAD �
   - `Services/`: Các lớp nghiệp vụ.
   - `ViewModels/` và `Views/`: Mã nguồn UI WPF dùng chung.
   - `Samples/GridMarker/`: Golden Sample — khuôn mẫu một tính năng hoàn chỉnh (gom theo tính năng).
+  - `Demos/`: Bộ lệnh minh họa `DEMO_*` (tự đăng ký CommandClass trong `Demos/DemoAssemblyInfo.cs`). Tắt bằng `<IncludeDemos>false</IncludeDemos>` — code lõi KHÔNG được tham chiếu tới `Demos/`.
   - `Utils/`: Lớp Helpers, Guards.
 - Tất cả mã nguồn C# đều phải dùng format 4 khoảng trắng, CRLF. Field private sử dụng format `_camelCase`.

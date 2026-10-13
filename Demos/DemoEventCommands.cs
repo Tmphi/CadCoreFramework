@@ -1,9 +1,10 @@
 using System;
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Utils;
 
-namespace CadCoreFramework.Commands.Demos
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Lớp message mẫu dùng cho EventAggregator Demo.

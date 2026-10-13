@@ -63,6 +63,14 @@ namespace CadCoreFramework.Core
 
         private const string NoActiveDocumentMessage = "Không tìm thấy bản vẽ AutoCAD nào đang hoạt động.";
 
+        private readonly ILoggerService? _logger;
+
+        /// <param name="logger">Ghi lại lỗi COM UndoMark (không làm hỏng lệnh, nhưng Ctrl+Z sẽ không gom bước).</param>
+        public CadContext(ILoggerService? logger = null)
+        {
+            _logger = logger;
+        }
+
         // ─── Private core — receives an already-resolved Document ──────────────
         // ExecuteAsync captures the Document before await so the active document
         // cannot change between the async preparation and the actual draw phase.
@@ -82,7 +90,11 @@ namespace CadCoreFramework.Core
                     if (useUndoMark)
                     {
                         try { comDoc = doc.GetAcadDocument(); comDoc.StartUndoMark(); }
-                        catch { comDoc = null; }
+                        catch (Exception ex)
+                        {
+                            comDoc = null;
+                            _logger?.Warning($"StartUndoMark '{undoMarkName}' thất bại — thao tác vẫn chạy nhưng không gom thành 1 bước Undo: {ex.Message}");
+                        }
                     }
 
                     try
@@ -105,7 +117,11 @@ namespace CadCoreFramework.Core
                     }
                     finally
                     {
-                        if (comDoc != null) try { comDoc.EndUndoMark(); } catch { }
+                        if (comDoc != null)
+                        {
+                            try { comDoc.EndUndoMark(); }
+                            catch (Exception ex) { _logger?.Warning($"EndUndoMark '{undoMarkName}' thất bại: {ex.Message}"); }
+                        }
                     }
                 }
             }

@@ -26,6 +26,12 @@ namespace CadCoreFramework.Core
     public class OverruleManager : IDisposable
     {
         private readonly List<ICadOverrule> _activeOverrules = new List<ICadOverrule>();
+        private readonly ILoggerService _logger;
+
+        public OverruleManager(ILoggerService logger = null)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Bật/Tắt chế độ chạy Overrule toàn cầu của AutoCAD.
@@ -58,9 +64,10 @@ namespace CadCoreFramework.Core
                 {
                     overrule.Unregister();
                 }
-                catch
+                catch (System.Exception ex)
                 {
-                    // Bỏ qua lỗi trong quá trình Shutdown
+                    // Không ném ra trong lúc Shutdown — nhưng ghi lại để biết Overrule nào chưa gỡ được
+                    _logger?.Error($"Không gỡ được Overrule {overrule.GetType().Name}.", ex);
                 }
             }
             _activeOverrules.Clear();

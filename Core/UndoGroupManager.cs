@@ -26,13 +26,16 @@ namespace CadCoreFramework.Core
     {
         private readonly Document _doc;
         private readonly dynamic _acadDoc;
+        private readonly ILoggerService _logger;
         private bool _isDisposed;
 
         /// <summary>
         /// Khởi tạo UndoGroupManager và đánh dấu điểm bắt đầu (StartUndoMark).
         /// </summary>
-        public UndoGroupManager()
+        /// <param name="logger">Tùy chọn — ghi lại lỗi COM StartUndoMark/EndUndoMark thay vì bỏ qua im lặng.</param>
+        public UndoGroupManager(ILoggerService logger = null)
         {
+            _logger = logger;
             _doc = Application.DocumentManager.MdiActiveDocument;
             if (_doc == null)
                 return;
@@ -42,10 +45,11 @@ namespace CadCoreFramework.Core
                 _acadDoc = _doc.GetAcadDocument();
                 _acadDoc.StartUndoMark();
             }
-            catch
+            catch (Exception ex)
             {
-                // Bỏ qua nếu COM interop không khả dụng trên môi trường đang chạy
+                // COM interop không khả dụng — vẫn chạy tiếp, chỉ mất việc gom bước Undo
                 _acadDoc = null;
+                _logger?.Warning($"StartUndoMark thất bại — các thao tác sẽ không gom thành 1 bước Undo: {ex.Message}");
             }
         }
 
@@ -63,9 +67,10 @@ namespace CadCoreFramework.Core
                 {
                     _acadDoc.EndUndoMark();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Đảm bảo không ném ngoại lệ làm crash app khi dispose
+                    // Không ném ngoại lệ khi dispose (làm crash app) — chỉ ghi log
+                    _logger?.Warning($"EndUndoMark thất bại: {ex.Message}");
                 }
             }
 

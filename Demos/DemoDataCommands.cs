@@ -2,11 +2,12 @@ using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
 using CadCoreFramework.Utils;
 
-namespace CadCoreFramework.Commands.Demos
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Các lệnh minh họa lưu trữ và truy xuất siêu dữ liệu (Metadata):

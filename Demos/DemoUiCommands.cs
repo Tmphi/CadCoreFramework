@@ -1,10 +1,11 @@
 using System.Windows;
 using System.Windows.Controls;
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Views;
 
-namespace CadCoreFramework.Commands.Demos
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Các lệnh minh họa tích hợp giao diện người dùng (WPF UI):

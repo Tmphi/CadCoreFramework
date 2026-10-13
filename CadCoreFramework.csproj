@@ -74,7 +74,18 @@
       version; the warning is noise rather than a real resolution risk.
     -->
     <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+
+    <!--
+      DEMO SUITE: Demos/ chứa bộ lệnh minh họa DEMO_* (kể cả CommandClass của chúng).
+      Dự án thật dựng từ template → đặt false (hoặc build /p:IncludeDemos=false) để loại
+      toàn bộ demo khỏi DLL. Golden Sample (Samples/GridMarker) KHÔNG bị ảnh hưởng.
+    -->
+    <IncludeDemos Condition="'$(IncludeDemos)' == ''">true</IncludeDemos>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(IncludeDemos)' != 'true'">
+    <Compile Remove="Demos\**" />
+  </ItemGroup>
 
   <!-- ═══ AutoCAD NuGet References ════════════════════════════════════════════
        ExcludeAssets="runtime" is MANDATORY: AutoCAD ships its own copies of

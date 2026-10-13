@@ -2,12 +2,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
 using CadCoreFramework.Utils;
 using CadCoreFramework.Utils.Jigs;
 
-namespace CadCoreFramework.Commands.Demos
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Các lệnh minh họa tương tác với người dùng qua Command Line và Editor:

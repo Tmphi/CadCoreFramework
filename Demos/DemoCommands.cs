@@ -1,7 +1,8 @@
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 
-namespace CadCoreFramework.Commands
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Lệnh điều phối và hướng dẫn sử dụng bộ lệnh minh họa (Demo Suite) của CadCoreFramework.

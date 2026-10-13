@@ -2,12 +2,13 @@ using System;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
 using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
 
-namespace CadCoreFramework.Commands.Demos
+namespace CadCoreFramework.Demos
 {
     /// <summary>
     /// Các lệnh minh họa các dịch vụ hạ tầng trong hệ thống DI:
