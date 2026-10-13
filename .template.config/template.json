@@ -25,8 +25,8 @@
       "type": "parameter",
       "datatype": "string",
       "defaultValue": "YOUR_ORG/YOUR_REPO",
-      "replaces": "YOUR_ORG/YOUR_REPO",
-      "description": "Repo GitHub dạng owner/name — dùng cho badge CI trong README và help link của analyzer CAD001."
+      "replaces": "Tmphi/CadCoreFramework",
+      "description": "Repo GitHub dạng owner/name — dùng cho badge CI trong README và help link của analyzer CAD001. Bỏ trống → placeholder YOUR_ORG/YOUR_REPO (không trỏ về repo template)."
     },
     "IncludeDemos": {
       "type": "parameter",

@@ -46,7 +46,7 @@ public sealed class MdiActiveDocumentInServiceAnalyzer : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: Description,
-        helpLinkUri: "https://github.com/YOUR_ORG/YOUR_REPO/blob/main/docs/02_CORE_ARCHITECTURE.md"
+        helpLinkUri: "https://github.com/Tmphi/CadCoreFramework/blob/main/docs/02_CORE_ARCHITECTURE.md"
     );
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>

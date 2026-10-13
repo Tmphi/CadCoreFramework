@@ -24,8 +24,10 @@
     Must start with a letter and contain only letters, digits, underscores, or dots.
 
 .PARAMETER GitHubRepo
-    Optional. "owner/name" of your GitHub repo — replaces the YOUR_ORG/YOUR_REPO
-    placeholder in the README CI badge and the CAD001 analyzer help link.
+    Optional. "owner/name" of your GitHub repo — replaces the template's own repo
+    (Tmphi/CadCoreFramework) in the README CI badge and the CAD001 analyzer help link.
+    Omitted together with -ProjectName → the placeholder YOUR_ORG/YOUR_REPO is used,
+    so your project never points at the template repo.
 
 .PARAMETER RemoveDemos
     Optional. Deletes the Demos/ folder (all DEMO_* commands). Same effect as
@@ -124,15 +126,18 @@ if ($slnFile) {
 }
 
 # ─── 1b. GitHub repo placeholder (README badge, analyzer help link) ──────────
-if ($GitHubRepo) {
+$TemplateRepo = 'Tmphi/CadCoreFramework'
+$targetRepo = if ($GitHubRepo) { $GitHubRepo } elseif ($ProjectName) { 'YOUR_ORG/YOUR_REPO' } else { '' }
+if ($targetRepo) {
     Write-Host ""
-    Write-Host "Setting GitHub repo → $GitHubRepo..."
+    Write-Host "Setting GitHub repo → $targetRepo..."
+    $self = $MyInvocation.MyCommand.Path
     Get-ChildItem -Path $Root -Recurse -Include $TextExts -File |
-        Where-Object { -not (Should-Skip $_.FullName) } |
+        Where-Object { -not (Should-Skip $_.FullName) -and $_.FullName -ne $self -and $_.FullName -notlike '*\.template.config\*' } |
         ForEach-Object {
             $raw = Get-Content -Path $_.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($null -eq $raw -or -not $raw.Contains('YOUR_ORG/YOUR_REPO')) { return }
-            [System.IO.File]::WriteAllText($_.FullName, $raw.Replace('YOUR_ORG/YOUR_REPO', $GitHubRepo), [System.Text.Encoding]::UTF8)
+            if ($null -eq $raw -or -not $raw.Contains($TemplateRepo)) { return }
+            [System.IO.File]::WriteAllText($_.FullName, $raw.Replace($TemplateRepo, $targetRepo), [System.Text.Encoding]::UTF8)
             Write-Host "  content  $($_.FullName.Substring($Root.Length + 1))"
         }
 }
