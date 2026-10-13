@@ -264,7 +264,7 @@ Mục "Vì sao không bị phát hiện sớm hơn" là mục **quan trọng nh�
 | 3 | Palette không mở, lỗi resource URI | [A2](T03_PITFALLS_CASEBOOK.md#a2-palette-lỗi-does-not-have-a-resource-identified-by-the-uri) (nạp byte array) |
 | 4 | Palette lỗi `StaticResourceExtension` | [A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension), đổi sang `DynamicResource` |
 | 5 | Palette lỗi "ViewModel chưa được đăng ký" | Thêm `AddTransient<TViewModel>()` trong `ConfigureServices` |
-| 6 | Palette sai màu / trắng | B-01 (DARKMODE), B-02 (hai hệ màu), B-03 (key không tồn tại) |
+| 6 | Palette sai màu / trắng / không đổi theo theme | ① code-behind có gọi `ThemeManager.Attach(this)` sau `InitializeComponent()` không ② XAML dùng `{DynamicResource}` và key có trong **cả hai** file theme (chạy `XamlPaletteTests`) ③ log có cảnh báo "Không đọc được sysvar COLORTHEME" không. Lịch sử: B-01 (DARKMODE), B-02 (hai hệ màu), B-03 (key không tồn tại), B-23 — sửa ở PR #6 |
 | 7 | Lệnh chạy xong nhưng **không thấy gì** | ① đang ở Layout (`CurrentSpace` là Paper Space) ② layer tắt/đóng băng ③ vẽ ở bản vẽ khác (B6) ④ lỗi bị nuốt trong lambda nên rollback (B3) ⑤ từ palette: chưa regen (`autoRegen`) ⑥ chỉ là zoom (`ZOOM E`) |
 | 8 | Ctrl+Z gỡ từng phần nhỏ | Thao tác từ palette không có `undoMarkName` ([T01 §11](T01_AUTOCAD_NET_FOUNDATIONS.md#11-undo)) |
 | 9 | AutoCAD treo | ① prompt trong transaction (B4) ② `.Result`/`.Wait()` (B9) ③ vòng lặp dài trên main thread ④ hộp thoại modal bị che sau cửa sổ |
@@ -272,6 +272,8 @@ Mục "Vì sao không bị phát hiện sớm hơn" là mục **quan trọng nh�
 | 11 | *"Nested CadContext.Execute detected"* | Service gọi Service bên trong lambda; publish message *bên trong* transaction ([T02 §4.6](T02_ARCHITECTURE_DEEP_DIVE.md#46-cadcontextguard-chặn-lồng-nhau)) |
 | 12 | Chạy trên máy dev, lỗi trên máy người dùng | ① bundle thiếu DLL ② đường dẫn không tin cậy / `SECURELOAD` ③ phiên bản AutoCAD ngoài `SeriesMin/Max` ④ code giả định đường dẫn (`Assembly.Location`, B30) ⑤ quyền ghi thư mục |
 | 13 | Crash | §5.2: đọc exception code. Nghi B8 (thread), B5/B7 (đối tượng đã đóng), B25 (Overrule), B26 (finalizer) |
+| 14 | *"… được gọi từ thread N, không phải main thread của AutoCAD"* | Gọi `ICadContext` từ thread nền: `Task.Run`, `System.Timers.Timer`, `ConfigureAwait(false)`, hoặc phần sau `await` không có `SynchronizationContext` ([T03 B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền)). Đây là guard `CadThread` báo đúng chỗ — đừng tắt nó |
+| 15 | `ArgumentException` *"Tên ký hiệu '…' chứa ký tự không hợp lệ"* | Tên layer/block/style từ người dùng hoặc dữ liệu ngoài chứa `< > / \ " : ; ? * \| , = `` ` ``; validate ở tầng Model (`SymbolNameRules`) trước khi vẽ |
 
 ---
 

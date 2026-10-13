@@ -118,26 +118,20 @@ Quy tắc: không đọc `MdiActiveDocument` (CAD001), không prompt, không gi�
 </UserControl>
 ```
 
-**Code-behind**: copy mẫu [`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs). Nạp `Styles.xaml` bằng pack URI dựng **lúc runtime** (tên assembly Debug có timestamp), áp theme, lấy ViewModel từ DI và ném lỗi nếu thiếu.
+**Code-behind**: copy mẫu [`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs) — ngay sau `InitializeComponent()` gọi `ThemeManager.Attach(this)` (nạp `Styles.xaml` + theme hiện hành bằng pack URI dựng lúc runtime, tự áp lại khi người dùng đổi `COLORTHEME`), rồi gán `DataContext` cho **chính UserControl** từ DI và ném lỗi nếu thiếu. Không viết mã màu trong XAML: dùng key trong `Themes/AutoCadTheme.xaml` (key mới thì thêm vào **cả hai** file theme — test sẽ bắt nếu quên).
 
-**Lệnh mở palette, nhớ được vị trí** ([B-04](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): `TogglePalette` không nhận Guid. Nhưng nó tìm `PaletteSet` theo **tên** trước khi tạo, nên chỉ cần tạo sẵn PaletteSet *có Guid* bằng `GetOrCreatePaletteSet` trước lần Toggle đầu:
+**Lệnh mở palette:** `PaletteService` tự gán Guid ổn định (dẫn xuất từ `[assembly: Guid]` + tên palette), nên AutoCAD nhớ vị trí/kích thước qua các lần khởi động mà bạn không phải làm gì ([B-04](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). **Đừng đổi tên palette** sau khi phát hành (đổi tên = Guid mới = mất vị trí đã lưu); nếu buộc phải đổi, truyền Guid cũ qua `GetOrCreatePaletteSet(name, guid)` trước lần Toggle đầu.
 
 ```csharp
-private static readonly Guid PanelPaletteGuid = new Guid("8E0B3A0C-2D7F-4F7E-9C41-1B5E6A2F9D10"); // tự sinh, KHÔNG đổi về sau
-
 [CommandMethod("PANEL_PALETTE")]
 public void ShowPanelPalette()
 {
-    ExecuteCommand(() =>
-    {
-        var palettes = GetRequiredService<IPaletteService>();
-        palettes.GetOrCreatePaletteSet("PanelPalette", PanelPaletteGuid);   // lần đầu: tạo kèm Guid
-        palettes.TogglePalette("PanelPalette", () => new PanelPalette(), tabTitle: "Tủ điện");
-    });
+    ExecuteCommand(() => GetRequiredService<IPaletteService>()
+        .TogglePalette("PanelPalette", () => new PanelPalette(), tabTitle: "Tủ điện"));
 }
 ```
 
-Thêm test trong `XamlPaletteTests` (đăng ký ViewModel vào container giả) và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`.
+Thêm palette vào mảng `Palettes` trong `XamlPaletteTests` (test resource key ở cả hai theme sẽ tự chạy cho nó), đăng ký ViewModel vào container giả, và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`. Lệnh mới nhớ thêm vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm).
 
 ---
 
@@ -168,26 +162,15 @@ Palette chạy ở **application context**: không prompt từ ViewModel ([T01 �
 
 ## 6. Thêm Ribbon tab
 
-Hiện trạng v1.0.0: `RibbonService` có đủ hạ tầng nhưng **chưa ai dựng tab** ([B-05](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Có hai cái bẫy về **thời điểm** và **trùng lặp**:
+Dự án có sẵn tab **"CadCore"**: [`Commands/CadCoreRibbon.cs`](../../Commands/CadCoreRibbon.cs). Thêm nút = thêm một dòng `AddButton` vào `CadCoreRibbon.Build`. Phần dưới giải thích *vì sao* nó được viết như vậy — hai cái bẫy về **thời điểm** và **trùng lặp** ([B-05](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), sửa ở PR #6):
 
-| Tình huống | `InitializeRibbon()` làm gì | Ai gọi build? |
-| :--- | :--- | :--- |
-| Plugin nạp lúc AutoCAD **đang khởi động** (Autoloader) | Ribbon chưa có → hook `ItemInitialized` → gọi build action khi Ribbon sẵn sàng | Service, **nếu build action đã đăng ký trước đó** |
-| NETLOAD khi AutoCAD **đã mở xong** | Ribbon đã có → không hook gì | **Không ai.** Bạn phải tự gọi |
-| Người dùng chạy `CUI` / `MENULOAD` / `WSCURRENT` … | `CommandEnded` → `Application.Idle` → gọi build action | Service |
+| Tình huống | `RibbonService` làm gì |
+| :--- | :--- |
+| Plugin nạp lúc AutoCAD **đang khởi động** (Autoloader) | Ribbon chưa có → hook `ItemInitialized` → gọi build action khi Ribbon sẵn sàng |
+| NETLOAD khi AutoCAD **đã mở xong** | Ribbon đã có → gọi build action **ngay** (trong `InitializeRibbon` hoặc `RegisterBuildAction`, cái nào đến sau) |
+| Người dùng chạy `CUI` / `MENULOAD` / `WSCURRENT` … | `CommandEnded` → `Application.Idle` → gọi lại build action |
 
-`AddTab`/`AddPanel` idempotent, nhưng **`AddButton` thì không**: build lại khi tab còn tồn tại sẽ nhân đôi nút. Cách an toàn là **xóa tab cũ rồi dựng lại**. Việc này cần một method `RemoveTab`, là **đề xuất bổ sung** vào `RibbonService` (chưa có trong v1.0.0):
-
-```csharp
-// ĐỀ XUẤT bổ sung vào IRibbonService / RibbonService (Lab L11)
-public void RemoveTab(string tabId)
-{
-    var tab = ComponentManager.Ribbon?.Tabs.FirstOrDefault(t => t.Id == tabId);
-    if (tab != null) ComponentManager.Ribbon.Tabs.Remove(tab);
-}
-```
-
-Dựng Ribbon (ví dụ trong một class `CadCoreRibbon`):
+Trên v1.0.0, trường hợp NETLOAD muộn **không ai** gọi build, và `AddButton` không idempotent (dựng lại khi tab còn sẽ nhân đôi nút). Từ PR #6: thứ tự `RegisterBuildAction`/`InitializeRibbon` không còn quan trọng; `AddButton` bỏ qua nút trùng lệnh; và có `RemoveTab` để build luôn dựng lại từ đầu:
 
 ```csharp
 public static class CadCoreRibbon
@@ -198,29 +181,25 @@ public static class CadCoreRibbon
     {
         ribbon.RemoveTab(TabId);                                   // idempotent: luôn dựng lại từ đầu
         ribbon.AddTab(TabId, "CadCore", TabId);
-        ribbon.AddPanel(TabId, "CADCORE_GRID", "Grid Marker");
-        ribbon.AddButton(TabId, "CADCORE_GRID", "Vẽ lưới", "SAMPLE_GRID", tooltip: "Vẽ lưới ô đánh nhãn");
-        ribbon.AddButton(TabId, "CADCORE_GRID", "Palette", "SHOW_PALETTE");
-        ribbon.AddPanel(TabId, "CADCORE_TOOLS", "Công cụ");
-        ribbon.AddButton(TabId, "CADCORE_TOOLS", "Debug", "CORE_DEBUG");
+        ribbon.AddPanel(TabId, "CADCORE_PANEL_TOOLS", "Công cụ");
+        ribbon.AddButton(TabId, "CADCORE_PANEL_TOOLS", "Grid\nMarker", "SAMPLE_GRID", tooltip: "SAMPLE_GRID — Vẽ lưới ô đánh nhãn");
+        // … (bản đầy đủ: Commands/CadCoreRibbon.cs)
     }
 }
 ```
 
-Nối vào khởi động, **thứ tự là quan trọng** (trong `AppBootstrapper.InitializeCore`, thay cho 2 dòng khởi động Ribbon hiện tại):
+Nối vào khởi động (đã có trong `AppBootstrapper.InitializeCore`):
 
 ```csharp
 var ribbonService = ServiceProvider.GetService<IRibbonService>();
 if (ribbonService != null)
 {
-    ribbonService.RegisterBuildAction(() => CadCoreRibbon.Build(ribbonService)); // ① đăng ký TRƯỚC
-    ribbonService.InitializeRibbon();                                            // ② có thể hoãn build
-    if (Autodesk.Windows.ComponentManager.Ribbon != null)                        // ③ Ribbon đã sẵn (NETLOAD muộn)
-        CadCoreRibbon.Build(ribbonService);
+    ribbonService.RegisterBuildAction(() => Commands.CadCoreRibbon.Build(ribbonService));
+    ribbonService.InitializeRibbon();   // Ribbon đã sẵn → build ngay; chưa → build khi ItemInitialized
 }
 ```
 
-Kiểm tra (Lab L11): NETLOAD khi AutoCAD đã mở → tab xuất hiện; chạy `CUI` rồi đóng → tab vẫn còn, **không** nhân đôi nút; cài bằng bundle (nạp lúc khởi động) → tab xuất hiện; nút bấm chạy đúng lệnh.
+Kiểm tra (chỉ làm được trong GUI): NETLOAD khi AutoCAD đã mở → tab xuất hiện; chạy `CUI` rồi đóng → tab vẫn còn, **không** nhân đôi nút; cài bằng bundle (nạp lúc khởi động) → tab xuất hiện; nút bấm chạy đúng lệnh.
 
 ---
 
@@ -284,7 +263,7 @@ settings.SetSetting("GridMarker.Spacing", 25.0);
 settings.Save();                                                      // ghi %AppData%\CadCoreFramework\settings.json
 ```
 
-Key có tiền tố theo tính năng. Gọi `Save()` khi người dùng xác nhận thay đổi, không gọi mỗi lần gõ phím. Lưu ý: nhiều phiên AutoCAD cùng ghi thì **phiên ghi sau thắng** ([B-22](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
+Key có tiền tố theo tính năng. Gọi `Save()` khi người dùng xác nhận thay đổi, không gọi mỗi lần gõ phím. Nhiều phiên AutoCAD cùng mở: `Save()` đọc lại tệp và **chỉ ghi đè các key phiên này đã `SetSetting`**, ghi atomic (tệp tạm rồi thay thế), nên key do phiên khác lưu không bị mất ([B-22](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), PR #6). Hai phiên cùng đổi **một** key thì phiên `Save()` sau thắng — đó là ngữ nghĩa mong muốn.
 
 ---
 
@@ -352,14 +331,15 @@ public sealed class ErasedWatcher : IDisposable
 
 ## 12. Checklist trước khi mở PR
 
-- [ ] Build `-c Release -warnaserror` 0 warning; `dotnet test` xanh trên cả hai TFM
-- [ ] Không prompt trong transaction; không prompt trong Service/ViewModel
-- [ ] Mọi thao tác ghi qua `ICadContext`; Service truyền `undoMarkName`
-- [ ] Không `MdiActiveDocument` trong Service/ViewModel; không đọc nó sau `await`
+- [ ] Build `-c Release -warnaserror` 0 warning (analyzer CAD001–CAD003 chạy trong build); `dotnet test` xanh trên cả hai TFM
+- [ ] Không prompt trong transaction; không prompt trong Service/ViewModel (CAD002)
+- [ ] Mọi thao tác ghi qua `ICadContext`; Service truyền `undoMarkName`; không ghi trong `ExecuteRead` (CAD003)
+- [ ] Không `MdiActiveDocument` trong Service/ViewModel (CAD001); không đọc nó sau `await`
 - [ ] Đối tượng không vào DB được `Dispose`; `ResultBuffer`/side DB trong `using`
 - [ ] Subscription qua `TrackSubscription`; event AutoCAD được gỡ trong `Dispose`/`Shutdown`
 - [ ] Logic tách khỏi lambda; có test kết quả cho logic, test hợp đồng cho service
-- [ ] Đăng ký DI + `CommandClass`; palette mới có test XAML
+- [ ] Đăng ký DI + `CommandClass`; palette mới có test XAML (`ThemeManager.Attach`, không mã màu cứng); lệnh mới có trong `PackageContents.xml`
+- [ ] Sửa helper trong `Extensions/`/`Utils/` → chạy `tests\integration\run-headless-lab.ps1` (nếu có AutoCAD) và thêm kiểm thử lab FAIL trên code cũ
 - [ ] Smoke test thủ công các kịch bản bị ảnh hưởng ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)), ghi kết quả vào PR
 - [ ] CHANGELOG `[Unreleased]`; cập nhật T-module nếu đổi quy ước
 

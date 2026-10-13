@@ -133,7 +133,7 @@ flowchart LR
 
 Cách framework xử lý:
 - [`ICadScope`](../../Core/ICadScope.cs) cung cấp `Document/Database/Editor` **đã chụp sẵn** khi vào scope. Code trong lambda dùng `scope.Document`, không đọc lại `MdiActiveDocument`.
-- Analyzer **CAD001** cảnh báo khi Service/ViewModel đọc `MdiActiveDocument` trực tiếp ([T02 §11](T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001)).
+- Analyzer **CAD001** cảnh báo khi Service/ViewModel đọc `MdiActiveDocument` trực tiếp ([T02 §11](T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001cad003)).
 - [`CadContext.ExecuteAsync`](../../Core/CadContext.cs) chụp Document **trước** `await`.
 
 ### ✅ Tự kiểm tra §2
@@ -182,7 +182,7 @@ Mỗi Database có các bảng cố định. Mỗi bảng chứa các *record* c
 
 Ba quy tắc khi làm việc với bảng:
 1. **Kiểm tra `Has(name)` trước khi dùng indexer `table[name]`.** Indexer với tên không tồn tại ném `eKeyNotFound`. Mọi hàm `Ensure*` trong [`CadScopeLayerExtensions.cs`](../../Extensions/CadScopeLayerExtensions.cs) đều theo mẫu này.
-2. **Tên phải hợp lệ.** Ký tự như `< > / \ " : ; ? * | , = `` ` `` bị cấm. Validate bằng `SymbolUtilityServices.ValidateSymbolName(name, false)` hoặc tự kiểm tra như [`GridSpec.Validate`](../../Samples/GridMarker/GridSpec.cs). (⚠️ `EnsureLayer` hiện **không** validate tên, xem B-16 ở [T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).)
+2. **Tên phải hợp lệ.** Ký tự như `< > / \ " : ; ? * | , = `` ` `` bị cấm; gán tên sai thì AutoCAD ném `eInvalidInput` mà không nói ký tự nào sai (đã kiểm chứng). Validate bằng `SymbolUtilityServices.ValidateSymbolName(name, false)` hoặc luật thuần .NET [`SymbolNameRules`](../../Utils/SymbolNameRules.cs) của dự án — mọi `Ensure*`, `CreateBlockDefinition`, `EnsureRegApp` và [`GridSpec.Validate`](../../Samples/GridMarker/GridSpec.cs) dùng nó, ném `ArgumentException` nêu rõ ký tự sai (B-16 ở [T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), PR #6).
 3. **Thêm record mới cần 2 bước:** `table.Add(record)` rồi `tr.AddNewlyCreatedDBObject(record, true)`.
 
 ### 3.3 `BlockTableRecord`: mọi entity đều có "nhà"
@@ -271,7 +271,7 @@ using (Transaction tr = db.TransactionManager.StartTransaction())
 
 Hai thao tác chuyển mode trên đối tượng đã mở: `UpgradeOpen()` (Read → Write) và `DowngradeOpen()`.
 
-🔎 **Đọc code:** [`CadContext.CadScope.AppendEntityToCurrentSpace`](../../Core/CadContext.cs). `CurrentSpace` được mở **ForRead** khi vào scope, và chỉ `UpgradeOpen()` khi thật sự append entity đầu tiên. Ngược lại, [`EnsureLayer`](../../Extensions/CadScopeLayerExtensions.cs) mở `LayerTable` **ForWrite** ngay từ đầu. Cả hai cách đều đúng trong một transaction. Mở ForRead rồi upgrade khi cần thì rẻ hơn khi phần lớn lần gọi không ghi gì. (Comment trong `EnsureLayer` giải thích bằng `eVetoed`. Lập luận đó không phải lý do chính, xem [T09 B-19](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).)
+🔎 **Đọc code:** [`CadContext.CadScope.AppendEntityToCurrentSpace`](../../Core/CadContext.cs). `CurrentSpace` được mở **ForRead** khi vào scope, và chỉ `UpgradeOpen()` khi thật sự append entity đầu tiên. [`EnsureLayer`](../../Extensions/CadScopeLayerExtensions.cs) (và các `Ensure*` khác) cũng vậy từ PR #6: mở bảng **ForRead**, `UpgradeOpen()` chỉ khi phải thêm record. Cả hai cách (ForWrite ngay, hay ForRead rồi upgrade) đều đúng trong một transaction; ForRead rồi upgrade rẻ hơn khi phần lớn lần gọi không ghi gì (layer thường đã có) — mở ForWrite là ghi nhận undo và gửi thông báo dù không đổi gì. (Trên v1.0.0, `EnsureLayer` mở ForWrite ngay và comment giải thích bằng `eVetoed` — không phải lý do thật, [T09 B-19](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).)
 
 ### 4.3 Transaction lồng nhau
 
@@ -287,7 +287,7 @@ Framework **cấm** lồng `ICadContext.Execute` bằng [`CadContextGuard`](../.
 **Commit.** Với transaction không sửa gì, Commit rẻ hơn Abort, vì Abort phải chạy cơ chế rollback. [`CadContext.ExecuteRead`](../../Core/CadContext.cs) vì vậy kết thúc bằng `tr.Commit()`, có comment giải thích.
 
 > [!WARNING]
-> Hệ quả ít ai để ý: nếu code trong `ExecuteRead` **lỡ** mở một đối tượng `ForWrite` và sửa nó, thay đổi **sẽ được commit**. `IsReadOnly` của scope chỉ chặn `AppendEntityToCurrentSpace` và các hàm XRecord, chứ không chặn được `GetObject(…, ForWrite)`. Xem [T09 B-07](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).
+> Hệ quả ít ai để ý: nếu code trong `ExecuteRead` **lỡ** mở một đối tượng `ForWrite` và sửa nó, thay đổi **sẽ được commit**. `IsReadOnly` của scope chỉ chặn `AppendEntityToCurrentSpace` và các hàm XRecord, chứ không chặn được `GetObject(…, ForWrite)` lúc chạy. Từ PR #6, analyzer **CAD003** cảnh báo `ForWrite`/`UpgradeOpen()` viết trong lambda của `ExecuteRead` ngay lúc build. Xem [T09 B-07](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).
 
 ### 4.5 `StartOpenCloseTransaction`
 
@@ -490,7 +490,7 @@ Bộ lọc là mảng `TypedValue(mã DXF, giá trị)`:
 | 1001 | Có XData của app | `"CADCORE_GRID_MARKER"` |
 | -4 | Toán tử logic | `"<OR"` … `"OR>"`, `"<AND"`, `"<NOT"` |
 
-Ký tự wildcard trong giá trị chuỗi: `* ? # @ . ~ [ ] , `` ` ``. Muốn khớp **nguyên văn** một ký tự đặc biệt (layer tên `A*B`) thì phải escape bằng dấu backquote `` ` ``. [`SelectionFilterBuilder`](../../Utils/SelectionFilterBuilder.cs) ghép mảng bằng dấu phẩy và **không** escape, nên tên có ký tự đặc biệt sẽ bị hiểu thành wildcard.
+Ký tự wildcard trong giá trị chuỗi: `* ? # @ . ~ [ ] - , `` ` ``. Một số trong đó **hợp lệ trong tên** layer/block — `#` (một chữ số), `@` (một chữ cái), `.` (một ký tự không phải chữ/số), `~`, `[ ]`, `-` — nên một tên hoàn toàn bình thường vẫn bị hiểu thành mẫu: layer `LAB#1` **không khớp chính nó**, `M.EQUIP` khớp cả `M-EQUIP` (đã kiểm chứng trên AutoCAD 2024). (`* ? ,` không hợp lệ trong tên ký hiệu, nên không gặp ở tên.) Muốn khớp **nguyên văn** thì escape từng ký tự bằng dấu backquote `` ` ``. [`SelectionFilterBuilder`](../../Utils/SelectionFilterBuilder.cs): `OnLayers`/`WithBlockNames` nhận **mẫu** (ghép bằng dấu phẩy, không escape); `OnLayersExact`/`WithBlockNamesExact` nhận **tên** và tự escape (`EscapeWildcards`).
 
 **Implied selection** (chọn trước rồi gõ lệnh): khai báo `CommandFlags.UsePickSet` và gọi `ed.SelectImplied()`.
 
@@ -526,7 +526,7 @@ Ký tự wildcard trong giá trị chuỗi: `* ? # @ . ~ [ ] , `` ` ``. Muốn k
 - `ConfigureAwait(false)` trong code *sẽ chạm AutoCAD* sau đó khiến phần tiếp theo chạy trên ThreadPool. **Nguy hiểm.**
 - Không có `SynchronizationContext` (ví dụ đang ở thread nền) thì phần tiếp theo cũng chạy trên ThreadPool.
 
-🔎 **Đọc code:** [`CadAsyncHelper.ExecuteSafeAsync`](../../Utils/CadAsyncHelper.cs) **chụp context của main thread trước**, ném lỗi rõ ràng nếu không có, chạy việc nặng bằng `Task.Run`, rồi `Post` kết quả về main thread **một cách tường minh**. Đây là mẫu an toàn nhất. ⚠️ `CadContext.ExecuteAsync` thì *không* kiểm tra context như vậy, xem [T09 B-06](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).
+🔎 **Đọc code:** [`CadAsyncHelper.ExecuteSafeAsync`](../../Utils/CadAsyncHelper.cs) **chụp context của main thread trước**, ném lỗi rõ ràng nếu không có, chạy việc nặng bằng `Task.Run`, rồi `Post` kết quả về main thread **một cách tường minh**. Đây là mẫu an toàn nhất. `CadContext.ExecuteAsync` cũng kiểm tra context khi bắt đầu, và kiểm lại đang ở main thread sau `await` (từ PR #6, [T09 B-06](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)); trên v1.0.0 nó không kiểm.
 
 ### 8.3 Lệnh async thực chất chạy thế nào
 
@@ -580,16 +580,18 @@ Bài học: **ghép hai điểm mạnh lại**. Lab L10 yêu cầu bạn làm đ
 > [!WARNING]
 > **Vì sao "quên Dispose đối tượng ngoài DB" nguy hiểm?** Garbage Collector sẽ gọi finalizer của wrapper trên **finalizer thread**, tức một thread không phải main thread. Việc hủy đối tượng C++ từ thread đó có thể gây lỗi khó tái hiện. Cùng lý do đó, [`UndoGroupManager`](../../Core/UndoGroupManager.cs) **cố ý không có finalizer**: gọi COM `EndUndoMark` từ finalizer thread có thể làm sập AutoCAD.
 
-Ví dụ từ chính dự án ([T09 B-14](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): các hàm `Draw*` tạo entity, gọi `configure?.Invoke(entity)` **trước** khi append. Nếu `configure` ném lỗi, entity không bao giờ vào DB và không được `Dispose`.
+Ví dụ từ chính dự án ([T09 B-14](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): trên v1.0.0 các hàm `Draw*` tạo entity, gọi `configure?.Invoke(entity)` **trước** khi append. Nếu `configure` ném lỗi, entity không bao giờ vào DB và không được `Dispose`. Từ PR #6, mọi `Draw*` đi qua một hàm chung (`CadScopeDrawingHelpers.AppendNew`): bước nào ném lỗi trước khi append thì entity được `Dispose` rồi lỗi được ném lại.
 
 ### 9.1 Sao chép đối tượng: `Clone` vs `DeepCloneObjects`
 
 | Cách | Bản chất | Ghi chú |
 | :--- | :--- | :--- |
-| `entity.Clone()` | Sao chép **nông** thành một đối tượng chưa vào DB | **Không** tạo lại các đối tượng con như `AttributeReference` của block. Framework dùng trong `CopyEntity`/`MirrorEntity` ([B-13](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
-| `entity.GetTransformedCopy(matrix)` | Bản sao đã biến đổi | Tiện cho entity đơn giản |
-| `db.DeepCloneObjects(ids, ownerId, idMap, false)` | Sao chép **sâu** cả đối tượng con, ánh xạ tham chiếu | Đúng cho block có attribute, entity có Extension Dictionary |
+| `entity.Clone()` | Bản sao **chưa vào DB** | Bản sao **không có Extension Dictionary** → mất metadata XRecord (XData thì còn). `BlockReference.Clone()` vẫn tạo `AttributeReference` riêng cho bản sao (đã kiểm chứng). Framework từng dùng trong `CopyEntity`/`MirrorEntity` ([B-13](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
+| `entity.GetTransformedCopy(matrix)` | Bản sao đã biến đổi | Tiện cho entity đơn giản; cùng hạn chế như `Clone()` |
+| `db.DeepCloneObjects(ids, ownerId, idMap, false)` | Sao chép **sâu** cả đối tượng sở hữu (attribute, Extension Dictionary), ánh xạ tham chiếu | Đúng cho entity mang metadata, block có attribute. `CopyEntity`/`MirrorEntity` dùng cách này từ PR #6 (rồi `TransformBy`) |
 | `db.WblockCloneObjects(...)` | Sao chép **giữa hai database** | Chèn block từ file thư viện |
+
+> Bảng này từng ghi `Clone()` "không tạo lại `AttributeReference`" — **sai**, đã đính chính sau khi chạy kiểm thử trên AutoCAD thật ([T03 B19](T03_PITFALLS_CASEBOOK.md#b19-sao-chép-entity-mất-metadata-extension-dictionary)). Điều bạn *tin* về API phải được *chạy thử* trước khi thành tài liệu.
 
 ---
 
@@ -710,7 +712,7 @@ Khi plugin cần `Microsoft.Extensions.DependencyInjection.dll`, CLR đi tìm th
 `accoreconsole.exe` (nằm cạnh `acad.exe`) là lõi AutoCAD **không có giao diện**: chạy script `.scr`, đọc/ghi DWG, rất hữu ích cho xử lý hàng loạt và thử nghiệm nhanh.
 
 > [!IMPORTANT]
-> **Đã kiểm chứng trên AutoCAD 2024 (2026-10-13):** NETLOAD *riêng* `acmgd.dll` trong accoreconsole làm tiến trình crash với mã `0xC00000FD` (stack overflow trong `clr.dll`). Vì vậy **mọi DLL tham chiếu `AcMgd`** (PaletteSet, Ribbon, WPF của AutoCAD) **không thể chạy trong accoreconsole**. CadCoreFramework là một DLL duy nhất có UI, nên integration test headless hiện không khả thi. Runner trả exit code 3 cho trường hợp này ([tests/integration/README.md](../../tests/integration/README.md)).
+> **Đã kiểm chứng trên AutoCAD 2024 (2026-10-13):** NETLOAD *riêng* `acmgd.dll` trong accoreconsole làm tiến trình crash với mã `0xC00000FD` (stack overflow trong `clr.dll`). Vì vậy **mọi DLL tham chiếu `AcMgd`** (PaletteSet, Ribbon, WPF của AutoCAD) **không thể chạy trong accoreconsole**. Plugin CadCoreFramework là một DLL có UI nên không nạp được (runner smoke trả exit code 3). Một DLL **chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`** thì chạy tốt — đó là cách [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) kiểm chứng các helper của framework trên AutoCAD thật (`.\tests\integration\run-headless-lab.ps1`).
 
 Dùng accoreconsole **an toàn** để thí nghiệm:
 

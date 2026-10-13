@@ -2,17 +2,18 @@
 
 # T10 — Bài Lab & Đánh Giá
 
-Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở đây đi từ thí nghiệm nhỏ tới sửa **nợ kỹ thuật có thật** trong dự án ([backlog T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm xong, bạn vừa giỏi lên, vừa làm dự án tốt lên.
+Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở đây đi từ thí nghiệm nhỏ tới sửa **lỗi có thật** mà dự án đã gặp ([backlog T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) — làm trên `v1.0.0`, rồi đối chiếu với lời giải đã merge. Lỗi thật dạy nhiều hơn bài tập bịa: chúng có bằng chứng, có cạm bẫy, và có lời giải để so.
 
 ---
 
 ## 1. Quy tắc làm lab
 
-1. **Mỗi lab một branch**: `lab/Lxx-<tên-bạn>`. Lab thí nghiệm (L02, L03) **không merge**. Lab sửa backlog thì mở PR như công việc thật.
+1. **Mỗi lab một branch**: `lab/Lxx-<tên-bạn>`. Lab thí nghiệm (L02, L03) **không merge**. Lab sửa backlog thì mở PR như công việc thật, nhưng **base là branch tạo từ `v1.0.0`** (quy tắc 6) để mentor review — không merge vào `main`. Lab xây tính năng mới (L07, L09, L13, L14) theo quy trình bình thường.
 2. **Definition of Done (DoD)** của từng lab là tiêu chí chấm. Chưa đạt DoD thì lab chưa xong.
 3. **Báo cáo lab** trong mô tả PR (hoặc issue "Lab report"): đã làm gì, kết quả thí nghiệm, trả lời câu hỏi phản tư.
 4. **Tái hiện trước, sửa sau.** Với lab sửa lỗi: viết test hoặc bước tái hiện *fail trước* rồi mới sửa.
 5. Thử nghiệm sysvar / script thì dùng accoreconsole `/isolate` ([T04 §5.3](T04_DEBUGGING_TROUBLESHOOTING.md#53-thí-nghiệm-an-toàn-với-accoreconsole)). **Không** thay đổi thiết lập AutoCAD thật của máy (`SECURELOAD`…).
+6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa.
 
 ---
 
@@ -64,7 +65,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 | 3 | Dùng `DBObject` sau khi transaction Dispose | Lỗi (ghi lại thông điệp) |
 | 4 | Lệnh `CommandFlags.Session`, ghi DB **không** lock | `eLockViolation` |
 | 5 | Gọi `ICadContext.Execute` bên trong lambda của `Execute` khác | Thông điệp của `CadContextGuard` |
-| 6 | Trong `ExecuteRead`: `GetObject(id, ForWrite)` rồi đổi màu | **Thay đổi được commit** (B-07). Đề xuất cách phòng |
+| 6 | Trong `ExecuteRead`: `GetObject(id, ForWrite)` rồi đổi màu | **Thay đổi được commit** (B-07). Đề xuất cách phòng (trên `main`: analyzer CAD003 cảnh báo ngay lúc build — so với đề xuất của bạn) |
 
 - **DoD:** bảng đủ 6 dòng, phần giải thích dẫn được tới đúng mục T01/T02. Code thí nghiệm **không merge**.
 
@@ -77,7 +78,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 ### L05 — Selection filter & dynamic block
 
 - **Đề bài:** (1) lệnh chọn mọi block "DOOR" kể cả dynamic block đã chỉnh (`` "DOOR,`*U*" `` + lọc lại bằng effective name); (2) sửa **B-17**: thêm cách escape ký tự wildcard trong `SelectionFilterBuilder` (ví dụ `OnLayersExact(...)`) kèm unit test (`SelectionFilterBuilderTests` chạy được không cần AutoCAD).
-- **DoD:** test escape cho `* ? # @ . ~ [ ] , `` ` ``; thử tay với layer tên `A*B`.
+- **DoD:** test escape cho `* ? # @ . ~ [ ] - , `` ` ``; thử tay với layer `LAB#1` (không khớp chính nó nếu không escape — `#` là "một chữ số"), `M.EQUIP` và `M-EQUIP` (`.` khớp mọi ký tự không phải chữ/số). Tên kiểu `A*B` **không tồn tại được**: `*` không hợp lệ trong tên ký hiệu.
 
 ### L06 — Metadata XRecord, xóa đúng cách
 
@@ -89,12 +90,13 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 - **Đề bài:** tính năng **"Dãy tủ điện"**: vẽ N tủ cạnh nhau (rộng × cao, khoảng hở), nhãn tên, XRecord `{ v, name, index, width, height }` trên khung. Đi đủ các tầng của [T08 §2](T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn): Spec (có `MaxPanels`), Planner, Service (`TryExecute` + undo mark), lệnh `PANEL_ROW`, ViewModel, palette.
 - **DoD:** ≥ 15 unit test (Spec/Planner/Service/ViewModel); test XAML cho palette; smoke tay; một Ctrl+Z xóa cả dãy (cả từ lệnh lẫn từ palette).
-- **Mở rộng:** sửa **B-13** (copy dãy tủ bằng `DeepCloneObjects`), kiểm chứng **B-25** với block có attribute căn giữa.
+- **Mở rộng:** sửa **B-13** (copy dãy tủ bằng `DeepCloneObjects`), kiểm chứng **B-25** với block có attribute căn giữa. Tự kiểm chứng *trước*: `Clone()` làm mất gì? (Giả thuyết ban đầu của dự án là "mất attribute" — và nó **sai**; xem B-13.)
 
 ### L08 — Palette nhớ vị trí
 
 - **Đề bài:** sửa **B-04** tận gốc: `TogglePalette`/`ShowPalette` nhận `Guid?`; mỗi palette của dự án có Guid **cố định**; cập nhật `IPaletteService`.
 - **DoD:** dời palette → đóng AutoCAD → mở lại → palette ở đúng chỗ cũ. Các test hiện có vẫn xanh.
+- **So sánh:** PR #6 chọn cách khác — không thêm tham số, mà **dẫn xuất** Guid từ `[assembly: Guid]` + tên palette (`Core/PaletteGuids`). Ưu/nhược so với Guid viết tay? (Gợi ý: đổi tên palette, hai plugin cùng template, quên truyền Guid.)
 
 ### L09 — Sự kiện bản vẽ
 
@@ -128,7 +130,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 ### L15 — Phát hành thử
 
-- **Đề bài:** trên **repo fork / repo thử** (không phải repo chính): chạy đủ checklist [T06 §5.3](T06_BUILD_RELEASE_DEVOPS.md#53-checklist-phát-hành) với tag `v0.1.0`. Mở rộng tùy chọn: làm cứng `PlotService` (**B-10**).
+- **Đề bài:** trên **repo fork / repo thử** (không phải repo chính): chạy đủ checklist [T06 §5.3](T06_BUILD_RELEASE_DEVOPS.md#53-checklist-phát-hành) với tag `v0.1.0`. Mở rộng tùy chọn: làm cứng `PlotService` (**B-10**) — viết kiểm thử HeadlessLab in thật ra PDF *trước*; bạn sẽ gặp các lỗi của **B-28** mà đọc code không thấy.
 - **DoD:** Release trên fork có đúng một zip, manifest đúng version; release note; tự kiểm cài đặt từ zip.
 
 ### L16 — Pháp y sự cố

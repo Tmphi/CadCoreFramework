@@ -17,7 +17,9 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **Autoloader / Bundle** | Cơ chế tự nạp plugin từ thư mục `*.bundle` + `PackageContents.xml` | [T06 §6](T06_BUILD_RELEASE_DEVOPS.md#6-bundle-autoloader-và-cài-đặt) |
 | **Block definition** (`BlockTableRecord`) | Định nghĩa block; cũng là "nhà" của Model Space / Paper Space | [T01 §3.3](T01_AUTOCAD_NET_FOUNDATIONS.md#33-blocktablerecord-mọi-entity-đều-có-nhà) |
 | **Block reference** | Một lần chèn block vào bản vẽ | — |
+| **CAD001 / CAD002 / CAD003** | Analyzer của dự án: không `MdiActiveDocument` / không prompt trong Service-ViewModel; không ghi trong `ExecuteRead` | [T02 §11](T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001cad003) |
 | **CadResult** | Kiểu kết quả của framework: thành công + giá trị, hoặc thất bại + thông điệp | [T02 §4.7](T02_ARCHITECTURE_DEEP_DIVE.md#47-cadresult--cadresultt) |
+| **COLORTHEME** | Sysvar theme giao diện AutoCAD: 0 = tối, 1 = sáng (không có sysvar `DARKMODE`) | [T02 §10](T02_ARCHITECTURE_DEEP_DIVE.md#10-thememanager-styles-và-hệ-màu) |
 | **Command context** | Ngữ cảnh bên trong lệnh Modal: AutoCAD đã lock bản vẽ, gom Undo theo lệnh | [T01 §5](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) |
 | **CommandClass / CommandMethod** | Attribute khai báo class chứa lệnh / method là lệnh | [T01 §6](T01_AUTOCAD_NET_FOUNDATIONS.md#6-lệnh-command-đăng-ký-instance-commandflags) |
 | **CommandFlags** | Cờ hành vi của lệnh (Modal, Session, UsePickSet…) | [T01 §6.3](T01_AUTOCAD_NET_FOUNDATIONS.md#63-commandflags) |
@@ -35,6 +37,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **Functional core / Imperative shell** | Lõi logic thuần + vỏ mỏng chạm hệ thống ngoài | [Phần 9 §9.2](../09_GOLDEN_SAMPLE.md) |
 | **Golden Sample** | Tính năng mẫu chuẩn `Samples/GridMarker` | [Phần 9](../09_GOLDEN_SAMPLE.md) |
 | **Handle** | Định danh bền vững của đối tượng trong file DWG | [T01 §3.1](T01_AUTOCAD_NET_FOUNDATIONS.md#31-objectid-vs-handle-vs-dbobject) |
+| **HeadlessLab** | DLL chỉ dành cho kiểm thử, link mã không-UI của framework, chạy kiểm thử trên AutoCAD thật trong accoreconsole | [T05 §9](T05_TESTING_STRATEGY.md#9-integration-test-headless-hiện-trạng-và-hướng-đi) |
 | **Implied selection** (pick-first) | Đối tượng đã chọn trước khi gõ lệnh (`UsePickSet` + `SelectImplied`) | [T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter) |
 | **Incident report** | Báo cáo sự cố theo mẫu | [T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report) |
 | **Jig** | Tương tác kéo-thả xem trước (`EntityJig`, `DrawJig`) | [T02 §6.2](T02_ARCHITECTURE_DEEP_DIVE.md#62-nhóm-chức-năng) |
@@ -51,6 +54,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **Service locator** | Lấy dependency từ container toàn cục; chỉ cho phép ở biên | [T02 §3.1](T02_ARCHITECTURE_DEEP_DIVE.md#31-service-locator-ở-biên-được-phép-và-có-giới-hạn) |
 | **Side database** | `Database` đọc từ file DWG mà không mở Document | [T07 §4](T07_PERFORMANCE_AND_SCALE.md#4-xử-lý-nhiều-bản-vẽ-side-database) |
 | **Smoke test** | Kiểm tra nhanh các lệnh chính trên AutoCAD thật | [T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được) |
+| **Token màu** (design token) | Key màu dùng chung (`BackgroundBrush`, `AccentBrush`…) định nghĩa ở cả hai file theme; XAML chỉ tham chiếu key, không viết mã màu | [T02 §10](T02_ARCHITECTURE_DEEP_DIVE.md#10-thememanager-styles-và-hệ-màu) |
 | **Symbol table** | Bảng ký hiệu: Layer, Block, TextStyle, Linetype, DimStyle, RegApp… | [T01 §3.2](T01_AUTOCAD_NET_FOUNDATIONS.md#32-bảng-ký-hiệu-symbol-tables) |
 | **SynchronizationContext** | Cơ chế đưa phần sau `await` về đúng thread | [T01 §8.2](T01_AUTOCAD_NET_FOUNDATIONS.md#82-asyncawait-và-synchronizationcontext) |
 | **Sysvar** (system variable) | Biến hệ thống AutoCAD (`COLORTHEME`, `BACKGROUNDPLOT`…) | [T04 §5.3](T04_DEBUGGING_TROUBLESHOOTING.md#53-thí-nghiệm-an-toàn-với-accoreconsole) |

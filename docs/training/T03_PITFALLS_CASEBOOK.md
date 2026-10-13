@@ -3,7 +3,7 @@
 # T03 — Sổ Tay Sự Cố & Bẫy (Casebook)
 
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
-- **Phần A:** 14 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
+- **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
 - **Phần B:** 30 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh.
 
 Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùng khi viết báo cáo sự cố ([T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report)):
@@ -56,7 +56,7 @@ Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùn
 - **Gốc rễ:** `0xC00000FD` là **stack overflow**. Plugin tham chiếu `AcMgd.dll` (UI), và chính `AcMgd.dll` không nạp được trong môi trường không giao diện.
 - **Phát hiện:** Thu hẹp dần. Trace tạm thời cho thấy crash xảy ra *trước* `Initialize()`. Sau đó NETLOAD **riêng `acmgd.dll`** cũng crash y hệt, tức kết luận độc lập với code plugin.
 - **Sửa:** Không sửa được trong kiến trúc một DLL. Runner integration trả **exit code 3** kèm giải thích, và README ghi rõ giới hạn.
-- **Phòng ngừa:** Muốn test headless thì phải tách phần không UI thành DLL riêng (B-20). Bài học phương pháp: **cô lập biến số** (bỏ plugin ra khỏi thí nghiệm) trước khi kết luận.
+- **Phòng ngừa:** Muốn test headless thì phần được test phải không tham chiếu `AcMgd`. Dự án làm điều đó **mà vẫn phát hành một DLL**: [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) link lại mã không-UI vào một DLL chỉ dành cho kiểm thử (PR #6, B-20, ADR-015). Bài học phương pháp: **cô lập biến số** (bỏ plugin ra khỏi thí nghiệm) trước khi kết luận.
 
 ### A6. Integration test báo "passed" dù không lệnh nào chạy
 
@@ -116,7 +116,7 @@ Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùn
 - **Triệu chứng:** Các thành phần dùng key `Cad*` của `ThemeManager` luôn hiện bản **sáng**. Đổi theme AutoCAD khi đang chạy cũng không có tác dụng.
 - **Gốc rễ:** [`CadApplicationHelper.IsDarkMode`](../../Utils/CadApplicationHelper.cs) đọc sysvar **`DARKMODE`**, biến **không tồn tại**. `GetSystemVariable` ném lỗi, helper nuốt lỗi rồi trả mặc định `0`, tức `IsDarkMode == false`. `ThemeManager` cũng chỉ nghe thay đổi của `DARKMODE`, nên không bao giờ nhận được sự kiện.
 - **Phát hiện:** Hỏi thẳng AutoCAD bằng accoreconsole `/isolate` (chỉ đọc): `(getvar "DARKMODE")` → `nil`; `(getvar "COLORTHEME")` → `0`.
-- **Sửa (đề xuất, chưa áp dụng, xem B-01):** Đọc `COLORTHEME` (0 = tối, 1 = sáng) và nghe sự kiện của `COLORTHEME`. Kiểm tra trực quan cả hai theme trong AutoCAD.
+- **Sửa (PR #6, B-01):** Đọc `COLORTHEME` (0 = tối, 1 = sáng) qua hàm thuần `IsDarkColorTheme`, nghe sự kiện của `COLORTHEME`, log khi không đọc được. Kèm theo: một nguồn màu (B-02), palette tự đổi theme khi đang mở (B-23). Kiểm chứng: HeadlessLab `COLORTHEME_DRIVES_DARK_MODE`, test resource key ở cả hai theme, ảnh render từng palette ở cả hai theme.
 - **Phòng ngừa:** **Kiểm chứng giả định với hệ thống thật**, đừng tin comment. Helper "nuốt lỗi rồi trả mặc định" che giấu lỗi cấu hình: hãy log khi sysvar không tồn tại.
 
 ### A14. CHANGELOG mô tả một API không tồn tại
@@ -125,6 +125,22 @@ Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùn
 - **Gốc rễ:** **Không có** `BeginUndoMark`/`StartUndoMark` trong bất kỳ DLL managed nào của AutoCAD 2024 (đã grep metadata). Code dùng COM `StartUndoMark` **từ bản đầu**, và chính comment trong code ghi rõ "Database KHÔNG có BeginUndoMark". Dòng CHANGELOG mô tả một thay đổi chưa từng xảy ra.
 - **Sửa:** Đính chính CHANGELOG.
 - **Phòng ngừa:** Tài liệu cũng cần review như code. **Mọi tên API trong tài liệu phải tồn tại**: kiểm bằng grep metadata DLL hoặc reflection ([T04 §6](T04_DEBUGGING_TROUBLESHOOTING.md#6-kiểm-chứng-api-bằng-metadata)).
+
+### A15. Dự án tạo bằng `dotnet new` mất các khối `#if`
+
+- **Triệu chứng:** Dự án sinh từ template build lỗi `CA1850` trên net8, trong khi chính repo template build sạch. Soi kỹ thì còn tệ hơn: `AppBootstrapper.SetServiceProviderForTesting` biến mất, logger không bao giờ ở mức Debug kể cả bản Debug, `[assembly: SupportedOSPlatform("windows")]` cũng mất — lỗi có từ trước, chỉ là chưa ai thấy.
+- **Gốc rễ:** Template engine của `dotnet new` coi `#if/#else/#endif` trong file `.cs` là **điều kiện template**. Ký hiệu nó không biết (`NET`, `DEBUG`) bị tính là `false`: nhánh `#if` bị xóa, nhánh `#else` được giữ, chỉ thị biến mất. Nó dò token này **cả trong comment**: một comment có dấu thăng + "if" liền nhau làm engine crash "Index was out of range".
+- **Phát hiện:** Chạy lại kiểm chứng template (`dotnet new install . --debug:custom-hive <thư-mục-tạm>`, `dotnet new cad-plugin`, build `-warnaserror`, test) sau một PR thêm code có `#if` (PR #6).
+- **Sửa:** Bao mỗi khối biên dịch có điều kiện bằng hai dòng `//-:cnd:noEmit` … `//+:cnd:noEmit` (tắt xử lý điều kiện của engine, không xuất dòng marker ra dự án sinh ra); code mới tránh `#if` khi có API dùng được cho cả hai TFM (`IncrementalHash`); comment không viết token đó.
+- **Phòng ngừa:** PR đổi cấu trúc dự án hoặc thêm `#if` → chạy lại **cả hai** đường tạo dự án (`dotnet new` và `init-template.ps1`) rồi build + test kết quả ([T06 §8](T06_BUILD_RELEASE_DEVOPS.md#8-template-tạo-dự-án-mới)). "Repo template build được" không có nghĩa "dự án sinh ra build được".
+
+### A16. Test chỉ pass nhờ thứ tự chạy
+
+- **Triệu chứng:** `ThemeDictionaries_DefineExactlyTheSameKeys` pass trong repo nhưng fail trong dự án sinh từ template: `NotSupportedException: The URI prefix is not recognized`.
+- **Gốc rễ:** `ResourceDictionary.Source` với URI tương đối cần gói `pack://application:,,,/` đã được đăng ký — việc static constructor của `System.Windows.Application` làm. Trong repo, luôn có một test dựng palette chạy trước (`InitializeComponent` chạm tới `Application`), nên test kia pass "ké". xUnit sắp thứ tự test theo ID tính từ tên; dự án sinh ra đổi namespace → đổi thứ tự → lộ lỗi.
+- **Phát hiện:** Chạy **riêng** test đó trong repo (`dotnet test --filter "FullyQualifiedName~ThemeDictionaries"`) → fail ngay.
+- **Sửa:** Helper `RunOnSta` của test chủ động chạm `System.Windows.Application.Current` trước khi chạy.
+- **Phòng ngừa:** Test mới phải pass khi chạy **một mình**, không chỉ khi chạy cả bộ. Trạng thái tĩnh (static) dùng chung giữa các test là nơi hay giấu loại lỗi này.
 
 ---
 
@@ -146,13 +162,13 @@ Prompt (`GetPoint`…) **bên trong** transaction/lock. → HỎI trước, VẼ
 Giữ `Line`/`Entity` trong field để dùng lại. → Giữ `ObjectId` (trong phiên) / `Handle` (bền vững).
 
 ### B6. Vẽ nhầm bản vẽ sau `await`
-Đọc `MdiActiveDocument` *sau* `await`: người dùng có thể đã đổi tab. → Chụp `Document` trước `await` như `CadContext.ExecuteAsync` và `CadCommandBase.ExecuteWithScopeAsync`. Ví dụ phản diện có thật: `DEMO_ASYNC_AWAIT` (B-08). [T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)
+Đọc `MdiActiveDocument` *sau* `await`: người dùng có thể đã đổi tab. → Chụp `Document` trước `await` như `CadContext.ExecuteAsync` và `CadCommandBase.ExecuteWithScopeAsync`. Ví dụ phản diện có thật: `DEMO_ASYNC_AWAIT` trên v1.0.0 (B-08) — từ PR #6 nó là ví dụ **đúng** (xem `Demos/DemoServicesCommands.cs`). [T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)
 
 ### B7. Fatal error khi bản vẽ bị đóng trong lúc chờ
 `LockDocument()` trên Document đã hủy. → Kiểm tra `doc.IsDisposed` sau `await` (có trong `ExecuteAsync`).
 
 ### B8. Gọi AutoCAD API từ thread nền
-`Task.Run(() => …GetObject…)`, `System.Timers.Timer`, `ConfigureAwait(false)`. → Chỉ tính toán/I-O ở thread nền, rồi marshal về main thread (`CadAsyncHelper.ExecuteSafeAsync`). [T01 §8](T01_AUTOCAD_NET_FOUNDATIONS.md#8-threading-và-async-trong-autocad)
+`Task.Run(() => …GetObject…)`, `System.Timers.Timer`, `ConfigureAwait(false)`. → Chỉ tính toán/I-O ở thread nền, rồi marshal về main thread (`CadAsyncHelper.ExecuteSafeAsync`). Từ PR #6, gọi `ICadContext` từ thread khác ném ngay `InvalidOperationException` có hướng dẫn (`Core/CadThread`, B-06) thay vì hỏng ngẫu nhiên. [T01 §8](T01_AUTOCAD_NET_FOUNDATIONS.md#8-threading-và-async-trong-autocad)
 
 ### B9. Deadlock khi `.Result` / `.Wait()`
 Chặn main thread chờ một task cần quay về main thread. → `await` từ đầu đến cuối. Ở biên dùng `FireAndForget(onError)`.
@@ -161,7 +177,7 @@ Chặn main thread chờ một task cần quay về main thread. → `await` t�
 → Dùng `scope.AppendEntityToCurrentSpace` (gom cả hai bước). Với record bảng ký hiệu/Xrecord/Group/Attribute, xem mẫu trong `Ensure*`, `XRecordHelper`, `BlockHelper`.
 
 ### B11. Rò rỉ đối tượng chưa vào database
-`new Line()` rồi bỏ dở (do lỗi, hoặc chỉ dùng tạm) mà không `Dispose()`. Finalizer sẽ chạy trên thread khác. → `using`/`Dispose` cho mọi đối tượng không được append. Trong framework: B-12, B-14.
+`new Line()` rồi bỏ dở (do lỗi, hoặc chỉ dùng tạm) mà không `Dispose()`. Finalizer sẽ chạy trên thread khác. → `using`/`Dispose` cho mọi đối tượng không được append. Trong framework: B-12, B-14 (sửa ở PR #6 — mọi `Draw*` đi qua `CadScopeDrawingHelpers.AppendNew`, lỗi trước khi append thì Dispose rồi ném lại).
 
 ### B12. Lọc block theo tên bỏ sót dynamic block
 Dynamic block đã chỉnh tham số tham chiếu BTR ẩn danh `*Uxx`, không còn tên gốc. → Lọc thêm `` `*U* `` rồi lọc lại sau khi chọn bằng `DynamicBlockHelper.GetEffectiveName`.
@@ -170,7 +186,7 @@ Dynamic block đã chỉnh tham số tham chiếu BTR ẩn danh `*Uxx`, không c
 Mã DXF 62 của entity màu *ByLayer* là 256, không phải màu thật của layer. → Lọc theo layer, hoặc kiểm tra màu hiệu lực sau khi chọn.
 
 ### B14. Tên có ký tự đặc biệt bị hiểu là wildcard
-Layer `A*B` trong `SelectionFilter` khớp mọi layer bắt đầu bằng A, kết thúc bằng B. → Escape bằng `` ` ``. `SelectionFilterBuilder` hiện không escape (B-17).
+Giá trị chuỗi trong `SelectionFilter` là **mẫu wildcard**. Vài ký tự **hợp lệ trong tên** layer/block lại là wildcard: `#` (một chữ số), `@` (một chữ cái), `.` (một ký tự không phải chữ/số), `~`, `[ ]`, `-`. Hệ quả (đã kiểm chứng, HeadlessLab `FILTER_ONLAYERS_IS_WILDCARD`): layer `LAB#1` **không khớp chính nó**, `M.EQUIP` khớp cả `M-EQUIP`. (`* ? ,` thì không hợp lệ trong tên ký hiệu, nên không gặp ở tên.) → Escape bằng `` ` ``: dùng `OnLayersExact` / `WithBlockNamesExact` / `SelectionFilterBuilder.EscapeWildcards` (PR #6, B-17).
 
 ### B15. Tọa độ lệch khi UCS bị xoay
 Dùng thẳng điểm từ `Editor.GetPoint` (hệ UCS) để vẽ (hệ WCS). → `CadPromptHelper` tự chuyển. Khi dùng `Editor` thô: `TransformBy(ed.CurrentUserCoordinateSystem)`. [T01 §7.3](T01_AUTOCAD_NET_FOUNDATIONS.md#73-ba-hệ-tọa-độ-wcs-ucs-ocs)
@@ -182,13 +198,15 @@ Giới hạn 16 KB **mỗi đối tượng** (mọi app gộp lại), mỗi chu�
 → `XDataHelper.EnsureRegApp` tự đăng ký. Entity phải **đã nằm trong database** (helper dùng `obj.Database`), vì vậy Golden Sample gắn XData *sau* khi append.
 
 ### B18. Xóa Xrecord khỏi dictionary nhưng đối tượng vẫn còn
-`DBDictionary.Remove(key)` gỡ *mục* trong dictionary nhưng không xóa đối tượng (nó thành "mồ côi"). → Mở Xrecord `ForWrite` rồi `Erase()`. `XRecordHelper.RemoveMetadata` hiện chỉ `Remove` (B-09).
+`DBDictionary.Remove(key)` gỡ *mục* trong dictionary nhưng không xóa đối tượng (nó thành "mồ côi"). → Mở Xrecord `ForWrite` rồi `Erase()`. `XRecordHelper.RemoveMetadata` từng chỉ `Remove` — sửa ở PR #6 (B-09; HeadlessLab `XRECORD_REMOVE_ERASES` FAIL trên v1.0.0).
 
-### B19. Sao chép block mất attribute
-`Entity.Clone()` sao chép nông, không tạo lại `AttributeReference`. → `Database.DeepCloneObjects`. `CopyEntity`/`MirrorEntity` hiện dùng `Clone()` (B-13).
+### B19. Sao chép entity mất metadata (Extension Dictionary)
+`Entity.Clone()` cho một bản sao chưa vào database **không có Extension Dictionary** — mọi metadata XRecord của framework (`XRecordHelper`) mất ở bản sao (XData thì còn). → `Database.DeepCloneObjects` (sao cả đối tượng sở hữu) rồi `TransformBy`. `CopyEntity`/`MirrorEntity` từng dùng `Clone()` — sửa ở PR #6 (B-13; HeadlessLab `COPY_KEEPS_METADATA` FAIL trên v1.0.0).
+
+> **Đính chính.** Bản trước của mục này ghi "sao chép block **mất attribute**". Kiểm chứng trên AutoCAD 2024 cho thấy **sai**: `Clone()` của `BlockReference` vẫn tạo `AttributeReference` **riêng** cho bản sao (ObjectId khác, owner là bản sao — HeadlessLab `COPY_KEEPS_ATTRIBUTES`, `MIRROR_KEEPS_ATTRIBUTES` PASS cả trước lẫn sau khi sửa). Bài học: một kết luận "nghe hợp lý" về API vẫn phải được chạy thử.
 
 ### B20. Attribute lệch vị trí sau khi đổi giá trị
-Attribute căn lề khác *Left* cần tính lại căn chỉnh sau khi đổi `TextString`. → Cân nhắc `attRef.AdjustAlignment(db)` (API tồn tại trong `AcDbMgd`). Kiểm chứng bằng lab với block thật trước khi đưa vào `BlockHelper` (B-25).
+Attribute căn lề khác *Left* phải được tính lại căn chỉnh sau khi đổi `TextString`, nếu không hình học giữ chỗ cũ (đã kiểm chứng: tâm X = 42.507 thay vì điểm căn 20). → `BlockHelper.InsertBlock` và `BlockHelper.SetBlockAttribute` tự căn lại (hàm nội bộ `RefreshAlignment`): attribute MText thì `UpdateMTextAttribute()`, còn lại `AdjustAlignment(db)` (PR #6, B-25; HeadlessLab `ATTRIBUTE_REALIGNED_AFTER_SET`). Tự đổi `attRef.TextString` ngoài helper thì phải tự gọi một trong hai hàm đó.
 
 ### B21. Hatch lỗi `eNotInDatabase`
 Gán `Associative = true` / `AppendLoop` trước khi Hatch vào database. → Append trước, như [`DrawHatch`](../../Extensions/CadScopeBlockExtensions.cs) đang làm.
@@ -209,16 +227,16 @@ Overrule còn đăng ký khi plugin tắt. → `OverruleManager` được Dispos
 Gọi COM (ví dụ `EndUndoMark`) từ finalizer chạy trên thread khác. → `UndoGroupManager` **cố ý không có finalizer**, chỉ dùng với `using`.
 
 ### B27. Palette không nhớ vị trí
-`PaletteSet` tạo không có Guid ổn định. → Truyền Guid cố định. Dự án hiện **chưa** làm (B-04).
+`PaletteSet` tạo không có Guid ổn định. → Guid cố định cho mỗi palette. Từ PR #6, `PaletteService` tự dẫn xuất Guid từ `[assembly: Guid]` + tên palette (`Core/PaletteGuids`, B-04).
 
 ### B28. Resource WPF thiếu nhưng không báo lỗi
-`{DynamicResource KeyKhôngCó}` âm thầm dùng giá trị mặc định. → Test XAML; script so khớp key (B-03).
+`{DynamicResource KeyKhôngCó}` âm thầm dùng giá trị mặc định. → Test: mọi key mà XAML tham chiếu phải resolve được, ở **cả hai** theme (`XamlPaletteTests.EveryResourceKeyReferencedByPalettesAndStyles_Resolves`, B-03). Kèm: giá trị **local** trên thẻ luôn thắng setter của Style/DataTrigger — đặt giá trị mặc định *trong* Style nếu muốn trigger đổi được nó (B-29).
 
 ### B29. Plot thất bại hoặc chạy nền ngoài ý muốn
-Không kiểm tra `PlotFactory.ProcessPlotState` (đang có plot khác thì không plot được); `BACKGROUNDPLOT` mặc định **2** (đã kiểm chứng) nghĩa là publish chạy nền; `PlotEngine` không được Dispose. → Kiểm tra trạng thái, tạm đặt `BACKGROUNDPLOT = 0` rồi khôi phục, `using` cho engine (B-10).
+Không kiểm tra `PlotFactory.ProcessPlotState` (đang có plot khác thì không plot được); `BACKGROUNDPLOT` mặc định **2** (đã kiểm chứng) nghĩa là publish chạy nền; `PlotEngine` không được Dispose. → Kiểm tra trạng thái, tạm đặt `BACKGROUNDPLOT = 0` rồi khôi phục, `using` cho engine (B-10). Khi in thật còn gặp (HeadlessLab, B-28): `GetCanonicalMediaNameList` trả `StringCollection` (phải `Cast<string>()`); `SetPlotCentered` ném `eInvalidInput` với vùng in `Layout`; `PlotInfoValidator` ném `eLayoutNotCurrent` nếu layout không hiện hành.
 
 ### B30. `Assembly.Location` rỗng
-Khi nạp từ byte array, `Assembly.Location == ""`, và `Path.GetDirectoryName("")` ném `ArgumentException` trên .NET Framework (đã kiểm chứng). → Không suy ra thư mục plugin từ `Location` mà không kiểm tra. `AppBootstrapper` có kiểm tra, `PathProvider` thì không (B-11).
+Khi nạp từ byte array, `Assembly.Location == ""`, và `Path.GetDirectoryName("")` ném `ArgumentException` trên .NET Framework (đã kiểm chứng). → Không suy ra thư mục plugin từ `Location` mà không kiểm tra. `AppBootstrapper` có kiểm tra; `PathProvider` từ PR #6 ném lỗi nói rõ nguyên nhân (B-11).
 
 ---
 

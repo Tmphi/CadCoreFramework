@@ -126,7 +126,8 @@ AutoCAD tự tạo instance class lệnh và WPF tự tạo `UserControl` (cả 
 | :--- | :--- | :--- |
 | Lệnh (`CadCommandBase`) | `GetRequiredService<T>()` | **Ném** `InvalidOperationException` có thông điệp rõ, được `ExecuteCommand` bắt |
 | Palette code-behind | `ServiceProvider?.GetService<TViewModel>() ?? throw …` | **Ném** (fail-loud), lệnh mở palette báo lỗi |
-| `ViewModelLocator` (XAML) | `ServiceProvider?.GetService<…>()` | Trả `null` âm thầm (ngoại lệ còn sót, chỉ dùng cho `CommonControlsPalette`) |
+
+(Trên v1.0.0 còn một biên thứ ba, `ViewModelLocator` trong XAML của `CommonControlsPalette`: trả `null` âm thầm và gắn ViewModel vào một `Grid` con nên `PaletteService` không Dispose được nó. Đã bỏ ở PR #6 — B-26.)
 
 Bên trong (Service, ViewModel) **luôn** dùng constructor injection. Đây là ranh giới để code nghiệp vụ test được.
 
@@ -181,7 +182,7 @@ Câu hỏi để đọc kỹ (đáp án ở cuối mục):
 - Lock **chỉ khi** `DocumentManager.IsApplicationContext` (palette, modeless). Trong lệnh, AutoCAD đã lock sẵn.
 - Scope có `IsReadOnly = true`. `AppendEntityToCurrentSpace`, `SetXRecord`, `RemoveXRecord` ném `InvalidOperationException`.
 - Kết thúc bằng `Commit()` (rẻ hơn Abort với transaction chỉ đọc).
-- ⚠️ "Read-only" là **quy ước có hàng rào một phần**, không phải bảo đảm tuyệt đối: `scope.Transaction.GetObject(id, ForWrite)` rồi sửa vẫn được commit ([B-07](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
+- ⚠️ "Read-only" là **quy ước có hàng rào một phần**, không phải bảo đảm tuyệt đối lúc chạy: `scope.Transaction.GetObject(id, ForWrite)` rồi sửa vẫn được commit ([B-07](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Hàng rào thứ hai nằm ở **lúc build**: analyzer CAD003 cảnh báo `OpenMode.ForWrite` / `UpgradeOpen()` viết trực tiếp trong lambda của `ExecuteRead` ([§11](#11-analyzer-cad001cad003)).
 
 ### 4.4 `ExecuteAsync`: hai giai đoạn
 
@@ -191,12 +192,13 @@ Task ExecuteAsync(Func<Task<Action<ICadScope>>> asyncPreparation, bool autoRegen
 ```
 
 1. **Chụp `Document` trước `await`.** Đây là điểm giá trị nhất: người dùng đổi tab trong lúc chờ cũng không vẽ nhầm.
-2. Kiểm tra hủy (`ThrowIfCancellationRequested`) trước và sau giai đoạn chuẩn bị.
-3. `await asyncPreparation()`: tải dữ liệu / tính toán, **không** lock gì.
-4. Nếu `doc.IsDisposed` (bản vẽ đã đóng) thì ném lỗi rõ ràng, thay vì `LockDocument()` trên đối tượng đã hủy.
-5. `ExecuteCore(doc, drawAction, …)` chạy giai đoạn vẽ như bình thường.
+2. **Không có `SynchronizationContext` thì ném ngay** (B-06, PR #6): thiếu nó, phần sau `await` sẽ chạy trên ThreadPool. Báo lỗi trước khi làm việc nặng, thay vì để kết quả phụ thuộc thời điểm.
+3. Kiểm tra hủy (`ThrowIfCancellationRequested`) trước và sau giai đoạn chuẩn bị.
+4. `await asyncPreparation()`: tải dữ liệu / tính toán, **không** lock gì.
+5. Sau `await`: kiểm lại đang ở main thread (`CadThread`, [§4.6](#46-cadcontextguard-chặn-lồng-nhau)); nếu `doc.IsDisposed` (bản vẽ đã đóng) thì ném lỗi rõ ràng, thay vì `LockDocument()` trên đối tượng đã hủy.
+6. `ExecuteCore(doc, drawAction, …)` chạy giai đoạn vẽ như bình thường.
 
-Chỉ dùng khi **thật sự có việc async** (I/O, HTTP). Bọc code đồng bộ trong `Task.FromResult` để gọi `ExecuteAsync` là sai mục đích ([quy tắc dự án](../../.agents/rules/project_rules.md)). ⚠️ Method này *không* xác nhận đang có `SynchronizationContext` của main thread ([B-06](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
+Chỉ dùng khi **thật sự có việc async** (I/O, HTTP). Bọc code đồng bộ trong `Task.FromResult` để gọi `ExecuteAsync` là sai mục đích ([quy tắc dự án](../../.agents/rules/project_rules.md)). Mẫu gọi đúng từ một lệnh: [`DEMO_ASYNC_AWAIT`](../../Demos/DemoServicesCommands.cs) (`ExecuteWithScopeAsync`, thông báo sau `await` ghi qua `scope.Editor`).
 
 ### 4.5 `ExecuteBatch`
 
@@ -209,7 +211,9 @@ Vẽ N phần tử trong **một** transaction, **một** bước Undo (mặc đ
 **Vì sao cấm**, khi AutoCAD *cho phép* transaction lồng nhau và lock lồng nhau ([T01 §4.3](T01_AUTOCAD_NET_FOUNDATIONS.md#43-transaction-lồng-nhau))? Vì một `Execute` là **một đơn vị công việc**: một lock, một transaction, một bước Undo, một kết quả. Lồng nhau thường là triệu chứng thiết kế sai (Service A gọi Service B *bên trong* lambda), và tạo ra những câu hỏi không có câu trả lời tốt: transaction trong commit rồi mà ngoài rollback thì sao? Undo mark lồng nhau tính thế nào? Guard biến lỗi thiết kế thành một exception có thông điệp hướng dẫn cách sửa.
 
 > [!NOTE]
-> Comment trong `CadContextGuard.cs` giải thích bằng "AutoCAD sẽ ném eLockViolation hoặc deadlock". Đó **không** phải lý do thực sự (lock và transaction lồng nhau đều hợp lệ với AutoCAD). Lý do đúng là *đơn vị công việc* như trên ([B-19](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Hiểu đúng lý do giúp bạn quyết định đúng khi gặp trường hợp biên.
+> Trên v1.0.0, comment trong `CadContextGuard.cs` giải thích bằng "AutoCAD sẽ ném eLockViolation hoặc deadlock". Đó **không** phải lý do thực sự (lock và transaction lồng nhau đều hợp lệ với AutoCAD). Lý do đúng là *đơn vị công việc* như trên; comment đã sửa ở PR #6 ([B-19](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Hiểu đúng lý do giúp bạn quyết định đúng khi gặp trường hợp biên.
+
+**Guard thứ hai: đúng thread** ([`Core/CadThread.cs`](../../Core/CadThread.cs), PR #6, B-06). `AppBootstrapper.Initialize` ghi nhận main thread (AutoCAD luôn gọi `Initialize` trên main thread — HeadlessLab `INITIALIZE_RUNS_ON_COMMAND_THREAD` kiểm điều này). Mọi điểm vào `ICadContext` — và phần sau `await` trong `ExecuteAsync` — ném `InvalidOperationException` có hướng dẫn nếu đang ở thread khác, thay vì để AutoCAD hỏng ngẫu nhiên. Chưa ghi nhận (unit test) thì guard không làm gì.
 
 Cờ áp dụng cho cả `ExecuteRead`: gọi `ExecuteRead` bên trong `Execute` cũng bị chặn. Đọc cần thiết thì làm ngay trong cùng scope. Đây cũng là lý do Service **publish message sau khi `TryExecute` đã trả về**: subscriber như `GridMarkerViewModel.RefreshCount` sẽ gọi `ExecuteRead` mà không bị coi là lồng nhau.
 
@@ -361,12 +365,12 @@ stateDiagram-v2
 | :--- | :--- |
 | `contentFactory` (lazy) | View chỉ được tạo khi người dùng thật sự mở palette |
 | Dispose ViewModel cũ trước khi thay content | Gỡ subscription, tránh rò rỉ (lỗi khi Dispose được **log**, không nuốt) |
-| `TogglePalette` **ném lại** lỗi | Lệnh mở palette báo lỗi và ghi FAIL vào lịch sử, thay vì palette âm thầm không mở |
-| `ShowPalette` chỉ **log** lỗi | Không nhất quán với Toggle ([B-15](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
-| `GetOrCreatePaletteSet(name, guid?)` | Có tham số Guid để AutoCAD **nhớ vị trí/kích thước** palette. ⚠️ `TogglePalette`/`ShowPalette` **không truyền Guid**, nên palette của dự án không được nhớ vị trí ([B-04](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
+| `TogglePalette` / `ShowPalette` **ném lại** lỗi | Lệnh mở palette báo lỗi và ghi FAIL vào lịch sử, thay vì palette âm thầm không mở (`ShowPalette` từng chỉ log — B-15, PR #6) |
+| Guid ổn định cho **mọi** PaletteSet | AutoCAD lưu vị trí/kích thước/dock theo Guid. `GetOrCreatePaletteSet(name, guid?)`: không truyền guid → dẫn xuất từ `[assembly: Guid]` + tên palette ([`Core/PaletteGuids.cs`](../../Core/PaletteGuids.cs), UUID v8/SHA-256), nên hai plugin dựng từ template không đụng nhau (B-04, PR #6) |
+| Lần Toggle **đầu tiên** của phiên luôn là "hiện + nạp content" | PaletteSet vừa tạo có thể được AutoCAD khôi phục trạng thái phiên trước nhưng chưa có nội dung |
 | Khi người dùng đóng bằng nút X | Chỉ ẩn. ViewModel vẫn sống và vẫn nhận message tới lần Toggle sau |
 
-Code-behind palette ([`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs)) chỉ làm hạ tầng: `InitializeComponent()`, nạp `Styles.xaml` bằng pack URI dựng lúc runtime, áp theme, lấy ViewModel từ DI (fail-loud), và gọi `RefreshCount` khi `Loaded`.
+Code-behind palette ([`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs)) chỉ làm hạ tầng: `InitializeComponent()`, `ThemeManager.Attach(this)` (Styles + theme, [§10](#10-thememanager-styles-và-hệ-màu)), lấy ViewModel từ DI gán cho **chính UserControl** (fail-loud), và gọi `RefreshCount` khi `Loaded`.
 
 > [!IMPORTANT]
 > Style từ `Styles.xaml` được merge **sau** `InitializeComponent()`, nên XAML phải tham chiếu chúng bằng **`{DynamicResource}`**. `{StaticResource}` tới các key đó đã từng làm palette không mở được ([T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension)).
@@ -377,13 +381,14 @@ Code-behind palette ([`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/Grid
 
 🔎 [`Core/RibbonService.cs`](../../Core/RibbonService.cs)
 
-- `InitializeRibbon()`: lấy `ComponentManager.Ribbon`. Nếu Ribbon chưa sẵn sàng (plugin nạp lúc AutoCAD đang khởi động), đăng ký `ComponentManager.ItemInitialized` để dựng sau.
+- `RegisterBuildAction(build)` + `InitializeRibbon()`: Ribbon đã sẵn (NETLOAD muộn) → dựng **ngay**, bất kể hàm nào được gọi trước; chưa sẵn (plugin nạp lúc AutoCAD đang khởi động) → đăng ký `ComponentManager.ItemInitialized` để dựng khi nó xuất hiện. Lỗi trong build action được log, không làm hỏng khởi động.
 - Theo dõi `CommandEnded` của mọi bản vẽ. Sau các lệnh reset giao diện (`CUI`, `MENULOAD`, `WSCURRENT`…), nó đăng ký `Application.Idle` **một lần** để dựng lại Ribbon khi AutoCAD rảnh.
-- `AddTab` / `AddPanel` tìm theo Id/Name trước khi tạo nên **idempotent**. `AddButton` / `AddSplitButton` thì **không** kiểm tra trùng: gọi lại trên panel còn tồn tại sẽ tạo nút trùng. Build action phải tự xóa hoặc kiểm tra trước khi thêm nút ([T08 §6](T08_RECIPES_EXTENDING.md#6-thêm-ribbon-tab)).
+- `AddTab` / `AddPanel` tìm theo Id/Name trước khi tạo nên **idempotent**; `AddButton` bỏ qua nút đã có cùng lệnh; `RemoveTab` gỡ tab để build luôn dựng lại từ đầu ([T08 §6](T08_RECIPES_EXTENDING.md#6-thêm-ribbon-tab)). (`AddSplitButton` không kiểm trùng — build phải `RemoveTab` trước.)
 - Nút bấm dùng `RibbonCommandHandler`: `SendStringToExecute("\x03\x03_.LỆNH ")` ([T01 §5.3](T01_AUTOCAD_NET_FOUNDATIONS.md#53-đi-từ-application-context-sang-command-context)).
+- Tab của dự án: [`Commands/CadCoreRibbon.cs`](../../Commands/CadCoreRibbon.cs) ("CadCore": Grid Marker, palette, Layer Manager, Debug Inspector, CORE_INFO), đăng ký trong `AppBootstrapper.InitializeCore`.
 
-> [!WARNING]
-> **Hiện trạng v1.0.0:** không có chỗ nào gọi `AddTab`/`AddButton`/`RegisterBuildAction`. Hạ tầng đã sẵn nhưng **plugin chưa hiện Ribbon nào** ([B-05](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Công thức dựng Ribbon đúng chuẩn nằm ở [T08 §6](T08_RECIPES_EXTENDING.md#6-thêm-ribbon-tab); lab L11 yêu cầu bạn làm việc này.
+> [!NOTE]
+> Trên v1.0.0 không có chỗ nào gọi `AddTab`/`AddButton`/`RegisterBuildAction`: hạ tầng đã sẵn nhưng plugin không hiện Ribbon nào, và NETLOAD muộn thì không ai gọi build ([B-05](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), sửa ở PR #6). Hành vi Ribbon chỉ kiểm được trong AutoCAD GUI.
 
 ---
 
@@ -391,9 +396,27 @@ Code-behind palette ([`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/Grid
 
 🔎 [`Themes/ThemeManager.cs`](../../Themes/ThemeManager.cs), [`Themes/Styles.xaml`](../../Themes/Styles.xaml), [`Utils/CadApplicationHelper.cs`](../../Utils/CadApplicationHelper.cs)
 
-Thiết kế dự định: đọc theme AutoCAD → nạp `AutoCadTheme.xaml` (tối) hoặc `AutoCadLightTheme.xaml` (sáng) → nghe `SystemVariableChanged` để đổi theme lúc đang chạy.
+**Thiết kế (từ PR #6):**
 
-Thực tế v1.0.0 (đã kiểm chứng, đây là bài học "đọc toàn cục"):
+```mermaid
+flowchart LR
+    CT["sysvar COLORTHEME<br/>0 = tối · 1 = sáng"] -->|Initialize / SystemVariableChanged| TM[ThemeManager.ApplyTheme]
+    TM -->|ThemeChanged| P1["Palette A<br/>(Attach: nghe khi Loaded)"]
+    TM -->|ThemeChanged| P2[Palette B]
+    P1 -->|swap dictionary| R["Resources của palette:<br/>Styles.xaml + AutoCadTheme.xaml / AutoCadLightTheme.xaml"]
+```
+
+| Thành phần | Vai trò |
+| :--- | :--- |
+| `CadApplicationHelper.IsDarkMode` | Đọc `COLORTHEME` qua hàm thuần `IsDarkColorTheme` (thiếu/lạ → tối, mặc định của AutoCAD) |
+| `AutoCadTheme.xaml` / `AutoCadLightTheme.xaml` | **Nguồn màu duy nhất**, cùng một bộ key ở cả hai file: token dùng chung (`BackgroundBrush`, `SurfaceBrush`, `SurfaceAltBrush`, `SurfaceHoverBrush`, `BorderBrush`, `TextPrimaryBrush`, `TextSecondaryBrush`, `AccentBrush`, `AccentHoverBrush`, `OnAccentBrush`, `DangerBrush`, `SuccessBrush`, `WarningBrush`, `OverlayBrush`) và bộ `Cad*` |
+| `Styles.xaml` | **Chỉ Style**, tham chiếu màu bằng `{DynamicResource}` — swap theme thì control đang hiện tự đổi |
+| `ThemeManager.Attach(root)` | Gọi sau `InitializeComponent()`: nạp Styles + theme hiện hành vào `root.Resources`; nghe `ThemeChanged` khi `Loaded`, gỡ khi `Unloaded` (không giữ palette đã đóng); khi hiện lại thì bắt kịp theme hiện hành |
+| `ThemeManager.ApplyTheme` | Luôn phát `ThemeChanged` (palette AutoCAD không dùng `Application.Resources`, thường không có WPF `Application`) |
+
+Kiểm thử bảo vệ thiết kế này (`XamlPaletteTests`): hai file theme cùng bộ key; `Styles.xaml` không chứa màu; mọi key mà XAML của từng palette (và `Styles.xaml`) tham chiếu đều resolve được ở **cả hai** theme; palette đã `Attach` đổi màu khi theme đổi lúc đang hiện, thôi nghe sau `Unloaded`.
+
+**Hiện trạng v1.0.0** (đã kiểm chứng — bài học "đọc toàn cục"; sửa ở PR #6):
 
 | Phát hiện | Bằng chứng | Mã |
 | :--- | :--- | :---: |
@@ -401,20 +424,27 @@ Thực tế v1.0.0 (đã kiểm chứng, đây là bài học "đọc toàn cụ
 | `Styles.xaml` **cố định một bảng màu tối riêng** (`#1E1E2E`, accent tím) và palette chủ yếu dùng các key này | Đọc file | B-02 |
 | Không ai subscribe `ThemeManager.ThemeChanged`; palette chỉ áp theme **một lần** lúc tạo | grep `ThemeChanged` | B-23 |
 | `LayerManagerControl.xaml` dùng 3 key **không được định nghĩa** (`Brush.Surface.Default`, `Brush.Surface.Elevated`, `Brush.Text.Default`). `DynamicResource` thiếu key thì **im lặng** | Script so khớp key | B-03 |
+| Theme sáng thiếu style `CadComboBox` (có ở theme tối) | Test so khớp key của hai file theme | B-02 |
 
-Đây là ví dụ kinh điển cho việc một tính năng "trông như chạy": palette vẫn hiện, không ai báo lỗi, nhưng thiết kế dự định không bao giờ được thực thi. Senior phát hiện loại lỗi này bằng cách **kiểm chứng giả định** (hỏi thẳng AutoCAD giá trị sysvar), không phải bằng cách đọc comment.
+Đây là ví dụ kinh điển cho việc một tính năng "trông như chạy": palette vẫn hiện, không ai báo lỗi, nhưng thiết kế dự định không bao giờ được thực thi. Senior phát hiện loại lỗi này bằng cách **kiểm chứng giả định** (hỏi thẳng AutoCAD giá trị sysvar), không phải bằng cách đọc comment. Và vì là UI: **nhìn** kết quả ở cả hai theme — render palette ra ảnh còn lộ thêm các lỗi hiển thị mà không test nào bắt (B-29).
 
 ---
 
-## 11. Analyzer CAD001
+## 11. Analyzer CAD001–CAD003
 
-🔎 [`CadCoreFramework.Analyzers/MdiActiveDocumentInServiceAnalyzer.cs`](../../CadCoreFramework.Analyzers/MdiActiveDocumentInServiceAnalyzer.cs)
+🔎 [`CadCoreFramework.Analyzers/`](../../CadCoreFramework.Analyzers/) — test: [`CadCoreFramework.Tests/AnalyzerTests.cs`](../../CadCoreFramework.Tests/AnalyzerTests.cs)
 
-- Roslyn analyzer, chạy **lúc build**, được tham chiếu dạng `OutputItemType="Analyzer"` nên không đóng gói vào DLL plugin.
-- Báo **warning** (thành lỗi trên CI vì `-warnaserror`) khi một class trong namespace `*.Services` / `*.ViewModels`, hoặc tên kết thúc bằng `Service` / `ViewModel`, truy cập `.MdiActiveDocument`. Bỏ qua `CadContext` và `AppBootstrapper`.
-- Ngoại lệ có chủ đích được đánh dấu bằng `#pragma warning disable CAD001` kèm comment giải thích (ví dụ `NotificationService`).
+- Roslyn analyzer, chạy **lúc build**, được tham chiếu dạng `OutputItemType="Analyzer"` nên không đóng gói vào DLL plugin. Báo **warning**, thành lỗi trên CI vì `-warnaserror`.
+- "Service/ViewModel" (CAD001, CAD002) = class trong namespace `*.Services` / `*.ViewModels`, hoặc tên kết thúc bằng `Service` / `ViewModel` (xét cả lớp bao ngoài); bỏ qua `CadContext` và `AppBootstrapper` ([`ArchitectureLayers.cs`](../../CadCoreFramework.Analyzers/ArchitectureLayers.cs)).
 
-Giới hạn ([B-18](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): phân tích theo **cú pháp**, chỉ bắt chuỗi `.MdiActiveDocument` xuất hiện trực tiếp. Service gọi `CadPromptHelper.GetPoint` (gián tiếp dùng `MdiActiveDocument`, và còn **prompt trong service**) sẽ lọt qua. Đây là đề bài tốt cho người muốn học viết analyzer.
+| Rule | Bắt | Vì sao |
+| :---: | :--- | :--- |
+| **CAD001** | Service/ViewModel truy cập `.MdiActiveDocument` | Phải đi qua `ICadContext` (lock, transaction, test được) |
+| **CAD002** | Service/ViewModel gọi `CadPromptHelper.*` hoặc `Editor.GetPoint/GetString/GetSelection/…` (B-18) | Prompt thuộc tầng Command; Service phải dùng được từ palette, batch, test |
+| **CAD003** | `OpenMode.ForWrite` / `UpgradeOpen()` trong lambda (kể cả lambda lồng) truyền cho `ExecuteRead` của một `*CadContext` (B-07) | Transaction của `ExecuteRead` được Commit: ghi trong đó *sẽ* vào bản vẽ |
+
+- Ngoại lệ có chủ đích được đánh dấu bằng `#pragma warning disable CADxxx` kèm comment giải thích (ví dụ CAD001 trong `NotificationService`).
+- Giới hạn chung: chỉ thấy lời gọi **trực tiếp**; không theo vào method được gọi từ đó (Service gọi một helper mà helper prompt thì lọt), và CAD003 không xét method group (`ExecuteRead(DocRead)`). Viết thêm rule là đề bài tốt cho người muốn học Roslyn — mẫu test ở `AnalyzerTests` (biên dịch đoạn mã kèm stub kiểu AutoCAD, không cần AutoCAD).
 
 ---
 
@@ -424,9 +454,10 @@ Giới hạn ([B-18](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-c
 | :--- | :--- | :--- |
 | `ILoggerService` | [`LoggerService.cs`](../../Core/LoggerService.cs) | Tự viết (không Serilog, xem T03 A1). File `%AppData%\CadCoreFramework\Logs\log-yyyyMMdd.txt`, định dạng `2026-10-12 19:30:00.123 +07:00 [INF] …`. Mức tối thiểu: Debug ở bản Debug, Information ở bản Release. Giữ 31 file. Mở/đóng file mỗi lần ghi với `FileShare.ReadWrite` (nhiều phiên AutoCAD ghi chung). **Không bao giờ ném lỗi** |
 | `INotificationService` | [`NotificationService.cs`](../../Core/NotificationService.cs) | In `[✔]` / `[⚠]` / `[✖]` lên dòng lệnh **và** ghi log. `Confirm` dùng MessageBox |
-| `ISettingsService` | [`SettingsService.cs`](../../Services/SettingsService.cs) | `%AppData%\CadCoreFramework\settings.json`, `Dictionary<string, object>` có lock. `GetSetting<T>` round-trip JSON để đổi kiểu (Newtonsoft đọc số thành `Int64`). Ghi file không atomic ([B-22](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
-| `IPathProvider` | [`PathProvider.cs`](../../Services/PathProvider.cs) | `GetPluginDirectory()` dựa vào `Assembly.Location`, chuỗi **rỗng** khi nạp từ byte array, và `Path.GetDirectoryName("")` ném `ArgumentException` trên .NET Framework. Hiện chưa có code sản phẩm gọi nó ([B-11](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
-| `IFileSystemService` | [`FileSystemService.cs`](../../Services/FileSystemService.cs) | Bọc `System.IO` để mock được trong test (`SettingsServiceTests`) |
+| `ISettingsService` | [`SettingsService.cs`](../../Services/SettingsService.cs) | `%AppData%\CadCoreFramework\settings.json`, `Dictionary<string, object>` có lock. `GetSetting<T>` round-trip JSON để đổi kiểu (Newtonsoft đọc số thành `Int64`). `Save()` an toàn khi nhiều phiên AutoCAD: đọc lại tệp, chỉ áp các key phiên này đã đổi, named mutex giữa tiến trình, ghi atomic; ghi lỗi thì giữ key cho lần sau ([B-22](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), PR #6) |
+| `IPathProvider` | [`PathProvider.cs`](../../Services/PathProvider.cs) | `GetPluginDirectory()` dựa vào `Assembly.Location`, chuỗi **rỗng** khi nạp từ byte array; từ PR #6 ném `InvalidOperationException` nói rõ nguyên nhân thay vì `ArgumentException` khó hiểu của `Path.GetDirectoryName("")`. Chưa có code sản phẩm gọi nó ([B-11](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) |
+| `IFileSystemService` | [`FileSystemService.cs`](../../Services/FileSystemService.cs) | Bọc `System.IO` để mock được trong test (`SettingsServiceTests`). `WriteAllText` ghi **atomic**: tệp tạm cùng thư mục rồi `File.Replace` |
+| `IPlotService` | [`PlotService.cs`](../../Services/PlotService.cs) | In layout ra PDF. Chỉ in bản vẽ đang làm việc; kiểm tên layout và `ProcessPlotState` trước; tạm đặt `BACKGROUNDPLOT = 0`, chuyển layout hiện hành (bắt buộc với `PlotInfoValidator`), rồi khôi phục cả hai; vùng in `Extents`, fit + center. Kiểm chứng in thật bằng HeadlessLab `PLOT_*` (B-10, B-28) |
 | `ICommandHistoryService` | [`CommandHistoryService.cs`](../../Core/CommandHistoryService.cs) | 50 bản ghi gần nhất trong bộ nhớ, thread-safe. Hiện trong Debug Inspector |
 
 ---

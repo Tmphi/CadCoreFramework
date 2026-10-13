@@ -158,8 +158,9 @@ Tích hợp với AutoCAD thật: kịch bản `SAMPLE_GRID` với `0,0 · 2 hà
 1. Copy `Samples/GridMarker/` → `Features/<TênTínhNăng>/` (hoặc thư mục bạn chọn), đổi tên class và namespace.
 2. **Model:** khai báo input bất biến + `Validate()` trả danh sách lỗi.
 3. **Planner:** đưa toàn bộ tính toán vào hàm thuần, không dùng kiểu AutoCAD.
-4. **Service:** interface chỉ dùng kiểu plugin; implementation gọi `ICadContext` (`TryExecute` nếu muốn trả `CadResult`) với `undoMarkName`; không prompt, không `MdiActiveDocument` (CAD001 sẽ báo).
-5. **Command:** prompt → validate → plan → service → báo kết quả; bọc trong `ExecuteCommand`; dùng `GetRequiredService<T>()`.
-6. **ViewModel:** không dùng kiểu WPF/AutoCAD; `CanExecute` gắn với validate; subscription qua `TrackSubscription`.
+4. **Service:** interface chỉ dùng kiểu plugin; implementation gọi `ICadContext` (`TryExecute` nếu muốn trả `CadResult`) với `undoMarkName`; không prompt (CAD002 sẽ báo), không `MdiActiveDocument` (CAD001), không ghi trong `ExecuteRead` (CAD003).
+5. **Command:** prompt → validate → plan → service → báo kết quả; bọc trong `ExecuteCommand`; dùng `GetRequiredService<T>()`. Thêm lệnh vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm); muốn có nút thì thêm một dòng vào `Commands/CadCoreRibbon.cs`.
+6. **ViewModel:** không dùng kiểu WPF/AutoCAD; `CanExecute` gắn với validate; subscription qua `TrackSubscription`; nhận `ILoggerService? logger = null` và chuyển cho `base(logger)` để lỗi trong `RunSafe*` được log.
 7. **Đăng ký:** `AppBootstrapper.ConfigureServices` (service Singleton, ViewModel Transient) + `[assembly: CommandClass]` trong `Properties/AssemblyInfo.cs`.
-8. **Test:** Planner + Model (kết quả), Service (`FakeCadContext`), ViewModel (Mock), palette (`XamlPaletteTests`). Thêm kịch bản của tính năng vào checklist smoke test thủ công ([T05 §7](training/T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) và vào `smoke.scr` (mỗi lệnh kèm thông điệp thành công trong `$expected` của runner).
+8. **Palette:** code-behind gọi `ThemeManager.Attach(this)` sau `InitializeComponent()`; XAML chỉ dùng key theme qua `{DynamicResource}`, không mã màu cứng.
+9. **Test:** Planner + Model (kết quả), Service (`FakeCadContext`), ViewModel (Mock), palette (`XamlPaletteTests` + thêm vào mảng `Palettes` để chạy test theme). Helper mới trong `Extensions/`/`Utils/` có hành vi AutoCAD đáng ngờ → thêm kiểm thử [HeadlessLab](../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật). Thêm kịch bản của tính năng vào checklist smoke test thủ công ([T05 §7](training/T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) và vào `smoke.scr` (mỗi lệnh kèm thông điệp thành công trong `$expected` của runner).

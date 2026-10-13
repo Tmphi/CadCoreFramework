@@ -201,7 +201,7 @@ public partial class TuDienViewModel : ViewModelBase
 }
 ```
 
-**Bước 6: Palette WPF**: XAML chỉ có Binding, dùng `{DynamicResource …}` cho style. Code-behind copy mẫu [`GridMarkerPalette.xaml.cs`](Samples/GridMarker/GridMarkerPalette.xaml.cs): lấy ViewModel từ DI và **ném lỗi nếu thiếu** (`?? throw new InvalidOperationException(…)`), nạp `Styles.xaml` bằng pack URI dựng lúc runtime.
+**Bước 6: Palette WPF**: XAML chỉ có Binding, dùng `{DynamicResource …}` cho style và màu (không mã màu cứng). Code-behind copy mẫu [`GridMarkerPalette.xaml.cs`](Samples/GridMarker/GridMarkerPalette.xaml.cs): `ThemeManager.Attach(this)` ngay sau `InitializeComponent()` (nạp Styles + theme tối/sáng theo `COLORTHEME`, tự đổi khi người dùng đổi theme), rồi lấy ViewModel từ DI và **ném lỗi nếu thiếu** (`?? throw new InvalidOperationException(…)`).
 
 **Bước 7: Đăng ký + test**
 ```csharp
@@ -211,7 +211,9 @@ services.AddTransient<TuDienViewModel>();
 // Properties/AssemblyInfo.cs
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(typeof(MyPlugin.Commands.TuDienCommands))]
 ```
-Test: `TuDienSpec` bằng xUnit thuần; `TuDienService` bằng `FakeCadContext { ExecuteAction = false }` (đúng một `TryExecute`, đúng undo mark); ViewModel bằng Mock `ITuDienService`; palette bằng `XamlPaletteTests` ([T05](docs/training/T05_TESTING_STRATEGY.md)).
+Test: `TuDienSpec` bằng xUnit thuần; `TuDienService` bằng `FakeCadContext { ExecuteAction = false }` (đúng một `TryExecute`, đúng undo mark); ViewModel bằng Mock `ITuDienService`; palette bằng `XamlPaletteTests` ([T05](docs/training/T05_TESTING_STRATEGY.md)). Lệnh mới thêm vào `Deployment/PackageContents.xml`; nút Ribbon (tùy chọn) là một dòng trong `Commands/CadCoreRibbon.cs`. Analyzer CAD001–CAD003 chạy trong build và báo nếu Service/ViewModel prompt, dùng `MdiActiveDocument`, hoặc ghi trong `ExecuteRead`.
+
+**Kiểm thử trên AutoCAD thật không cần mở giao diện:** `.\tests\integration\run-headless-lab.ps1` chạy các kiểm thử HeadlessLab trong accoreconsole (profile cô lập, không đụng thiết lập AutoCAD của bạn) — [tests/integration/README.md](tests/integration/README.md).
 
 ---
 
@@ -252,7 +254,7 @@ CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(blockRef); });
 Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockViolation`, `eNotOpenForWrite`, v.v.
 👉 **Hướng dẫn cứu hộ:**
 - [T04: Debug & chẩn đoán](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md): cây quyết định từ triệu chứng tới nguyên nhân, đọc log, attach debugger, phân tích crash.
-- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 14 sự cố thật của dự án + 30 bẫy AutoCAD API kinh điển.
+- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 30 bẫy AutoCAD API kinh điển.
 - [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [DevOps & Standards](docs/06_DEVOPS_AND_STANDARDS.md)
 
 ---

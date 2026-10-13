@@ -11,12 +11,13 @@ Code chạy được trên máy bạn mới là một nửa. Nửa còn lại l�
 | Project | Target | Vai trò | Đóng gói vào plugin? |
 | :--- | :--- | :--- | :---: |
 | `CadCoreFramework` (gốc repo) | `net48;net8.0-windows`, x64, WPF + WinForms | **Plugin** | ✅ |
-| `CadCoreFramework.Analyzers` | `netstandard2.0` | Roslyn analyzer CAD001 (chạy lúc build) | ❌ |
+| `CadCoreFramework.Analyzers` | `netstandard2.0` | Roslyn analyzer CAD001–CAD003 (chạy lúc build) | ❌ |
 | `CadCoreFramework.Testing` | `net48;net8.0-windows`, x64 | Test double: `FakeCadContext`, `FakeCadScope` | ❌ |
-| `CadCoreFramework.Tests` | `net48;net8.0-windows`, x64, WPF | xUnit + FluentAssertions + Moq | ❌ |
+| `CadCoreFramework.Tests` | `net48;net8.0-windows`, x64, WPF | xUnit + FluentAssertions + Moq (+ Roslyn cho `AnalyzerTests`) | ❌ |
 | `CadCoreFramework.Benchmarks` | `net8.0-windows` | BenchmarkDotNet cho code thuần | ❌ |
+| `HeadlessLab` (`tests/integration/HeadlessLab`) | `net48`, x64 | Kiểm thử trên AutoCAD thật trong accoreconsole; **link** mã không-UI, chỉ `AcDbMgd` + `AcCoreMgd`. CI chỉ biên dịch | ❌ |
 
-Project plugin nằm **ở gốc repo**, nên các thư mục project khác phải bị loại khỏi glob biên dịch (`DefaultItemExcludes`). Nếu không, code test sẽ bị biên dịch lẫn vào plugin.
+Project plugin nằm **ở gốc repo**, nên các thư mục project khác phải bị loại khỏi glob biên dịch (`DefaultItemExcludes`). Nếu không, code test sẽ bị biên dịch lẫn vào plugin. (Chính lỗi này đã xảy ra khi thêm HeadlessLab: `obj/` của nó lọt vào plugin, gây `CS0579 Duplicate attribute` — sửa bằng `tests\**`.)
 
 ---
 
@@ -35,7 +36,7 @@ Project plugin nằm **ở gốc repo**, nên các thư mục project khác ph�
 | `EnforceCodeStyleInBuild`, `AnalysisLevel=latest`, `AnalysisMode=Recommended` | | Rule IDE/CA chạy **lúc build**, không chỉ trong IDE |
 | `GenerateDocumentationFile` + `NoWarn CS1591` | | Bắt buộc để IDE0005 (using thừa) chạy khi build; không bắt doc cho mọi member |
 | `AssemblyName` (Debug) | `CadCoreFramework_yyyyMMdd_HHmmss` | Hot-reload ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)). Target `PostBuild` copy về tên cố định |
-| `DefaultItemExcludes` | các project khác + `Templates\**` | Không biên dịch lẫn code test / template |
+| `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` | Không biên dịch lẫn code test / template |
 | `IncludeDemos` | mặc định `true` | `false` thì loại `Demos/**` khỏi DLL |
 | `MSBuildWarningsAsMessages` | `MSB3277` | Xung đột version vô hại khi có thư mục `dist/` cạnh NuGet |
 | `PackageReference AutoCAD.NET*` | `24.0.0` (net48) / `25.0.1`+`25.0.0` (net8), `ExcludeAssets="runtime"` | Biên dịch theo API, **không** copy DLL AutoCAD ra output. `25.0.1` để tránh NU1608 (bản `25.0.0` ghim `Core` pre-release) |
@@ -106,7 +107,7 @@ flowchart LR
 | # | Việc | Ai |
 | :---: | :--- | :--- |
 | 1 | `main` xanh CI, không còn PR dở dang cho bản này | Người phát hành |
-| 2 | **Smoke test thủ công** 12 bước ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) trên AutoCAD sạch, từ commit sắp gắn tag | Người phát hành |
+| 2 | **HeadlessLab** (`.\tests\integration\run-headless-lab.ps1`) exit 0, rồi **smoke test thủ công** 16 bước ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) trên AutoCAD sạch, từ commit sắp gắn tag | Người phát hành |
 | 3 | Chạy `package.ps1` **trên bản sao** của repo (không làm bẩn `dist/` thật), đọc lại mọi file người dùng sẽ thấy: `HDSD.txt`, thông điệp `Install.bat` ([A12](T03_PITFALLS_CASEBOOK.md#a12-gói-phát-hành-kèm-hướng-dẫn-của-một-sản-phẩm-khác)) | Người phát hành |
 | 4 | Thử `Install.bat`/`Uninstall.bat` với `APPDATA` trỏ thư mục tạm | Người phát hành |
 | 5 | PR đổi CHANGELOG `[Unreleased]` → `[x.y.z] — ngày`; merge | Owner merge |
@@ -175,7 +176,10 @@ Dependency hiện tại: `CommunityToolkit.Mvvm 8.2.2`, `Microsoft.Extensions.De
 Cả hai đều: đổi tên project/namespace/file, sinh GUID mới (assembly, solution, ProductCode/UpgradeCode bundle + MSI), đặt repo cho badge CI và help link CAD001 (bỏ trống thì dùng placeholder `YOUR_ORG/YOUR_REPO`, không trỏ về repo template), và tùy chọn bỏ `Demos/`.
 
 > [!TIP]
-> **Thử template mà không làm bẩn máy:** `dotnet new install . --debug:custom-hive "$env:TEMP\hive"` và `dotnet new cad-plugin … --debug:custom-hive "$env:TEMP\hive"`. Sau đó **build + test dự án sinh ra**. Đó là cách lỗi [A9](T03_PITFALLS_CASEBOOK.md#a9-dotnet-new-cad-plugin--n-myplugin-sinh-ra-authorcsproj) được tìm ra và được kiểm chứng đã sửa.
+> **Thử template mà không làm bẩn máy:** `dotnet new install . --debug:custom-hive "$env:TEMP\hive"` và `dotnet new cad-plugin … --debug:custom-hive "$env:TEMP\hive"`. Sau đó **build + test dự án sinh ra** (và `init-template.ps1` trên một bản sao repo). Đó là cách lỗi [A9](T03_PITFALLS_CASEBOOK.md#a9-dotnet-new-cad-plugin--n-myplugin-sinh-ra-authorcsproj), [A15](T03_PITFALLS_CASEBOOK.md#a15-dự-án-tạo-bằng-dotnet-new-mất-các-khối-if) và [A16](T03_PITFALLS_CASEBOOK.md#a16-test-chỉ-pass-nhờ-thứ-tự-chạy) được tìm ra.
+
+> [!WARNING]
+> **Template engine xử lý `#if` trong file `.cs`** như điều kiện template (ký hiệu lạ = `false`) và dò cả trong comment. Khối biên dịch có điều kiện phải được bao bằng `//-:cnd:noEmit` … `//+:cnd:noEmit` (xem `Properties/AssemblyInfo.cs`), và comment không được viết token đó ([A15](T03_PITFALLS_CASEBOOK.md#a15-dự-án-tạo-bằng-dotnet-new-mất-các-khối-if)). Mẫu loại trừ trong `.template.config/template.json` dùng `**/` để khớp mọi thư mục (`*.log` chỉ khớp thư mục gốc).
 
 Lệnh mới đơn lẻ: `dotnet new install .\Templates\cad-command` rồi `dotnet new cad-command -n PanelDrawCommand --AutoCadCommandName DRAW_PANEL` ([Templates/README.md](../../Templates/README.md)). Snippet Visual Studio / VS Code: `cadcmd`, `cadscope`, `cadsvc`, `cadvm` ([snippets/README.md](../../snippets/README.md)).
 
@@ -201,7 +205,7 @@ Lệnh mới đơn lẻ: `dotnet new install .\Templates\cad-command` rồi `dot
 
 1. Glob mặc định của SDK lấy mọi `*.cs` trong thư mục project và thư mục con, tức cả code của `CadCoreFramework.Tests/`, `Templates/`… Phải loại chúng ra để không biên dịch lẫn vào plugin.
 2. `v1.0.1` (PATCH). Không chuyển `v1.0.0`, vì người dùng đã tải bản ứng với tag đó.
-3. Ví dụ: xung đột DLL với host AutoCAD (A1); lỗi chỉ xuất hiện khi prompt/ESC/Undo/đa bản vẽ; theme sai (A13); file người dùng thấy bị sai nội dung (A12).
+3. Ví dụ: xung đột DLL với host AutoCAD (A1); lỗi chỉ xuất hiện khi prompt/ESC/Undo/đa bản vẽ; theme sai (A13); file người dùng thấy bị sai nội dung (A12); hành vi thật của API AutoCAD (B-28 — CI không có AutoCAD nên chỉ biên dịch HeadlessLab; phải chạy `run-headless-lab.ps1` trên máy có AutoCAD).
 </details>
 
 ---

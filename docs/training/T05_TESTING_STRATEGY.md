@@ -25,12 +25,13 @@ Project test tham chiếu `AutoCAD.NET` **không** có `ExcludeAssets`, nên cá
 
 ```mermaid
 flowchart TB
-    M["🖐️ Smoke test THỦ CÔNG trong AutoCAD\n(prompt, ESC, Undo, đa bản vẽ, UCS)"]
-    X["🪟 XAML palette trên STA\nXamlPaletteTests"]
+    M["🖐️ Smoke test THỦ CÔNG trong AutoCAD\n(prompt, ESC, Undo, đa bản vẽ, UCS, theme, Ribbon)"]
+    H["🧪 HeadlessLab trên AutoCAD THẬT (accoreconsole)\nhelper Extensions/Utils, PlotService"]
+    X["🪟 XAML palette trên STA\nXamlPaletteTests (cả hai theme)"]
     V["🧠 ViewModel + Mock service\nGridMarkerViewModelTests"]
     S["🐚 Lớp vỏ AutoCAD + FakeCadContext\nGridMarkerServiceTests (kiểm HỢP ĐỒNG)"]
     P["⚙️ Logic thuần: Spec / Planner / helper .NET\nGridSpecTests · GridPlannerTests (kiểm KẾT QUẢ)"]
-    M --- X --- V --- S --- P
+    M --- H --- X --- V --- S --- P
 ```
 
 | Tầng | Số lượng nên có | Tốc độ | Bắt được | Không bắt được |
@@ -38,10 +39,11 @@ flowchart TB
 | Logic thuần | **Nhiều nhất** | ms | Sai công thức, biên, validate | Tương tác AutoCAD |
 | Vỏ AutoCAD (FakeCadContext) | Vừa | ms | Gọi sai overload, sai undo mark, publish sai thời điểm, không xử lý lỗi | Nội dung lambda |
 | ViewModel (Mock) | Vừa | ms | `CanExecute`, trạng thái, subscription | Binding XAML |
-| XAML (STA) | 1 / palette | 100 ms | XAML sai, resource thiếu, DI chưa đăng ký | Hành vi trong PaletteSet thật |
+| XAML (STA) | 1 / palette (+ test theme chung) | 100 ms | XAML sai, resource thiếu ở theme nào, DI chưa đăng ký | Hành vi trong PaletteSet thật |
+| HeadlessLab | 1 / hành vi API đáng ngờ | giây | Hành vi **thật** của API AutoCAD (Erase, DeepClone, căn attribute, wildcard, in PDF…) | Lệnh, palette, Ribbon, `CadContext`; chỉ chạy trên máy có AutoCAD ([§9](#9-integration-test-headless-hiện-trạng-và-hướng-đi)) |
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
-Tổng hiện tại: **196 test × 2 runtime** (`net48`, `net8.0-windows`), chạy trên CI mỗi PR.
+Tổng hiện tại: **275 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **16 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
 
 ---
 
@@ -150,7 +152,16 @@ Test **dựng thật** từng palette (`InitializeComponent` + nạp `Styles.xam
 2. **Thread STA**: WPF bắt buộc. Exception được chuyển về thread test bằng `ExceptionDispatchInfo`.
 3. **Đăng ký scheme `pack://`** (đọc `PackUriHelper.UriSchemePack`): WPF tự làm khi có `Application`, còn test không có.
 
-Test này **đã tái hiện đúng** lỗi [A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension) trên markup cũ. Thêm palette mới thì phải thêm một test ở đây.
+Test này **đã tái hiện đúng** lỗi [A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension) trên markup cũ. Thêm palette mới thì phải thêm một test ở đây **và** thêm nó vào mảng `Palettes` — các test theme sau đó tự chạy cho nó:
+
+| Test theme | Bảo vệ điều gì |
+| :--- | :--- |
+| `ThemeDictionaries_DefineExactlyTheSameKeys` | Hai file theme cùng bộ key (key chỉ có một bên sẽ biến mất khi đổi theme) |
+| `StylesDictionary_DefinesNoColors` | Một nguồn màu: `Styles.xaml` chỉ có Style |
+| `EveryResourceKeyReferencedByPalettesAndStyles_Resolves` (tối + sáng) | Mọi `{Dynamic/StaticResource X}` trong XAML (đọc file như text) đều resolve được — bắt lỗi kiểu B-03 |
+| `AttachedPalette_FollowsThemeChangesWhileLoaded_AndStopsAfterUnloaded` | Palette đang hiện đổi màu theo theme; đã đóng thì thôi nghe (không rò rỉ) |
+
+Test không thay được **mắt người**: khi đổi UI, render palette ở cả hai theme rồi nhìn (lần đầu làm việc này đã lộ 4 lỗi hiển thị — B-29).
 
 ---
 
@@ -172,8 +183,12 @@ Chạy checklist này **trên phiên AutoCAD sạch** trước mỗi release và
 | 10 | Khóa layer `SAMPLE_GRID`, vẽ từ palette | Báo lỗi thân thiện (Status = Error), không crash |
 | 11 | `CORE_DEBUG` | Thấy lịch sử các lệnh trên, số subscriber hợp lý |
 | 12 | Đóng/mở palette 5 lần, xem `CORE_DEBUG` | Số subscriber **không tăng dần** (không rò rỉ) |
+| 13 | Mở `SHOW_PALETTE`, `SHOW_UI_TEMPLATE`, `CADCORE_LAYER_MANAGER`, `CORE_DEBUG` ở theme tối (`COLORTHEME` = 0), rồi đổi sang sáng (`COLORTHEME` = 1) **khi palette đang mở** | Palette theo theme AutoCAD, đổi màu ngay khi đổi theme; chữ đọc rõ ở cả hai theme |
+| 14 | Tab Ribbon **"CadCore"**: NETLOAD khi AutoCAD đã mở; chạy `CUI` rồi đóng; nạp lúc khởi động (bundle) | Tab xuất hiện cả ba trường hợp, **không** nhân đôi nút; mỗi nút chạy đúng lệnh |
+| 15 | Dời / đổi kích thước palette Grid Marker → đóng AutoCAD → mở lại → `SHOW_PALETTE` | Palette ở đúng vị trí, kích thước cũ |
+| 16 | `DEMO_ASYNC_AWAIT`, **chuyển sang bản vẽ khác** trong 3 giây chờ | Đường tròn và thông báo xuất hiện ở bản vẽ **ban đầu** |
 
-Ghi kết quả vào mô tả PR, ví dụ: *"Smoke 1–12 pass trên AutoCAD 2024, commit abc1234"*.
+Ghi kết quả vào mô tả PR, ví dụ: *"Smoke 1–16 pass trên AutoCAD 2024, commit abc1234"*.
 
 ---
 
@@ -198,8 +213,22 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 
 ## 9. Integration test headless: hiện trạng và hướng đi
 
-- Hiện **không khả thi**: plugin là một DLL tham chiếu `AcMgd`, mà accoreconsole không nạp được `AcMgd` ([A5](T03_PITFALLS_CASEBOOK.md#a5-accoreconsole-crash-0xc00000fd-khi-netload-plugin)). Runner trả exit code 3.
-- Hướng đi ([B-20](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): tách `CadCoreFramework.Core.dll` (chỉ `AcDbMgd` + `AcCoreMgd`: Core không UI, Extensions, Utils, Services, logic Samples, lệnh không palette) và `CadCoreFramework.UI.dll` (palette, ribbon, theme). Smoke test NETLOAD **DLL Core** trong accoreconsole. Cái giá: hai DLL cần nạp, cơ chế đăng ký DI cho module UI, và thay đổi quy trình nạp của nhóm. Đây là quyết định kiến trúc, cần ADR ([T09 §1](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
+- **Plugin** vẫn không nạp được trong accoreconsole: nó là một DLL tham chiếu `AcMgd`, mà accoreconsole không nạp được `AcMgd` ([A5](T03_PITFALLS_CASEBOOK.md#a5-accoreconsole-crash-0xc00000fd-khi-netload-plugin)). Runner smoke trả exit code 3.
+- **HeadlessLab** (PR #6, [ADR-015](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)) giải quyết phần lớn nhu cầu mà **không** đổi việc phát hành một DLL: [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) là một DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`. Mỗi kiểm thử chạy trên AutoCAD thật trong transaction riêng rồi rollback; in `LAB|tên|PASS|FAIL`.
+
+```powershell
+.\tests\integration\run-headless-lab.ps1     # exit 0 = mọi kiểm thử PASS
+```
+
+| Tầng kim tự tháp | Công cụ | Kiểm được gì |
+| :--- | :--- | :--- |
+| Logic thuần | xUnit | Kết quả (Spec, Planner, ViewModel, SymbolNameRules…) |
+| Vỏ AutoCAD | `FakeCadContext` | Hợp đồng gọi `ICadContext` |
+| **Helper trên AutoCAD thật** | **HeadlessLab** | Hành vi thật của API: Erase, DeepClone, căn attribute, wildcard filter, in PDF… |
+| Lệnh, palette, Ribbon, `CadContext` | AutoCAD GUI (smoke tay) | Phần còn lại ([§7](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) |
+
+HeadlessLab đã chứng minh giá trị ngay lần đầu: bắt được lỗi `PlotService` luôn thất bại (B-28) mà không unit test nào thấy được, và **bác bỏ** một giả thuyết sai trong tài liệu (B-13: `Clone()` không làm mất attribute). Quy tắc: sửa helper → viết kiểm thử lab **FAIL trên code cũ** trước.
+- Còn lại của hướng đi ([B-20](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): phủ `CadContext` (cần tách phần COM undo mark/`AcMgd` khỏi nó), hoặc tách hẳn `CadCoreFramework.Core.dll` + `CadCoreFramework.UI.dll` để smoke test cả lệnh. Cái giá: hai DLL cần nạp, cơ chế đăng ký DI cho module UI, thay đổi quy trình nạp của nhóm — quyết định kiến trúc, cần ADR ([T09 §1](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
 
 ---
 

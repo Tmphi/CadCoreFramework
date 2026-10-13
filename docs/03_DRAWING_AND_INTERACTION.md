@@ -38,12 +38,15 @@ Khi thao tác với Database trong `ICadScope`, bạn cần nắm vững chế �
 - **`OpenMode.ForWrite`**: Ghi/Sửa dữ liệu. Khoá độc quyền đối tượng đó, người khác không can thiệp được.
 
 **Hai cách mở một bảng mà bạn có thể sẽ ghi:**
-1. Mở `ForRead`, kiểm tra `Has(name)`, chỉ khi cần thêm mới thì `UpgradeOpen()`. Rẻ hơn khi phần lớn lần gọi không ghi gì. Framework dùng cách này cho `CurrentSpace` (upgrade lười trong `AppendEntityToCurrentSpace`) và cho `RegAppTable` (`XDataHelper.EnsureRegApp`).
-2. Mở `ForWrite` ngay từ đầu. Đơn giản khi gần như chắc chắn sẽ ghi. Hàm `EnsureLayer()` trong [`CadScopeLayerExtensions.cs`](../Extensions/CadScopeLayerExtensions.cs) dùng cách này:
+1. Mở `ForRead`, kiểm tra `Has(name)`, chỉ khi cần thêm mới thì `UpgradeOpen()`. Rẻ hơn khi phần lớn lần gọi không ghi gì. Framework dùng cách này cho `CurrentSpace` (upgrade lười trong `AppendEntityToCurrentSpace`), cho `RegAppTable` (`XDataHelper.EnsureRegApp`) và — từ PR #6 — cho mọi `Ensure*` trong [`CadScopeLayerExtensions.cs`](../Extensions/CadScopeLayerExtensions.cs):
 ```csharp
-var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForWrite);
+var layerTable = (LayerTable)scope.Transaction.GetObject(scope.Database.LayerTableId, OpenMode.ForRead);
+if (layerTable.Has(layerName)) return layerTable[layerName];
+layerTable.UpgradeOpen();   // chỉ khi thật sự thêm layer mới
 ```
-Trong **một** transaction, cả hai cách đều đúng. Comment trong `EnsureLayer` giải thích lựa chọn này bằng lỗi `eVetoed`. Đó không phải lý do chính, xem [T09 B-19](training/T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng). Lỗi bạn **thực sự** hay gặp là sửa đối tượng đang mở `ForRead`, gây `eNotOpenForWrite` ([T01 §4.2](training/T01_AUTOCAD_NET_FOUNDATIONS.md#42-openmode)).
+2. Mở `ForWrite` ngay từ đầu. Đơn giản khi gần như chắc chắn sẽ ghi.
+
+Trong **một** transaction, cả hai cách đều đúng. (Trên v1.0.0, `EnsureLayer` mở `ForWrite` ngay và comment giải thích bằng lỗi `eVetoed` — không phải lý do thật, xem [T09 B-19](training/T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng).) Lỗi bạn **thực sự** hay gặp là sửa đối tượng đang mở `ForRead`, gây `eNotOpenForWrite` ([T01 §4.2](training/T01_AUTOCAD_NET_FOUNDATIONS.md#42-openmode)). Tên layer cũng được validate trước (`SymbolNameRules`): tên sai ném `ArgumentException` nêu rõ ký tự, thay vì `eInvalidInput` khó hiểu của AutoCAD.
 
 ---
 
