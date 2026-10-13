@@ -89,8 +89,8 @@ Kiểm tra cài đặt và tạo chương trình đầu tiên (mở **PowerShell
 ```powershell
 dotnet --version              # in ra 8.x hoặc mới hơn
 git --version
-mkdir D:\hoc-csharp           # thư mục luyện tập RIÊNG, ngoài repo dự án
-cd D:\hoc-csharp
+mkdir $HOME\hoc-csharp        # thư mục luyện tập RIÊNG, ngoài repo dự án ($HOME = C:\Users\<tên bạn>)
+cd $HOME\hoc-csharp
 dotnet new console -n BaiTap01
 cd BaiTap01
 dotnet run                    # in ra: Hello, World!

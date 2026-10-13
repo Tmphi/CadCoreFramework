@@ -43,7 +43,7 @@ Module này dạy những viên gạch đầu tiên: chạy một chương trìn
 ## 2. Chương trình đầu tiên
 
 ```powershell
-cd D:\hoc-csharp
+cd $HOME\hoc-csharp                # thư mục luyện tập đã tạo ở C00 §3
 dotnet new console -n BaiTap01     # tạo dự án mới tên BaiTap01
 cd BaiTap01
 dotnet run                         # biên dịch + chạy

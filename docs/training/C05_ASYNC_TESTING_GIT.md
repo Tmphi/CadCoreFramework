@@ -97,7 +97,7 @@ Số thread trên máy bạn có thể khác (trên .NET Framework 4.8 là `1` r
 Tạo dự án test để luyện:
 
 ```powershell
-cd D:\hoc-csharp
+cd $HOME\hoc-csharp
 dotnet new xunit -n HocTest
 cd HocTest
 dotnet add package FluentAssertions --version 6.12.0
@@ -329,8 +329,8 @@ Sau `push`, GitHub hiện nút **Compare & pull request**. Mô tả PR gồm ba 
 Làm trong một repo GitHub **của riêng bạn** (ví dụ `hoc-csharp`), có mentor làm reviewer:
 
 ```powershell
-mkdir D:\hoc-csharp\PanelRow
-cd D:\hoc-csharp\PanelRow
+mkdir $HOME\hoc-csharp\PanelRow
+cd $HOME\hoc-csharp\PanelRow
 dotnet new sln -n PanelRow
 dotnet new classlib -n PanelRow.Core -f net8.0
 dotnet new xunit -n PanelRow.Tests -f net8.0
