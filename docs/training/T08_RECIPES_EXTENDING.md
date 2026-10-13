@@ -2,6 +2,8 @@
 
 # T08 — Công Thức Mở Rộng Dự Án
 
+> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6–7 ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../09_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**.
 
 ---

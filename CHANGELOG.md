@@ -9,6 +9,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (PR #9 — đào tạo: Giai đoạn 0, nhập môn lập trình & C#)
+- **`docs/training/C00`–`C05`**: lộ trình 6 tuần cho người **chưa biết lập trình**, dạy C# theo quy tắc **20/80** — chọn và sắp xếp theo số lần tính năng xuất hiện trong 110 file `.cs` của dự án (có lệnh để tự đếm lại). Mỗi khái niệm đi kèm chỗ nó xuất hiện trong code thật; ví dụ là chương trình hoàn chỉnh đã chạy trên .NET 8 với C# 10 như dự án, kèm thông báo lỗi biên dịch thật và các khác biệt trên .NET Framework 4.8 đã chạy thử. C00 bắt đầu từ đây (bài kiểm tra đầu vào), C01 chương trình đầu tiên, C02 dữ liệu & collection, C03 hướng đối tượng (đọc trọn `GridSpec.cs`), C04 C# dự án dùng hằng ngày (giải mã 6 dòng code thật), C05 async, xUnit, Git & PR, đồ án nhập môn "Planner dãy tủ điện" (nửa đầu lab L07) và đánh giá 🌰 → 🌱.
+- **Chuẩn hóa bộ đào tạo**: khung năng lực **5 cấp** (thêm 🌰 Nhập môn và năng lực "C# & lập trình"); lộ trình ~18 tuần chia Giai đoạn 0–3; mỗi T-module có dòng *Cấp độ · Cần trước · Trong lộ trình*; T10 §4 thêm bậc 🌰 → 🌱; Thuật ngữ thêm phần A (lập trình & C#); README, `00_TOC`, Phần 1 dẫn người mới về C00. Sửa số tuần sai ở README đào tạo: gộp tuần 1–2 và 4–5 rút 12 tuần xuống **10** (trước ghi 8).
+
 ### Fixed (PR #7 — hồi quy của PR #6, phát hiện khi kiểm trong AutoCAD GUI)
 - **`DEMO_ASYNC_AWAIT` không vẽ gì khi người dùng chuyển sang bản vẽ khác trong lúc chờ** (B-30). Bản sửa B-08 ở PR #6 ghi thông báo bằng `scope.Editor` trong giai đoạn vẽ; Editor của bản vẽ không active ném `eNotApplicable` (kể cả `WriteMessage`) và hủy cả transaction. Giờ Action vẽ chỉ thao tác database, kết quả được báo sau đó lên bản vẽ đang active, kèm tên bản vẽ đã vẽ vào.
 - Lỗi của lệnh async (`CadCommandBase.ExecuteWithScopeAsync`) **không đến được người dùng** nếu họ đã chuyển bản vẽ hoặc đóng bản vẽ gốc: thông báo được ghi vào Editor bản vẽ gốc (bị nuốt), hoặc bỏ qua hẳn khi bản vẽ đã đóng. Giờ ghi lên bản vẽ đang active, kèm tên bản vẽ gốc.

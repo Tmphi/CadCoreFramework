@@ -2,6 +2,8 @@
 
 # T05 — Chiến Lược Kiểm Thử
 
+> **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md); viết unit test xUnit ([C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit)) · **Trong lộ trình:** tuần 6 ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Plugin AutoCAD **không thể** unit test theo kiểu thông thường: hầu hết API cần lõi C++ của AutoCAD đang chạy. Chiến lược của dự án vì vậy không phải "mock AutoCAD", mà là **thiết kế để phần cần AutoCAD càng mỏng càng tốt**, rồi test mỗi tầng bằng công cụ phù hợp với nó.
 
 > [!IMPORTANT]

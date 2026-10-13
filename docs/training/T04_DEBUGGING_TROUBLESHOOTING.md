@@ -2,6 +2,8 @@
 
 # T04 — Debug & Chẩn Đoán
 
+> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md); dùng debugger cơ bản ([C01 §9](C01_FIRST_PROGRAM.md#9-debug-xem-chương-trình-chạy-từng-bước)) · **Trong lộ trình:** tuần 9 ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên trong* một tiến trình lớn của hãng khác, crash nhiều khi không có stack trace, và lỗi phụ thuộc vào bản vẽ, phiên bản AutoCAD, plugin khác đang chạy. Module này trang bị **quy trình** chẩn đoán, không chỉ công cụ.
 
 > [!IMPORTANT]

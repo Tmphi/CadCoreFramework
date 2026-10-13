@@ -2,6 +2,8 @@
 
 # T02 — Mổ Xẻ Kiến Trúc CadCoreFramework
 
+> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) §1–6; C# ở mức [C03](C03_OBJECT_ORIENTED.md)–[C04](C04_CSHARP_IN_THIS_PROJECT.md) (interface, DI, lambda, `using`) · **Trong lộ trình:** tuần 4–5 ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) dạy luật chơi của AutoCAD. Module này cho thấy framework **áp dụng các luật đó ở đâu, bằng dòng code nào**, và những chỗ nó chưa làm trọn. Hãy đọc với file nguồn mở bên cạnh: mọi link 🔎 đều trỏ vào code thật.
 
 **Sau module này bạn phải làm được:**

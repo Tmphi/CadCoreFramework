@@ -2,6 +2,8 @@
 
 # T10 — Bài Lab & Đánh Giá
 
+> **Cấp độ:** mọi cấp · **Cần trước:** module ghi ở từng lab · **Trong lộ trình:** suốt Giai đoạn 1–3; đánh giá 🌰 → 🌱 nằm ở [C05 §6](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher) ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở đây đi từ thí nghiệm nhỏ tới sửa **lỗi có thật** mà dự án đã gặp ([backlog T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) — làm trên `v1.0.0`, rồi đối chiếu với lời giải đã merge. Lỗi thật dạy nhiều hơn bài tập bịa: chúng có bằng chứng, có cạm bẫy, và có lời giải để so.
 
 ---
@@ -88,7 +90,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 ### L07 — Nhân bản Golden Sample
 
-- **Đề bài:** tính năng **"Dãy tủ điện"**: vẽ N tủ cạnh nhau (rộng × cao, khoảng hở), nhãn tên, XRecord `{ v, name, index, width, height }` trên khung. Đi đủ các tầng của [T08 §2](T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn): Spec (có `MaxPanels`), Planner, Service (`TryExecute` + undo mark), lệnh `PANEL_ROW`, ViewModel, palette.
+- **Đề bài:** tính năng **"Dãy tủ điện"**: vẽ N tủ cạnh nhau (rộng × cao, khoảng hở), nhãn tên, XRecord `{ v, name, index, width, height }` trên khung. Đi đủ các tầng của [T08 §2](T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn): Spec (có `MaxPanels`), Planner, Service (`TryExecute` + undo mark), lệnh `PANEL_ROW`, ViewModel, palette. Đã làm [đồ án nhập môn](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện) thì lấy nó làm điểm xuất phát: `PanelRowSpec` + `PanelRowPlanner` vào `Samples/PanelRow/`, test vào `CadCoreFramework.Tests/Samples/PanelRow/`, đổi namespace thành `CadCoreFramework.Samples.PanelRow` và viết dạng khối `namespace … { }` như mọi file của dự án.
 - **DoD:** ≥ 15 unit test (Spec/Planner/Service/ViewModel); test XAML cho palette; smoke tay; một Ctrl+Z xóa cả dãy (cả từ lệnh lẫn từ palette).
 - **Mở rộng:** sửa **B-13** (copy dãy tủ bằng `DeepCloneObjects`), kiểm chứng **B-25** với block có attribute căn giữa. Tự kiểm chứng *trước*: `Clone()` làm mất gì? (Giả thuyết ban đầu của dự án là "mất attribute" — và nó **sai**; xem B-13.)
 
@@ -171,6 +173,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 | Lên cấp | Điều kiện | Thực hành | Vấn đáp (chọn 5) |
 | :--- | :--- | :--- | :--- |
+| 🌰 → 🌱 Fresher | Bài tập C01–C05; đồ án nhập môn đạt DoD ([C05 §5](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện)) | Sửa một test fail do mentor cài vào đồ án (20 phút) | Đủ 10 câu ở [C05 §6](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher), đạt ≥ 7 |
 | 🌱 → 🌿 Junior | L01–L06 đạt; trắc nghiệm T01 ≥ 80% | Sửa một bug được giao trong 1 ngày (có test) | Q1, Q2, Q3, Q5, Q7, Q9, Q12 |
 | 🌿 → 🌳 Middle | L07–L10 đạt; review thành công bài "code có lỗi cài sẵn" bên dưới (≥ 7/9 lỗi) | Một tính năng nhỏ trọn vẹn theo Golden Sample | Q4, Q6, Q8, Q10, Q11, Q13, Q14 |
 | 🌳 → 🏔️ Senior | L11–L16 + đồ án đạt; chủ trì một release thật; một incident report; một ADR được chấp nhận | Chẩn đoán một sự cố "lạ" do mentor dựng sẵn | Q15–Q20 + bảo vệ ADR |

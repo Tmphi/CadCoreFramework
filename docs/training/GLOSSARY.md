@@ -1,8 +1,76 @@
 > **🎓 Học viện CadCoreFramework** · [Lộ trình](README.md) · **Thuật ngữ**
 
-# 📖 Thuật Ngữ AutoCAD .NET (Anh – Việt)
+# 📖 Thuật Ngữ (Anh – Việt)
 
 Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Phần tiếng Việt để hiểu nghĩa. Cột cuối dẫn tới chỗ giải thích kỹ.
+
+- [A. Lập trình & C# cho người mới](#a-lập-trình--c-cho-người-mới) — dùng trong Giai đoạn 0 (C00–C05).
+- [B. AutoCAD .NET & dự án](#b-autocad-net--dự-án) — dùng từ T01 trở đi.
+
+---
+
+## A. Lập trình & C# cho người mới
+
+| Thuật ngữ | Nghĩa | Xem |
+| :--- | :--- | :--- |
+| **Abstract class** | Class chỉ để kế thừa, không `new` trực tiếp được | [C03 §7](C03_OBJECT_ORIENTED.md#7-kế-thừa-abstract-virtual-override) |
+| **Access modifier** (`public`, `internal`, `protected`, `private`) | Phạm vi được phép dùng một thành viên | [C03 §5](C03_OBJECT_ORIENTED.md#5-namespace-using-và-phạm-vi-truy-cập) |
+| **`Action` / `Func`** | Delegate có sẵn: `Action<…>` không trả về gì, `Func<…, TResult>` trả về `TResult` | [C04 §1](C04_CSHARP_IN_THIS_PROJECT.md#1-delegate-hàm-là-một-giá-trị) |
+| **Array** (mảng) | Dãy phần tử cùng kiểu, số phần tử cố định | [C02 §2](C02_DATA_AND_COLLECTIONS.md#2-mảng) |
+| **`async` / `await`, `Task`** | Chờ một việc mất thời gian mà không chặn thread; `Task<T>` là việc sẽ cho ra một `T` | [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) |
+| **Attribute** | Nhãn `[…]` gắn lên code để một công cụ đọc (`[CommandMethod]`, `[Fact]`) | [C04 §10](C04_CSHARP_IN_THIS_PROJECT.md#10-attribute-nhãn-cho-công-cụ-đọc) |
+| **Branch / Commit / Push / Pull Request** | Nhánh làm việc / ảnh chụp thay đổi / đẩy lên GitHub / đề nghị gộp, có review | [C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request) |
+| **Breakpoint / Debugger** | Điểm dừng / công cụ chạy chương trình từng bước, xem giá trị biến | [C01 §9](C01_FIRST_PROGRAM.md#9-debug-xem-chương-trình-chạy-từng-bước) |
+| **Class / Object** | Bản thiết kế / một thứ cụ thể tạo từ bản thiết kế bằng `new` | [C03 §1](C03_OBJECT_ORIENTED.md#1-class-và-object) |
+| **Closure** (bao đóng) | Lambda dùng ("bắt") biến ở bên ngoài nó — bắt chính biến, không phải bản sao | [C04 §2](C04_CSHARP_IN_THIS_PROJECT.md#2-lambda-và-closure) |
+| **Compile / Compiler error** (`CSxxxx`) | Biên dịch: kiểm tra và dịch code; mỗi lỗi có mã `CS…` tra cứu được | [C01 §3](C01_FIRST_PROGRAM.md#3-đọc-lỗi-biên-dịch) |
+| **`const` / `readonly`** | Hằng số lúc biên dịch / field chỉ gán được một lần | [C02 §8](C02_DATA_AND_COLLECTIONS.md#8-const-và-readonly) |
+| **Constructor** | Hàm trùng tên class, chạy đúng một lần khi `new` | [C03 §2](C03_OBJECT_ORIENTED.md#2-property-và-constructor) |
+| **Culture** (`CultureInfo`, `InvariantCulture`) | Định dạng khu vực khi đổi số ↔ chữ; dữ liệu dùng chung giữa các máy luôn dùng `InvariantCulture` | [C01 §5](C01_FIRST_PROGRAM.md#5-chuỗi-và-định-dạng-số--bẫy-định-dạng-việt-nam) |
+| **Deadlock** | Hai bên chờ nhau mãi, chương trình treo — ví dụ `.Result` trên main thread | [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) |
+| **Deferred execution** (thực thi trì hoãn) | `Where`, `Select`… chỉ chạy khi có người duyệt kết quả | [C04 §4](C04_CSHARP_IN_THIS_PROJECT.md#4-linq-chạy-lúc-nào-thực-thi-trì-hoãn) |
+| **Delegate** | Kiểu của một biến chứa **hàm** | [C04 §1](C04_CSHARP_IN_THIS_PROJECT.md#1-delegate-hàm-là-một-giá-trị) |
+| **Dependency Injection** (DI), **singleton / transient** | Nhận phụ thuộc qua constructor; container tạo object một lần duy nhất / mỗi lần cần | [C03 §8](C03_OBJECT_ORIENTED.md#8-nhận-phụ-thuộc-qua-constructor), [T02 §3](T02_ARCHITECTURE_DEEP_DIVE.md#3-dependency-injection) |
+| **`Dictionary<TKey, TValue>`** | Tập cặp khóa → giá trị, tra nhanh theo khóa | [C02 §4](C02_DATA_AND_COLLECTIONS.md#4-dictionary-tra-theo-khóa) |
+| **Encapsulation** (đóng gói) | Dữ liệu và luật của nó nằm cùng một class | [C03 §3](C03_OBJECT_ORIENTED.md#3-đóng-gói-đối-tượng-tự-giữ-luật-của-mình) |
+| **`enum`** | Tập lựa chọn có tên (`GridLabelStyle`, `OpenMode`) | [C02 §7](C02_DATA_AND_COLLECTIONS.md#7-enum-tập-lựa-chọn-có-tên) |
+| **Event** (`+=` / `-=`) | Cơ chế báo tin cho những ai đăng ký; gỡ bằng đúng delegate đã đăng ký | [C04 §9](C04_CSHARP_IN_THIS_PROJECT.md#9-event-báo-tin-cho-người-đăng-ký) |
+| **Exception** (`throw`, `try`/`catch`/`finally`) | Báo lỗi và bắt lỗi | [C04 §7](C04_CSHARP_IN_THIS_PROJECT.md#7-exception-báo-lỗi-đúng-cách) |
+| **Extension method** | Hàm `static` có `this` ở tham số đầu, gọi như hàm của kiểu đó: `scope.DrawLine(…)` | [C04 §5](C04_CSHARP_IN_THIS_PROJECT.md#5-extension-method-thêm-hàm-cho-kiểu-có-sẵn) |
+| **Field / Property** | Biến bên trong object / "mặt tiền" dữ liệu của object (`{ get; }`) | [C03 §2](C03_OBJECT_ORIENTED.md#2-property-và-constructor) |
+| **Generic** (`<T>`, `where`) | Code viết một lần cho nhiều kiểu; `where` giới hạn kiểu được dùng | [C04 §6](C04_CSHARP_IN_THIS_PROJECT.md#6-generic-một-code-cho-nhiều-kiểu) |
+| **Immutable** (bất biến) | Tạo xong không đổi được nữa (`GridSpec`, `Point3d`, `string`) | [C03 §3](C03_OBJECT_ORIENTED.md#3-đóng-gói-đối-tượng-tự-giữ-luật-của-mình) |
+| **Inheritance** (kế thừa), **`virtual` / `override` / `sealed`** | Class con nhận lại và viết đè hành vi của class cha | [C03 §7](C03_OBJECT_ORIENTED.md#7-kế-thừa-abstract-virtual-override) |
+| **Interface** | Hợp đồng "phải có những gì"; tên bắt đầu bằng `I` | [C03 §6](C03_OBJECT_ORIENTED.md#6-interface-hợp-đồng-và-bản-giả) |
+| **Lambda** (`=>`) | Hàm ngắn viết tại chỗ, không tên: `x => x > 0` | [C04 §2](C04_CSHARP_IN_THIS_PROJECT.md#2-lambda-và-closure) |
+| **LangVersion** | Phiên bản ngôn ngữ C#; dự án dùng **C# 10** | [C04](C04_CSHARP_IN_THIS_PROJECT.md) |
+| **LINQ** | Bộ hàm hỏi đáp trên danh sách: `Where`, `Select`, `ToList`, `FirstOrDefault`… | [C04 §3](C04_CSHARP_IN_THIS_PROJECT.md#3-linq-hỏi-đáp-trên-danh-sách) |
+| **`List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>`** | Danh sách sửa được / chỉ đọc, có `Count` và `[i]` / chỉ duyệt được | [C02 §3](C02_DATA_AND_COLLECTIONS.md#3-list-danh-sách-co-giãn), [C02 §5](C02_DATA_AND_COLLECTIONS.md#5-trả-về-danh-sách-chỉ-đọc-ireadonlylist) |
+| **Main thread / ThreadPool** | Thread chính của AutoCAD — nơi duy nhất được chạm API / bể thread nền | [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) |
+| **Method** (hàm), **parameter** (tham số), **return value** | Khối lệnh có tên, nhận tham số, trả kết quả | [C01 §8](C01_FIRST_PROGRAM.md#8-hàm-method) |
+| **Namespace / `using`** | Nhóm tên của các class / cho phép gọi tắt tên | [C03 §5](C03_OBJECT_ORIENTED.md#5-namespace-using-và-phạm-vi-truy-cập) |
+| **`nameof`** | Lấy tên biến, hàm thành chuỗi — đổi tên không bị sót | [C04 §11](C04_CSHARP_IN_THIS_PROJECT.md#11-cú-pháp-nhỏ-hay-gặp-is-nameof-tuple) |
+| **NuGet package** | Thư viện cài vào project bằng `dotnet add package` | [C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit) |
+| **`null`, `?.`, `??`, `NullReferenceException`** | "Không có đối tượng", các toán tử xử lý nó, và lỗi khi quên xử lý | [C02 §6](C02_DATA_AND_COLLECTIONS.md#6-null-giá-trị-không-có) |
+| **Nullable** (`string?`, `short?`) | Ghi chú hoặc kiểu cho phép null; dự án đặt `<Nullable>annotations</Nullable>` | [C02 §6](C02_DATA_AND_COLLECTIONS.md#6-null-giá-trị-không-có) |
+| **`partial` / Source generator** | Class chia nhiều phần / công cụ sinh code lúc build (`[ObservableProperty]`) | [C04 §10](C04_CSHARP_IN_THIS_PROJECT.md#10-attribute-nhãn-cho-công-cụ-đọc) |
+| **Pattern matching** (`is`) | Kiểm tra kiểu và lấy giá trị cùng lúc | [C04 §11](C04_CSHARP_IN_THIS_PROJECT.md#11-cú-pháp-nhỏ-hay-gặp-is-nameof-tuple) |
+| **Solution / Project** (`.sln`/`.slnx`, `.csproj`) | Tập hợp các project / một đơn vị build ra DLL hoặc EXE | [C05 §3](C05_ASYNC_TESTING_GIT.md#3-đọc-solution-của-dự-án) |
+| **Stack trace** | Dấu vết chuỗi hàm đang gọi nhau tại lúc lỗi xảy ra | [C04 §7](C04_CSHARP_IN_THIS_PROJECT.md#7-exception-báo-lỗi-đúng-cách) |
+| **`static`** | Thuộc về class, không cần object | [C03 §4](C03_OBJECT_ORIENTED.md#4-static-hàm-không-cần-đối-tượng) |
+| **String interpolation** (`$"…{x}…"`) | Ghép giá trị vào chuỗi | [C01 §5](C01_FIRST_PROGRAM.md#5-chuỗi-và-định-dạng-số--bẫy-định-dạng-việt-nam) |
+| **`struct` / `class`** (value type / reference type) | Kiểu giá trị — sao chép khi gán / kiểu tham chiếu — dùng chung một đối tượng | [C02 §1](C02_DATA_AND_COLLECTIONS.md#1-giá-trị-và-tham-chiếu-struct-và-class) |
+| **Target framework** (`net48`, `net8.0-windows`) | Nền .NET mà project build ra | [C05 §3](C05_ASYNC_TESTING_GIT.md#3-đọc-solution-của-dự-án) |
+| **Thread** | Một luồng chạy của chương trình | [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) |
+| **Tuple** | Gói vài giá trị nhỏ: `(row, column)` | [C04 §11](C04_CSHARP_IN_THIS_PROJECT.md#11-cú-pháp-nhỏ-hay-gặp-is-nameof-tuple) |
+| **Unit test** (`[Fact]`, `[Theory]`, Arrange–Act–Assert) | Code kiểm code, chạy tự động mỗi lần build | [C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit) |
+| **`using` / `IDisposable`** | Khối bảo đảm `Dispose()` luôn được gọi, kể cả khi lỗi | [C04 §8](C04_CSHARP_IN_THIS_PROJECT.md#8-using-và-idisposable-dọn-dẹp-chắc-chắn) |
+| **`var`** | Để trình biên dịch tự suy ra kiểu từ vế phải | [C01 §4](C01_FIRST_PROGRAM.md#4-biến-và-kiểu-dữ-liệu) |
+| **Variable** (biến), **type** (kiểu) | Hộp có tên và kiểu, chứa một giá trị | [C01 §4](C01_FIRST_PROGRAM.md#4-biến-và-kiểu-dữ-liệu) |
+
+---
+
+## B. AutoCAD .NET & dự án
 
 | Thuật ngữ | Nghĩa | Xem |
 | :--- | :--- | :--- |

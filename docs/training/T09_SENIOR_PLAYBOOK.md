@@ -2,6 +2,8 @@
 
 # T09 — Sổ Tay Senior
 
+> **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [T03](T03_PITFALLS_CASEBOOK.md) · **Trong lộ trình:** tuần 11; checklist review ở §2 dùng từ tuần 6 ([README §3](README.md#3-lộ-trình-đào-tạo))
+
 Senior không chỉ viết code đúng. Senior **giữ cho cả hệ thống đúng theo thời gian**: biết vì sao kiến trúc như hiện tại, nhận ra khi nào nó cần đổi, review để lỗi không lọt vào, và quản lý danh sách nợ kỹ thuật một cách trung thực.
 
 ---
