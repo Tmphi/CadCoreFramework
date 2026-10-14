@@ -79,6 +79,7 @@ Nhờ vậy `GridPlannerTests` kiểm được *"ô B3 nằm ở (40, −20) và
 `GridSpec.Validate()` trả về **danh sách** lỗi (không throw) để UI hiển thị tất cả lỗi cùng lúc. Cả Command và ViewModel đều gọi nó — không nơi nào tự viết lại luật.
 
 - **ViewModel:** mỗi khi input đổi → `Revalidate()` → cập nhật `ValidationSummary`, `HasValidationErrors` và `DrawCommand.NotifyCanExecuteChanged()`. Nút *Vẽ* tự disable khi input sai.
+- **Ô số trên palette** bind vào property **chuỗi** (`RowsText`, `SpacingText`…), không bind thẳng vào số. ViewModel đọc chuỗi bằng `ViewModels/NumberText`: dấu chấm thập phân như dòng lệnh, không phụ thuộc culture của máy. Ô nào không đọc được thành số thì `Revalidate()` báo lỗi của ô đó, **trước** các lỗi của `GridSpec.Validate()`. Đây là luật về cách *gõ* số trên UI, không phải luật của lưới, nên nó không lặp lại luật nào của `GridSpec`. Bind thẳng vào số thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống (B-31/B-32, [U01 §5](training/U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
 - **Command:** sau khi prompt xong → `Validate()` → in từng lỗi bằng `notify.Warn` và dừng.
 - **Planner:** gọi `Validate()` lần cuối và **throw** nếu sai — hàng rào bảo vệ khi có caller quên validate.
 
@@ -145,7 +146,9 @@ Code-behind chỉ làm hạ tầng: lấy ViewModel từ DI (fail-loud nếu thi
 | `GridSpecTests` | 18 | Mọi luật validate, báo đủ nhiều lỗi cùng lúc |
 | `GridPlannerTests` | 18 | Số ô, tọa độ, thứ tự, nhãn A…Z/AA…/AAA, spec sai |
 | `GridMarkerServiceTests` | 8 | Một `TryExecute` + đúng undo mark, không mở transaction khi rỗng, publish khi thành công / không publish khi lỗi, subscriber lỗi không làm hỏng kết quả |
-| `GridMarkerViewModelTests` | 12 | `CanExecute` theo validate, truyền đúng spec/cells, trạng thái thành công/lỗi/exception, message → refresh, Dispose → ngừng nghe |
+| `GridMarkerViewModelTests` | 23 | `CanExecute` theo validate, truyền đúng spec/cells, trạng thái thành công/lỗi/exception, message → refresh, Dispose → ngừng nghe; ô số: `2,5`, ô trống, `NaN` là lỗi, số ↔ chuỗi đồng bộ hai chiều |
+| `NumberTextTests` | 26 | Đọc số như dòng lệnh AutoCAD: dấu chấm, không dấu phân cách hàng nghìn, chặn `NaN`/vô cực/tràn số, không phụ thuộc culture của máy |
+| `XamlPaletteTests` (phần Grid Marker) | 2 + 1 | Gõ vào ô thật của palette: `2,5` và ô trống làm tắt nút Vẽ; cộng một test cho **mọi** palette: không TextBox nào bind thẳng vào property số |
 
 Toàn bộ test chạy trên **cả `net48` và `net8.0-windows`** (hai runtime của AutoCAD 2021–2024 và 2025+).
 
@@ -162,5 +165,5 @@ Tích hợp với AutoCAD thật: kịch bản `SAMPLE_GRID` với `0,0 · 2 hà
 5. **Command:** prompt → validate → plan → service → báo kết quả; bọc trong `ExecuteCommand`; dùng `GetRequiredService<T>()`. Thêm lệnh vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm); muốn có nút thì thêm một dòng vào `Commands/CadCoreRibbon.cs`.
 6. **ViewModel:** không dùng kiểu WPF/AutoCAD; `CanExecute` gắn với validate; subscription qua `TrackSubscription`; nhận `ILoggerService? logger = null` và chuyển cho `base(logger)` để lỗi trong `RunSafe*` được log.
 7. **Đăng ký:** `AppBootstrapper.ConfigureServices` (service Singleton, ViewModel Transient) + `[assembly: CommandClass]` trong `Properties/AssemblyInfo.cs`.
-8. **Palette:** code-behind gọi `ThemeManager.Attach(this)` sau `InitializeComponent()`; XAML chỉ dùng key theme qua `{DynamicResource}`, không mã màu cứng.
+8. **Palette:** code-behind gọi `ThemeManager.Attach(this)` sau `InitializeComponent()`; XAML chỉ dùng key theme qua `{DynamicResource}`, không mã màu cứng. Ô số bind vào property chuỗi rồi đọc bằng `NumberText` ([§9.3](#93-nguyên-tắc-2--validate-một-lần-ở-model)); `EveryPaletteTextBox_BindsToAStringProperty` kiểm điều này cho mọi palette có trong mảng `Palettes`.
 9. **Test:** Planner + Model (kết quả), Service (`FakeCadContext`), ViewModel (Mock), palette (`XamlPaletteTests` + thêm vào mảng `Palettes` để chạy test theme). Helper mới trong `Extensions/`/`Utils/` có hành vi AutoCAD đáng ngờ → thêm kiểm thử [HeadlessLab](../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật). Thêm kịch bản của tính năng vào checklist smoke test thủ công ([T05 §7](training/T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) và vào `smoke.scr` (mỗi lệnh kèm thông điệp thành công trong `$expected` của runner).

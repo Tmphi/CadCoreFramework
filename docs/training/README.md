@@ -107,7 +107,7 @@ Mỗi tuần ≈ 60% đọc và thực hành, 40% làm lab. Đầu ra mỗi tu�
 | Tuần | Đọc | Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
 | 6 | [T05](T05_TESTING_STRATEGY.md), [T08 §1–3](T08_RECIPES_EXTENDING.md) | L07 Nhân bản Golden Sample (tiếp nối đồ án nhập môn) | Tính năng mới + ≥ 15 unit test |
-| 7 | [U00](U00_UI_START_HERE.md), [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD), L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; PR sửa B-31/B-32 có test fail-trước |
+| 7 | [U00](U00_UI_START_HERE.md), [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD), L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) có test fail-trước, đối chiếu với PR #11 |
 | 8 | [U02](U02_UI_IN_AUTOCAD.md), [T08 §4–6](T08_RECIPES_EXTENDING.md) | L08 Palette, L11 Ribbon | Palette nhớ vị trí; Ribbon sống sót qua `CUI` |
 | 9 | [U03](U03_DRAWING_ON_UI.md) | L17 Xem trước trên palette, L19 Xem trước trên màn hình bản vẽ | Palette Grid Marker có khung xem trước (ảnh hai theme); lệnh xem trước bằng transient, đặt bằng jig |
 | 10 | [T01 §10–11](T01_AUTOCAD_NET_FOUNDATIONS.md), [T03 Phần B](T03_PITFALLS_CASEBOOK.md#phần-b--bẫy-autocad-api-kinh-điển) | L09 Events, L10 Async | Palette tự cập nhật khi xóa entity; async không vẽ nhầm bản vẽ |
@@ -159,7 +159,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | ✅ **Tự kiểm tra** | Câu hỏi cuối mục. Đáp án nằm trong khối thu gọn, hãy tự trả lời trước khi mở |
 | 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
 | 🌰 🌱 🌿 🌳 🏔️ | Năm cấp: Nhập môn → Fresher → Junior → Middle → Senior ([§2](#2-khung-năng-lực-5-cấp)) |
-| `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code. B-01…B-27 lập tại v1.0.0, B-28…B-30 tìm thấy khi sửa; hầu hết đã sửa ở PR #6/#7. B-31…B-33 tìm thấy khi viết nhánh UI, **còn mở**. Xem cột Trạng thái |
+| `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code. B-01…B-27 lập tại v1.0.0, B-28…B-30 tìm thấy khi sửa; hầu hết đã sửa ở PR #6/#7. B-31…B-34 tìm thấy khi viết nhánh UI; B-31…B-33 đã sửa ở PR #11, B-34 còn mở. Xem cột Trạng thái |
 | Lab `TÊN` / HeadlessLab | Một kiểm thử trên AutoCAD thật trong [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) |
 
 ---
@@ -172,7 +172,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 4. **Bắt buộc tái hiện trước khi sửa.** Mọi PR sửa lỗi phải mô tả cách tái hiện, như các mục trong T03.
 5. **Đánh giá lên cấp** theo [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp): phần vấn đáp nặng hơn phần trắc nghiệm.
 6. **Với học viên Giai đoạn 0:** gặp 30 phút mỗi tuần, kiểm đúng "đầu ra" của tuần ở [C00 §2](C00_START_HERE.md#2-lộ-trình-6-tuần). Bắt học viên **gõ lại** ví dụ, không copy. Chấm đồ án nhập môn bằng một bộ **test ẩn** do bạn viết (các giá trị biên, nguyên văn thông điệp lỗi — [C05 §5](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện)), và đừng công bố lời giải.
-7. **Với nhánh UI:** chấm bằng **ảnh** palette ở cả hai theme và bằng **smoke trong AutoCAD**, không chỉ đọc code. Những bước chỉ AutoCAD có giao diện mới kiểm được có danh sách ở cuối [U02](U02_UI_IN_AUTOCAD.md#trạng-thái-kiểm-chứng) và [U03](U03_DRAWING_ON_UI.md#trạng-thái-kiểm-chứng): yêu cầu học viên ghi kết quả của chúng vào mô tả PR. Lab L18 và bài tập U02-E1 sửa lỗi **còn mở** (B-31…B-33), nên PR tốt nhất có thể merge thật.
+7. **Với nhánh UI:** chấm bằng **ảnh** palette ở cả hai theme và bằng **smoke trong AutoCAD**, không chỉ đọc code. Những bước chỉ AutoCAD có giao diện mới kiểm được có danh sách ở cuối [U02](U02_UI_IN_AUTOCAD.md#trạng-thái-kiểm-chứng) và [U03](U03_DRAWING_ON_UI.md#trạng-thái-kiểm-chứng): yêu cầu học viên ghi kết quả của chúng vào mô tả PR. Lab L18 và bài tập U02-E1 (B-31…B-33) làm trên commit `632a6c1` rồi đối chiếu với PR #11, như các lab sửa backlog khác ở mục 3.
 
 ---
 
@@ -186,6 +186,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
 - Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab — 2026-10-13/14). Các mục chỉ AutoCAD GUI kiểm được (T05 smoke 13–16: theme, Ribbon, vị trí palette, async nhiều bản vẽ) đã được kiểm trên AutoCAD 2024 ngày 2026-10-14. Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0". Giai đoạn 0 (C00–C05) thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày. Nhánh UI (U00–U03) thêm cùng ngày, với các kiểm chứng sau:
   - Hành vi WPF chạy thật trên net48 và net8.
-  - Các bước của U03 áp vào một bản sao của dự án: build `-warnaserror` sạch, 290/290 test xanh, ảnh palette render từ chính palette đó.
-  - Hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 19/19).
+  - Các bước của U03 áp vào một bản sao của dự án: build `-warnaserror` sạch, test xanh, ảnh palette render từ chính palette đó. Áp lại trên code của PR #11: 330/330 test, ảnh trùng từng byte.
+  - Hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 20/20 trên code của PR #11).
+  - PR #11 (sửa B-31…B-33, 2026-10-14) cập nhật các chỗ nhắc tới ba lỗi đó. Phần mô tả hành vi trước khi sửa ghi rõ "trước PR #11".
   - Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm trên AutoCAD 2024 ngày 2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của tài liệu: palette có khung xem trước, xem trước đối tượng đang chọn, transient, hộp thoại chọn điểm, chọn sẵn và zoom từ application context. Danh sách chi tiết ở cuối U02 và U03.

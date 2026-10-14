@@ -17,8 +17,8 @@ Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, l�
 > 💡 **20/80 của chủ đề này là 5 khái niệm:** (1) vẽ từ **dữ liệu thuần**, không phải từ `Entity`; (2) **biến đổi tọa độ** bản vẽ → màn hình (fit khung, lật trục Y); (3) **một control tự vẽ** bằng `OnRender`; (4) **màu theo theme**, màu 7 của AutoCAD là màu chữ của theme; (5) **kiểm thử bằng số và bằng ảnh**. Phần còn lại của module là chi tiết của 5 điều đó.
 
 **Mọi code trong module đã chạy thật**, với C# 10, trên net48 và net8.0-windows:
-- **Phần WPF (§2–6):** đã áp đúng các bước vào một bản sao của dự án. Kết quả: build `-warnaserror` sạch; 290/290 test xanh (275 test cũ + 15 test mới); palette Grid Marker được render ra ảnh ở cả hai theme. Ảnh trong module là ảnh thật.
-- **Phần đọc entity (§7):** chạy trên AutoCAD 2024 bằng HeadlessLab, 19/19 kiểm thử xanh.
+- **Phần WPF (§2–6):** đã áp đúng các bước vào một bản sao của dự án, lần gần nhất trên code sau PR #11. Kết quả: build `-warnaserror` sạch; 330/330 test xanh (315 test có sẵn + 15 test của module); palette Grid Marker được render ra ảnh ở cả hai theme. Ảnh trong module là ảnh thật, và render lại trên code sau PR #11 vẫn ra đúng từng byte.
+- **Phần đọc entity (§7):** chạy trên AutoCAD 2024 bằng HeadlessLab, 20/20 kiểm thử xanh (18 có sẵn + 2 của module).
 - **Phần vẽ tạm (§9):** đã gọi API thật trong accoreconsole.
 - **Trong AutoCAD 2024 có giao diện:** `CadPreview` trong một palette thật, xem trước các đối tượng đang chọn, và hình transient hiện ra rồi biến mất đều đã kiểm ([trạng thái kiểm chứng](#trạng-thái-kiểm-chứng)).
 
@@ -580,7 +580,7 @@ namespace CadCoreFramework.Samples.GridMarker
 }
 ```
 
-**4b — ViewModel giữ danh sách hình.** Trong [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs): thêm `using CadCoreFramework.Models.Preview;`, một property, và ba dòng trong `Revalidate()`:
+**4b — ViewModel giữ danh sách hình.** Trong [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs): thêm `using CadCoreFramework.Models.Preview;` và một property. Trong `Revalidate()`, đưa `BuildSpec()` ra một biến `spec` để dùng lại, rồi thêm ba dòng gán `Preview`:
 
 ```csharp
 /// <summary>Hình xem trước của lưới theo input hiện tại; rỗng khi input sai. View vẽ bằng CadPreview.</summary>
@@ -591,7 +591,8 @@ namespace CadCoreFramework.Samples.GridMarker
 private void Revalidate()
 {
     GridSpec spec = BuildSpec();
-    var errors = spec.Validate();
+    List<string> errors = NumberInputErrors();    // ô số không đọc được (B-31/B-32)…
+    errors.AddRange(spec.Validate());             // …cộng luật của GridSpec — một nguồn luật duy nhất
     ValidationSummary = string.Join(Environment.NewLine, errors);
     HasValidationErrors = errors.Count > 0;
 
@@ -605,7 +606,7 @@ private void Revalidate()
 }
 ```
 
-`Revalidate()` đã chạy mỗi khi một trong 7 input đổi ([U01 §6](U01_WPF_MVVM_BASICS.md#6-mvvm-với-communitytoolkitmvvm)). Vì vậy xem trước tự cập nhật **theo từng phím gõ** mà không cần thêm code nào. Input sai thì `Preview` rỗng. `GridPlanner.Plan` ném exception khi spec sai, nên phải kiểm `HasValidationErrors` **trước** khi gọi. ViewModel vẫn chỉ có dữ liệu thuần: không `Brush`, không `Entity`.
+`Revalidate()` đã chạy mỗi khi một trong 7 input đổi ([U01 §6](U01_WPF_MVVM_BASICS.md#6-mvvm-với-communitytoolkitmvvm)), và mỗi khi người dùng gõ vào một ô số ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)). Vì vậy xem trước tự cập nhật **theo từng phím gõ** mà không cần thêm code nào. Input sai thì `Preview` rỗng. Ô số đang trống hay đang ghi `2,5` cũng tính là input sai, nên khung xem trước không bao giờ hiện lưới cũ khi ô đang sai. `GridPlanner.Plan` ném exception khi spec sai, nên phải kiểm `HasValidationErrors` **trước** khi gọi. ViewModel vẫn chỉ có dữ liệu thuần: không `Brush`, không `Entity`.
 
 **4c — View.** Trong [`GridMarkerPalette.xaml`](../../Samples/GridMarker/GridMarkerPalette.xaml): khai báo namespace của control ở thẻ gốc, rồi đặt khung xem trước ngay trên dòng báo lỗi validate:
 
@@ -709,6 +710,16 @@ public void Preview_ReplacedAsAWholeList_SoBindingRedraws()
     vm.Columns = 5;
 
     raised.Should().Contain(nameof(GridMarkerViewModel.Preview));
+}
+
+[Fact]
+public void Preview_ClearedBox_IsEmpty_NotTheOldGrid()
+{
+    var vm = NewViewModel();
+
+    vm.RowsText = "";   // ô SỐ HÀNG bị xóa trắng: Rows vẫn là 3, nhưng input đang sai (B-32)
+
+    vm.Preview.Should().BeEmpty();
 }
 ```
 
@@ -986,7 +997,7 @@ CadContext.ExecuteRead(scope => shapes = EntityPreviewBuilder.FromEntities(scope
 // shapes giờ gán được vào ViewModel của một palette, hay vào CadPreview của một hộp thoại
 ```
 
-**Kiểm trên AutoCAD thật.** Thêm hai kiểm thử vào [`LabCommands.cs`](../../tests/integration/HeadlessLab/LabCommands.cs) của HeadlessLab (đã chạy: 19/19 PASS), ví dụ:
+**Kiểm trên AutoCAD thật.** Thêm hai kiểm thử vào [`LabCommands.cs`](../../tests/integration/HeadlessLab/LabCommands.cs) của HeadlessLab (đã chạy: 20/20 PASS trên code sau PR #11), ví dụ:
 
 ```csharp
 // U03: đoạn cong của Polyline được lấy mẫu đúng chiều (bulge > 0 = ngược chiều kim đồng hồ).
@@ -1214,8 +1225,8 @@ Chênh lệch khoảng 8 lần, và nó lớn dần theo số hình. Với vài 
 
 ### Trạng thái kiểm chứng
 
-- **§2–6 (WPF):** áp vào bản sao của dự án; build Release `-warnaserror` sạch; 290/290 test xanh trên net48 và net8.0-windows; ảnh palette được render từ chính palette đó; đo hiệu năng trên cùng máy.
-- **§7 (đọc entity):** chạy trên AutoCAD 2024 bằng HeadlessLab (19/19), cộng một lab riêng in giá trị thật cho bảng ở §7.
+- **§2–6 (WPF):** áp vào bản sao của dự án; build Release `-warnaserror` sạch; ảnh palette được render từ chính palette đó; đo hiệu năng trên cùng máy. Áp lại trên code sau PR #11 (ô số bind vào chuỗi): 330/330 test xanh trên net48 và net8.0-windows, ảnh render ra trùng từng byte với ảnh cũ. Trên palette đó, gõ `2,5` vào KHOẢNG CÁCH hay xóa trắng SỐ HÀNG thì nút Vẽ tắt và khung xem trước rỗng. Ảnh được render bằng một test tạm riêng, không tính vào 330.
+- **§7 (đọc entity):** chạy trên AutoCAD 2024 bằng HeadlessLab (20/20 trên code sau PR #11), cộng một lab riêng in giá trị thật cho bảng ở §7.
 - **§9 (vẽ tạm):** chữ ký API kiểm trong metadata; `AddTransient`/`EraseTransient` và `Editor.Drag` (jig) đã chạy trong accoreconsole.
 - **AutoCAD 2024 có giao diện** (2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của module; mọi bước đạt kỳ vọng):
   - `CadPreview` trong một `PaletteSet` thật: gõ số hàng/cột thì khung vẽ lại ngay; kéo giãn palette thì hình tự fit, nét vẫn mảnh (§4–5).

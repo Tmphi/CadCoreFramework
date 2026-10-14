@@ -15,7 +15,7 @@ Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở �
 3. **Báo cáo lab** trong mô tả PR (hoặc issue "Lab report"): đã làm gì, kết quả thí nghiệm, trả lời câu hỏi phản tư.
 4. **Tái hiện trước, sửa sau.** Với lab sửa lỗi: viết test hoặc bước tái hiện *fail trước* rồi mới sửa.
 5. Thử nghiệm sysvar / script thì dùng accoreconsole `/isolate` ([T04 §5.3](T04_DEBUGGING_TROUBLESHOOTING.md#53-thí-nghiệm-an-toàn-với-accoreconsole)). **Không** thay đổi thiết lập AutoCAD thật của máy (`SECURELOAD`…).
-6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa. **Ngoại lệ:** B-31…B-33 (tìm thấy khi viết nhánh UI) **còn mở**. Lab L18 và bài tập U02-E1 làm trên `main` và mở PR thật như công việc bình thường.
+6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa. **Riêng B-31…B-33** (tìm thấy khi viết nhánh UI, sửa ở **PR #11**): lab L18 và bài tập U02-E1 làm trên commit **`632a6c1`** (`git switch -c lab/L18-ten 632a6c1`, tức `main` ngay trước PR #11), rồi đối chiếu với PR #11 theo cùng cách.
 
 ---
 
@@ -153,8 +153,9 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 ### L18 — Sửa bẫy ô nhập số
 
-- **Đề bài:** sửa **B-31** và **B-32** trên palette Grid Marker theo [U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi): ô số bind vào chuỗi, parse `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào `ValidationSummary`. Viết test **fail trước** trên `main`: ViewModel nhận `"2,5"` hoặc `""` thì phải có lỗi và tắt nút Vẽ.
+- **Đề bài:** trên commit `632a6c1` ([quy tắc 6](#1-quy-tắc-làm-lab)), sửa **B-31** và **B-32** trên palette Grid Marker theo [U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi): ô số bind vào chuỗi, parse `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào `ValidationSummary`. Viết test **fail trước**: gõ `"2,5"` hoặc `""` vào ô thì phải có lỗi và nút Vẽ phải tắt. Tìm ô theo **nhãn** trên palette, không theo tên property, để cùng một test chạy được trên code cũ lẫn code mới.
 - **DoD:** test fail trước, pass sau; gõ `2,5` thì có thông báo rõ ràng và nút tắt; xóa trắng ô thì nút tắt; `2.5` vẫn đúng; lệnh `SAMPLE_GRID` không đổi hành vi; các test hiện có vẫn xanh.
+- **So sánh:** đọc PR #11 (`ViewModels/NumberText.cs`, `GridMarkerViewModel`). PR giữ nguyên các property số (`Rows`, `Spacing`…) và thêm property chuỗi (`RowsText`…) đồng bộ hai chiều, thay vì đổi hẳn sang chuỗi. Được và mất gì? (Gợi ý: test và tài liệu đang dùng `vm.Rows`, thiết lập đã lưu sau này, độ dài code.) PR còn chặn `NaN`. Bạn có nghĩ tới trường hợp đó không ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng))?
 - **Phản tư:** luật "phải là số" thuộc về ViewModel hay `GridSpec`? Lệnh `SAMPLE_GRID` (prompt bằng `GetDouble`) có cần luật đó không, và vì sao?
 
 ### L19 — Xem trước trên màn hình bản vẽ
@@ -350,9 +351,9 @@ Tái hiện, đọc Event Viewer (mã lỗi, stack managed), thu hẹp (tắt t�
 Kiểm chứng bằng metadata, đính chính tài liệu (ghi rõ là đính chính), và thêm vào checklist review: mọi tên API trong tài liệu phải tồn tại. ([A14](T03_PITFALLS_CASEBOOK.md#a14-changelog-mô-tả-một-api-không-tồn-tại))
 </details>
 
-<details><summary><b>Q21.</b> Người dùng gõ <code>2,5</code> vào một ô số thực trên palette của dự án. Chuyện gì xảy ra, vì sao, và sửa thế nào?</summary>
+<details><summary><b>Q21.</b> Người dùng gõ <code>2,5</code> vào một ô bind thẳng vào <code>double</code> (như palette Grid Marker trước PR #11). Chuyện gì xảy ra, vì sao, và sửa thế nào?</summary>
 
-Giá trị thành **25**, không có lỗi nào. WPF đổi số theo `Language` mặc định `en-US` (không theo culture `vi-VN` của Windows), nên dấu phẩy là dấu phân cách hàng nghìn. Sửa: bind ô vào chuỗi, tự parse bằng `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào validate (B-31, [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
+Giá trị thành **25**, không có lỗi nào. WPF đổi số theo `Language` mặc định `en-US` (không theo culture `vi-VN` của Windows), nên dấu phẩy là dấu phân cách hàng nghìn. Sửa: bind ô vào chuỗi, tự parse bằng `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào validate. Đó là cách PR #11 sửa Golden Sample (B-31, [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
 </details>
 
 <details><summary><b>Q22.</b> Nút trên palette cần người dùng chọn một điểm trên bản vẽ. Vì sao không gọi <code>GetPoint</code> trong ViewModel, và cách đúng là gì?</summary>

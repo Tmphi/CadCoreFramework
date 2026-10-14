@@ -84,6 +84,9 @@ public partial class TuDienViewModel : ViewModelBase
 > Ví dụ đầy đủ (validate + `CanExecute`, trạng thái dạng enum, EventAggregator, unit test):
 > xem [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md) — `Samples/GridMarker/GridMarkerViewModel.cs`.
 
+> [!TIP]
+> Ô nhập **số** (số hàng, khoảng cách…) thì bind vào property **chuỗi** rồi tự đọc số bằng `NumberText`, như `RowsText`/`SpacingText` của Golden Sample. Đừng bind thẳng vào `int`/`double`: WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống ([U01 §5](training/U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
+
 ---
 
 ## 5.3 AutoCAD Theme Tự Động (Dark/Light)
