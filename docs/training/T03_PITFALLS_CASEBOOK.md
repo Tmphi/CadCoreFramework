@@ -2,11 +2,11 @@
 
 # T03 — Sổ Tay Sự Cố & Bẫy (Casebook)
 
-> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md) · **Trong lộ trình:** tuần 8 (Phần B) và 9 (Phần A); sau đó dùng như sổ tra cứu ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md) · **Trong lộ trình:** tuần 10 (Phần B) và 11 (Phần A); sau đó dùng như sổ tra cứu ([README §3](README.md#3-lộ-trình-đào-tạo))
 
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
 - **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
-- **Phần B:** 31 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh.
+- **Phần B:** 36 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh. B32–B36 được phát hiện và kiểm chứng khi viết [nhánh UI](U00_UI_START_HERE.md).
 
 Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùng khi viết báo cáo sự cố ([T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report)):
 
@@ -242,6 +242,24 @@ Khi nạp từ byte array, `Assembly.Location == ""`, và `Path.GetDirectoryName
 
 ### B31. Gọi Editor của bản vẽ không active
 Mọi lời gọi `Editor` — **kể cả `WriteMessage`**, không chỉ prompt — trên một `Document` không phải bản vẽ đang active ném `eNotApplicable` (từ `AcMgUserInteraction`; đã kiểm chứng trên AutoCAD 2024). Gặp ngay ở giai đoạn vẽ của `ExecuteAsync` khi người dùng chuyển bản vẽ trong lúc chờ: Document đã chụp vẫn đúng để **vẽ** (`Database`, lock, transaction đều được), nhưng một dòng `scope.Editor.WriteMessage` làm hủy cả transaction — không có hình nào được vẽ. Tệ hơn, nếu cả thông báo lỗi cũng được ghi vào Editor của bản vẽ gốc thì nó cũng bị nuốt: người dùng không thấy gì. (Đây là lỗi PR #6 đưa vào `DEMO_ASYNC_AWAIT`, phát hiện khi người dùng kiểm trong GUI 2026-10-14, nhờ log có đủ stack trace.) → Giai đoạn vẽ chỉ thao tác database; báo kết quả **sau** khi vẽ xong, lên bản vẽ **đang active** (`INotificationService`), kèm tên bản vẽ đã vẽ vào. Framework (PR #7): `CadCommandBase` báo lỗi lệnh async lên bản vẽ đang active (kể cả khi bản vẽ gốc đã bị đóng); `autoRegen` chỉ regen bản vẽ đang active; cảnh báo của `InsertBlock` chỉ ghi khi bản vẽ đang active. So sánh hai `Document`: dùng `==` (`DisposableWrapper` có `op_Equality`).
+
+### B32. Màu ByLayer đọc ra là trắng
+`entity.Color.ColorValue` của một entity màu ByLayer trả về **trắng (255, 255, 255)**, không phải màu của layer. Màu 7 cũng ra trắng (`EntityColor.LookUpRgb(7) = 0xFFFFFF`), dù AutoCAD vẽ nó **đen** trên nền sáng. Cả hai đã kiểm chứng trên AutoCAD 2024, khi viết bộ xem trước của [U03](U03_DRAWING_ON_UI.md). → Khi `Color.IsByLayer`, đọc `LayerTableRecord.Color`; màu 7 thì để theme quyết định ([U03 §7](U03_DRAWING_ON_UI.md#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)).
+
+### B33. `Explode` không trả về attribute
+`BlockReference.Explode` trả về các entity của định nghĩa block, **kể cả `AttributeDefinition`**, nhưng **không** trả về `AttributeReference`, tức giá trị attribute thật của block đó. Mọi phần trả về đều nằm ngoài database (đã kiểm chứng). → Đọc `block.AttributeCollection` riêng, bỏ qua `AttributeDefinition`, và `Dispose` mọi phần sau khi đọc ([U03 §7](U03_DRAWING_ON_UI.md#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)).
+
+### B34. Jig nhận WCS, `GetPoint` trả UCS
+Cùng gõ `10,0` khi UCS xoay 90°: `Editor.GetPoint` trả (10; 0), là **UCS**; `AcquirePoint` trong jig trả (0; 10), là **WCS** (đã kiểm chứng). Đổi kết quả của jig sang WCS thêm một lần nữa là đổi hai lần. → `CadPromptHelper.GetPoint` đã đổi sẵn sang WCS; điểm của jig thì dùng thẳng ([U03 §9.1](U03_DRAWING_ON_UI.md#91-jig-hình-chạy-theo-chuột)). Liên quan: [B15](#b15-tọa-độ-lệch-khi-ucs-bị-xoay).
+
+### B35. `CS0104: 'Polyline' is an ambiguous reference`
+`Autodesk.AutoCAD.GraphicsInterface`, namespace cần cho jig và transient, cũng có kiểu tên `Polyline`. File `using` cả hai namespace sẽ không biên dịch được. → Dùng alias: `using Polyline = Autodesk.AutoCAD.DatabaseServices.Polyline;` ([U03 §9.2](U03_DRAWING_ON_UI.md#92-transient-hình-tạm-đứng-yên)).
+
+### B36. Danh sách từ khóa in hai lần
+`PromptKeywordOptions.AppendKeywordsToMessage` mặc định là `true`: AutoCAD tự nối `[Yes/No] <Yes>` vào câu nhắc. Câu nhắc tự viết thêm `[Yes/No]` thì danh sách in hai lần (đã kiểm chứng; lỗi này có trong `CadPromptHelper.GetKeywords`, backlog B-33). → Câu nhắc chỉ chứa phần chữ ([U02 §2.3](U02_UI_IN_AUTOCAD.md#23-từ-khóa)).
+
+> [!NOTE]
+> Bẫy của **WPF** khi chạy trong AutoCAD nằm ở [U01 §5 và §8–9](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số): dấu phẩy thập phân, ô số bị xóa trắng, đổi dữ liệu từ luồng nền, `DynamicResource` sai key. Bẫy khi vẽ lên UI nằm ở [U03 §11](U03_DRAWING_ON_UI.md#11-bẫy).
 
 ---
 

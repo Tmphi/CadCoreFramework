@@ -2,7 +2,7 @@
 
 # T08 — Công Thức Mở Rộng Dự Án
 
-> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6–7 ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 
 Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../09_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**.
 
@@ -135,6 +135,8 @@ public void ShowPanelPalette()
 
 Thêm palette vào mảng `Palettes` trong `XamlPaletteTests` (test resource key ở cả hai theme sẽ tự chạy cho nó), đăng ký ViewModel vào container giả, và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`. Lệnh mới nhớ thêm vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm).
 
+Ô nhập **số** trên palette: bind vào chuỗi và tự parse, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
+
 ---
 
 ## 5. Palette cần người dùng chọn điểm trên màn hình
@@ -159,6 +161,8 @@ Palette chạy ở **application context**: không prompt từ ViewModel ([T01 �
    ```
    ViewModel nhận `ICommandLauncher` qua constructor và test bằng Mock.
 3. **`ExecuteInCommandContextAsync`**, khi cần chạy chuỗi thao tác *như một lệnh* rồi xử lý tiếp kết quả: `await Application.DocumentManager.ExecuteInCommandContextAsync(async _ => { … }, null);` (chữ ký đã kiểm chứng: `Func<object, Task>` + `object`, trả về `ExecutionResult` có `await` được).
+
+Với **hộp thoại modal** (không phải palette) cần chọn điểm, mẫu đơn giản nhất là "đóng → hỏi → mở lại" ngay trong lệnh: [U02 §4](U02_UI_IN_AUTOCAD.md#4-hộp-thoại-modal).
 
 ---
 

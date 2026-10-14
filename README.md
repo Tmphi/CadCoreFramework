@@ -28,7 +28,7 @@ Chúng tôi đã cấu trúc lại toàn bộ tài liệu thành một bộ giá
 | **Phần 7** | [07_API_REFERENCE.md](docs/07_API_REFERENCE.md) | Tài liệu tham khảo nhanh API, CadScopeDrawingExtensions, Utils, Builders. |
 | **Phần 8** | [08_COOKBOOK.md](docs/08_COOKBOOK.md) | Công thức giải quyết các bài toán thường gặp. |
 | **Phần 9** | [09_GOLDEN_SAMPLE.md](docs/09_GOLDEN_SAMPLE.md) | Golden Sample — khuôn mẫu chuẩn để copy khi làm tính năng mới. |
-| **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án, kể cả người chưa biết lập trình**: Giai đoạn 0 dạy C# theo quy tắc 20/80 trên chính code dự án ([bắt đầu từ đây](docs/training/C00_START_HERE.md)), rồi lộ trình 12 tuần; khung năng lực 5 cấp Nhập môn → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 16 bài lab, đề đánh giá. |
+| **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án, kể cả người chưa biết lập trình**: Giai đoạn 0 dạy C# theo quy tắc 20/80 trên chính code dự án ([bắt đầu từ đây](docs/training/C00_START_HERE.md)), rồi lộ trình 14 tuần; khung năng lực 5 cấp Nhập môn → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, **nhánh UI** (WPF/MVVM, palette, hộp thoại, vẽ thực thể lên UI — [U00](docs/training/U00_UI_START_HERE.md)), sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 19 bài lab, đề đánh giá. |
 
 ---
 
@@ -254,7 +254,7 @@ CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(blockRef); });
 Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockViolation`, `eNotOpenForWrite`, v.v.
 👉 **Hướng dẫn cứu hộ:**
 - [T04: Debug & chẩn đoán](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md): cây quyết định từ triệu chứng tới nguyên nhân, đọc log, attach debugger, phân tích crash.
-- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 31 bẫy AutoCAD API kinh điển.
+- [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 36 bẫy AutoCAD API kinh điển.
 - [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [DevOps & Standards](docs/06_DEVOPS_AND_STANDARDS.md)
 
 ---

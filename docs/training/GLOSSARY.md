@@ -6,6 +6,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 
 - [A. Lập trình & C# cho người mới](#a-lập-trình--c-cho-người-mới) — dùng trong Giai đoạn 0 (C00–C05).
 - [B. AutoCAD .NET & dự án](#b-autocad-net--dự-án) — dùng từ T01 trở đi.
+- [C. Giao diện: WPF & UI trong AutoCAD](#c-giao-diện-wpf--ui-trong-autocad) — dùng trong nhánh UI (U00–U03).
 
 ---
 
@@ -108,7 +109,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **HeadlessLab** | DLL chỉ dành cho kiểm thử, link mã không-UI của framework, chạy kiểm thử trên AutoCAD thật trong accoreconsole | [T05 §9](T05_TESTING_STRATEGY.md#9-integration-test-headless-hiện-trạng-và-hướng-đi) |
 | **Implied selection** (pick-first) | Đối tượng đã chọn trước khi gõ lệnh (`UsePickSet` + `SelectImplied`) | [T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter) |
 | **Incident report** | Báo cáo sự cố theo mẫu | [T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report) |
-| **Jig** | Tương tác kéo-thả xem trước (`EntityJig`, `DrawJig`) | [T02 §6.2](T02_ARCHITECTURE_DEEP_DIVE.md#62-nhóm-chức-năng) |
+| **Jig** | Tương tác kéo-thả xem trước (`EntityJig`, `DrawJig`) | [T02 §6.2](T02_ARCHITECTURE_DEEP_DIVE.md#62-nhóm-chức-năng), [U03 §9.1](U03_DRAWING_ON_UI.md#91-jig-hình-chạy-theo-chuột) |
 | **MdiActiveDocument** | Bản vẽ đang được focus; thay đổi khi người dùng đổi tab | [T01 §2.1](T01_AUTOCAD_NET_FOUNDATIONS.md#21-mdiactivedocument-tiện-nhưng-nguy-hiểm) |
 | **NETLOAD** | Lệnh nạp DLL .NET thủ công | — |
 | **NOD** (Named Objects Dictionary) | Dictionary gốc cấp bản vẽ | [T01 §3.4](T01_AUTOCAD_NET_FOUNDATIONS.md#34-dictionary-extension-dictionary-xrecord) |
@@ -133,3 +134,36 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **WorkingDatabase** | Database mà một số API ngầm dùng (`HostApplicationServices`) | [T07 §4](T07_PERFORMANCE_AND_SCALE.md#4-xử-lý-nhiều-bản-vẽ-side-database) |
 | **XData** | Dữ liệu mở rộng gắn thẳng vào đối tượng, ≤ 16 KB mỗi đối tượng | [T01 §3.4](T01_AUTOCAD_NET_FOUNDATIONS.md#34-dictionary-extension-dictionary-xrecord) |
 | **Xrecord** | Bản ghi dữ liệu tùy ý trong dictionary | [T01 §3.4](T01_AUTOCAD_NET_FOUNDATIONS.md#34-dictionary-extension-dictionary-xrecord) |
+
+---
+
+## C. Giao diện: WPF & UI trong AutoCAD
+
+| Thuật ngữ | Nghĩa | Xem |
+| :--- | :--- | :--- |
+| **`AffectsRender`** | Cờ của một DependencyProperty: giá trị đổi thì WPF tự vẽ lại control | [U03 §4](U03_DRAWING_ON_UI.md#4-bước-3--control-cadpreview) |
+| **Attached property** (`Grid.Column`) | Property mà phần tử cha "gắn" thêm cho phần tử con | [U01 §2](U01_WPF_MVVM_BASICS.md#2-bố-cục-grid-và-stackpanel) |
+| **Binding** (`{Binding X}`) | Sợi dây tự động nối một property của View với property `X` của ViewModel | [U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel) |
+| **Code-behind** | File `.xaml.cs` đi cặp với XAML; trong dự án chỉ làm hạ tầng | [U01 §11](U01_WPF_MVVM_BASICS.md#11-code-behind-chỉ-làm-hạ-tầng) |
+| **Command** (`ICommand`, `RelayCommand`, `CanExecute`) | Hành động mà nút bấm gọi; `CanExecute` quyết định nút sáng hay mờ | [U01 §6](U01_WPF_MVVM_BASICS.md#6-mvvm-với-communitytoolkitmvvm) |
+| **Converter** (`IValueConverter`) | Đổi kiểu dữ liệu giữa View và ViewModel, ví dụ `bool` → `Visibility` | [U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel) |
+| **DataContext** | Đối tượng mà mọi `{Binding}` bên trong đọc dữ liệu từ đó; phần tử con thừa hưởng | [U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel) |
+| **DataTrigger** | Đổi giao diện theo giá trị dữ liệu (màu theo trạng thái) | [U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel) |
+| **DependencyProperty** | Loại property của WPF hỗ trợ binding, style và `DynamicResource` | [U03 §4](U03_DRAWING_ON_UI.md#4-bước-3--control-cadpreview) |
+| **DIP** (pixel độc lập thiết bị) | Đơn vị đo của WPF, bằng 1/96 inch, tự co giãn theo DPI | [U01 §2](U01_WPF_MVVM_BASICS.md#2-bố-cục-grid-và-stackpanel) |
+| **Dispatcher / UI thread** | Luồng sở hữu các control WPF; trong AutoCAD đó là main thread | [U01 §8](U01_WPF_MVVM_BASICS.md#8-luồng-thread) |
+| **`DynamicResource` / `StaticResource`** | Tham chiếu resource: tìm lúc chạy và theo dõi thay đổi / tìm một lần lúc nạp XAML | [U01 §9](U01_WPF_MVVM_BASICS.md#9-resource-style-và-theme) |
+| **Freeze** (`Freezable`) | "Đóng băng" brush, pen, geometry của WPF: không đổi được nữa, vẽ nhanh hơn | [U03 §4](U03_DRAWING_ON_UI.md#4-bước-3--control-cadpreview) |
+| **`Language`** (của phần tử WPF) | Ngôn ngữ dùng để đổi chuỗi ↔ số; mặc định `en-US`, **không** theo Windows | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số) |
+| **Modal / modeless** | Hộp thoại chặn AutoCAD tới khi đóng / cửa sổ không chặn | [U02 §4](U02_UI_IN_AUTOCAD.md#4-hộp-thoại-modal), [§5](U02_UI_IN_AUTOCAD.md#5-cửa-sổ-modeless) |
+| **MVVM** (Model–View–ViewModel) | Chia màn hình thành View (XAML), ViewModel (dữ liệu và hành động), Model | [U01 §1](U01_WPF_MVVM_BASICS.md#1-wpf-trong-5-phút) |
+| **`ObservableCollection<T>`** | Danh sách báo thay đổi (thêm/xóa) cho giao diện | [U01 §7](U01_WPF_MVVM_BASICS.md#7-danh-sách-observablecollection) |
+| **`[ObservableProperty]`** | Attribute của CommunityToolkit.Mvvm: từ field `_rows` sinh property `Rows` biết báo thay đổi | [U01 §6](U01_WPF_MVVM_BASICS.md#6-mvvm-với-communitytoolkitmvvm) |
+| **`OnRender` / `DrawingContext`** | Hàm mà control tự vẽ nội dung của mình / "cây bút" để vẽ | [U03 §4](U03_DRAWING_ON_UI.md#4-bước-3--control-cadpreview) |
+| **Preview** (xem trước) | Vẽ kết quả lên UI hoặc lên màn hình trước khi chốt vào bản vẽ | [U03](U03_DRAWING_ON_UI.md) |
+| **Prompt, `PromptStatus`, keyword** | Câu hỏi trên dòng lệnh; kết quả (`OK`, `Cancel`, `None`…); từ khóa chọn được | [U02 §2](U02_UI_IN_AUTOCAD.md#2-dòng-lệnh-bề-mặt-ui-dùng-nhiều-nhất) |
+| **`SetImpliedSelection`** | Chọn sẵn đối tượng cho người dùng (hiện grip) | [U02 §7.3](U02_UI_IN_AUTOCAD.md#73-chọn-sẵn-và-zoom-tới-entity) |
+| **Transient graphics** (`TransientManager`) | Hình vẽ tạm lên màn hình bản vẽ, không vào database | [U03 §9.2](U03_DRAWING_ON_UI.md#92-transient-hình-tạm-đứng-yên) |
+| **`UpdateSourceTrigger`** | Lúc binding đẩy giá trị về ViewModel; `TextBox` mặc định là khi mất focus | [U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel) |
+| **Viewport transform** ("zoom extents") | Biến đổi tọa độ bản vẽ → pixel cho hình vừa khung: một scale chung, lật trục Y | [U03 §3](U03_DRAWING_ON_UI.md#3-bước-2--biến-đổi-tọa-độ) |
+| **XAML** | Ngôn ngữ đánh dấu mô tả cây đối tượng giao diện của WPF | [U01 §1](U01_WPF_MVVM_BASICS.md#1-wpf-trong-5-phút) |

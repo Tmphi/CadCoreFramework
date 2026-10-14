@@ -2,7 +2,7 @@
 
 # T01 — Nền Tảng AutoCAD .NET
 
-> **Cấp độ:** 🌱 Fresher → 🌿 Junior · **Cần trước:** [Giai đoạn 0](C00_START_HERE.md) (C00–C05) hoặc nền C# tương đương ([bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu)); AutoCAD 2024 · **Trong lộ trình:** tuần 1–3 và 8 ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌱 Fresher → 🌿 Junior · **Cần trước:** [Giai đoạn 0](C00_START_HERE.md) (C00–C05) hoặc nền C# tương đương ([bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu)); AutoCAD 2024 · **Trong lộ trình:** tuần 1–3 và 10 ([README §3](README.md#3-lộ-trình-đào-tạo))
 
 Module này dạy **AutoCAD .NET API** ở mức đủ sâu để bạn hiểu *vì sao* CadCoreFramework được thiết kế như hiện tại. Mỗi khái niệm đều được nối với chỗ framework xử lý nó, để bạn thấy lý thuyết "sống" trong code.
 

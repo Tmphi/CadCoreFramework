@@ -2,7 +2,7 @@
 
 # T06 — Build, Phát Hành & DevOps
 
-> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T05](T05_TESTING_STRATEGY.md); Git & PR ([C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request)) · **Trong lộ trình:** tuần 11 ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T05](T05_TESTING_STRATEGY.md); Git & PR ([C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request)) · **Trong lộ trình:** tuần 13 ([README §3](README.md#3-lộ-trình-đào-tạo))
 
 Code chạy được trên máy bạn mới là một nửa. Nửa còn lại là **build tái lập được**, **CI chặn được lỗi**, và **bản phát hành đến tay người dùng đúng như bạn nghĩ**. Module này giải thích từng mắt xích, và chỉ ra những mắt xích đã từng đứt ([T03 A7–A12](T03_PITFALLS_CASEBOOK.md#a7-init-templateps1-không-parse-được-trên-windows-powershell-51)).
 

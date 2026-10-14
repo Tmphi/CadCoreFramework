@@ -1,4 +1,4 @@
-> **📚 Học viện CadCoreFramework** · [🌰 Bắt đầu từ đây](C00_START_HERE.md) · [🏠 README dự án](../../README.md) · [📑 Giáo trình thực chiến (Phần 1–9)](../00_TOC.md) · [📖 Thuật ngữ](GLOSSARY.md)
+> **📚 Học viện CadCoreFramework** · [🌰 Bắt đầu từ đây](C00_START_HERE.md) · [🖥️ Nhánh UI](U00_UI_START_HERE.md) · [🏠 README dự án](../../README.md) · [📑 Giáo trình thực chiến (Phần 1–9)](../00_TOC.md) · [📖 Thuật ngữ](GLOSSARY.md)
 
 # 🎓 Lộ Trình Đào Tạo: Từ Người Chưa Biết Lập Trình Đến Senior AutoCAD .NET
 
@@ -6,6 +6,8 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 
 > [!TIP]
 > **Chưa biết lập trình, hoặc chưa biết C#?** Bắt đầu ở [C00 — Bắt đầu từ đây](C00_START_HERE.md). **Giai đoạn 0** (6 tuần, không cần AutoCAD) dạy C# theo **quy tắc 20/80**: học đúng khoảng 30 tính năng mà chính dự án này dùng nhiều nhất (đã đếm trong code), luyện ngay trên code thật của dự án. Đã biết C#: làm [bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) để biết có bỏ qua được không.
+>
+> **Làm tool có giao diện** (palette, hộp thoại, xem trước trước khi vẽ)? **Nhánh UI** [U00–U03](U00_UI_START_HERE.md) dạy theo cùng quy tắc 20/80: API UI mà code AutoCAD công khai dùng nhiều nhất (đã đếm), WPF/MVVM, và hướng dẫn **vẽ thực thể lên UI** từng bước.
 
 > [!IMPORTANT]
 > **Nguyên tắc số 1 của bộ tài liệu: mọi khẳng định đều phải kiểm chứng được.**
@@ -31,17 +33,22 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | **Giai đoạn 1–3 — AutoCAD .NET và dự án** | | |
 | [T01 — Nền tảng AutoCAD .NET](T01_AUTOCAD_NET_FOUNDATIONS.md) | Object model, Database, Transaction, Lock, Command/Application context, Prompt & UCS, Threading, bộ nhớ, Events, Undo, vòng đời plugin, accoreconsole | 🌱 → 🌿 |
 | [T02 — Mổ xẻ kiến trúc CadCoreFramework](T02_ARCHITECTURE_DEEP_DIVE.md) | Đọc code từng tầng: Bootstrapper, DI, `ICadContext`, `CadCommandBase`, Extensions, EventAggregator, Palette, Ribbon, Theme, Logger, Golden Sample | 🌱 → 🌳 |
-| [T03 — Sổ tay sự cố & bẫy](T03_PITFALLS_CASEBOOK.md) | 16 sự cố thật của dự án + 31 bẫy API kinh điển. Format: Triệu chứng → Gốc rễ → Sửa → Phòng ngừa | 🌿 → 🏔️ |
+| [T03 — Sổ tay sự cố & bẫy](T03_PITFALLS_CASEBOOK.md) | 16 sự cố thật của dự án + 36 bẫy API kinh điển. Format: Triệu chứng → Gốc rễ → Sửa → Phòng ngừa | 🌿 → 🏔️ |
 | [T04 — Debug & chẩn đoán](T04_DEBUGGING_TROUBLESHOOTING.md) | Attach debugger, log, Debug Inspector, đọc `ErrorStatus`, phân tích crash (Event Viewer, mã lỗi), Fusion log, cây quyết định | 🌿 → 🏔️ |
 | [T05 — Chiến lược kiểm thử](T05_TESTING_STRATEGY.md) | Kim tự tháp test cho plugin CAD, `FakeCadContext`, test ViewModel, test XAML trên STA, smoke test thủ công | 🌿 → 🌳 |
 | [T06 — Build, phát hành & DevOps](T06_BUILD_RELEASE_DEVOPS.md) | Giải phẫu `.csproj`, CI, quy trình release theo tag, bundle Autoloader, template `dotnet new`, chính sách dependency | 🌿 → 🏔️ |
 | [T07 — Hiệu năng & quy mô](T07_PERFORMANCE_AND_SCALE.md) | Mô hình chi phí, batch, lọc theo `ObjectClass`, side database, đo đạc | 🌳 → 🏔️ |
 | [T08 — Công thức mở rộng dự án](T08_RECIPES_EXTENDING.md) | Checklist thêm lệnh / tính năng / service / palette / ribbon / overrule / metadata / settings | 🌱 → 🌳 |
 | [T09 — Sổ tay Senior](T09_SENIOR_PLAYBOOK.md) | ADR (vì sao kiến trúc như hiện tại), checklist code review, **backlog kỹ thuật đã kiểm chứng**, lộ trình kiến trúc | 🌳 → 🏔️ |
-| [T10 — Bài lab & đánh giá](T10_LABS_AND_ASSESSMENT.md) | 16 bài lab có tiêu chí đạt, đồ án cuối khóa, ngân hàng câu hỏi, đề đánh giá lên cấp | Mọi cấp |
-| [Thuật ngữ](GLOSSARY.md) | Từ điển Anh–Việt: lập trình & C# cho người mới (phần A), AutoCAD .NET & dự án (phần B) | — |
+| [T10 — Bài lab & đánh giá](T10_LABS_AND_ASSESSMENT.md) | 19 bài lab có tiêu chí đạt, đồ án cuối khóa, ngân hàng câu hỏi, đề đánh giá lên cấp | Mọi cấp |
+| **Nhánh UI — giao diện & vẽ thực thể lên UI** (tuần 7–9 của Giai đoạn 2) | | |
+| [U00 — Nhánh UI: bắt đầu từ đây](U00_UI_START_HERE.md) | Bản đồ UI của tool AutoCAD, quy tắc 20/80 (đếm trên code công khai và trong dự án), 6 quy tắc vàng, lộ trình 3 tuần, bài kiểm tra đầu vào | 🌱 → 🌳 |
+| [U01 — WPF & MVVM](U01_WPF_MVVM_BASICS.md) | XAML, `Grid`/`StackPanel`, 8 control, binding, **3 bẫy nhập số** (đã kiểm trên palette thật), CommunityToolkit.Mvvm, `ObservableCollection`, luồng, theme; không cần AutoCAD | 🌱 → 🌿 |
+| [U02 — UI trong AutoCAD](U02_UI_IN_AUTOCAD.md) | Chọn bề mặt UI; prompt (mặc định, từ khóa, UCS); palette; hộp thoại modal có nút chọn điểm; Ribbon; chọn sẵn và zoom; bẫy | 🌱 → 🌳 |
+| [U03 — Vẽ thực thể lên UI](U03_DRAWING_ON_UI.md) | Một kế hoạch, hai nơi vẽ; biến đổi tọa độ; control `CadPreview`; khung xem trước cho Golden Sample; đọc entity và block thành hình; jig, transient; hiệu năng; bẫy | 🌿 → 🌳 |
+| [Thuật ngữ](GLOSSARY.md) | Từ điển Anh–Việt: lập trình & C# cho người mới (phần A), AutoCAD .NET & dự án (phần B), giao diện WPF & UI trong AutoCAD (phần C) | — |
 
-Bộ **C00–C05** là *nền tảng lập trình và C#*, dạy trên chính code của dự án. Giáo trình **Phần 1–9** (`docs/00`–`09`) là tài liệu *tham khảo nhanh theo chủ đề*. Bộ **T01–T10** là tài liệu *đào tạo theo chiều sâu*. Ba bộ bổ sung cho nhau: T-modules thường dẫn ngược về Phần 1–9 khi cần ví dụ ngắn, và về C01–C05 khi cần nhắc lại cú pháp C#.
+Bộ **C00–C05** là *nền tảng lập trình và C#*, dạy trên chính code của dự án. Giáo trình **Phần 1–9** (`docs/00`–`09`) là tài liệu *tham khảo nhanh theo chủ đề*. Bộ **T01–T10** là tài liệu *đào tạo theo chiều sâu*. **Nhánh UI U00–U03** là *chuyên đề giao diện*, học trong Giai đoạn 2. Các bộ bổ sung cho nhau: T-modules và U-modules thường dẫn ngược về Phần 1–9 khi cần ví dụ ngắn, và về C01–C05 khi cần nhắc lại cú pháp C#.
 
 ---
 
@@ -53,6 +60,7 @@ Mỗi cấp có **tiêu chí đo được**. Mentor dùng bảng này khi đánh
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **C# & lập trình** | Biến, điều kiện, vòng lặp, hàm, collection, class/interface; đọc được lambda, LINQ, `using`, event trong code dự án | Viết đúng lambda, LINQ, extension method, generic; `async` theo 5 quy tắc ở C05 §1 | Dùng đúng `IDisposable`, exception ở biên, closure trong code async | Thiết kế API generic và extension có chủ đích; nhận ra chỗ tốn cấp phát bộ nhớ | Đặt quy ước C# của dự án (analyzer, `.editorconfig`, lộ trình chuyển nullable) |
 | **AutoCAD API** | — (chưa cần) | Biết `Document`/`Database`/`Transaction`/`ObjectId`; vẽ được entity qua `ICadScope` | Hiểu OpenMode, lock, command vs application context; dùng Prompt, SelectionFilter, XData/XRecord đúng | Làm chủ events, Undo, dynamic block, side database, Jig, Overrule | Giải thích được hành vi "lạ" của AutoCAD từ gốc (threading, lifetime, AppDomain dùng chung) |
+| **UI & tương tác** | — (chưa cần) | Sửa được XAML của palette có sẵn: thêm ô nhập, binding, nút có `Command` | Tự làm palette hoặc hộp thoại MVVM đúng chuẩn (`DynamicResource`, `CanExecute`, validate, ô số an toàn); prompt đúng UCS, từ khóa, ESC | Vẽ thực thể lên UI (khung xem trước, jig, transient); test ViewModel và test render; tránh được bẫy luồng và bẫy nhập số | Thiết kế UI cho nhiều bản vẽ và cả hai ngữ cảnh; đặt chuẩn trải nghiệm; xử lý hiệu năng UI lớn |
 | **Kiến trúc dự án** | Đọc hiểu `GridSpec`/`GridPlanner`; biết vai trò từng project và thư mục | Chạy và đọc được Golden Sample | Tự làm tính năng trọn vẹn theo Golden Sample | Thiết kế service/abstraction mới, giữ đúng quy tắc phụ thuộc | Viết ADR, thay đổi kiến trúc có kiểm soát, mở rộng analyzer |
 | **Chất lượng** | Viết unit test xUnit cho logic thuần; đọc được test fail | Code **trong dự án** build 0 warning (kể cả analyzer CAD001–CAD003) | Viết unit test cho Planner/Service/ViewModel | Review code người khác bằng checklist T09 | Đặt chuẩn, nâng mức đảm bảo chất lượng (test, CI, release) |
 | **Chẩn đoán** | Đọc lỗi biên dịch; dùng breakpoint, Step Over/Into | Biết đọc log và Debug Inspector | Attach debugger, đọc `ErrorStatus`, tự sửa lỗi lock/open mode | Chẩn đoán lỗi nạp assembly, xung đột DLL với host | Phân tích crash không có stack trace (mã lỗi, dump, tái hiện cô lập) |
@@ -68,7 +76,7 @@ Các cột **cộng dồn**: mỗi cấp gồm mọi thứ của các cấp trư
 
 ## 3. Lộ trình đào tạo
 
-Người **chưa biết lập trình** đi trọn khoảng **18 tuần**: Giai đoạn 0 (6 tuần) rồi Giai đoạn 1–3 (12 tuần). Người **đã vững C#** làm [bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu): đạt 7–8 điểm thì chỉ cần đồ án nhập môn rồi vào thẳng tuần 1 của Giai đoạn 1; có thể rút Giai đoạn 1–3 xuống khoảng 10 tuần bằng cách gộp tuần 1–2 và tuần 4–5.
+Người **chưa biết lập trình** đi trọn khoảng **20 tuần**: Giai đoạn 0 (6 tuần) rồi Giai đoạn 1–3 (14 tuần, gồm 3 tuần của nhánh UI). Người **đã vững C#** làm [bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu): đạt 7–8 điểm thì chỉ cần đồ án nhập môn rồi vào thẳng tuần 1 của Giai đoạn 1; có thể rút Giai đoạn 1–3 xuống khoảng 12 tuần bằng cách gộp tuần 1–2 và tuần 4–5. Đã quen WPF thì làm thêm [bài kiểm tra của nhánh UI](U00_UI_START_HERE.md#6-bài-kiểm-tra-đầu-vào), có thể gộp tuần 7 vào tuần 8.
 
 ### Giai đoạn 0 — Nhập môn lập trình & C# (6 tuần · 🌰 → 🌱)
 
@@ -80,7 +88,7 @@ Mỗi tuần 8–10 giờ, **không cần AutoCAD**. Kế hoạch chi tiết t�
 | 3–4 | [C02 §5–9](C02_DATA_AND_COLLECTIONS.md), [C03](C03_OBJECT_ORIENTED.md), [C04 §1–4](C04_CSHARP_IN_THIS_PROJECT.md) | Class `PanelSpec` có `Validate()`; giải thích được từng dòng của `GridSpec.cs` |
 | 5–6 | [C04 §5–13](C04_CSHARP_IN_THIS_PROJECT.md), [C05](C05_ASYNC_TESTING_GIT.md) | Giải mã 6 dòng code thật; **PR đồ án nhập môn**; vượt [đánh giá 🌰 → 🌱](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher) |
 
-### Giai đoạn 1–3 — AutoCAD .NET và dự án (12 tuần · 🌱 → 🏔️)
+### Giai đoạn 1–3 — AutoCAD .NET và dự án (14 tuần · 🌱 → 🏔️)
 
 Mỗi tuần ≈ 60% đọc và thực hành, 40% làm lab. Đầu ra mỗi tuần là một **PR nhỏ** (lab, test, hoặc sửa docs) được mentor review. Từ đây cần AutoCAD 2024.
 
@@ -94,24 +102,26 @@ Mỗi tuần ≈ 60% đọc và thực hành, 40% làm lab. Đầu ra mỗi tu�
 | 4 | [T02 §1–5](T02_ARCHITECTURE_DEEP_DIVE.md) | — | Vẽ lại sơ đồ khởi động (từ trí nhớ) và được mentor xác nhận |
 | 5 | [T02 §6–12](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9](../09_GOLDEN_SAMPLE.md) | L06 Metadata | XRecord ghi/đọc/xóa đúng |
 
-**Giai đoạn 2 — Xây tính năng và chẩn đoán** (tuần 6–9; đánh giá 🌿 → 🌳 cần L07–L10):
+**Giai đoạn 2 — Xây tính năng, giao diện và chẩn đoán** (tuần 6–11; đánh giá 🌿 → 🌳 cần L07–L10 và L17–L19):
 
 | Tuần | Đọc | Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
 | 6 | [T05](T05_TESTING_STRATEGY.md), [T08 §1–3](T08_RECIPES_EXTENDING.md) | L07 Nhân bản Golden Sample (tiếp nối đồ án nhập môn) | Tính năng mới + ≥ 15 unit test |
-| 7 | [T08 §4–6](T08_RECIPES_EXTENDING.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | L08 Palette, L11 Ribbon | Palette nhớ vị trí; Ribbon sống sót qua `CUI` |
-| 8 | [T01 §10–11](T01_AUTOCAD_NET_FOUNDATIONS.md), [T03 Phần B](T03_PITFALLS_CASEBOOK.md#phần-b--bẫy-autocad-api-kinh-điển) | L09 Events, L10 Async | Palette tự cập nhật khi xóa entity; async không vẽ nhầm bản vẽ |
-| 9 | [T04](T04_DEBUGGING_TROUBLESHOOTING.md), [T03 Phần A](T03_PITFALLS_CASEBOOK.md#phần-a--sự-cố-thật-của-dự-án) | L12 Sửa lỗi theme, L16 Pháp y crash | PR sửa một mục backlog thật (trên `v1.0.0`, đối chiếu với PR #6) + incident report |
+| 7 | [U00](U00_UI_START_HERE.md), [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD), L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; PR sửa B-31/B-32 có test fail-trước |
+| 8 | [U02](U02_UI_IN_AUTOCAD.md), [T08 §4–6](T08_RECIPES_EXTENDING.md) | L08 Palette, L11 Ribbon | Palette nhớ vị trí; Ribbon sống sót qua `CUI` |
+| 9 | [U03](U03_DRAWING_ON_UI.md) | L17 Xem trước trên palette, L19 Xem trước trên màn hình bản vẽ | Palette Grid Marker có khung xem trước (ảnh hai theme); lệnh xem trước bằng transient, đặt bằng jig |
+| 10 | [T01 §10–11](T01_AUTOCAD_NET_FOUNDATIONS.md), [T03 Phần B](T03_PITFALLS_CASEBOOK.md#phần-b--bẫy-autocad-api-kinh-điển) | L09 Events, L10 Async | Palette tự cập nhật khi xóa entity; async không vẽ nhầm bản vẽ |
+| 11 | [T04](T04_DEBUGGING_TROUBLESHOOTING.md), [T03 Phần A](T03_PITFALLS_CASEBOOK.md#phần-a--sự-cố-thật-của-dự-án) | L12 Sửa lỗi theme, L16 Pháp y crash | PR sửa một mục backlog thật (trên `v1.0.0`, đối chiếu với PR #6) + incident report |
 
-**Giai đoạn 3 — Hiệu năng, phát hành và vai trò Senior** (tuần 10–12; đánh giá 🌳 → 🏔️ cần L11–L16 + đồ án cuối khóa):
+**Giai đoạn 3 — Hiệu năng, phát hành và vai trò Senior** (tuần 12–14; đánh giá 🌳 → 🏔️ cần L11–L16 + đồ án cuối khóa):
 
 | Tuần | Đọc | Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
-| 10 | [T07](T07_PERFORMANCE_AND_SCALE.md) | L13 Hiệu năng, L14 Side database | Báo cáo đo đạc có số liệu trước/sau |
-| 11 | [T06](T06_BUILD_RELEASE_DEVOPS.md), [T09](T09_SENIOR_PLAYBOOK.md) | L15 Release thử | Release candidate trên branch thử + release note |
-| 12 | Ôn tập | **Đồ án cuối khóa** | Demo + ADR + bảo vệ trước mentor |
+| 12 | [T07](T07_PERFORMANCE_AND_SCALE.md) | L13 Hiệu năng, L14 Side database | Báo cáo đo đạc có số liệu trước/sau |
+| 13 | [T06](T06_BUILD_RELEASE_DEVOPS.md), [T09](T09_SENIOR_PLAYBOOK.md) | L15 Release thử | Release candidate trên branch thử + release note |
+| 14 | Ôn tập | **Đồ án cuối khóa** | Demo + ADR + bảo vệ trước mentor |
 
-Lên cấp không tự động theo tuần: mỗi cấp phải vượt đề đánh giá ở [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp). Riêng 🏔️ Senior còn cần kinh nghiệm thật (chủ trì release, incident report, ADR được chấp nhận), nên thường đến sau tuần 12.
+Lên cấp không tự động theo tuần: mỗi cấp phải vượt đề đánh giá ở [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp). Riêng 🏔️ Senior còn cần kinh nghiệm thật (chủ trì release, incident report, ADR được chấp nhận), nên thường đến sau tuần 14.
 
 ---
 
@@ -149,7 +159,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | ✅ **Tự kiểm tra** | Câu hỏi cuối mục. Đáp án nằm trong khối thu gọn, hãy tự trả lời trước khi mở |
 | 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
 | 🌰 🌱 🌿 🌳 🏔️ | Năm cấp: Nhập môn → Fresher → Junior → Middle → Senior ([§2](#2-khung-năng-lực-5-cấp)) |
-| `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code (B-01…B-27 lập tại v1.0.0; hầu hết đã sửa ở PR #6 — cột Trạng thái) |
+| `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code. B-01…B-27 lập tại v1.0.0, B-28…B-30 tìm thấy khi sửa; hầu hết đã sửa ở PR #6/#7. B-31…B-33 tìm thấy khi viết nhánh UI, **còn mở**. Xem cột Trạng thái |
 | Lab `TÊN` / HeadlessLab | Một kiểm thử trên AutoCAD thật trong [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) |
 
 ---
@@ -162,6 +172,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 4. **Bắt buộc tái hiện trước khi sửa.** Mọi PR sửa lỗi phải mô tả cách tái hiện, như các mục trong T03.
 5. **Đánh giá lên cấp** theo [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp): phần vấn đáp nặng hơn phần trắc nghiệm.
 6. **Với học viên Giai đoạn 0:** gặp 30 phút mỗi tuần, kiểm đúng "đầu ra" của tuần ở [C00 §2](C00_START_HERE.md#2-lộ-trình-6-tuần). Bắt học viên **gõ lại** ví dụ, không copy. Chấm đồ án nhập môn bằng một bộ **test ẩn** do bạn viết (các giá trị biên, nguyên văn thông điệp lỗi — [C05 §5](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện)), và đừng công bố lời giải.
+7. **Với nhánh UI:** chấm bằng **ảnh** palette ở cả hai theme và bằng **smoke trong AutoCAD**, không chỉ đọc code. Những bước chỉ AutoCAD có giao diện mới kiểm được có danh sách ở cuối [U02](U02_UI_IN_AUTOCAD.md#trạng-thái-kiểm-chứng) và [U03](U03_DRAWING_ON_UI.md#trạng-thái-kiểm-chứng): yêu cầu học viên ghi kết quả của chúng vào mô tả PR. Lab L18 và bài tập U02-E1 sửa lỗi **còn mở** (B-31…B-33), nên PR tốt nhất có thể merge thật.
 
 ---
 
@@ -172,4 +183,9 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó.
 - **C00–C05 trích nguyên văn code dự án** (nhiều nhất ở [C04 §12](C04_CSHARP_IN_THIS_PROJECT.md#12-giải-mã-dòng-code-thật) và [C03 §9](C03_OBJECT_ORIENTED.md#9-đọc-có-hướng-dẫn-gridspeccs)). PR đổi `GridSpec`, `GridPlanner`, `GridMarkerService`, `CadContext`, `RibbonService`, `ThemeManager`, `SelectionFilterBuilder` hay `DrawLine` phải kiểm lại các trích dẫn đó. Bảng số liệu 20/80 ở [C00 §1](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) đếm lại được bằng lệnh ghi ngay dưới bảng.
 - Ví dụ trong C01–C05 là chương trình hoàn chỉnh, đã chạy trên .NET 8 với `<LangVersion>10.0</LangVersion>`; kết quả ghi trong tài liệu là kết quả thật. Sửa ví dụ thì chạy lại trước khi commit.
-- Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab — 2026-10-13/14). Các mục chỉ AutoCAD GUI kiểm được (T05 smoke 13–16: theme, Ribbon, vị trí palette, async nhiều bản vẽ) đã được kiểm trên AutoCAD 2024 ngày 2026-10-14. Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0". Giai đoạn 0 (C00–C05) thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày.
+- **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
+- Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab — 2026-10-13/14). Các mục chỉ AutoCAD GUI kiểm được (T05 smoke 13–16: theme, Ribbon, vị trí palette, async nhiều bản vẽ) đã được kiểm trên AutoCAD 2024 ngày 2026-10-14. Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0". Giai đoạn 0 (C00–C05) thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày. Nhánh UI (U00–U03) thêm cùng ngày, với các kiểm chứng sau:
+  - Hành vi WPF chạy thật trên net48 và net8.
+  - Các bước của U03 áp vào một bản sao của dự án: build `-warnaserror` sạch, 290/290 test xanh, ảnh palette render từ chính palette đó.
+  - Hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 19/19).
+  - Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm trên AutoCAD 2024 ngày 2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của tài liệu: palette có khung xem trước, xem trước đối tượng đang chọn, transient, hộp thoại chọn điểm, chọn sẵn và zoom từ application context. Danh sách chi tiết ở cuối U02 và U03.
