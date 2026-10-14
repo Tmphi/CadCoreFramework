@@ -44,7 +44,7 @@ Các kiểm thử hiện có (18, đều PASS trên AutoCAD 2024 — mục backl
 | `DRAW_CONFIGURE_THROWS_DISPOSES` | `configure` ném lỗi → entity được Dispose (B-14) |
 | `FILTER_ONLAYERS_IS_WILDCARD`, `FILTER_EXACT_MATCHES_LITERALLY` | Wildcard của filter / `OnLayersExact` (B-17) |
 | `PLOT_LAYOUT_TO_PDF`, `PLOT_MULTIPLE_LAYOUTS_TO_PDF`, `PLOT_UNKNOWN_LAYOUT_FAILS_CLEANLY` | In PDF thật, khôi phục `BACKGROUNDPLOT` + layout hiện hành (B-10) |
-| `KEYWORDS_PROMPT_LISTS_ONCE` | `CadPromptHelper.GetKeywords` không in danh sách từ khóa hai lần (B-33). Prompt **thật**: runner gõ `No` cho nó (dòng ngay sau `LAB_ALL` trong `.scr`) và kiểm output có đúng `LAB keyword prompt [Yes/No] <Yes>:`, không có `[Yes/No] [Yes/No]` |
+| `KEYWORDS_PROMPT_LISTS_ONCE` | `CadPromptHelper.GetKeywords` và extension cũ `AskKeyword` không in danh sách từ khóa hai lần (B-33). Hai prompt **thật**: runner gõ `No` cho mỗi prompt (hai dòng ngay sau `LAB_ALL` trong `.scr`) và kiểm output có đúng `LAB keyword prompt [Yes/No] <Yes>:` và `LAB scope keyword prompt [Yes/No] <Yes>:`, không có `[Yes/No] [Yes/No]` |
 
 **Thêm kiểm thử:** thêm một dòng `("TÊN", scope => { … Assert(điều_kiện, "lý do"); })` vào `Tests` trong
 `HeadlessLab/LabCommands.cs` (hoặc vào `DocumentTests` nếu cần database đã commit). Viết kiểm thử để nó

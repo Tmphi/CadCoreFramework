@@ -76,8 +76,8 @@ namespace CadCoreFramework.Extensions
         public static string AskKeyword(this ICadScope scope, string message, string[] keywords, string defaultKeyword = null)
         {
             if (keywords == null || keywords.Length == 0) return null;
-            string prompt = $"\n{message} [{string.Join("/", keywords)}]: ";
-            var opts = new Autodesk.AutoCAD.EditorInput.PromptKeywordOptions(prompt);
+            // Chỉ phần chữ: AutoCAD tự nối "[Yes/No] <Yes>:" (AppendKeywordsToMessage mặc định true) — B-33.
+            var opts = new Autodesk.AutoCAD.EditorInput.PromptKeywordOptions($"\n{message}");
             foreach (var kw in keywords) opts.Keywords.Add(kw);
             if (!string.IsNullOrEmpty(defaultKeyword)) opts.Keywords.Default = defaultKeyword;
             var res = scope.Editor.GetKeywords(opts);

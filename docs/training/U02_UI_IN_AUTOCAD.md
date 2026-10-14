@@ -91,7 +91,7 @@ options.Keywords.Default = "Yes";
 PromptResult answer = Editor.GetKeywords(options);
 ```
 
-`CadPromptHelper.GetKeywords` làm đúng như vậy từ PR #11. Kiểm thử HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ nó đúng: kiểm thử chạy một prompt thật trong accoreconsole, rồi runner kiểm trong output rằng danh sách chỉ xuất hiện một lần. Chạy cùng kiểm thử đó trên code cũ thì nó fail, với output `LAB keyword prompt [Yes/No] [Yes/No] <Yes>:`.
+`CadPromptHelper.GetKeywords` làm đúng như vậy từ PR #11, và extension cũ `AskKeyword` (`[Obsolete]`) cũng vậy. Kiểm thử HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cả hai đúng: kiểm thử chạy prompt thật trong accoreconsole, rồi runner kiểm trong output rằng danh sách chỉ xuất hiện một lần. Chạy cùng kiểm thử đó trên code cũ thì nó fail, với output `LAB keyword prompt [Yes/No] [Yes/No] <Yes>:`.
 
 ### 2.4 Hệ tọa độ: `GetPoint` trả về UCS
 

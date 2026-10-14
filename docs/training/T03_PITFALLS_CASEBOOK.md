@@ -256,7 +256,7 @@ Cùng gõ `10,0` khi UCS xoay 90°: `Editor.GetPoint` trả (10; 0), là **UCS**
 `Autodesk.AutoCAD.GraphicsInterface`, namespace cần cho jig và transient, cũng có kiểu tên `Polyline`. File `using` cả hai namespace sẽ không biên dịch được. → Dùng alias: `using Polyline = Autodesk.AutoCAD.DatabaseServices.Polyline;` ([U03 §9.2](U03_DRAWING_ON_UI.md#92-transient-hình-tạm-đứng-yên)).
 
 ### B36. Danh sách từ khóa in hai lần
-`PromptKeywordOptions.AppendKeywordsToMessage` mặc định là `true`: AutoCAD tự nối `[Yes/No] <Yes>` vào câu nhắc. Câu nhắc tự viết thêm `[Yes/No]` thì danh sách in hai lần (đã kiểm chứng; `CadPromptHelper.GetKeywords` từng mắc lỗi này, backlog B-33, đã sửa ở PR #11). → Câu nhắc chỉ chứa phần chữ ([U02 §2.3](U02_UI_IN_AUTOCAD.md#23-từ-khóa)). HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cho helper không mắc lại.
+`PromptKeywordOptions.AppendKeywordsToMessage` mặc định là `true`: AutoCAD tự nối `[Yes/No] <Yes>` vào câu nhắc. Câu nhắc tự viết thêm `[Yes/No]` thì danh sách in hai lần (đã kiểm chứng; `CadPromptHelper.GetKeywords` và extension cũ `AskKeyword` từng mắc lỗi này, backlog B-33, đã sửa ở PR #11). → Câu nhắc chỉ chứa phần chữ ([U02 §2.3](U02_UI_IN_AUTOCAD.md#23-từ-khóa)). HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cho helper không mắc lại.
 
 > [!NOTE]
 > Bẫy của **WPF** khi chạy trong AutoCAD nằm ở [U01 §5 và §8–9](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số): dấu phẩy thập phân, ô số bị xóa trắng, đổi dữ liệu từ luồng nền, `DynamicResource` sai key. Bẫy khi vẽ lên UI nằm ở [U03 §11](U03_DRAWING_ON_UI.md#11-bẫy).

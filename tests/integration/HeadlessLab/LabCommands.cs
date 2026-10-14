@@ -28,10 +28,11 @@ namespace CadCoreFramework.HeadlessLab
         private const string AttBlock = "LAB_ATT_BLOCK";
 
         /// <summary>
-        /// Câu nhắc của kiểm thử KEYWORDS_PROMPT_LISTS_ONCE. Runner gõ "No" cho nó và tìm đúng dòng
-        /// "LAB keyword prompt [Yes/No] &lt;Yes&gt;:" trong output — đổi chuỗi này thì đổi cả run-headless-lab.ps1.
+        /// Hai câu nhắc của kiểm thử KEYWORDS_PROMPT_LISTS_ONCE. Runner gõ "No" cho mỗi câu và tìm đúng dòng
+        /// "… [Yes/No] &lt;Yes&gt;:" trong output — đổi chuỗi nào thì đổi cả run-headless-lab.ps1.
         /// </summary>
         internal const string KeywordPrompt = "LAB keyword prompt";
+        internal const string ScopeKeywordPrompt = "LAB scope keyword prompt";
 
         private static readonly List<(string Name, Action<ICadScope> Body)> Tests = new List<(string, Action<ICadScope>)>
         {
@@ -244,13 +245,23 @@ namespace CadCoreFramework.HeadlessLab
                 Assert(PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting, "Job in bị treo");
             }),
 
-            // B-33: AutoCAD tự nối "[Yes/No] <Yes>:" vào câu nhắc — CadPromptHelper không được nối thêm lần nữa.
-            // Prompt THẬT: runner gõ "No" (không gõ Enter: dòng trống ở dấu nhắc lệnh sẽ lặp lại LAB_ALL — T03 A6),
-            // rồi kiểm trong output rằng danh sách chỉ xuất hiện MỘT lần.
+            // B-33: AutoCAD tự nối "[Yes/No] <Yes>:" vào câu nhắc — helper không được nối thêm lần nữa.
+            // Prompt THẬT, hai lần: CadPromptHelper.GetKeywords, rồi extension cũ AskKeyword (cùng lỗi). Runner gõ "No"
+            // cho mỗi lần (không gõ Enter: dòng trống ở dấu nhắc lệnh sẽ lặp lại LAB_ALL — T03 A6), rồi kiểm trong
+            // output rằng mỗi danh sách chỉ xuất hiện MỘT lần.
             ("KEYWORDS_PROMPT_LISTS_ONCE", doc =>
             {
                 string answer = CadPromptHelper.GetKeywords(KeywordPrompt, new[] { "Yes", "No" }, "Yes");
                 Assert(answer == "No", $"GetKeywords trả '{answer ?? "null"}', kỳ vọng 'No' (runner gõ No)");
+
+                using (doc.LockDocument())
+                using (Transaction tr = doc.Database.TransactionManager.StartTransaction())
+                {
+#pragma warning disable CS0618 // AskKeyword đã Obsolete (prompt trong lúc giữ transaction) nhưng vẫn là API công khai
+                    string scoped = new LabScope(doc, tr).AskKeyword(ScopeKeywordPrompt, new[] { "Yes", "No" }, "Yes");
+#pragma warning restore CS0618
+                    Assert(scoped == "No", $"AskKeyword trả '{scoped ?? "null"}', kỳ vọng 'No' (runner gõ No)");
+                }
             }),
         };
 
