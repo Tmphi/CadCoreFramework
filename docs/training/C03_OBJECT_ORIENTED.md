@@ -350,7 +350,7 @@ Nghĩa là: "ai cần `IGridMarkerService` thì tạo **một** `GridMarkerServi
 
 ## 9. Đọc có hướng dẫn: GridSpec.cs
 
-Mở [`Samples/GridMarker/GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs) (101 dòng). Bạn đã học **mọi** thứ trong file này:
+Mở [`Samples/GridMarker/GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs) (107 dòng). Bạn đã học **mọi** thứ trong file này, trừ `NaN`, được giải thích ngay trong bảng:
 
 | Dòng | Code | Khái niệm | Học ở |
 | :---: | :--- | :--- | :--- |
@@ -364,12 +364,14 @@ Mở [`Samples/GridMarker/GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs) (1
 | 47–63 | `public GridSpec(int rows, int columns, double spacing = 20, …)` | constructor, tham số mặc định | §2, [C01 §8](C01_FIRST_PROGRAM.md#8-hàm-method) |
 | 61 | `LayerName = layerName ?? string.Empty;` | `??` — không bao giờ để `LayerName` là null | [C02 §6](C02_DATA_AND_COLLECTIONS.md#6-null-giá-trị-không-có) |
 | 66 | `public int CellCount => Rows * Columns;` | property tính toán | §2 |
-| 72–96 | `public IReadOnlyList<string> Validate()` | method; `List` bên trong, `IReadOnlyList` ra ngoài | §3, [C02 §5](C02_DATA_AND_COLLECTIONS.md#5-trả-về-danh-sách-chỉ-đọc-ireadonlylist) |
+| 72–99 | `public IReadOnlyList<string> Validate()` | method; `List` bên trong, `IReadOnlyList` ra ngoài | §3, [C02 §5](C02_DATA_AND_COLLECTIONS.md#5-trả-về-danh-sách-chỉ-đọc-ireadonlylist) |
 | 77 | `errors.Add($"Số hàng phải trong khoảng 1–{MaxDimension}.");` | chuỗi nội suy | [C01 §5](C01_FIRST_PROGRAM.md#5-chuỗi-và-định-dạng-số--bẫy-định-dạng-việt-nam) |
 | 80 | `if (Rows >= 1 && Columns >= 1 && CellCount > MaxCells)` | `&&` — chỉ báo "quá nhiều ô" khi số hàng/cột đã hợp lệ | [C01 §6](C01_FIRST_PROGRAM.md#6-ra-quyết-định-if-else-switch) |
-| 92 | `SymbolNameRules.ContainsInvalidCharacter(LayerName)` | gọi hàm `static` của class khác — cùng luật mà `EnsureLayer` dùng | §4 |
-| 93 | `` "… (< > / \\ \" : ; ? * \| , = `)." `` | `\\` và `\"` trong chuỗi | [C02 E1](C02_DATA_AND_COLLECTIONS.md#10-bài-tập) |
-| 99 | `public bool IsValid => Validate().Count == 0;` | property tính toán gọi method | §2 |
+| 84 | `if (!IsFinite(Spacing) \|\| !IsFinite(CellSize) \|\| !IsFinite(TextHeight))` | `!` và `\|\|`. **`NaN`** (*Not a Number*, "không phải số") là một giá trị đặc biệt của `double`, ví dụ kết quả của `0.0 / 0.0`. So sánh `<`, `<=`, `>`, `>=`, `==` với `NaN` đều trả `false` (chỉ `!=` trả `true`), nên luật `CellSize <= 0` ở dòng 86 không bắt được nó; phải hỏi thẳng bằng `double.IsNaN` | [C01 §6](C01_FIRST_PROGRAM.md#6-ra-quyết-định-if-else-switch) |
+| 95 | `SymbolNameRules.ContainsInvalidCharacter(LayerName)` | gọi hàm `static` của class khác — cùng luật mà `EnsureLayer` dùng | §4 |
+| 96 | `` "… (< > / \\ \" : ; ? * \| , = `)." `` | `\\` và `\"` trong chuỗi | [C02 E1](C02_DATA_AND_COLLECTIONS.md#10-bài-tập) |
+| 102 | `public bool IsValid => Validate().Count == 0;` | property tính toán gọi method | §2 |
+| 105 | `private static bool IsFinite(double value) => …` | hàm `private static` viết gọn bằng `=>`: chỉ dùng bên trong class, không cần đối tượng | §4, §5, [C01 §8](C01_FIRST_PROGRAM.md#8-hàm-method) |
 
 Trả lời được ba câu này là bạn đã đọc *hiểu*, không chỉ đọc *thấy*:
 1. Vì sao `GridSpec` không có `set` nào?

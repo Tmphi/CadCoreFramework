@@ -9,6 +9,11 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed (PR #13 — `GridSpec` chặn `NaN` và vô cực)
+- **`GridSpec.Validate()` coi `NaN` và vô cực là kích thước hợp lệ** (B-34): so sánh `<`, `<=`, `>`, `>=` với `NaN` đều ra `false`, nên `Spacing = NaN` hay `CellSize = NaN` cho 0 lỗi; `Spacing = ∞` cũng lọt. Giờ `Validate()` báo lỗi "Khoảng cách, kích thước ô và chiều cao chữ phải là số hữu hạn…", và `GridPlanner` từ chối spec đó như mọi spec sai khác. Từ PR #11 người dùng không gõ ra được các giá trị này (palette và `GetDouble` đều chặn); bản sửa này chặn cả code gọi thẳng `GridSpec`.
+- Test: 315 → **320 × 2 TFM**: `Validate_SizeNotAFiniteNumber_ReturnsError`, 5 trường hợp, đều FAIL trên `74e32ca` (code cũ coi chúng là hợp lệ).
+- Tài liệu: bảng đọc `GridSpec.cs` ở C03 §9 theo số dòng mới, thêm giải thích `NaN`; T09 B-34 ✅; Phần 9, T05, T10 L18, U01, README học viện.
+
 ### Fixed (PR #11 — ô nhập số trên palette, danh sách từ khóa in hai lần)
 - **Ô số thực trên palette Grid Marker đọc `2,5` thành 25** (B-31). Ô bind thẳng vào `double` nên WPF đổi chuỗi theo `Language` mặc định `en-US`, không theo culture `vi-VN` của máy. **Ô số bị xóa trắng hay gõ chữ thì ViewModel lặng lẽ giữ số cũ** (B-32), nút Vẽ vẫn bật. Giờ 7 ô số bind vào property chuỗi (`RowsText`, `SpacingText`…). `ViewModels/NumberText` đọc số như dòng lệnh AutoCAD: dấu chấm thập phân, `InvariantCulture` + `NumberStyles.Float`, chặn cả `NaN`, vô cực và tràn số (WPF mặc định nhận `NaN`). Ô không đọc được thành số là lỗi validate ("Số hàng: nhập một số nguyên."), nên nút Vẽ tắt. Các property số (`Rows`, `Spacing`…) giữ nguyên và đồng bộ hai chiều với chuỗi.
 - **`CadPromptHelper.GetKeywords` in danh sách từ khóa hai lần** (B-33): `Vẽ lưới này? [Yes/No] [Yes/No] <Yes>:`. AutoCAD đã tự nối danh sách (`AppendKeywordsToMessage` mặc định `true`), nên helper giờ chỉ truyền phần chữ. Extension cũ `ICadScope.AskKeyword` (`[Obsolete]`) mắc cùng lỗi và được sửa cùng cách.

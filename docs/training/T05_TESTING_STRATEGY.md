@@ -45,7 +45,7 @@ flowchart TB
 | HeadlessLab | 1 / hành vi API đáng ngờ | giây | Hành vi **thật** của API AutoCAD (Erase, DeepClone, căn attribute, wildcard, in PDF…) | Lệnh, palette, Ribbon, `CadContext`; chỉ chạy trên máy có AutoCAD ([§9](#9-integration-test-headless-hiện-trạng-và-hướng-đi)) |
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
-Tổng hiện tại (sau PR #11): **315 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **18 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
+Tổng hiện tại (sau PR #13): **320 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **18 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
 
 ---
 

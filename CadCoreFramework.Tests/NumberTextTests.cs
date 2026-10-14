@@ -29,7 +29,7 @@ namespace CadCoreFramework.Tests
         [InlineData("")]            // B-32: ô trống
         [InlineData("   ")]
         [InlineData("abc")]
-        [InlineData("NaN")]         // WPF mặc định nhận NaN mà không báo lỗi; GridSpec.Validate cũng không chặn
+        [InlineData("NaN")]         // WPF mặc định nhận NaN mà không báo lỗi (B-31, B-34)
         [InlineData("Infinity")]
         [InlineData("-Infinity")]
         [InlineData("1e999")]       // tràn số: .NET 8 trả ∞, .NET Framework báo không đọc được — cả hai đều phải bị chặn
