@@ -17,6 +17,8 @@
           và được swap khi người dùng đổi COLORTHEME. Không viết mã màu cứng.
         • Màu trạng thái do View quyết định qua DataTrigger trên enum Status —
           ViewModel không biết gì về Brush.
+        • Ô số bind vào property CHUỖI (RowsText, SpacingText…), không bind thẳng vào số: ViewModel tự đọc
+          số với dấu chấm thập phân và báo lỗi khi gõ sai hoặc để trống (B-31/B-32, docs/training/U01 §5).
     -->
 
     <UserControl.Resources>
@@ -62,12 +64,12 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="SỐ HÀNG" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding RowsText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="SỐ CỘT" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding ColumnsText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </Grid>
 
@@ -82,17 +84,17 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="KHOẢNG CÁCH" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding Spacing, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding SpacingText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="CỠ Ô" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding CellSize, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding CellSizeText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="4">
                         <TextBlock Text="CAO CHỮ" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding TextHeight, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding TextHeightText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </Grid>
 
@@ -115,12 +117,12 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="TÂM A1 — X" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding OriginX, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding OriginXText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="TÂM A1 — Y" Style="{DynamicResource LabelStyle}"/>
                         <TextBox Style="{DynamicResource InputStyle}"
-                                 Text="{Binding OriginY, UpdateSourceTrigger=PropertyChanged}"/>
+                                 Text="{Binding OriginYText, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </Grid>
 

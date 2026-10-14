@@ -75,7 +75,7 @@ Kết quả đã kiểm với từ khóa `Yes`/`No`, mặc định `Yes`:
 - Nhấn Enter → `Yes`.
 - Gõ `n` → `No`: chỉ cần gõ **phần đầu** của từ khóa, không phân biệt hoa thường.
 
-⚠️ **Lỗi của dự án (B-33):** `CadPromptHelper.GetKeywords` tự nối `[Yes/No]` vào câu nhắc, trong khi AutoCAD **cũng tự nối** danh sách từ khóa: `PromptOptions.AppendKeywordsToMessage` mặc định là `true` (đã kiểm). Kết quả là danh sách bị in hai lần (nguyên văn, AutoCAD 2024):
+⚠️ **Lỗi của dự án (B-33, đã sửa ở PR #11):** trước PR #11, `CadPromptHelper.GetKeywords` tự nối `[Yes/No]` vào câu nhắc, trong khi AutoCAD **cũng tự nối** danh sách từ khóa: `PromptOptions.AppendKeywordsToMessage` mặc định là `true` (đã kiểm). Kết quả là danh sách bị in hai lần (nguyên văn, AutoCAD 2024):
 
 ```text
 Vẽ lưới này? [Yes/No] [Yes/No] <Yes>:
@@ -91,13 +91,15 @@ options.Keywords.Default = "Yes";
 PromptResult answer = Editor.GetKeywords(options);
 ```
 
+`CadPromptHelper.GetKeywords` làm đúng như vậy từ PR #11, và extension cũ `AskKeyword` (`[Obsolete]`) cũng vậy. Kiểm thử HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cả hai đúng: kiểm thử chạy prompt thật trong accoreconsole, rồi runner kiểm trong output rằng danh sách chỉ xuất hiện một lần. Chạy cùng kiểm thử đó trên code cũ thì nó fail, với output `LAB keyword prompt [Yes/No] [Yes/No] <Yes>:`.
+
 ### 2.4 Hệ tọa độ: `GetPoint` trả về UCS
 
 Thí nghiệm thật: xoay UCS 90° quanh trục Z, gõ `10,0`. `Editor.GetPoint` trả về **(10; 0)**, tức tọa độ **UCS** đúng như người dùng gõ. Đổi sang WCS (`TransformBy(ed.CurrentUserCoordinateSystem)`) thì được **(0; 10)**. Entity luôn được vẽ bằng WCS, nên `CadPromptHelper.GetPoint` đổi sẵn cho bạn ([T01 §7.3](T01_AUTOCAD_NET_FOUNDATIONS.md#73-ba-hệ-tọa-độ-wcs-ucs-ocs), lab L04). Jig thì **khác**: `AcquirePoint` trong jig trả thẳng WCS ([U03 §9.1](U03_DRAWING_ON_UI.md#91-jig-hình-chạy-theo-chuột)).
 
 ### 2.5 Số thực: dòng lệnh từ chối dấu phẩy
 
-Trên dòng lệnh, dấu phẩy là dấu ngăn cách tọa độ. Gõ `1,5` vào `GetDouble` thì AutoCAD báo `Requires numeric value.` và hỏi lại. Palette WPF thì ngược lại: **âm thầm** đổi `2,5` thành 25 ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Người dùng cùng một tool không nên gặp hai luật khác nhau, nên palette cũng nên chỉ nhận dấu chấm, giống dòng lệnh.
+Trên dòng lệnh, dấu phẩy là dấu ngăn cách tọa độ. Gõ `1,5` vào `GetDouble` thì AutoCAD báo `Requires numeric value.` và hỏi lại. Palette WPF thì ngược lại: **âm thầm** đổi `2,5` thành 25 ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Người dùng cùng một tool không nên gặp hai luật khác nhau, nên palette cũng nên chỉ nhận dấu chấm, giống dòng lệnh. Palette Grid Marker làm vậy từ PR #11 ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)).
 
 ### 2.6 Chọn đối tượng và thông báo
 
@@ -253,8 +255,8 @@ _cadContext.ExecuteRead(scope =>
 | `eLockViolation` khi bấm nút palette | Ghi bản vẽ từ application context mà không lock | Mọi ghi đi qua `ICadContext` | [T03 B1](T03_PITFALLS_CASEBOOK.md#b1-elockviolation-khi-bấm-nút-trên-palette) |
 | Prompt từ palette chạy lung tung | Prompt ở application context | Nhập trên form, hoặc nút gửi lệnh | [§7.2](#72-nút-palette-chạy-một-lệnh-để-prompt) |
 | Palette không mở, lỗi `StaticResourceExtension` | `StaticResource` tới key nạp sau `InitializeComponent` | `DynamicResource` | [T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension) |
-| Gõ `2,5` thành 25 trên palette | WPF dùng `en-US` mặc định | Ô số bind vào chuỗi, parse InvariantCulture | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), B-31 |
-| Danh sách từ khóa in hai lần | Tự nối `[…]` trong khi AutoCAD cũng nối | Để `AppendKeywordsToMessage` làm việc đó | [§2.3](#23-từ-khóa), B-33 |
+| Gõ `2,5` thành 25 trên palette | WPF dùng `en-US` mặc định | Ô số bind vào chuỗi, parse InvariantCulture (Golden Sample: PR #11) | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), B-31 |
+| Danh sách từ khóa in hai lần | Tự nối `[…]` trong khi AutoCAD cũng nối | Để `AppendKeywordsToMessage` làm việc đó (đã sửa ở PR #11) | [§2.3](#23-từ-khóa), B-33 |
 | Thông báo hoặc vẽ "biến mất" sau khi người dùng đổi bản vẽ | Gọi `Editor` của bản vẽ **không** active | Báo kết quả lên bản vẽ đang active | [T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active) |
 | Palette mất vị trí sau mỗi lần mở AutoCAD | `PaletteSet` không có Guid cố định | `PaletteService` tự dẫn xuất Guid; đừng đổi tên palette | [T03 B27](T03_PITFALLS_CASEBOOK.md#b27-palette-không-nhớ-vị-trí) |
 | Hiển thị số liệu của bản vẽ trước | Palette không biết người dùng đã chuyển bản vẽ | Nghe `DocumentActivated` | Bài tập U02-E2 |
@@ -263,8 +265,8 @@ _cadContext.ExecuteRead(scope =>
 
 ## 10. Bài tập
 
-**U02-E1 — Sửa B-33.** Sửa `CadPromptHelper.GetKeywords` để danh sách từ khóa chỉ in một lần ([§2.3](#23-từ-khóa)).
-- **DoD:** chạy `DEMO_PROMPT` tới bước từ khóa, chụp dòng lệnh trước/sau; Enter vẫn chọn từ khóa mặc định; gõ chữ đầu vẫn chọn đúng từ khóa.
+**U02-E1 — Sửa B-33.** Trên commit `632a6c1` ([T10 quy tắc 6](T10_LABS_AND_ASSESSMENT.md#1-quy-tắc-làm-lab)), sửa `CadPromptHelper.GetKeywords` để danh sách từ khóa chỉ in một lần ([§2.3](#23-từ-khóa)), rồi so với PR #11.
+- **DoD:** chạy `DEMO_PROMPT` tới bước từ khóa, chụp dòng lệnh trước/sau; Enter vẫn chọn từ khóa mặc định; gõ chữ đầu vẫn chọn đúng từ khóa. Viết một kiểm thử bắt được lỗi này, rồi so với `KEYWORDS_PROMPT_LISTS_ONCE` của PR #11. Gợi ý: unit test không làm được, vì `PromptKeywordOptions` cần AutoCAD; còn chuỗi AutoCAD *in ra* thì chỉ thấy được trong output của accoreconsole.
 
 **U02-E2 — Palette theo bản vẽ đang mở.** Thêm sự kiện `DocumentActivated` vào [`IEventService`](../../Core/IEventService.cs) và [`EventService`](../../Core/EventService.cs) (gỡ đăng ký trong `Shutdown`, như các sự kiện sẵn có). Cho palette Grid Marker tự đếm lại số ô khi người dùng chuyển bản vẽ. Mẫu tham khảo: cách `GridMarkerViewModel` nghe `GridDrawnMessage` và tự gỡ khi `Dispose` (`TrackSubscription`).
 - **DoD:** mở 2 bản vẽ có số ô khác nhau; chuyển qua lại thì số đếm đổi theo; mở/đóng palette 5 lần, `CORE_DEBUG` không cho thấy subscriber tăng dần; có unit test cho ViewModel (giả lập sự kiện bằng Mock).

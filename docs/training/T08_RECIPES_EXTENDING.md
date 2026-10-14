@@ -135,7 +135,7 @@ public void ShowPanelPalette()
 
 Thêm palette vào mảng `Palettes` trong `XamlPaletteTests` (test resource key ở cả hai theme sẽ tự chạy cho nó), đăng ký ViewModel vào container giả, và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`. Lệnh mới nhớ thêm vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm).
 
-Ô nhập **số** trên palette: bind vào chuỗi và tự parse, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
+Ô nhập **số** trên palette: bind vào chuỗi và tự parse bằng `NumberText`, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Mẫu để chép là `RowsText`/`SpacingText` trong `GridMarkerViewModel` ([Phần 9 §9.3](../09_GOLDEN_SAMPLE.md#93-nguyên-tắc-2--validate-một-lần-ở-model)); test `EveryPaletteTextBox_BindsToAStringProperty` sẽ đỏ nếu palette mới của bạn bind ô vào số. Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
 
 ---
 

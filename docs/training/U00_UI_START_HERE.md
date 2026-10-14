@@ -63,7 +63,7 @@ flowchart LR
 Giai đoạn 0 đếm tính năng C# **trong dự án**. Với UI, chỉ đếm trong dự án là chưa đủ: dự án là một template, mỗi demo chỉ gọi mỗi API một lần. Vì vậy bảng dưới dùng **hai nguồn**, đếm ngày 2026-10-14:
 
 1. **Code C# công khai trên GitHub** (tìm kiếm code của GitHub): số file chứa chữ `Autodesk.AutoCAD` **và** tên API. Có 18.496 file chứa `Autodesk.AutoCAD`. Tên chung như `GetString` hay `GetDouble` trùng với API khác (`Encoding.GetString`, `DataReader.GetDouble`…), nên với prompt bảng dùng lớp `Prompt…Options`: chỉ AutoCAD có lớp này, nên số đếm "sạch".
-2. **Code của dự án**: 4 file XAML của palette và 110 file `.cs` (không tính test).
+2. **Code của dự án**: 4 file XAML của palette và 111 file `.cs` (không tính test). Số liệu của dự án đã cập nhật theo PR #11: thêm `NumberText.cs` và 7 property chuỗi cho ô số.
 
 | Tầng | API — số file trên GitHub | Học ở |
 | :--- | :--- | :---: |
@@ -74,7 +74,7 @@ Giai đoạn 0 đếm tính năng C# **trong dự án**. Với UI, chỉ đếm 
 **Trong dự án:**
 - XAML (4 palette): `TextBlock` 35 · `StackPanel` 14 · `TextBox` 10 · `Grid` 10 · `Button` 7 · `DataGrid` 4 · `ComboBox`, `CheckBox`, `RadioButton` mỗi loại 2.
 - Markup trong XAML: `{Binding` 56 lần · `DynamicResource` 105 · `StaticResource` 10.
-- C#: `[ObservableProperty]` 32 · `CadPromptHelper.Get…` 27 · `SelectionFilterBuilder` 21 · `WriteMessage` 19 · `ObservableCollection` 14 · `TogglePalette` 10 · `[RelayCommand]` 7 · `Editor.Drag` 4 · `TransientManager` 0.
+- C#: `[ObservableProperty]` 39 · `CadPromptHelper.Get…` 27 · `SelectionFilterBuilder` 21 · `WriteMessage` 19 · `ObservableCollection` 14 · `TogglePalette` 10 · `[RelayCommand]` 7 · `Editor.Drag` 4 · `TransientManager` 0.
 
 > [!TIP]
 > 💡 **20/80:** phần lớn UI của một tool AutoCAD là **ba thứ**: prompt trên dòng lệnh (Tầng 1), một palette hoặc hộp thoại WPF dùng binding, và **kỷ luật context/lock** khi UI ghi vào bản vẽ. Học kỹ ba thứ đó trước (U01–U02). Jig, transient, xem trước (U03) là bước sau, trên cùng nền đó.
@@ -119,7 +119,7 @@ Nhánh UI chiếm **tuần 7–9** của Giai đoạn 2 ([README §3](README.md#
 
 | Tuần | Đọc | Luyện tập / Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
-| 7 | U00, [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD); L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; PR sửa B-31/B-32 kèm test fail-trước |
+| 7 | U00, [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD); L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) kèm test fail-trước, đối chiếu với PR #11 |
 | 8 | [U02](U02_UI_IN_AUTOCAD.md), [T08 §4–6](T08_RECIPES_EXTENDING.md#4-thêm-một-palette) | L08 Palette nhớ vị trí, L11 Ribbon | Palette mới đúng chuẩn; Ribbon còn nguyên sau `CUI` |
 | 9 | [U03](U03_DRAWING_ON_UI.md) | L17 Xem trước trên palette, L19 Xem trước trên màn hình bản vẽ | Palette Grid Marker có khung xem trước (ảnh hai theme); lệnh xem trước bằng transient, đặt bằng jig |
 

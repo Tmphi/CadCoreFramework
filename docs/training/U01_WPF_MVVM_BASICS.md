@@ -79,7 +79,7 @@ File XAML có cặp là một file C# **code-behind** (`GridMarkerPalette.xaml.c
 
 Kích thước cột của `Grid`: `Auto` (vừa nội dung) · `*` (chia phần còn lại; `2*` được gấp đôi `*`) · một số (đơn vị là *pixel độc lập thiết bị*, 1/96 inch, tự co giãn theo DPI). `Margin` là khoảng **ngoài** phần tử, `Padding` là khoảng **trong**.
 
-🔎 **Đọc code:** hai ô nhập cạnh nhau trong [`GridMarkerPalette.xaml`](../../Samples/GridMarker/GridMarkerPalette.xaml) (nguyên văn, dòng 56–72). Cột giữa rộng `8` chỉ để làm khe hở:
+🔎 **Đọc code:** hai ô nhập cạnh nhau trong [`GridMarkerPalette.xaml`](../../Samples/GridMarker/GridMarkerPalette.xaml) (nguyên văn, dòng 58–74). Cột giữa rộng `8` chỉ để làm khe hở. Ô số bind vào property **chuỗi** (`RowsText`), vì sao thì xem [§5](#5-ba-bẫy-khi-nhập-số):
 
 ```xml
 <Grid>
@@ -91,12 +91,12 @@ Kích thước cột của `Grid`: `Auto` (vừa nội dung) · `*` (chia phần
     <StackPanel Grid.Column="0">
         <TextBlock Text="SỐ HÀNG" Style="{DynamicResource LabelStyle}"/>
         <TextBox Style="{DynamicResource InputStyle}"
-                 Text="{Binding Rows, UpdateSourceTrigger=PropertyChanged}"/>
+                 Text="{Binding RowsText, UpdateSourceTrigger=PropertyChanged}"/>
     </StackPanel>
     <StackPanel Grid.Column="2">
         <TextBlock Text="SỐ CỘT" Style="{DynamicResource LabelStyle}"/>
         <TextBox Style="{DynamicResource InputStyle}"
-                 Text="{Binding Columns, UpdateSourceTrigger=PropertyChanged}"/>
+                 Text="{Binding ColumnsText, UpdateSourceTrigger=PropertyChanged}"/>
     </StackPanel>
 </Grid>
 ```
@@ -199,7 +199,7 @@ Vì vậy palette ghi rõ `Mode=OneWay`: `<Run Text="{Binding MarkerCount, Mode=
 
 ## 5. Ba bẫy khi nhập số
 
-Ba bẫy này **có thật trên palette Grid Marker** (kiểm bằng cách dựng palette thật, gõ vào ô rồi đọc ViewModel, trên cả net48 lẫn net8). Chúng là mục [B-31 và B-32](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) trong backlog. Bạn sẽ sửa chúng ở lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số).
+Ba bẫy này **từng có thật trên palette Grid Marker**, cho tới PR #11 (kiểm bằng cách dựng palette thật, gõ vào ô rồi đọc ViewModel, trên cả net48 lẫn net8). Chúng là mục [B-31 và B-32](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) trong backlog. PR #11 sửa chúng đúng theo cách ở [§5.3](#53-cách-sửa-2080-ô-số-bind-vào-chuỗi). Lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số) cho bạn tự sửa lại trên code cũ rồi so với bản đã merge.
 
 ### 5.1 Dấu phẩy thập phân: gõ "2,5" thành 25
 
@@ -211,7 +211,7 @@ WPF đổi chuỗi thành số theo `Language` của phần tử, **mặc địn
 | `1,5` | **15**, không báo lỗi | 1.5 |
 | `abc` hoặc ô trống | giữ 20, ô viền đỏ | giữ 20, ô viền đỏ |
 
-Trên palette thật: gõ **`2,5`** vào ô KHOẢNG CÁCH thì `Spacing` thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`.
+Trên palette thật, trước PR #11: gõ **`2,5`** vào ô KHOẢNG CÁCH thì `Spacing` thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`. WPF còn nhận cả chuỗi `NaN` (và `∞`) mà không báo lỗi: `Spacing` thành `NaN`, mà `GridSpec.Validate()` cũng không chặn ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
 
 Dòng lệnh AutoCAD thì khác: luôn dùng dấu chấm, vì dấu phẩy là dấu ngăn cách tọa độ (`10,5` là một điểm). Gõ `1,5` vào `GetDouble` thì AutoCAD **từ chối** (đã chạy thật trên AutoCAD 2024):
 
@@ -224,9 +224,9 @@ Requires numeric value.
 
 ### 5.2 Ô bị xóa trắng: ViewModel vẫn giữ giá trị cũ
 
-Xóa trắng ô SỐ HÀNG (đang là 3) trên palette thật:
+Xóa trắng ô SỐ HÀNG (đang là 3) trên palette thật, trước PR #11:
 - Ô viền đỏ (WPF không đổi được `""` thành `int`).
-- `Rows` **vẫn là 3**, `ValidationSummary` rỗng, nút Vẽ **vẫn bật**, và khung xem trước vẫn hiện lưới 3 hàng.
+- `Rows` **vẫn là 3**, `ValidationSummary` rỗng, nút Vẽ **vẫn bật**. Palette có khung xem trước như ở U03 thì khung vẫn hiện lưới 3 hàng.
 
 Người dùng bấm Vẽ thì được lưới 3 hàng trong khi ô đang trống. Lỗi chuyển đổi nằm ở **binding**, ViewModel không bao giờ thấy nó, nên `GridSpec.Validate()` (nơi giữ mọi luật) cũng không thấy.
 
@@ -288,6 +288,24 @@ XAML: `<TextBox Text="{Binding WidthText, UpdateSourceTrigger=PropertyChanged}"/
 | `2.5` / ` 600 ` | **bật** | (rỗng) |
 
 Chìa khóa là `NumberStyles.Float`: nó cho phép dấu chấm, dấu âm, số mũ và khoảng trắng, nhưng **không** cho dấu phân cách hàng nghìn. Thêm `NumberStyles.AllowThousands` thì `"2,5"` lại thành 25. Đó chính là kiểu mà WPF dùng mặc định.
+
+🔎 **Golden Sample làm đúng như vậy, từ PR #11.** Chỉ khác một điểm: [`GridMarkerViewModel`](../../Samples/GridMarker/GridMarkerViewModel.cs) vẫn giữ các property số (`Rows`, `Spacing`…) để `GridSpec`, code và test khác dùng tiếp. Mỗi ô số có thêm một property chuỗi (`RowsText`, `SpacingText`…) để TextBox bind vào, và hai bên đồng bộ hai chiều. Bộ đọc số dùng chung nằm ở [`ViewModels/NumberText.cs`](../../ViewModels/NumberText.cs); nó chặn cả `NaN` và vô cực. Khi người dùng gõ, chuỗi được đổi thành số (nguyên văn):
+
+```csharp
+partial void OnSpacingTextChanged(string value)
+{
+    if (NumberText.TryParseDouble(value, out double spacing)) Spacing = spacing;
+    Revalidate();
+}
+```
+
+Khi code gán số (test, thiết lập đã lưu…), số được đổi ngược thành chuỗi, trừ khi chuỗi đang có đã ghi đúng số đó, ví dụ giữ nguyên `20.0` mà người dùng đang gõ:
+
+```csharp
+partial void OnSpacingChanged(double value) => SpacingText = Shown(SpacingText, value);
+```
+
+Test `EveryPaletteTextBox_BindsToAStringProperty` trong `XamlPaletteTests` kiểm **mọi** palette: không TextBox nào được bind thẳng vào property số.
 
 > [!TIP]
 > 💡 **20/80:** ô nhập **số** trên palette thì bind vào `string` và tự parse bằng `CultureInfo.InvariantCulture` + `NumberStyles.Float`. Mọi lỗi, kể cả lỗi "không phải số", đi về **một chỗ** validate. Ô chữ (tên layer, tên tủ) thì bind thẳng như bình thường.
@@ -461,7 +479,7 @@ Làm trên project `HocWpf` ([U00 §5](U00_UI_START_HERE.md#5-chuẩn-bị)), kh
 ## ✅ Tự kiểm tra
 
 1. Vì sao mọi ô nhập của Grid Marker ghi `UpdateSourceTrigger=PropertyChanged`?
-2. Người dùng gõ `2,5` vào một ô `double` trên palette của dự án. Giá trị thành bao nhiêu, và vì sao không ai báo lỗi?
+2. Người dùng gõ `2,5` vào một ô bind thẳng vào `double` (như palette Grid Marker trước PR #11). Giá trị thành bao nhiêu, và vì sao không ai báo lỗi?
 3. Nút Vẽ vẫn sáng dù `CanDraw()` đã trả `false`. Kể hai cách sửa.
 4. Bạn `Add` vào một `List<T>` đang làm `ItemsSource`. Giao diện có đổi không? Còn `ObservableCollection<T>` gọi `Add` từ `Task.Run`?
 5. Vì sao `{DynamicResource}` với key sai lại nguy hiểm hơn `{StaticResource}` với key sai?

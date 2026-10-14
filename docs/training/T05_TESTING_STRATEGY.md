@@ -45,7 +45,7 @@ flowchart TB
 | HeadlessLab | 1 / hành vi API đáng ngờ | giây | Hành vi **thật** của API AutoCAD (Erase, DeepClone, căn attribute, wildcard, in PDF…) | Lệnh, palette, Ribbon, `CadContext`; chỉ chạy trên máy có AutoCAD ([§9](#9-integration-test-headless-hiện-trạng-và-hướng-đi)) |
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
-Tổng hiện tại: **275 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **17 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
+Tổng hiện tại (sau PR #11): **315 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **18 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
 
 ---
 
@@ -125,7 +125,7 @@ Các kịch bản *hợp đồng* đáng test cho mọi Service:
 
 🔎 [`GridMarkerViewModelTests`](../../CadCoreFramework.Tests/Samples/GridMarker/GridMarkerViewModelTests.cs)
 
-Các test thật: `NewViewModel_DefaultsAreValid_DrawEnabled`, `InvalidInput_DisablesDraw_AndShowsErrors`, `FixingInput_ReenablesDraw`, `InputChange_RaisesCanExecuteChanged`, `Draw_PassesSpecAndPlannedCellsToService`, `Draw_ServiceReturnsFail_SetsErrorStatus`, `Draw_ServiceThrows_SetsErrorStatus_DoesNotCrash`, `GridDrawnMessage_RefreshesMarkerCount`, `Dispose_StopsListeningToMessages`, `Constructor_NullDependency_Throws`.
+Các test thật: `NewViewModel_DefaultsAreValid_DrawEnabled`, `InvalidInput_DisablesDraw_AndShowsErrors`, `FixingInput_ReenablesDraw`, `InputChange_RaisesCanExecuteChanged`, `Draw_PassesSpecAndPlannedCellsToService`, `Draw_ServiceReturnsFail_SetsErrorStatus`, `Draw_ServiceThrows_SetsErrorStatus_DoesNotCrash`, `GridDrawnMessage_RefreshesMarkerCount`, `Dispose_StopsListeningToMessages`, `Constructor_NullDependency_Throws`. Từ PR #11, ô số bind vào chuỗi ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)), nên có thêm các test như `CommaDecimal_IsAnError_NotTwentyFive`, `UnreadableRows_DisablesDraw_InsteadOfKeepingTheOldValue` và `SettingANumberFromCode_UpdatesTheText`.
 
 ```csharp
 // Nguyên văn từ GridMarkerViewModelTests.cs (_events là EventAggregator thật, _service là Mock<IGridMarkerService>)
@@ -163,6 +163,12 @@ Test này **đã tái hiện đúng** lỗi [A3](T03_PITFALLS_CASEBOOK.md#a3-sho
 | `EveryResourceKeyReferencedByPalettesAndStyles_Resolves` (tối + sáng) | Mọi `{Dynamic/StaticResource X}` trong XAML (đọc file như text) đều resolve được — bắt lỗi kiểu B-03 |
 | `AttachedPalette_FollowsThemeChangesWhileLoaded_AndStopsAfterUnloaded` | Palette đang hiện đổi màu theo theme; đã đóng thì thôi nghe (không rò rỉ) |
 
+Test ViewModel không bắt được lỗi nằm ở **binding**. Lỗi B-31/B-32 nằm đúng ở đó: WPF tự đổi chuỗi thành số trước khi ViewModel thấy gì. Vì vậy, từ PR #11, `XamlPaletteTests` còn **gõ vào ô thật** của palette: `GridMarkerPalette_CommaDecimalInSpacing_IsAnError_NotTwentyFive` và `GridMarkerPalette_ClearedRows_DisablesDraw`. Hai kỹ thuật cần nhớ:
+- Tìm ô theo **nhãn hiển thị** ("KHOẢNG CÁCH"), không theo tên property. Nhờ vậy, cùng một test chạy được trên code cũ (để thấy nó FAIL) lẫn code mới.
+- Gọi `Measure`, `Arrange` **và** `UpdateLayout()` trước khi gõ. Thiếu `UpdateLayout()` thì binding chưa được gắn, gán `TextBox.Text` không tới ViewModel, và test đỏ vì lý do sai.
+
+`EveryPaletteTextBox_BindsToAStringProperty` chặn lỗi này tái phát ở **mọi** palette: không TextBox nào được bind thẳng vào property số.
+
 Test không thay được **mắt người**: khi đổi UI, render palette ở cả hai theme rồi nhìn (lần đầu làm việc này đã lộ 4 lỗi hiển thị — B-29).
 
 ---
@@ -189,8 +195,9 @@ Chạy checklist này **trên phiên AutoCAD sạch** trước mỗi release và
 | 14 | Tab Ribbon **"CadCore"**: NETLOAD khi AutoCAD đã mở; chạy `CUI` rồi đóng; nạp lúc khởi động (bundle) | Tab xuất hiện cả ba trường hợp, **không** nhân đôi nút; mỗi nút chạy đúng lệnh |
 | 15 | Dời / đổi kích thước palette Grid Marker → đóng AutoCAD → mở lại → `SHOW_PALETTE` | Palette ở đúng vị trí, kích thước cũ |
 | 16 | `DEMO_ASYNC_AWAIT` ở bản vẽ A, **chuyển sang bản vẽ B** trong 3 giây chờ; lần sau thì **đóng A** trong lúc chờ | Đường tròn ở bản vẽ **A**; ở B (đang mở) hiện "… Đã vẽ một đường tròn … vào bản vẽ 'A'". Đóng A: ở B hiện lỗi "[A] … Bản vẽ đã bị đóng …", không crash. Log không có `eNotApplicable` ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)) |
+| 17 | `SHOW_PALETTE` → gõ `2,5` vào KHOẢNG CÁCH; sửa lại thành `2.5`; rồi xóa trắng SỐ HÀNG | `2,5`: hiện "Khoảng cách: nhập một số, phần thập phân dùng dấu chấm (ví dụ 2.5).", nút *Vẽ lưới* tắt. `2.5`: hết lỗi, nút bật. Ô trống: hiện "Số hàng: nhập một số nguyên.", nút tắt ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), B-31/B-32) |
 
-Ghi kết quả vào mô tả PR, ví dụ: *"Smoke 1–16 pass trên AutoCAD 2024, commit abc1234"*.
+Ghi kết quả vào mô tả PR, ví dụ: *"Smoke 1–17 pass trên AutoCAD 2024, commit abc1234"*.
 
 ---
 
@@ -216,7 +223,7 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 ## 9. Integration test headless: hiện trạng và hướng đi
 
 - **Plugin** vẫn không nạp được trong accoreconsole: nó là một DLL tham chiếu `AcMgd`, mà accoreconsole không nạp được `AcMgd` ([A5](T03_PITFALLS_CASEBOOK.md#a5-accoreconsole-crash-0xc00000fd-khi-netload-plugin)). Runner smoke trả exit code 3.
-- **HeadlessLab** (PR #6, [ADR-015](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)) giải quyết phần lớn nhu cầu mà **không** đổi việc phát hành một DLL: [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) là một DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`. Mỗi kiểm thử chạy trên AutoCAD thật trong transaction riêng rồi rollback; in `LAB|tên|PASS|FAIL`.
+- **HeadlessLab** (PR #6, [ADR-015](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)) giải quyết phần lớn nhu cầu mà **không** đổi việc phát hành một DLL: [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) là một DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`. Mỗi kiểm thử chạy trên AutoCAD thật trong transaction riêng rồi rollback; in `LAB|tên|PASS|FAIL`. Lab chạy được cả **prompt thật**: runner ghi sẵn câu trả lời vào file `.scr`, rồi đọc output để kiểm chuỗi AutoCAD đã in ra (`KEYWORDS_PROMPT_LISTS_ONCE`, B-33).
 
 ```powershell
 .\tests\integration\run-headless-lab.ps1     # exit 0 = mọi kiểm thử PASS
@@ -226,7 +233,7 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 | :--- | :--- | :--- |
 | Logic thuần | xUnit | Kết quả (Spec, Planner, ViewModel, SymbolNameRules…) |
 | Vỏ AutoCAD | `FakeCadContext` | Hợp đồng gọi `ICadContext` |
-| **Helper trên AutoCAD thật** | **HeadlessLab** | Hành vi thật của API: Erase, DeepClone, căn attribute, wildcard filter, in PDF… |
+| **Helper trên AutoCAD thật** | **HeadlessLab** | Hành vi thật của API: Erase, DeepClone, căn attribute, wildcard filter, in PDF, câu nhắc từ khóa… |
 | Lệnh, palette, Ribbon, `CadContext` | AutoCAD GUI (smoke tay) | Phần còn lại ([§7](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) |
 
 HeadlessLab đã chứng minh giá trị ngay lần đầu: bắt được lỗi `PlotService` luôn thất bại (B-28) mà không unit test nào thấy được, và **bác bỏ** một giả thuyết sai trong tài liệu (B-13: `Clone()` không làm mất attribute). Quy tắc: sửa helper → viết kiểm thử lab **FAIL trên code cũ** trước.

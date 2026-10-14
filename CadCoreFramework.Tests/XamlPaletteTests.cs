@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using CadCoreFramework.Core;
 using CadCoreFramework.Samples.GridMarker;
 using CadCoreFramework.Services;
@@ -142,6 +145,61 @@ namespace CadCoreFramework.Tests
             }));
         }
 
+        // ─── Ô nhập số (B-31/B-32) ───────────────────────────────────────────────
+        // Tìm ô theo NHÃN trên palette, không theo tên property: cùng test chạy được trên code cũ (fail) và mới.
+
+        [Fact]
+        public void GridMarkerPalette_CommaDecimalInSpacing_IsAnError_NotTwentyFive()
+        {
+            RunWithServices(() =>
+            {
+                var palette = LaidOut(new GridMarkerPalette());   // binding chỉ gắn sau khi layout
+                var vm = (GridMarkerViewModel)palette.DataContext;
+
+                TextBoxUnderLabel(palette, "KHOẢNG CÁCH").Text = "2,5";
+
+                vm.Spacing.Should().Be(20, "dấu phẩy không phải dấu phân cách hàng nghìn (B-31)");
+                vm.DrawCommand.CanExecute(null).Should().BeFalse();
+            });
+        }
+
+        [Fact]
+        public void GridMarkerPalette_ClearedRows_DisablesDraw()
+        {
+            RunWithServices(() =>
+            {
+                var palette = LaidOut(new GridMarkerPalette());
+                var vm = (GridMarkerViewModel)palette.DataContext;
+
+                TextBoxUnderLabel(palette, "SỐ HÀNG").Text = "";
+
+                vm.DrawCommand.CanExecute(null).Should().BeFalse("ô trống không được âm thầm giữ số cũ (B-32)");
+            });
+        }
+
+        [Fact]
+        public void EveryPaletteTextBox_BindsToAStringProperty()
+        {
+            // TextBox bind thẳng vào int/double nghĩa là để WPF đổi số theo Language en-US (B-31). Cấm ở mọi palette.
+            RunWithServices(() =>
+            {
+                foreach (var (xaml, create) in Palettes)
+                {
+                    FrameworkElement palette = LaidOut(create());
+                    Type viewModel = palette.DataContext.GetType();
+                    foreach (TextBox box in LogicalDescendants<TextBox>(palette))
+                    {
+                        Binding? binding = BindingOperations.GetBinding(box, TextBox.TextProperty);
+                        if (binding == null || binding.Path.Path.IndexOfAny(new[] { '.', '[' }) >= 0) continue;
+
+                        PropertyInfo? property = viewModel.GetProperty(binding.Path.Path);
+                        property.Should().NotBeNull($"{xaml}: TextBox bind tới '{binding.Path.Path}' — property không tồn tại");
+                        property!.PropertyType.Should().Be(typeof(string), $"{xaml}: TextBox bind tới '{binding.Path.Path}'");
+                    }
+                }
+            });
+        }
+
         [Theory]
         [InlineData(0, true)]
         [InlineData((short)0, true)]
@@ -196,6 +254,32 @@ namespace CadCoreFramework.Tests
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────
+
+        /// <summary>Đo và xếp chỗ như palette đang hiển thị — trước đó binding của XAML chưa được gắn.</summary>
+        private static T LaidOut<T>(T element) where T : FrameworkElement
+        {
+            element.Measure(new Size(340, 900));
+            element.Arrange(new Rect(0, 0, 340, 900));
+            element.UpdateLayout();
+            return element;
+        }
+
+        private static IEnumerable<T> LogicalDescendants<T>(DependencyObject root) where T : DependencyObject
+        {
+            foreach (object child in LogicalTreeHelper.GetChildren(root))
+            {
+                if (!(child is DependencyObject node)) continue;
+                if (node is T match) yield return match;
+                foreach (T nested in LogicalDescendants<T>(node)) yield return nested;
+            }
+        }
+
+        /// <summary>Ô nhập nằm cùng StackPanel, ngay dưới TextBlock có đúng nhãn này.</summary>
+        private static TextBox TextBoxUnderLabel(FrameworkElement root, string label)
+            => LogicalDescendants<StackPanel>(root)
+                .Where(panel => panel.Children.OfType<TextBlock>().Any(t => t.Text == label))
+                .SelectMany(panel => panel.Children.OfType<TextBox>())
+                .Single();
 
         private static IServiceProvider BuildServices()
         {
