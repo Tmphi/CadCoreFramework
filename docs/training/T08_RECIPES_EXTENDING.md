@@ -2,9 +2,9 @@
 
 # T08 — Công Thức Mở Rộng Dự Án
 
-> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 
-Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../09_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–11 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../09_GOLDEN_SAMPLE.md).
+Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–11 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
 
 ---
 
@@ -153,7 +153,7 @@ public void ShowPanelPalette()
 
 Thêm palette vào mảng `Palettes` trong `XamlPaletteTests` (test resource key ở cả hai theme sẽ tự chạy cho nó), đăng ký ViewModel vào container giả, và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`. Lệnh mới nhớ thêm vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm).
 
-Ô nhập **số** trên palette: bind vào chuỗi và tự parse bằng `NumberText`, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Mẫu để chép là `RowsText`/`SpacingText` trong `GridMarkerViewModel` ([Phần 9 §9.3](../09_GOLDEN_SAMPLE.md#93-nguyên-tắc-2--validate-một-lần-ở-model)); test `EveryPaletteTextBox_BindsToAStringProperty` sẽ đỏ nếu palette mới của bạn bind ô vào số. Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
+Ô nhập **số** trên palette: bind vào chuỗi và tự parse bằng `NumberText`, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Mẫu để chép là `RowsText`/`SpacingText` trong `GridMarkerViewModel` ([R05 §3](../reference/R05_GOLDEN_SAMPLE.md#3-nguyên-tắc-2--validate-một-lần-ở-model)); test `EveryPaletteTextBox_BindsToAStringProperty` sẽ đỏ nếu palette mới của bạn bind ô vào số. Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
 
 ---
 

@@ -39,7 +39,7 @@ public sealed class PromptInServiceAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "Prompt trong Service/ViewModel khiến chúng không dùng được từ Palette, batch hay unit test, " +
                      "và trộn việc thu thập input của Command với nghiệp vụ.",
-        helpLinkUri: "https://github.com/Tmphi/CadCoreFramework/blob/main/docs/training/T09_SENIOR_PLAYBOOK.md");
+        helpLinkUri: "https://github.com/Tmphi/CadCoreFramework/blob/main/docs/reference/R06_STANDARDS.md#cad002");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 

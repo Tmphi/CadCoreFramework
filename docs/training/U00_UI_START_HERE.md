@@ -107,7 +107,7 @@ Get-ChildItem Views,Samples -Recurse -Filter *.xaml | Select-String -Pattern 'Dy
 | 1 | **HỎI trước, VẼ sau**: prompt xong mới mở transaction | Prompt trong transaction giữ lock trong lúc người dùng chần chừ | [T01 §7.2](T01_AUTOCAD_NET_FOUNDATIONS.md#72-luật-thép-hỏi-trước-vẽ-sau), [T03 B4](T03_PITFALLS_CASEBOOK.md#b4-autocad-đơ-khi-chờ-người-dùng) |
 | 2 | **Palette và cửa sổ modeless là application context**: ghi bản vẽ chỉ qua `ICadContext`; không prompt từ ViewModel | Không có lock thì `eLockViolation`; prompt từ palette là sai ngữ cảnh (analyzer CAD002) | [T01 §5](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi), [T03 B1](T03_PITFALLS_CASEBOOK.md#b1-elockviolation-khi-bấm-nút-trên-palette) |
 | 3 | **ViewModel không biết WPF, cũng không biết AutoCAD**: chỉ dữ liệu và command | Test được bằng xUnit, không cần AutoCAD | [T05 §5](T05_TESTING_STRATEGY.md#5-viewmodel-mock-service) |
-| 4 | **Màu chỉ lấy từ theme, qua `DynamicResource`** | Theme đổi được lúc palette đang mở; key thiếu thì WPF im lặng | [Phần 5 §5.3](../05_WPF_UI_AND_MVVM.md#53-autocad-theme-tự-động-darklight), [T03 B28](T03_PITFALLS_CASEBOOK.md#b28-resource-wpf-thiếu-nhưng-không-báo-lỗi) |
+| 4 | **Màu chỉ lấy từ theme, qua `DynamicResource`** | Theme đổi được lúc palette đang mở; key thiếu thì WPF im lặng | [R04 §4](../reference/R04_UI.md#4-theme-sángtối-tự-động), [T03 B28](T03_PITFALLS_CASEBOOK.md#b28-resource-wpf-thiếu-nhưng-không-báo-lỗi) |
 | 5 | **Mọi thứ chạm UI hoặc AutoCAD chạy trên main thread**; luồng nền chỉ để tính toán | WPF ném lỗi khi collection hoặc `CanExecute` đổi từ luồng khác (đã kiểm chứng ở [U01 §8](U01_WPF_MVVM_BASICS.md#8-luồng-thread)) | [T03 B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền) |
 | 6 | **UI không giữ `DBObject`**: giữ `ObjectId`, hoặc bản sao dữ liệu thuần (`PreviewShape`) | `DBObject` chỉ dùng được trong transaction đã mở nó | [U03 §1](U03_DRAWING_ON_UI.md#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ), [T03 B5](T03_PITFALLS_CASEBOOK.md#b5-dùng-dbobject-sau-khi-transaction-kết-thúc) |
 | 7 | **Ô nhập số bind vào chuỗi**, rồi tự đọc số bằng `NumberText` (dấu chấm thập phân, như dòng lệnh) | Bind thẳng vào `double` thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống: lỗi thật của dự án (B-31, B-32) | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số) |
@@ -120,7 +120,7 @@ Nhánh UI chiếm **tuần 7–9** của Giai đoạn 2 ([README §3](README.md#
 
 | Tuần | Đọc | Luyện tập / Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
-| 7 | U00, [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD); L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) kèm test fail-trước, đối chiếu với PR #11 |
+| 7 | U00, [U01](U01_WPF_MVVM_BASICS.md), [R04](../reference/R04_UI.md) | Bài tập U01 (không cần AutoCAD); L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) kèm test fail-trước, đối chiếu với PR #11 |
 | 8 | [U02](U02_UI_IN_AUTOCAD.md), [T08 §4–6](T08_RECIPES_EXTENDING.md#4-thêm-một-palette) | L08 Palette nhớ vị trí, L11 Ribbon | Palette mới đúng chuẩn; Ribbon còn nguyên sau `CUI` |
 | 9 | [U03](U03_DRAWING_ON_UI.md) | L17 Xem trước trên palette, L19 Xem trước trên màn hình bản vẽ | Palette Grid Marker có khung xem trước (ảnh hai theme); lệnh xem trước bằng transient, đặt bằng jig |
 

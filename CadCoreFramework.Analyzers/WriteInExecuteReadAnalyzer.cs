@@ -33,7 +33,7 @@ public sealed class WriteInExecuteReadAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "ExecuteRead chỉ dành cho đọc. Mở ForWrite/UpgradeOpen trong đó làm thay đổi bản vẽ ngoài Undo mark " +
                      "và ngoài lock của Execute.",
-        helpLinkUri: "https://github.com/Tmphi/CadCoreFramework/blob/main/docs/training/T09_SENIOR_PLAYBOOK.md");
+        helpLinkUri: "https://github.com/Tmphi/CadCoreFramework/blob/main/docs/reference/R06_STANDARDS.md#cad003");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 

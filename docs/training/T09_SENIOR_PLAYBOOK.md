@@ -91,7 +91,7 @@ Người review đi theo thứ tự này. Người viết PR **tự chạy check
 
 ### D. Vận hành và tài liệu
 - [ ] Mô tả PR có *Summary* + *Verification* (smoke test nào, kết quả)
-- [ ] CHANGELOG `[Unreleased]`; T-module / Phần 1–9 cập nhật nếu đổi quy ước
+- [ ] CHANGELOG `[Unreleased]`; module training / trang tra cứu (`docs/reference/`) cập nhật nếu đổi quy ước
 - [ ] Mọi tên API mới trong tài liệu **tồn tại** (kiểm metadata, xem [T04 §6](T04_DEBUGGING_TROUBLESHOOTING.md#6-kiểm-chứng-api-bằng-metadata))
 - [ ] Thay đổi mục backlog thì cập nhật bảng §3
 

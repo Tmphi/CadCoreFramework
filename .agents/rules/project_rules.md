@@ -18,7 +18,7 @@ Dự án này sử dụng kiến trúc đóng gói các API thô của AutoCAD �
   - Để thay đổi bản vẽ mà nhận lỗi dạng giá trị: `_cadContext.TryExecute(...)` — trả `CadResult`/`CadResult<T>`, không throw. (`Execute<T>` đã Obsolete.)
   - Để đọc dữ liệu (Read-Only): `_cadContext.ExecuteRead(scope => { ... })` — tự lock khi gọi từ Palette.
   - Để tương tác bất đồng bộ: `_cadContext.ExecuteAsync(...)` — CHỈ khi thật sự có việc async cần chờ (I/O, API); không bọc code đồng bộ trong `Task.FromResult`.
-- **Khuôn mẫu chuẩn** cho tính năng mới: `Samples/GridMarker/` (đọc `docs/09_GOLDEN_SAMPLE.md`). Tách logic thuần (không kiểu AutoCAD) ra khỏi lambda của `ICadContext` để unit test được kết quả.
+- **Khuôn mẫu chuẩn** cho tính năng mới: `Samples/GridMarker/` (đọc `docs/reference/R05_GOLDEN_SAMPLE.md`). Tách logic thuần (không kiểu AutoCAD) ra khỏi lambda của `ICadContext` để unit test được kết quả.
 - Không sử dụng `Application.DocumentManager.MdiActiveDocument` bên trong các hàm xử lý dữ liệu. Luôn dùng `scope.Document`, `scope.Database`, `scope.Editor` được cung cấp từ `ICadScope`.
 
 ## 2. Tiện Ích Vẽ (Drawing Extensions)

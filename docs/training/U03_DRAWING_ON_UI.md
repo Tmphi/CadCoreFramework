@@ -1036,7 +1036,7 @@ Cách A dùng lại đúng hai phần bạn đã có (`EntityPreviewBuilder` + `
 
 ### 9.1 Jig: hình chạy theo chuột
 
-Dự án có sẵn hai jig dùng được ngay và hai lớp nền: [`RectangleJig`](../../Utils/Jigs/RectangleJig.cs) (`DEMO_JIG_RECTANGLE`), [`BlockPlacementJig`](../../Utils/Jigs/BlockPlacementJig.cs) (`DEMO_JIG_BLOCK`), [`CadEntityJigBase<T>`](../../Utils/Jigs/CadEntityJigBase.cs), [`CadDrawJigBase`](../../Utils/Jigs/CadDrawJigBase.cs). Cơ chế (`Sampler` lấy vị trí chuột, `Update`/`WorldDraw` vẽ lại) và cách gọi đã có ở [Phần 3 §3.4](../03_DRAWING_AND_INTERACTION.md#34-hiệu-ứng-di-chuột-interactive-jigs). Mục này chỉ thêm những điều 20/80 cần biết:
+Dự án có sẵn hai jig dùng được ngay và hai lớp nền: [`RectangleJig`](../../Utils/Jigs/RectangleJig.cs) (`DEMO_JIG_RECTANGLE`), [`BlockPlacementJig`](../../Utils/Jigs/BlockPlacementJig.cs) (`DEMO_JIG_BLOCK`), [`CadEntityJigBase<T>`](../../Utils/Jigs/CadEntityJigBase.cs), [`CadDrawJigBase`](../../Utils/Jigs/CadDrawJigBase.cs). Cơ chế (`Sampler` lấy vị trí chuột, `Update`/`WorldDraw` vẽ lại) và cách gọi đã có ở [R03 §6](../reference/R03_API.md#6-jig-hình-chạy-theo-chuột). Mục này chỉ thêm những điều 20/80 cần biết:
 
 | | `EntityJig` | `DrawJig` |
 | :--- | :--- | :--- |

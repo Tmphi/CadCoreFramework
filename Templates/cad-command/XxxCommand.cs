@@ -20,7 +20,7 @@ namespace CadCoreFramework.Commands
     ///   • ghi lại Stopwatch + success vào ICommandHistoryService
     ///
     /// Tính năng thật (có Service/ViewModel/test): copy khuôn Samples/GridMarker —
-    /// xem docs/09_GOLDEN_SAMPLE.md.
+    /// xem docs/reference/R05_GOLDEN_SAMPLE.md.
     /// </summary>
     public class XxxCommand : CadCommandBase
     {

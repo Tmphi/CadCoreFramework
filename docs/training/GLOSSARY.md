@@ -108,8 +108,8 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **Entity** | Đối tượng hình học (Line, Circle, Polyline, Text…) | — |
 | **ErrorStatus** | Mã lỗi của `Autodesk.AutoCAD.Runtime.Exception` (`LockViolation`…) | [T01 §14](T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) |
 | **Extension Dictionary** | Dictionary riêng của một đối tượng, chứa Xrecord | [T01 §3.4](T01_AUTOCAD_NET_FOUNDATIONS.md#34-dictionary-extension-dictionary-xrecord) |
-| **Functional core / Imperative shell** | Lõi logic thuần + vỏ mỏng chạm hệ thống ngoài | [Phần 9 §9.2](../09_GOLDEN_SAMPLE.md) |
-| **Golden Sample** | Tính năng mẫu chuẩn `Samples/GridMarker` | [Phần 9](../09_GOLDEN_SAMPLE.md) |
+| **Functional core / Imperative shell** | Lõi logic thuần + vỏ mỏng chạm hệ thống ngoài | [R05 §2](../reference/R05_GOLDEN_SAMPLE.md#2-nguyên-tắc-1--functional-core-imperative-shell) |
+| **Golden Sample** | Tính năng mẫu chuẩn `Samples/GridMarker` | [R05](../reference/R05_GOLDEN_SAMPLE.md) |
 | **Handle** | Định danh bền vững của đối tượng trong file DWG | [T01 §3.1](T01_AUTOCAD_NET_FOUNDATIONS.md#31-objectid-vs-handle-vs-dbobject) |
 | **HeadlessLab** | DLL chỉ dành cho kiểm thử, link mã không-UI của framework, chạy kiểm thử trên AutoCAD thật trong accoreconsole | [T05 §9](T05_TESTING_STRATEGY.md#9-integration-test-headless-hiện-trạng-và-hướng-đi) |
 | **Implied selection** (pick-first) | Đối tượng đã chọn trước khi gõ lệnh (`UsePickSet` + `SelectImplied`) | [T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter) |

@@ -1,4 +1,4 @@
-> **📚 Học viện CadCoreFramework** · [🌰 Bắt đầu từ đây](C00_START_HERE.md) · [🖥️ Nhánh UI](U00_UI_START_HERE.md) · [🏠 README dự án](../../README.md) · [📑 Giáo trình thực chiến (Phần 1–9)](../00_TOC.md) · [📖 Thuật ngữ](GLOSSARY.md)
+> **📚 Học viện CadCoreFramework** · [🌰 Bắt đầu từ đây](C00_START_HERE.md) · [🖥️ Nhánh UI](U00_UI_START_HERE.md) · [🏠 README dự án](../../README.md) · [📚 Mục lục tài liệu](../README.md) · [📘 Tra cứu](../README.md#-tra-cứu-reference) · [📖 Thuật ngữ](GLOSSARY.md)
 
 # 🎓 Lộ Trình Đào Tạo: Từ Người Chưa Biết Lập Trình Đến Senior AutoCAD .NET
 
@@ -24,7 +24,7 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | Chưa từng lập trình | [C00 — Bắt đầu từ đây](C00_START_HERE.md) | Giai đoạn 0 (6 tuần) rồi Giai đoạn 1–3: khoảng 20 tuần |
 | Biết một ngôn ngữ khác, chưa biết C# | [Bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) | Thường 2 tuần cho C01–C05, rồi Giai đoạn 1–3 |
 | Vững C#, mới với AutoCAD .NET | [Đồ án nhập môn](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện), rồi [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) | Giai đoạn 1–3: 12–14 tuần ([§3](#3-lộ-trình-đào-tạo)) |
-| Đã làm AutoCAD .NET, mới vào dự án | [T02](T02_ARCHITECTURE_DEEP_DIVE.md) → [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) → [T08](T08_RECIPES_EXTENDING.md) | Đọc theo thứ tự đó; gặp sự cố thì tra [T03](T03_PITFALLS_CASEBOOK.md) |
+| Đã làm AutoCAD .NET, mới vào dự án | [T02](T02_ARCHITECTURE_DEEP_DIVE.md) → [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) → [T08](T08_RECIPES_EXTENDING.md) | Đọc theo thứ tự đó; gặp sự cố thì tra [T03](T03_PITFALLS_CASEBOOK.md) |
 | Cần làm giao diện: palette, hộp thoại, xem trước | [U00 — Nhánh UI](U00_UI_START_HERE.md), sau [T01 §5 và §7](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) | Nhánh UI: 3 tuần |
 | Mentor | [§6 — Dành cho mentor](#6-dành-cho-mentor) | — |
 
@@ -59,7 +59,7 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | [U03 — Vẽ thực thể lên UI](U03_DRAWING_ON_UI.md) | Một kế hoạch, hai nơi vẽ; biến đổi tọa độ; control `CadPreview`; khung xem trước cho Golden Sample; đọc entity và block thành hình; jig, transient; hiệu năng; bẫy | 🌿 → 🌳 |
 | [Thuật ngữ](GLOSSARY.md) | Từ điển Anh–Việt: lập trình & C# cho người mới (phần A), AutoCAD .NET & dự án (phần B), giao diện WPF & UI trong AutoCAD (phần C) | — |
 
-Bộ **C00–C05** là *nền tảng lập trình và C#*, dạy trên chính code của dự án. Giáo trình **Phần 1–9** (`docs/00`–`09`) là tài liệu *tham khảo nhanh theo chủ đề*. Bộ **T01–T10** là tài liệu *đào tạo theo chiều sâu*. **Nhánh UI U00–U03** là *chuyên đề giao diện*, học trong Giai đoạn 2. Các bộ bổ sung cho nhau: T-modules và U-modules thường dẫn ngược về Phần 1–9 khi cần ví dụ ngắn, và về C01–C05 khi cần nhắc lại cú pháp C#.
+Bộ **C00–C05** là *nền tảng lập trình và C#*, dạy trên chính code của dự án. Bộ **T01–T10** là tài liệu *đào tạo theo chiều sâu*. **Nhánh UI U00–U03** là *chuyên đề giao diện*, học trong Giai đoạn 2. Ngoài Học viện, lớp **Tra cứu** [R01–R06](../README.md#-tra-cứu-reference) (`docs/reference/`) là bản tóm tắt để mở nhanh khi đang làm việc: hợp đồng API, Golden Sample, quy ước. Các bộ bổ sung cho nhau: T-modules và U-modules dẫn sang R01–R06 khi cần bảng tóm tắt, và về C01–C05 khi cần nhắc lại cú pháp C#.
 
 ---
 
@@ -107,18 +107,18 @@ Mỗi tuần ≈ 60% đọc và thực hành, 40% làm lab. Đầu ra mỗi tu�
 
 | Tuần | Đọc | Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
-| 1 | README dự án, [Phần 1](../01_GETTING_STARTED.md), [T01 §1–3](T01_AUTOCAD_NET_FOUNDATIONS.md) | L01 Môi trường | Chạy đủ 6 lệnh smoke; chỉ ra được file log |
+| 1 | README dự án, [R01](../reference/R01_QUICKSTART.md), [T01 §1–3](T01_AUTOCAD_NET_FOUNDATIONS.md) | L01 Môi trường | Chạy đủ 6 lệnh smoke; chỉ ra được file log |
 | 2 | [T01 §4–6](T01_AUTOCAD_NET_FOUNDATIONS.md) | L02 Đọc database, L03 Thí nghiệm transaction | Giải thích được `eNotOpenForWrite`, `eLockViolation` bằng ví dụ tự chạy |
-| 3 | [T01 §7–9](T01_AUTOCAD_NET_FOUNDATIONS.md), [Phần 3](../03_DRAWING_AND_INTERACTION.md) | L04 Prompt & UCS, L05 Selection filter | Lệnh vẽ đúng khi UCS xoay; chọn được dynamic block |
+| 3 | [T01 §7–9](T01_AUTOCAD_NET_FOUNDATIONS.md), [R03 §1–3](../reference/R03_API.md) | L04 Prompt & UCS, L05 Selection filter | Lệnh vẽ đúng khi UCS xoay; chọn được dynamic block |
 | 4 | [T02 §1–5](T02_ARCHITECTURE_DEEP_DIVE.md) | — | Vẽ lại sơ đồ khởi động (từ trí nhớ) và được mentor xác nhận |
-| 5 | [T02 §6–12](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9](../09_GOLDEN_SAMPLE.md) | L06 Metadata | XRecord ghi/đọc/xóa đúng |
+| 5 | [T02 §6–12](T02_ARCHITECTURE_DEEP_DIVE.md), [R05](../reference/R05_GOLDEN_SAMPLE.md) | L06 Metadata | XRecord ghi/đọc/xóa đúng |
 
 **Giai đoạn 2 — Xây tính năng, giao diện và chẩn đoán** (tuần 6–11; đánh giá 🌿 → 🌳 cần L07–L10 và L17–L19):
 
 | Tuần | Đọc | Lab ([T10](T10_LABS_AND_ASSESSMENT.md)) | Đầu ra kiểm chứng được |
 | :---: | :--- | :--- | :--- |
 | 6 | [T05](T05_TESTING_STRATEGY.md), [T08 §1–3](T08_RECIPES_EXTENDING.md) | L07 Nhân bản Golden Sample (tiếp nối đồ án nhập môn) | Tính năng mới + ≥ 15 unit test |
-| 7 | [U00](U00_UI_START_HERE.md), [U01](U01_WPF_MVVM_BASICS.md), [Phần 5](../05_WPF_UI_AND_MVVM.md) | Bài tập U01 (không cần AutoCAD), L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) có test fail-trước, đối chiếu với PR #11 |
+| 7 | [U00](U00_UI_START_HERE.md), [U01](U01_WPF_MVVM_BASICS.md), [R04](../reference/R04_UI.md) | Bài tập U01 (không cần AutoCAD), L18 Sửa bẫy ô nhập số | Form WPF có validate và `CanExecute`; bản sửa B-31/B-32 (trên `632a6c1`) có test fail-trước, đối chiếu với PR #11 |
 | 8 | [U02](U02_UI_IN_AUTOCAD.md), [T08 §4–6](T08_RECIPES_EXTENDING.md) | L08 Palette, L11 Ribbon | Palette nhớ vị trí; Ribbon sống sót qua `CUI` |
 | 9 | [U03](U03_DRAWING_ON_UI.md) | L17 Xem trước trên palette, L19 Xem trước trên màn hình bản vẽ | Palette Grid Marker có khung xem trước (ảnh hai theme); lệnh xem trước bằng transient, đặt bằng jig |
 | 10 | [T01 §10–11](T01_AUTOCAD_NET_FOUNDATIONS.md), [T03 Phần B](T03_PITFALLS_CASEBOOK.md#phần-b--bẫy-autocad-api-kinh-điển) | L09 Events, L10 Async | Palette tự cập nhật khi xóa entity; async không vẽ nhầm bản vẽ |

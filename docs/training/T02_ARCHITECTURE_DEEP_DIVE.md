@@ -341,7 +341,7 @@ internal static ObjectId AppendNew<T>(ICadScope scope, T entity, Action<T> setup
 
 | Đặc điểm | Ý nghĩa |
 | :--- | :--- |
-| Là **extension method của `ICadScope`** | Chỉ gọi được *bên trong* lambda `Execute`, tức đã có lock + transaction. **Không** tự mở transaction (một bản cũ của Phần 7 từng nói sai điều này) |
+| Là **extension method của `ICadScope`** | Chỉ gọi được *bên trong* lambda `Execute`, tức đã có lock + transaction. **Không** tự mở transaction (một bản cũ của trang API reference từng nói sai điều này) |
 | Trả `ObjectId` | Không lộ `DBObject` ra ngoài transaction |
 | Tham số `configure` | Lối thoát cho mọi thuộc tính chưa có tham số riêng |
 | Tọa độ **WCS** | Chuyển từ UCS ở bước prompt (`CadPromptHelper`) |
@@ -370,7 +370,7 @@ Bước nào ném lỗi **trước** khi entity vào database (kể cả `config
 | [`CadAsyncHelper`](../../Utils/CadAsyncHelper.cs) | `ExecuteSafeAsync` (marshal tường minh về main thread), `FireAndForget` có xử lý lỗi |
 | `Utils/Jigs/` | `RectangleJig`, `BlockPlacementJig`, base class cho EntityJig/DrawJig |
 
-`Sampler` và `Update` của Jig chạy **tuần tự trên main thread** bên trong `Editor.Drag`, không chạy song song như một bản cũ của Phần 3 từng viết.
+`Sampler` và `Update` của Jig chạy **tuần tự trên main thread** bên trong `Editor.Drag`, không chạy song song như một bản cũ của tài liệu tham khảo từng viết.
 
 ---
 
@@ -514,7 +514,7 @@ Kiểm thử bảo vệ thiết kế này (`XamlPaletteTests`): hai file theme c
 
 ## 13. Golden Sample: theo dấu một lệnh từ đầu đến cuối
 
-🔎 [`Samples/GridMarker/`](../../Samples/GridMarker/) và [Phần 9](../09_GOLDEN_SAMPLE.md). Đọc theo thứ tự: `GridSpec` → `GridPlanner` → `IGridMarkerService` → `GridMarkerService` → `GridMarkerCommands` → `GridMarkerViewModel` → `GridMarkerPalette`.
+🔎 [`Samples/GridMarker/`](../../Samples/GridMarker/) và [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md). Đọc theo thứ tự: `GridSpec` → `GridPlanner` → `IGridMarkerService` → `GridMarkerService` → `GridMarkerCommands` → `GridMarkerViewModel` → `GridMarkerPalette`.
 
 ```mermaid
 sequenceDiagram
