@@ -35,7 +35,7 @@ Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổ
 | Truy cập nhanh một lệnh có sẵn | **Nút Ribbon** gửi lệnh | Tab "CadCore" |
 | Báo kết quả, cảnh báo | **Dòng lệnh** (`INotificationService`) | Mọi lệnh của dự án |
 
-Golden Sample làm **cả hai**: lệnh `SAMPLE_GRID` (pick điểm) và palette (nhập trên form). Cả hai dùng chung `GridSpec.Validate()`, `GridPlanner` và `GridMarkerService` ([Phần 9](../09_GOLDEN_SAMPLE.md)). Đây là mẫu nên theo: **logic dùng chung, chỉ lớp UI khác nhau**.
+Golden Sample làm **cả hai**: lệnh `SAMPLE_GRID` (pick điểm) và palette (nhập trên form). Cả hai dùng chung `GridSpec.Validate()`, `GridPlanner` và `GridMarkerService` ([R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md)). Đây là mẫu nên theo: **logic dùng chung, chỉ lớp UI khác nhau**.
 
 ---
 
@@ -241,7 +241,7 @@ _cadContext.ExecuteRead(scope =>
 | Tình huống | Dùng | Ghi chú |
 | :--- | :--- | :--- |
 | Kết quả, cảnh báo của lệnh | `INotificationService.Info/Warn/Error` | Ghi dòng lệnh **và** log |
-| Thao tác lâu trên palette | `IsBusy` + lớp phủ ([U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel)) | Chỉ hiện được nếu phần nặng là `async` ([Phần 5 §5.2](../05_WPF_UI_AND_MVVM.md#52-giải-phẫu-mvvm--bí-ẩn-runsafeasync)) |
+| Thao tác lâu trên palette | `IsBusy` + lớp phủ ([U01 §4](U01_WPF_MVVM_BASICS.md#4-binding-nối-view-với-viewmodel)) | Chỉ hiện được nếu phần nặng là `async` ([R04 §2](../reference/R04_UI.md#2-viewmodel-viewmodelbase-và-runsafe)) |
 | Vòng lặp lâu trong lệnh (hàng nghìn entity) | `IProgressMeterService` (thanh tiến trình ở thanh trạng thái) | 91 file công khai dùng `ProgressMeter` |
 | Xác nhận trước khi xóa hoặc ghi đè | `INotificationService.Confirm` (hộp Yes/No) | Đừng dùng hộp thoại cho thông báo thường: nó chặn người dùng |
 | Lỗi validate trên palette | Dòng chữ đỏ + nút tắt (`CanExecute`) | Báo **trước** khi bấm, không phải sau |

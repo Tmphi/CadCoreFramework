@@ -1,5 +1,5 @@
 > **📚 Hệ Sinh Thái Tài Liệu CadCoreFramework:**  
-> [🏠 Trang chủ](README.md) \| [📑 Mục Lục Toàn Thư](docs/00_TOC.md) \| [🎓 Học viện (Nhập môn → Senior)](docs/training/README.md)
+> [🏠 Trang chủ](README.md) \| [📚 Tài liệu](docs/README.md) \| [🎓 Học viện (Nhập môn → Senior)](docs/training/README.md) \| [📘 Tra cứu](docs/README.md#-tra-cứu-reference)
 > ---
 
 # 🚀 CadCoreFramework - AutoCAD .NET Plugin Template
@@ -8,26 +8,22 @@
 
 Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫu (Template) chuyên nghiệp dành cho việc phát triển các ứng dụng/plugin AutoCAD bằng C# (.NET). 
 
-Cuốn tài liệu này được viết theo dạng **"Giáo trình thực chiến"**, không chỉ hướng dẫn bạn làm *như thế nào*, mà còn giải thích *tại sao* phải làm như vậy để giúp bạn tránh khỏi 99% các lỗi kinh điển (Fatal Error) của AutoCAD API.
+Bộ tài liệu đi kèm không chỉ hướng dẫn bạn làm *như thế nào*, mà còn giải thích *tại sao* phải làm như vậy, để bạn tránh được các lỗi kinh điển (Fatal Error, `eLockViolation`, vẽ nhầm bản vẽ) của AutoCAD API.
 
 ---
 
 ## 📖 Đường Dẫn Học Tập (Learning Path)
 
-Chúng tôi đã cấu trúc lại toàn bộ tài liệu thành một bộ giáo trình từ A-Z. Hãy đọc theo thứ tự dưới đây:
+Toàn bộ tài liệu nằm trong [`docs/`](docs/README.md) và chia làm hai lớp: **Học viện** để học theo lộ trình, **Tra cứu** để mở nhanh khi đang làm việc. Cửa vào chung, kèm bảng "bắt đầu từ đâu" theo từng loại người đọc: [docs/README.md](docs/README.md).
 
-| Phần | Link | Nội dung chính |
+| Lớp | Trang | Nội dung chính |
 | :--- | :--- | :--- |
-| **Mục lục** | [00_TOC.md](docs/00_TOC.md) | Mục lục tổng quan của toàn bộ hệ thống tài liệu. |
-| **Phần 1** | [01_GETTING_STARTED.md](docs/01_GETTING_STARTED.md) | Khởi động nhanh (Quickstart), Tư duy chuyển đổi, Lộ trình Fresher. |
-| **Phần 2** | [02_CORE_ARCHITECTURE.md](docs/02_CORE_ARCHITECTURE.md) | Quản lý Transaction an toàn, Dependency Injection, CommandBase. |
-| **Phần 3** | [03_DRAWING_AND_INTERACTION.md](docs/03_DRAWING_AND_INTERACTION.md) | Tương tác người dùng (Prompt), Jigs, Vẽ hình, Lọc đối tượng (Selection). |
-| **Phần 4** | [04_METADATA_AND_SERVICES.md](docs/04_METADATA_AND_SERVICES.md) | XData vs XRecord, Dynamic Blocks, Dịch vụ lõi (Plot, Settings, Logger). |
-| **Phần 5** | [05_WPF_UI_AND_MVVM.md](docs/05_WPF_UI_AND_MVVM.md) | MVVM Palette, Ribbon, Theme Động (Dark/Light), EventAggregator. |
-| **Phần 6** | [06_DEVOPS_AND_STANDARDS.md](docs/06_DEVOPS_AND_STANDARDS.md) | Bắt lỗi (Troubleshooting), WPF Hot-Reload, Unit Test, Coding Conventions. |
-| **Phần 7** | [07_API_REFERENCE.md](docs/07_API_REFERENCE.md) | Tài liệu tham khảo nhanh API, CadScopeDrawingExtensions, Utils, Builders. |
-| **Phần 8** | [08_COOKBOOK.md](docs/08_COOKBOOK.md) | Công thức giải quyết các bài toán thường gặp. |
-| **Phần 9** | [09_GOLDEN_SAMPLE.md](docs/09_GOLDEN_SAMPLE.md) | Golden Sample — khuôn mẫu chuẩn để copy khi làm tính năng mới. |
+| **📘 Tra cứu** | [R01 — Khởi động nhanh](docs/reference/R01_QUICKSTART.md) | Yêu cầu, cấu trúc thư mục, build → `NETLOAD` → `CORE_INFO`, các lệnh có sẵn. |
+| | [R02 — Kiến trúc cốt lõi](docs/reference/R02_ARCHITECTURE.md) | Hợp đồng `ICadContext`, undo, khởi động và DI, `CadCommandBase`. |
+| | [R03 — API](docs/reference/R03_API.md) | Prompt, hàm vẽ, lọc chọn, XData/XRecord, dynamic block, jig, service có sẵn. |
+| | [R04 — Giao diện](docs/reference/R04_UI.md) | Palette, Ribbon, MVVM, ô nhập số, theme sáng/tối. |
+| | [R05 — Golden Sample](docs/reference/R05_GOLDEN_SAMPLE.md) | Khuôn mẫu chuẩn để copy khi làm tính năng mới. |
+| | [R06 — Chuẩn mực](docs/reference/R06_STANDARDS.md) | Nạp lại không tắt AutoCAD, unit test, CI/CD, quy ước code, analyzer CAD001–CAD003. |
 | **🎓 Học viện** | [docs/training/](docs/training/README.md) | **Đào tạo chuyên sâu cho người kế thừa dự án, kể cả người chưa biết lập trình**: Giai đoạn 0 dạy C# theo quy tắc 20/80 trên chính code dự án ([bắt đầu từ đây](docs/training/C00_START_HERE.md)), rồi lộ trình 14 tuần; khung năng lực 5 cấp Nhập môn → Senior, nền tảng AutoCAD .NET, mổ xẻ kiến trúc, **nhánh UI** (WPF/MVVM, palette, hộp thoại, vẽ thực thể lên UI — [U00](docs/training/U00_UI_START_HERE.md)), sổ tay sự cố thật, debug, kiểm thử, phát hành, hiệu năng, ADR & backlog kỹ thuật, 19 bài lab, đề đánh giá. |
 
 ---
@@ -119,7 +115,7 @@ Dự án đã **multi-target** sẵn cả `net48` (AutoCAD 2021–2024) lẫn `n
 
 ## 🚀 4. Workflow: Quy Trình 7 Bước Tạo Chức Năng Mới
 
-Để tạo chức năng mới (VD: "Vẽ Tủ Điện") mà không vi phạm kiến trúc, đi đúng **các tầng của [Golden Sample](docs/09_GOLDEN_SAMPLE.md)**. Khi phân vân, copy `Samples/GridMarker/`. Bản đầy đủ có checklist: [T08 §2](docs/training/T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn).
+Để tạo chức năng mới (VD: "Vẽ Tủ Điện") mà không vi phạm kiến trúc, đi đúng **các tầng của [Golden Sample](docs/reference/R05_GOLDEN_SAMPLE.md)**. Khi phân vân, copy `Samples/GridMarker/`. Bản đầy đủ có checklist: [T08 §2](docs/training/T08_RECIPES_EXTENDING.md#2-thêm-một-tính-năng-trọn-vẹn).
 
 **Bước 1: Model + logic thuần** (không kiểu AutoCAD → test được 100%)
 ```csharp
@@ -255,7 +251,7 @@ Là người mới, bạn sẽ gặp các lỗi này thường xuyên: `eLockVio
 👉 **Hướng dẫn cứu hộ:**
 - [T04: Debug & chẩn đoán](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md): cây quyết định từ triệu chứng tới nguyên nhân, đọc log, attach debugger, phân tích crash.
 - [T03: Sổ tay sự cố](docs/training/T03_PITFALLS_CASEBOOK.md): 16 sự cố thật của dự án + 36 bẫy AutoCAD API kinh điển.
-- [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [DevOps & Standards](docs/06_DEVOPS_AND_STANDARDS.md)
+- [Bảng ErrorStatus thường gặp](docs/training/T01_AUTOCAD_NET_FOUNDATIONS.md#14-phụ-lục-errorstatus-thường-gặp) · [R06 — Chuẩn mực](docs/reference/R06_STANDARDS.md)
 
 ---
 *Chúc bạn có một trải nghiệm lập trình AutoCAD dễ chịu, khoa học và đạt chuẩn kỹ nghệ phần mềm cùng CadCoreFramework!*

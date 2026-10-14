@@ -390,7 +390,7 @@ Trong chuỗi `"\x03\x03_.TÊN_LỆNH "`:
 
 1. `eLockViolation`. Palette chạy ở application context, chưa có lock.
 2. Lock được đếm số lần (reference-counted). Lock thêm một lần trong lệnh là hợp lệ và được nhả khi `Dispose`.
-3. Hai lựa chọn: (a) nút bấm gửi một lệnh, ví dụ `SAMPLE_GRID` qua `SendStringToExecute`, để lệnh prompt người dùng; (b) dùng `ExecuteInCommandContextAsync`. Golden Sample chọn cách khác nữa: palette **nhập tọa độ trên form** (không prompt) và để lệnh `SAMPLE_GRID` lo kịch bản pick bằng chuột ([Phần 9 §9.4](../09_GOLDEN_SAMPLE.md)).
+3. Hai lựa chọn: (a) nút bấm gửi một lệnh, ví dụ `SAMPLE_GRID` qua `SendStringToExecute`, để lệnh prompt người dùng; (b) dùng `ExecuteInCommandContextAsync`. Golden Sample chọn cách khác nữa: palette **nhập tọa độ trên form** (không prompt) và để lệnh `SAMPLE_GRID` lo kịch bản pick bằng chuột ([R05 §4](../reference/R05_GOLDEN_SAMPLE.md#4-nguyên-tắc-3--hiểu-đúng-ngữ-cảnh-command-vs-palette)).
 </details>
 
 ---

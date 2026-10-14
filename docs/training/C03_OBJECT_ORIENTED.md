@@ -134,7 +134,7 @@ MSB-01: 1600000 mm², hợp lệ = True
 Ba quyết định thiết kế, giống hệt `GridSpec`:
 - **Bất biến** (immutable): mọi property chỉ có `get`. Tạo xong không ai đổi được, nên truyền đi đâu cũng an toàn — không có chuyện "ai đó sửa mất số hàng giữa chừng".
 - **`sealed`**: không cho class khác kế thừa ([§7](#7-kế-thừa-abstract-virtual-override)). Class dữ liệu không cần mở rộng thì niêm phong lại.
-- **Luật nằm trong class**: lệnh `SAMPLE_GRID` và palette Grid Marker đều gọi `spec.Validate()` — luật chỉ viết **một** lần ([Phần 9](../09_GOLDEN_SAMPLE.md)).
+- **Luật nằm trong class**: lệnh `SAMPLE_GRID` và palette Grid Marker đều gọi `spec.Validate()` — luật chỉ viết **một** lần ([R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md#3-nguyên-tắc-2--validate-một-lần-ở-model)).
 
 ---
 

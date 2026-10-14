@@ -360,7 +360,7 @@ protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 }
 ```
 
-**Command bất đồng bộ.** Đặt `[RelayCommand]` lên một method `async Task` thì generator sinh ra `AsyncRelayCommand`. Lệnh này **tự khóa nút trong lúc đang chạy** (đã kiểm: khi đang chạy thì `IsRunning = true` và `CanExecute = false`; chạy xong thì `CanExecute = true`), nên người dùng không bấm hai lần được. Muốn có thêm lớp phủ "đang bận" và ô báo lỗi thì dùng `RunSafeAsync` của [`ViewModelBase`](../../ViewModels/ViewModelBase.cs) ([Phần 5 §5.2](../05_WPF_UI_AND_MVVM.md#52-giải-phẫu-mvvm--bí-ẩn-runsafeasync)).
+**Command bất đồng bộ.** Đặt `[RelayCommand]` lên một method `async Task` thì generator sinh ra `AsyncRelayCommand`. Lệnh này **tự khóa nút trong lúc đang chạy** (đã kiểm: khi đang chạy thì `IsRunning = true` và `CanExecute = false`; chạy xong thì `CanExecute = true`), nên người dùng không bấm hai lần được. Muốn có thêm lớp phủ "đang bận" và ô báo lỗi thì dùng `RunSafeAsync` của [`ViewModelBase`](../../ViewModels/ViewModelBase.cs) ([R04 §2](../reference/R04_UI.md#2-viewmodel-viewmodelbase-và-runsafe)).
 
 ---
 
@@ -415,7 +415,7 @@ System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ =>
 | `{StaticResource KhongCoKeyNay}` | `XamlParseException: 'Provide value on 'System.Windows.StaticResourceExtension' threw an exception.'` — bên trong: `Cannot find resource named 'KhongCoKeyNay'. Resource names are case sensitive.` |
 | `{DynamicResource KhongCoKeyNay}` | **Không lỗi**: `Foreground` giữ màu mặc định `#FF000000`. Chữ đen trên palette tối nghĩa là **không nhìn thấy** |
 
-Dự án nạp `Styles.xaml` và theme **sau** `InitializeComponent()` (`ThemeManager.Attach`), nên mọi key màu/style **bắt buộc** dùng `DynamicResource`. Dùng `StaticResource` cho các key đó từng làm palette không mở được ([T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension)). `StaticResource` chỉ dành cho key khai báo **ngay trong file đó** (ví dụ `BoolToVis`). Danh sách key màu, và vì sao không bao giờ viết `Background="White"`: [Phần 5 §5.3](../05_WPF_UI_AND_MVVM.md#53-autocad-theme-tự-động-darklight). Test `XamlPaletteTests` tự kiểm mọi key mà XAML tham chiếu, ở cả hai theme ([T05 §6](T05_TESTING_STRATEGY.md#6-xaml-palette-trên-sta)).
+Dự án nạp `Styles.xaml` và theme **sau** `InitializeComponent()` (`ThemeManager.Attach`), nên mọi key màu/style **bắt buộc** dùng `DynamicResource`. Dùng `StaticResource` cho các key đó từng làm palette không mở được ([T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension)). `StaticResource` chỉ dành cho key khai báo **ngay trong file đó** (ví dụ `BoolToVis`). Danh sách key màu, và vì sao không bao giờ viết `Background="White"`: [R04 §4](../reference/R04_UI.md#4-theme-sángtối-tự-động). Test `XamlPaletteTests` tự kiểm mọi key mà XAML tham chiếu, ở cả hai theme ([T05 §6](T05_TESTING_STRATEGY.md#6-xaml-palette-trên-sta)).
 
 ---
 

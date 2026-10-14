@@ -73,6 +73,6 @@ using System.Runtime.InteropServices;
 // Bộ lệnh demo (DEMO_*) tự đăng ký CommandClass trong Demos/DemoAssemblyInfo.cs —
 // build với /p:IncludeDemos=false là toàn bộ demo biến mất khỏi DLL (xem CadCoreFramework.csproj).
 
-// Golden Sample — xem docs/09_GOLDEN_SAMPLE.md
+// Golden Sample — xem docs/reference/R05_GOLDEN_SAMPLE.md
 [assembly: Autodesk.AutoCAD.Runtime.CommandClass(
     typeof(CadCoreFramework.Samples.GridMarker.GridMarkerCommands))]

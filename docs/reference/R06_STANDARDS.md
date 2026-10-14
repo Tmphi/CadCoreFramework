@@ -1,149 +1,166 @@
-# Phần 6: DevOps, Unit Test & Tiêu Chuẩn (DevOps & Standards)
+> **📘 Tra cứu CadCoreFramework** · [Mục lục tài liệu](../README.md) · [← R05](R05_GOLDEN_SAMPLE.md) · **R06**
 
-Phần cuối cùng này hướng dẫn các kỹ thuật bảo trì cấp độ cao (DevOps), cách bắt lỗi và quy chuẩn viết code (Coding Conventions) khắt khe để dự án đạt độ tin cậy Enterprise.
+# R06 — Chuẩn Mực: Vòng Lặp Phát Triển, Test, CI Và Quy Ước
 
----
-
-## 6.1 Tuyệt Chiêu Hot-Reload WPF ("Lời Nguyền BAML Cache")
-
-WPF dịch các file XAML sang dạng nhị phân (BAML) và load thẳng vào RAM của tiến trình AutoCAD thông qua `PresentationFramework.dll`.
-- **Vấn đề (gốc rễ):** .NET Framework **không gỡ (unload) được** assembly khỏi AppDomain. Khi bạn NETLOAD lại một DLL **cùng identity** (cùng tên assembly + version), CLR trả về chính assembly **đã nạp từ trước**: code cũ, BAML cũ. Ngoài ra, file DLL nạp bằng NETLOAD bị khóa nên không ghi đè được khi build. Kết quả là bạn sửa XAML, build lại, nạp lại mà vẫn thấy giao diện cũ, hoặc gặp lỗi lệch kiểu giữa hai bản.
-- **Cách thợ vườn:** Tắt hẳn AutoCAD, build lại, mở AutoCAD (Mất 3 phút cho 1 lần sửa màu chữ).
-- **Cách của Framework (cấu hình trong `.csproj`):**
-  1. MSBuild tự sinh `AssemblyName` kèm Timestamp khi build Debug: `CadCoreFramework_20261010_120000.dll`.
-  2. PostBuild event copy file đó về tên chuẩn `CadCoreFramework.dll` để NETLOAD script vẫn dùng được.
-  3. Mỗi lần build là một **identity mới**, nên NETLOAD nạp đúng code + BAML mới. Bạn sửa XAML liên tục mà không cần tắt AutoCAD.
-  4. Lưu ý: các bản cũ **vẫn nằm trong AppDomain** (event đã hook, `Initialize` đã chạy). Khi sửa code khởi động, event, Overrule, Ribbon, hoặc khi thấy hành vi lạ, hãy khởi động lại AutoCAD ([T04 §2](training/T04_DEBUGGING_TROUBLESHOOTING.md#2-vòng-lặp-phát-triển-build--nạp--thử)). Hệ quả kỹ thuật: pack URI của WPF phải dựng tên assembly **lúc runtime**.
-
-Build bình thường bằng:
-```powershell
-dotnet build CadCoreFramework.sln -c Debug
-```
+> **Dùng khi:** chuẩn bị build/test/mở PR, gặp cảnh báo CAD001–CAD003, hoặc cần nhớ quy ước đặt tên · **Học bài bản:** [T05 — Kiểm thử](../training/T05_TESTING_STRATEGY.md), [T06 — Build & phát hành](../training/T06_BUILD_RELEASE_DEVOPS.md), [T09 §2 — Checklist code review](../training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review) · **Gặp sự cố:** [T04 — Debug & chẩn đoán](../training/T04_DEBUGGING_TROUBLESHOOTING.md), [T03 — Sổ tay sự cố](../training/T03_PITFALLS_CASEBOOK.md)
 
 ---
 
-## 6.2 Hướng Dẫn Viết Unit Test
+## Mục lục
 
-Không thể gọi trực tiếp `Application.DocumentManager` bên trong một Project Unit Test (vì nó chạy ngoài môi trường AutoCAD, thiếu file C++ lõi).
+1. [Nạp lại plugin không cần tắt AutoCAD](#1-nạp-lại-plugin-không-cần-tắt-autocad)
+2. [Unit test](#2-unit-test)
+3. [CI/CD](#3-cicd)
+4. [Quy ước viết code](#4-quy-ước-viết-code)
+5. [Analyzer CAD001–CAD003](#5-analyzer-cad001cad003)
 
-> [!TIP]
-> **Chiến lược Test trong CAD:** Trích xuất toàn bộ Logic toán học, chuỗi (String), và các lệnh điều hướng vào một Service (kế thừa Interface). Chừa lại phần móc nối vào CAD (`Execute`) ở lớp mỏng nhất. Dùng **`FakeCadContext`** (từ project `CadCoreFramework.Testing`) để kiểm soát và kiểm tra các lời gọi CAD.
+---
 
-### Cách 1: FakeCadContext (khuyến nghị cho Service tests)
+## 1. Nạp lại plugin không cần tắt AutoCAD
 
-`FakeCadContext` là một test-double đã có sẵn trong project `CadCoreFramework.Testing`. Nó ghi nhận mọi lời gọi mà không cần runtime AutoCAD.
+**Vấn đề:** .NET Framework **không gỡ (unload) được** assembly khỏi AppDomain. Khi bạn `NETLOAD` lại một DLL **cùng identity** (cùng tên assembly + version), CLR trả về chính assembly **đã nạp từ trước**: code cũ, BAML (XAML đã biên dịch) cũ. Ngoài ra, DLL nạp bằng `NETLOAD` bị khóa nên không ghi đè được khi build. Kết quả là bạn sửa XAML, build lại, nạp lại mà vẫn thấy giao diện cũ, hoặc gặp lỗi lệch kiểu giữa hai bản.
+
+**Cách của dự án** (cấu hình trong [`CadCoreFramework.csproj`](../../CadCoreFramework.csproj)):
+1. Build Debug đặt `AssemblyName` kèm thời điểm build: `CadCoreFramework_20261010_120000.dll`.
+2. Target `PostBuild` copy file đó về tên chuẩn `CadCoreFramework.dll` để script `NETLOAD` vẫn dùng được.
+3. Mỗi lần build là một **identity mới**, nên `NETLOAD` nạp đúng code + BAML mới mà không cần tắt AutoCAD.
+
+> [!WARNING]
+> Các bản cũ **vẫn nằm trong AppDomain** (event đã hook, `Initialize` đã chạy). Khi sửa code khởi động, event, Overrule, Ribbon, hoặc khi thấy hành vi lạ, hãy khởi động lại AutoCAD ([T04 §2](../training/T04_DEBUGGING_TROUBLESHOOTING.md#2-vòng-lặp-phát-triển-build--nạp--thử)). Hệ quả kỹ thuật: pack URI của WPF phải dựng tên assembly **lúc runtime** ([T02 §2.1](../training/T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)).
+
+---
+
+## 2. Unit test
+
+Project test chạy ngoài AutoCAD, nên không gọi được `Application.DocumentManager` hay mở database thật. Chiến lược của dự án ([T05 §2](../training/T05_TESTING_STRATEGY.md#2-kim-tự-tháp-test-của-dự-án)):
+
+| Tầng | Test bằng | Kiểm gì |
+| :--- | :--- | :--- |
+| Model, Planner (logic thuần) | xUnit thuần | **Kết quả** |
+| Service (vỏ AutoCAD) | [`FakeCadContext`](../../CadCoreFramework.Testing/Fakes/FakeCadContext.cs) với `ExecuteAction = false` | **Hợp đồng**: gọi overload nào, bao nhiêu lần, undo mark nào, xử lý lỗi ra sao |
+| ViewModel | Mock service (Moq) | `CanExecute`, trạng thái, lỗi |
+| XAML palette | `XamlPaletteTests` trên thread STA | Nạp được, key theme tồn tại, binding ô số |
+| Chỉ AutoCAD thật mới kiểm được | Smoke test thủ công, HeadlessLab | [T05 §7](../training/T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được) |
+
+`FakeCadContext` ghi lại mọi lời gọi: `ExecuteCount` (đếm cả `Execute` lẫn `TryExecute`), `ExecuteReadCount`, `ExecuteAsyncCount`, `ExecuteBatchCount`, `LastUndoMarkName`, `LastAutoRegen`. Gán `ExceptionToThrow` để giả lập lỗi AutoCAD. Hai test có thật trong [`LayerServiceTests.cs`](../../CadCoreFramework.Tests/LayerServiceTests.cs), nguyên văn:
 
 ```csharp
-using CadCoreFramework.Testing.Fakes;
-using FluentAssertions;
-using Xunit;
-
-public class PanelDrawServiceTests
+[Fact]
+public void ToggleLayerVisibility_UsesSingleTryExecute_WithUndoMarkAndRegen()
 {
-    [Fact]
-    public void DrawPanel_CallsExecuteOnce_WithCorrectUndoMarkName()
+    var fake = new FakeCadContext { ExecuteAction = false };
+
+    NewService(fake).ToggleLayerVisibility("E_LAYER", isOn: true);
+
+    fake.ExecuteCount.Should().Be(1);
+    fake.ExecuteAsyncCount.Should().Be(0);
+    fake.LastUndoMarkName.Should().Be(LayerService.ToggleUndoMarkName);
+    fake.LastAutoRegen.Should().BeTrue();
+}
+
+[Fact]
+public void ToggleLayerVisibility_WhenCadFails_ReturnsFailure_DoesNotThrow()
+{
+    var fake = new FakeCadContext
     {
-        // Arrange
-        var fake = new FakeCadContext();
-        var service = new PanelDrawService(fake);
+        ExecuteAction = false,
+        ExceptionToThrow = new InvalidOperationException("Layer locked")
+    };
 
-        // Act
-        service.DrawPanel("MSB-01");
+    var result = NewService(fake).ToggleLayerVisibility("E", true);
 
-        // Assert
-        fake.ExecuteCount.Should().Be(1);
-        fake.LastUndoMarkName.Should().Be("DrawPanel");
-    }
-
-    [Fact]
-    public void DrawPanel_WhenCadThrows_ServiceHandlesGracefully()
-    {
-        // Arrange — inject exception to simulate AutoCAD error
-        var fake = new FakeCadContext { ExceptionToThrow = new InvalidOperationException("CAD error") };
-        var service = new PanelDrawService(fake);
-
-        // Act & Assert
-        service.Invoking(s => s.DrawPanel("MSB-01")).Should().Throw<InvalidOperationException>();
-    }
+    result.IsSuccess.Should().BeFalse();
+    result.ErrorMessage.Should().Be("Layer locked");
 }
 ```
 
-### Cách 2: Moq (cho interface-only mocking)
+`ExecuteAction = false` vì lambda bên trong chạm `scope.Database`, thứ chỉ có trong AutoCAD thật. Đó cũng là giới hạn của kiểu test này: nó không biết lambda làm đúng hay sai. Muốn kiểm được kết quả, đưa logic ra hàm thuần ([R05 §2](R05_GOLDEN_SAMPLE.md#2-nguyên-tắc-1--functional-core-imperative-shell)).
 
-Dùng `Moq` khi bạn cần mock các interface khác (không phải `ICadContext`):
-
-```csharp
-using Moq;
-using Xunit;
-
-public class LayerServiceTests
-{
-    [Fact]
-    public void GetAllLayers_ReturnsNonNull()
-    {
-        var mockContext = new Mock<ICadContext>();
-        mockContext.Setup(c => c.ExecuteRead(It.IsAny<Action<ICadScope>>()));   // không chạy lambda
-
-        var service = new LayerService(mockContext.Object);
-        var layers = service.GetAllLayers();
-
-        Assert.NotNull(layers);
-    }
-}
-```
-
-### Chạy test và xem báo cáo coverage
+**Chạy test:**
 
 ```powershell
-# Chạy test với coverage
-dotnet test CadCoreFramework.Tests\CadCoreFramework.Tests.csproj --collect:"XPlat Code Coverage" --results-directory coverage
+# Toàn bộ, cả hai runtime (net48 và net8.0-windows)
+dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj
 
-# Tạo báo cáo HTML
-dotnet tool restore
-dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"Html"
-
-# Mở báo cáo
-Start-Process coverage\report\index.html
+# Một nhóm test
+dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj --filter "FullyQualifiedName~GridMarker"
 ```
+
+Coverage và báo cáo HTML (giống CI): [T05 §8](../training/T05_TESTING_STRATEGY.md#8-chạy-test-và-coverage). Quy tắc viết test (tên, một hành vi mỗi test, test phải fail được): [T05 §10](../training/T05_TESTING_STRATEGY.md#10-quy-tắc-viết-test).
 
 ---
 
-## 6.3 CI/CD — GitHub Actions
+## 3. CI/CD
 
-Dự án có hai workflow trong `.github/workflows/`:
+Hai workflow trong [`.github/workflows/`](../../.github/workflows/):
 
-| File | Kích hoạt | Mục đích |
+| File | Kích hoạt | Làm gì |
 | :--- | :--- | :--- |
 | `build-and-test.yml` | Push/PR vào `main` | Build Release `-warnaserror` → chạy toàn bộ unit test trên net48 + net8 → thu thập coverage → upload báo cáo HTML |
 | `release.yml` | Tag `v*` (ví dụ `v1.2.0`) | Build → Test → `package.ps1` → tạo GitHub Release với `.bundle` đính kèm |
 
-**Badge CI** đã có sẵn ở đầu `README.md`. Dự án tạo từ template nhận đúng repo của bạn khi truyền `--GitHubRepo owner/name` (`dotnet new`) hoặc `-GitHubRepo owner/name` (`init-template.ps1`); bỏ trống thì badge là placeholder `YOUR_ORG/YOUR_REPO` — thay bằng tay sau.
+Vì CI build với `-warnaserror`, mọi warning (kể cả CAD001–CAD003 ở §5) làm PR đỏ. Chi tiết từng bước, quy trình release và checklist phát hành: [T06 §4–5](../training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml). Badge CI của dự án tạo từ template: [T06 §8](../training/T06_BUILD_RELEASE_DEVOPS.md#8-template-tạo-dự-án-mới).
 
 ---
 
-## 6.4 Quy Chuẩn Viết Code (Coding Conventions)
+## 4. Quy ước viết code
 
-Là một Senior, mã nguồn không chỉ chạy được mà phải đọc được. Dưới đây là Luật Thép của dự án:
+**Đặt tên:**
 
-### 1. Quy tắc đặt tên (Naming)
-
-| Loại (Type) | Kiểu Đặt Tên | Ký hiệu (Prefix) | Ví dụ |
+| Loại | Kiểu | Tiền tố / hậu tố | Ví dụ |
 | :--- | :--- | :--- | :--- |
-| **Class, Method, Property** | `PascalCase` | Không | `CadContext`, `DrawRectangle`, `IsBusy` |
-| **Interface** | `PascalCase` | Chữ `I` in hoa | `ICadScope`, `ILoggerService` |
-| **Tham số (Parameter) & Biến cục bộ** | `camelCase` | Không | `layerName`, `radius`, `index` |
-| **Biến nội bộ (Private Field)** | `camelCase` | Dấu gạch dưới `_` | `_cadContext`, `_logger` |
-| **Hàm Bất Đồng Bộ (Async)** | `PascalCase` | Hậu tố `Async` | `ExecuteAsync`, `LoadDataAsync` |
+| Class, method, property | `PascalCase` | — | `CadContext`, `DrawRectangle`, `IsBusy` |
+| Interface | `PascalCase` | `I` | `ICadScope`, `ILoggerService` |
+| Tham số, biến cục bộ | `camelCase` | — | `layerName`, `radius` |
+| Field private | `camelCase` | `_` | `_cadContext`, `_logger` |
+| Hàm async | `PascalCase` | hậu tố `Async` | `ExecuteAsync`, `LoadDataAsync` |
+| Lệnh AutoCAD | `UPPER_SNAKE` | tiền tố riêng của tính năng | `SAMPLE_GRID`, `CADCORE_LAYER_MANAGER` |
 
-### 2. Cấu Trúc Khung của Một File C# (`.cs`)
-Thứ tự khai báo trong một Class bắt buộc phải tuân theo thứ tự sau (từ trên xuống dưới):
-1. **Fields**: Các biến nội bộ `private readonly ...`.
-2. **Constructors**: Các hàm khởi tạo (Tiêm DI vào đây).
-3. **Properties**: Các thuộc tính public.
-4. **Public Methods**: Các hàm giao tiếp bên ngoài (API bề mặt).
-5. **Private Methods**: Các hàm hỗ trợ ẩn ở dưới cùng.
+**Thứ tự trong một class:** fields (`private readonly …`) → constructors → properties → public methods → private methods.
 
-### 3. Quy Tắc Kiến Trúc
-- **Không nhét logic CAD vào ViewModels**: ViewModels (kể cả hàm Command) chỉ lo chuẩn bị dữ liệu và gọi Service. **Prompt** (lấy tọa độ…) thuộc về **lệnh** (`[CommandMethod]` trong `ExecuteCommand`), làm *trước* khi mở transaction. **Không bao giờ** prompt trong Service hay ViewModel, vì Service còn được gọi từ palette (application context). **Transaction** đi qua `ICadContext` bên trong Service ([Phần 9 §9.4](09_GOLDEN_SAMPLE.md)).
-- **Không bắt `System.Exception` tràn lan trong code nghiệp vụ**: bắt kiểu cụ thể khi bạn *xử lý được* nó. Việc bắt mọi lỗi chỉ làm ở **biên** (`ExecuteCommand`, `RunSafe`). Framework xử lý riêng `Autodesk.AutoCAD.Runtime.Exception` có `ErrorStatus.UserBreak` (khi nhấn ESC) để không in lỗi rác. Không có kiểu nào tên `UserBreakException`. Lưu ý: ESC *khi đang prompt* không ném exception mà trả `PromptStatus.Cancel`.
-- Chi tiết quy tắc review: [T09 §2](training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review).
+**Ngôn ngữ:** C# 10 (`<LangVersion>10.0</LangVersion>`), `Nullable=annotations`, không bật `ImplicitUsings`: mỗi file tự khai báo `using`. Định dạng theo [`.editorconfig`](../../.editorconfig).
+
+**Kiến trúc:**
+- **Prompt** thuộc về **lệnh** (`[CommandMethod]` trong `ExecuteCommand`), làm *trước* khi mở transaction. **Không bao giờ** prompt trong Service hay ViewModel, vì Service còn được gọi từ palette (application context). **Transaction** đi qua `ICadContext` bên trong Service ([R05 §4](R05_GOLDEN_SAMPLE.md#4-nguyên-tắc-3--hiểu-đúng-ngữ-cảnh-command-vs-palette)).
+- ViewModel (kể cả hàm command của nó) chỉ chuẩn bị dữ liệu và gọi Service; không có logic AutoCAD.
+- **Không bắt `System.Exception` tràn lan** trong code nghiệp vụ: bắt kiểu cụ thể khi bạn *xử lý được* nó. Bắt mọi lỗi chỉ làm ở **biên** (`ExecuteCommand`, `RunSafe`). Framework xử lý riêng `Autodesk.AutoCAD.Runtime.Exception` có `ErrorStatus.UserBreak` (ESC) để không in lỗi rác; không có kiểu nào tên `UserBreakException`. ESC *khi đang prompt* không ném exception mà trả `PromptStatus.Cancel`.
+
+Checklist review đầy đủ: [T09 §2](../training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review). Checklist trước khi mở PR: [T08 §12](../training/T08_RECIPES_EXTENDING.md#12-checklist-trước-khi-mở-pr).
+
+---
+
+## 5. Analyzer CAD001–CAD003
+
+🔎 [`CadCoreFramework.Analyzers/`](../../CadCoreFramework.Analyzers/) · test: [`AnalyzerTests.cs`](../../CadCoreFramework.Tests/AnalyzerTests.cs) · thiết kế: [T02 §11](../training/T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001cad003), [T09 ADR-011](../training/T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)
+
+Ba quy tắc Roslyn chạy **lúc build**, báo warning (thành lỗi trên CI vì `-warnaserror`). Analyzer chỉ được tham chiếu để phân tích, không đóng gói vào DLL plugin. Liên kết "help" của mỗi cảnh báo trong Visual Studio trỏ về mục tương ứng dưới đây.
+
+"Service/ViewModel" ở CAD001 và CAD002 nghĩa là: class trong namespace chứa `.Services` / `.ViewModels`, hoặc tên kết thúc bằng `Service` / `ViewModel` (xét cả lớp bao ngoài); bỏ qua `CadContext` và `AppBootstrapper` ([`ArchitectureLayers.cs`](../../CadCoreFramework.Analyzers/ArchitectureLayers.cs)).
+
+### CAD001
+
+**Service/ViewModel không được dùng `MdiActiveDocument`.**
+
+```csharp
+// ⛔ CAD001
+var doc = Application.DocumentManager.MdiActiveDocument;
+
+// ✅ Inject ICadContext, lấy Document từ scope
+_cadContext.Execute(scope => { var doc = scope.Document; /* … */ });
+```
+
+Vì sao: bản vẽ active đổi khi người dùng chuyển tab (vẽ nhầm file); không có lock tự động (`eLockViolation`); và `FakeCadContext` không giả lập được `MdiActiveDocument`, nên Service hết test được. Nền tảng: [T01 §2.1](../training/T01_AUTOCAD_NET_FOUNDATIONS.md#21-mdiactivedocument-tiện-nhưng-nguy-hiểm).
+
+### CAD002
+
+**Service/ViewModel không được hỏi người dùng qua dòng lệnh.** Bắt các lời gọi `CadPromptHelper.*` và `Editor.GetPoint/GetCorner/GetDistance/GetAngle/GetString/GetKeywords/GetInteger/GetDouble/GetEntity/GetNestedEntity/GetSelection/GetFileNameForOpen/GetFileNameForSave/Drag`.
+
+Sửa: lệnh hỏi người dùng, rồi truyền kết quả (`Point3d`, `GridSpec`…) vào Service; ViewModel nhận dữ liệu qua binding. Vì sao: prompt trong Service khiến nó không dùng được từ palette, batch hay unit test ([R05 §4](R05_GOLDEN_SAMPLE.md#4-nguyên-tắc-3--hiểu-đúng-ngữ-cảnh-command-vs-palette), backlog B-18).
+
+### CAD003
+
+**Không mở đối tượng để ghi bên trong `ExecuteRead`.** Bắt `OpenMode.ForWrite` và `UpgradeOpen()` trong lambda (kể cả lambda lồng) truyền cho `ExecuteRead` của một `*CadContext`.
+
+Sửa: dùng `Execute`/`TryExecute` cho thao tác ghi. Vì sao: transaction của `ExecuteRead` được **Commit**, nên ghi trong đó *sẽ* vào bản vẽ, ngoài undo mark và ngoài lock của `Execute` ([R02 §2](R02_ARCHITECTURE.md#2-hợp-đồng-của-icadcontext), backlog B-07).
+
+**Giới hạn chung:** analyzer chỉ thấy lời gọi **trực tiếp**. Nó không theo vào method được gọi từ đó (Service gọi một helper mà helper prompt thì lọt), và CAD003 không xét method group (`ExecuteRead(DocRead)`). Ngoại lệ có chủ đích được đánh dấu bằng `#pragma warning disable CADxxx` kèm comment giải thích (ví dụ CAD001 trong `NotificationService`).

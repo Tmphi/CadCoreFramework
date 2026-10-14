@@ -9,6 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (hợp nhất `docs/` thành một bộ tài liệu hai lớp)
+- **Cấu trúc mới**: `docs/README.md` là cửa vào duy nhất; `docs/training/` (Học viện, không đổi tên) và `docs/reference/` (Tra cứu R01–R06) dùng chung một bộ quy ước: thanh điều hướng, dòng "Dùng khi / Học bài bản", mục lục, trích dẫn dạng `R03 §2`.
+- **Phần 1–9 cũ chuyển thành R01–R06** (đổi tên bằng `git mv`, giữ lịch sử):
+  - `01_GETTING_STARTED` → `R01_QUICKSTART`: cây thư mục đúng với repo (thêm `Samples/`, `Demos/`, các project test/analyzer…), bảng 9 lệnh trong `PackageContents.xml`. Bỏ lộ trình 3 tuần và bài "Vẽ Tủ Điện MSB" (bản đúng chuẩn ở T10 §3 và đồ án C05 §5).
+  - `02_CORE_ARCHITECTURE` → `R02_ARCHITECTURE`: thêm bảng hợp đồng `ICadContext` (ném hay trả `CadResult`, lock, chặn thread/lồng nhau). §2.3 cũ ghi lệnh `VE_TU_DIEN` "tại `SampleCommands.cs`", lệnh không tồn tại; giờ trích nguyên văn `CORE_INFO` và `DRAW_CIRCLE_SAMPLE`.
+  - `03_DRAWING_AND_INTERACTION` + `04_METADATA_AND_SERVICES` + `07_API_REFERENCE` → `R03_API`: chữ ký chép lại từ code. Sửa: `SelectionFilterBuilder` có `OnLayersExact`/`WithBlockNamesExact`/`EscapeWildcards` (trang cũ nói "không escape wildcard"); Ribbon đã có tab `CadCoreRibbon` (trang cũ nói "chưa dựng tab nào"); bỏ "khớp v1.0.0". Thêm bảng mọi service có sẵn và tiện ích còn thiếu.
+  - `05_WPF_UI_AND_MVVM` → `R04_UI`, `09_GOLDEN_SAMPLE` → `R05_GOLDEN_SAMPLE`: nội dung giữ nguyên, đánh số lại.
+  - `06_DEVOPS_AND_STANDARDS` → `R06_STANDARDS`: ví dụ test dùng `PanelDrawService` không có trong repo được thay bằng hai test nguyên văn từ `LayerServiceTests`. Thêm §5 Analyzer CAD001–CAD003.
+- **Bỏ `08_COOKBOOK`**: chỉ 8.1/8.6/8.7 biên dịch sạch; 8.2, 8.3, 8.5, 8.8, 8.11 lỗi biên dịch (API không tồn tại, sai chữ ký, thiếu member abstract), 8.9 lỗi trên net48 (`record` thiếu `IsExternalInit`), 8.2/8.4/8.9 dùng `Execute<T>` đã obsolete, 8.10 che `ViewModelBase.Dispose`. Công thức đúng nằm ở T08.
+- **Bỏ `00_TOC`**: hứa những mục không tồn tại (Selection, Plot/Settings/Logger, EventAggregator, Troubleshooting); thay bằng `docs/README.md`.
+- **Link trong code**: `helpLinkUri` của CAD001/CAD002/CAD003 trỏ tới `R06_STANDARDS.md#cad001`…`#cad003`; thông báo `[Obsolete]` của `CadScopeQueryExtensions`, `AssemblyInfo.cs`, template `cad-command` và `.agents/rules` trỏ tới `R05_GOLDEN_SAMPLE.md`.
+- **Kiểm chứng**: 1699 link tương đối và anchor, 0 hỏng; mọi khối ghi "nguyên văn" khớp từng dòng với nguồn; số test của R05 khớp `dotnet test --list-tests`; build Release `-warnaserror` sạch, 320 test × 2 runtime xanh.
+
 ### Changed (PR #14 — rà soát toàn bộ tài liệu training)
 - **Chỗ tài liệu đã lệch với code**:
   - T02 §5: `ExecuteWithScopeAsync` trả `Task<bool>` và báo lỗi lên bản vẽ đang active (từ PR #7).

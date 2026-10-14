@@ -264,7 +264,7 @@ Bên trong plugin, mỗi thư mục có một vai trò, và **phụ thuộc ch�
 | 3 | [`GridPlannerTests.cs`](../../CadCoreFramework.Tests/Samples/GridMarker/GridPlannerTests.cs) | Test | ✅ §2 |
 | 4 | [`IGridMarkerService.cs`](../../Samples/GridMarker/IGridMarkerService.cs), [`GridMarkerService.cs`](../../Samples/GridMarker/GridMarkerService.cs) | Service | ✅ phần C#; phần AutoCAD (`ICadScope`, XData) học ở T01–T02 |
 | 5 | [`GridMarkerCommands.cs`](../../Samples/GridMarker/GridMarkerCommands.cs) | Lệnh `SAMPLE_GRID` | ✅ phần C#; prompt học ở [T01 §7](T01_AUTOCAD_NET_FOUNDATIONS.md#7-editor-prompt-hệ-tọa-độ-selection) |
-| 6 | [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs), [`GridMarkerPalette.xaml`](../../Samples/GridMarker/GridMarkerPalette.xaml) | Palette (WPF/MVVM) | một phần — MVVM ở [Phần 5](../05_WPF_UI_AND_MVVM.md) |
+| 6 | [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs), [`GridMarkerPalette.xaml`](../../Samples/GridMarker/GridMarkerPalette.xaml) | Palette (WPF/MVVM) | một phần — MVVM ở [U01](U01_WPF_MVVM_BASICS.md), tra nhanh ở [R04](../reference/R04_UI.md) |
 
 🧪 **Thử ngay — test bảo vệ code thế nào:** trong `GridSpec.cs`, đổi chữ `"Số hàng phải trong khoảng…"` thành `"Số dòng phải trong khoảng…"`, rồi chạy:
 

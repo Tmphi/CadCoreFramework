@@ -178,7 +178,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 
 ## 3. Đồ án cuối khóa: Bộ công cụ Tủ điện MSB
 
-> Bản viết lại đúng chuẩn của bài tập "Vẽ Tủ Điện MSB" trong [Phần 1 §1.3](../01_GETTING_STARTED.md). Bản cũ từng hướng dẫn prompt *trong Service* và dùng `ExecuteAsync` cho thao tác đồng bộ; cả hai là anti-pattern ([ADR-004](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
+> Bản viết lại đúng chuẩn của bài tập "Vẽ Tủ Điện MSB" từng nằm trong trang Getting Started cũ (nay là [R01](../reference/R01_QUICKSTART.md), không còn bài tập này). Bản cũ từng hướng dẫn prompt *trong Service* và dùng `ExecuteAsync` cho thao tác đồng bộ; cả hai là anti-pattern ([ADR-004](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
 
 **Yêu cầu chức năng:**
 1. Lệnh `MSB_DRAW`: pick điểm → nhập tên tủ, số lộ ra, dòng định mức → vẽ thân tủ + các lộ ra (Planner tính vị trí) + nhãn.
@@ -388,4 +388,4 @@ Mọi thứ bị lật theo: chữ lộn ngược, và độ dày nét bị nhâ
 
 ---
 
-**Quay về:** [Lộ trình đào tạo](README.md) · [Mục lục Phần 1–9](../00_TOC.md)
+**Quay về:** [Lộ trình đào tạo](README.md) · [Mục lục tài liệu](../README.md)

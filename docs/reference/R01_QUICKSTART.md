@@ -1,116 +1,137 @@
-# Phần 1: Bắt Đầu & Tư Duy (Getting Started)
+> **📘 Tra cứu CadCoreFramework** · [Mục lục tài liệu](../README.md) · **R01** · [R02 →](R02_ARCHITECTURE.md)
 
-Chào mừng bạn đến với **CadCoreFramework**! Đây là một khung mẫu (Template) chuyên nghiệp dành cho việc phát triển các ứng dụng/plugin AutoCAD bằng C# (.NET). Cuốn tài liệu này được viết theo dạng "Giáo trình thực chiến", giải thích *tại sao* kiến trúc lại được thiết kế như vậy.
+# R01 — Khởi Động Nhanh
 
-> [!NOTE]
-> Phần 1–9 giả định bạn đã biết C# cơ bản. **Chưa biết lập trình hoặc chưa biết C#?** Học Giai đoạn 0 trước: [C00 — Bắt đầu từ đây](training/C00_START_HERE.md) (6 tuần, không cần AutoCAD, dạy C# trên chính code của dự án).
+> **Dùng khi:** lần đầu build và nạp plugin, hoặc cần nhớ lại thư mục nào chứa gì · **Học bài bản:** [T01 — Nền tảng AutoCAD .NET](../training/T01_AUTOCAD_NET_FOUNDATIONS.md) · **Chưa biết C#:** [C00 — Bắt đầu từ đây](../training/C00_START_HERE.md)
+
+Trang này đưa bạn từ lúc mở Visual Studio tới khi thấy kết quả đầu tiên trong AutoCAD. Chưa cần hiểu kiến trúc: cứ chạy được đã, rồi đọc [R02](R02_ARCHITECTURE.md).
 
 ---
 
-## 1.1 Khởi Động Nhanh (Quickstart)
+## Mục lục
 
-Tài liệu này hướng dẫn bạn từ lúc mở Visual Studio cho đến khi thấy kết quả đầu tiên bên trong AutoCAD. Không cần hiểu kiến trúc ngay — cứ chạy được cái đã.
+1. [Yêu cầu](#1-yêu-cầu)
+2. [Cấu trúc thư mục](#2-cấu-trúc-thư-mục)
+3. [Build, nạp, kiểm tra](#3-build-nạp-kiểm-tra)
+4. [Các lệnh có sẵn](#4-các-lệnh-có-sẵn)
+5. [Luồng dữ liệu một chiều](#5-luồng-dữ-liệu-một-chiều)
+6. [Đọc tiếp](#6-đọc-tiếp)
 
-> [!IMPORTANT]
-> **Yêu cầu:** Visual Studio 2022, AutoCAD 2021–2024 (64-bit), .NET Framework 4.8 (target `net48`, đã kiểm chứng trên AutoCAD 2024).
-> Dự án cũng build sẵn `net8.0-windows` cho AutoCAD 2025+, nhưng bản đó **chưa được chạy thử trên AutoCAD thật**.
-> Đảm bảo AutoCAD đang **mở** và **có ít nhất 1 bản vẽ đang active** trước khi NETLOAD.
+---
 
-### Sơ đồ Cấu trúc Thư mục (Folder Tree)
-Trước khi Build, hãy lướt qua cấu trúc thư mục của Framework để hiểu vai trò của từng tầng. Dự án áp dụng kiến trúc **Separation of Concerns (SoC)** (Tách biệt mối quan tâm):
+## 1. Yêu cầu
+
+| Thành phần | Phiên bản | Ghi chú |
+| :--- | :--- | :--- |
+| AutoCAD | 2021–2024, 64-bit | Bản `net48`, đã kiểm chứng trên AutoCAD 2024 |
+| AutoCAD 2025+ | — | Dự án build sẵn `net8.0-windows`, nhưng bản đó **chưa được chạy thử trên AutoCAD thật** |
+| Visual Studio | 2022 | Workload ".NET desktop development" |
+| .NET SDK | 8.x trở lên | CI dùng 8.0.x |
+
+Môi trường đầy đủ cho người học (Git, GitHub CLI, quyền): [training/README §4](../training/README.md#4-chuẩn-bị-môi-trường).
+
+---
+
+## 2. Cấu trúc thư mục
+
+Dự án tách mỗi loại trách nhiệm vào một thư mục. Vai trò của từng tầng và quy tắc phụ thuộc giữa chúng: [T02 §1](../training/T02_ARCHITECTURE_DEEP_DIVE.md).
 
 ```text
 📁 CadCoreFramework
-├── 📁 Commands/       # Điểm đón lệnh AutoCAD (Entry Points). Chỉ chứa [CommandMethod].
-├── 📁 Core/           # Trái tim của Framework: Bootstrapper, Context, Service cơ sở.
-├── 📁 Extensions/     # Các hàm vẽ (DrawLine, DrawCircle) móc trực tiếp vào ICadScope.
-├── 📁 Models/         # Các class dữ liệu thuần tuý (DTO, Entity Model). Không chứa logic CAD.
-├── 📁 Services/       # Nơi chứa Logic nghiệp vụ (Business logic) thực sự. 
-├── 📁 Themes/         # Quản lý giao diện Sáng/Tối (Light/Dark mode) của AutoCAD.
-├── 📁 Utils/          # Tiện ích rời: PromptHelper, CoordinateHelper, Jigs.
-├── 📁 ViewModels/     # Cầu nối giữa giao diện WPF và Logic C#.
-└── 📁 Views/          # Giao diện WPF (XAML). TUYỆT ĐỐI KHÔNG chứa code xử lý AutoCAD.
+├── 📁 Commands/      Điểm vào lệnh AutoCAD ([CommandMethod]), CadCommandBase, Ribbon của dự án
+├── 📁 Core/          Bootstrapper, ICadContext/CadContext, CadResult, các service hạ tầng (log, palette, ribbon, event…)
+├── 📁 Extensions/    Hàm vẽ và truy vấn gắn vào ICadScope (DrawLine, EnsureLayer, SetXRecord…)
+├── 📁 Models/        Lớp dữ liệu thuần, không chứa logic AutoCAD
+├── 📁 Samples/       Golden Sample (GridMarker): khuôn mẫu chuẩn để copy khi làm tính năng mới
+├── 📁 Demos/         Lệnh DEMO_* minh họa từng API; loại khỏi DLL bằng IncludeDemos=false
+├── 📁 Services/      Nghiệp vụ dùng chung: Layer, Plot, Settings, Dialog, FileSystem
+├── 📁 Themes/        ThemeManager + màu sáng/tối + Styles.xaml
+├── 📁 Utils/         CadPromptHelper, SelectionFilterBuilder, XData/XRecord, Jigs, các helper khác
+├── 📁 ViewModels/    ViewModelBase, NumberText và ViewModel của các palette có sẵn
+├── 📁 Views/         XAML của các palette có sẵn; không chứa code xử lý AutoCAD
+├── 📁 Properties/    AssemblyInfo.cs: nơi khai báo [assembly: CommandClass]
+├── 📁 Deployment/    PackageContents.xml (bundle Autoloader), Install/Uninstall
+├── 📁 Templates/     Template `dotnet new cad-command`
+├── 📁 snippets/      Snippet Visual Studio: cadcmd, cadscope, cadsvc, cadvm
+├── 📁 tests/         Kiểm thử tích hợp: smoke.scr, HeadlessLab
+├── 📁 CadCoreFramework.Tests/       Unit test (xUnit), chạy trên cả net48 và net8.0-windows
+├── 📁 CadCoreFramework.Testing/     FakeCadContext và các test double
+├── 📁 CadCoreFramework.Analyzers/   Analyzer CAD001–CAD003 (R06 §5)
+├── 📁 CadCoreFramework.Benchmarks/  Đo hiệu năng
+└── 📁 docs/          Tài liệu này
 ```
 
-### Bước 1: Build Plugin
-Mở Terminal tại thư mục gốc của project và chạy:
+---
+
+## 3. Build, nạp, kiểm tra
+
+**Bước 1 — Build.** Mở terminal tại thư mục gốc của dự án:
+
 ```powershell
 dotnet build CadCoreFramework.sln -c Debug
 ```
 
-> [!NOTE]
-> **WPF Hot-Reload (Không cần tắt AutoCAD):** Trong chế độ Debug, `.csproj` tự sinh ra file DLL mới kèm Timestamp (ví dụ: `CadCoreFramework_20261010_120000.dll`). Nhờ đó file mới không đụng độ với bản cũ đang bị Windows lock. Sau đó PostBuild event tự copy về tên chuẩn `CadCoreFramework.dll`.
-> Chi tiết trong Phần 6.1.
+Bản Debug có tên assembly kèm thời điểm build (ví dụ `CadCoreFramework_20261010_120000.dll`) rồi được copy về `CadCoreFramework.dll`, nhờ vậy bạn nạp lại được mà không phải tắt AutoCAD. Cơ chế và giới hạn của nó: [R06 §1](R06_STANDARDS.md#1-nạp-lại-plugin-không-cần-tắt-autocad).
 
-### Bước 2: Nạp Plugin Vào AutoCAD
-1. Mở AutoCAD, gõ lệnh `NETLOAD` vào Command Line.
-2. Điều hướng đến file: `<thư mục project>\bin\Debug\net48\CadCoreFramework.dll`.
-3. Nhấn **Open**. (Sẽ không có bảng thông báo nào hiện ra, điều này là bình thường).
+**Bước 2 — Nạp vào AutoCAD.**
+1. Mở AutoCAD và **một bản vẽ bất kỳ** (lệnh cần có bản vẽ đang mở).
+2. Gõ `NETLOAD`, chọn `<thư mục dự án>\bin\Debug\net48\CadCoreFramework.dll`, bấm **Open**. Không có hộp thông báo nào hiện ra, điều này là bình thường.
 
-### Bước 3: Kiểm Tra Plugin
-Gõ lệnh `CORE_INFO`. Nếu thành công, Command Line sẽ in ra:
-`[CadCoreFramework] Hạ tầng plugin đã sẵn sàng.`
+**Bước 3 — Kiểm tra.** Gõ `CORE_INFO`. Command line in:
 
-Không thấy dòng này, hoặc lệnh báo `Unknown command`? Xem cây quyết định chẩn đoán ở [T04 §9](training/T04_DEBUGGING_TROUBLESHOOTING.md#9-cây-quyết-định-triệu-chứng--nguyên-nhân).
+```text
+[CadCoreFramework] Hạ tầng plugin đã sẵn sàng.
+```
+
+Không thấy dòng này, hoặc AutoCAD báo `Unknown command`? Đi theo cây quyết định ở [T04 §9](../training/T04_DEBUGGING_TROUBLESHOOTING.md#9-cây-quyết-định-triệu-chứng--nguyên-nhân). Log nằm ở `%AppData%\CadCoreFramework\Logs`.
 
 ---
 
-## 1.2 Tư Duy Chuyển Đổi (Mindset Shift)
+## 4. Các lệnh có sẵn
 
-🎯 **Mục tiêu:** Bỏ lại phía sau tư duy viết Script rời rạc, làm quen với tư duy "Kỹ nghệ Phần mềm" (Enterprise Software).
+Chín lệnh dưới đây là các lệnh được khai báo trong [`Deployment/PackageContents.xml`](../../Deployment/PackageContents.xml) (test `PackageManifestTests` kiểm danh sách này). Các lệnh `DEMO_*` trong `Demos/` không nằm trong bundle.
 
-### Từ Scripting đến Enterprise
-Nếu bạn đã quen với AutoLISP hoặc VBA, bạn thường viết code theo kiểu "kịch bản": Hỏi người dùng một câu -> Vẽ một nét -> Hỏi tiếp -> Vẽ tiếp. Mọi thứ được nhồi nhét vào một hàm duy nhất.
-Khi bước vào .NET và **CadCoreFramework**, bạn đang xây dựng một **Hệ thống**. Trong hệ thống này, Giao diện (UI) và Logic vẽ hình không bao giờ được phép "nói chuyện" trực tiếp với nhau.
+| Lệnh | Làm gì | Code |
+| :--- | :--- | :--- |
+| `CORE_INFO` | In dòng "Hạ tầng plugin đã sẵn sàng" | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `CORE_TEST_ALL` | Tạo layer, vẽ khung + chữ, ghi và đọc lại XData | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `DRAW_CIRCLE_SAMPLE` | Vẽ một đường tròn tại gốc tọa độ | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `CORE_DEBUG` | Mở Debug Inspector: lịch sử lệnh, service trong DI, subscriber | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `SHOW_PALETTE` | Bật/tắt palette Grid Marker (Golden Sample) | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `SHOW_UI_TEMPLATE` | Bật/tắt palette trưng bày các control WPF theo theme | [`SampleCommands.cs`](../../Commands/SampleCommands.cs) |
+| `SAMPLE_GRID` | Vẽ lưới ô đánh nhãn từ dòng lệnh (Golden Sample) | [`GridMarkerCommands.cs`](../../Samples/GridMarker/GridMarkerCommands.cs) |
+| `CADCORE_LAYER_MANAGER` | Mở palette quản lý layer | [`LayerCommands.cs`](../../Commands/LayerCommands.cs) |
+| `CADCORE_COUNT_LAYERS` | In số layer của bản vẽ và số layer đang tắt | [`LayerCommands.cs`](../../Commands/LayerCommands.cs) |
 
-### Luồng Dữ Liệu Một Chiều (One-way Data Flow)
+Kịch bản thử tay đầy đủ (17 bước): [T05 §7](../training/T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được).
+
+---
+
+## 5. Luồng dữ liệu một chiều
+
+Nếu bạn quen AutoLISP hoặc VBA, bạn thường viết theo kiểu kịch bản: hỏi người dùng, vẽ một nét, hỏi tiếp, vẽ tiếp, tất cả trong một hàm. Dự án này tách các bước đó ra thành từng tầng, và dữ liệu chỉ đi theo một chiều:
 
 ```mermaid
 flowchart LR
-    UI[Giao Diện\nWPF XAML] -->|Binding\nData| VM(ViewModel)
-    VM -->|ICommand\nClick| Svc{Service Layer}
+    UI[Giao diện\nWPF XAML] -->|Binding| VM(ViewModel)
+    VM -->|ICommand| Svc{Service}
+    Cmd[Lệnh\nCommandMethod] -->|prompt xong mới gọi| Svc
     Svc -->|ICadContext\nTryExecute| CAD[(AutoCAD\nDatabase)]
 ```
 
-> [!CAUTION]
-> Giao diện (Màu xanh) chỉ quan tâm đến việc hiển thị. AutoCAD Database (Màu đỏ) chỉ quan tâm đến lưu trữ nét vẽ. Việc lấy biến `TextBox.Text` và ép kiểu ngay bên trong thân hàm AutoCAD Transaction là **tội ác** trong kiến trúc MVVM. Luôn dùng `ViewModel` và Data Binding làm trung gian!
+- **View** chỉ hiển thị và binding. Không đọc `TextBox.Text` để vẽ.
+- **Lệnh** hỏi người dùng (prompt) **trước**, rồi gọi Service.
+- **Service** là nơi duy nhất chạm bản vẽ, qua `ICadContext`. Service không prompt, vì nó còn được gọi từ palette.
 
-### Async/Await: Phép Ẩn Dụ "Nhà Hàng & Bồi Bàn"
-AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao diện. Hãy tưởng tượng AutoCAD là một **Người Bồi Bàn (UI Thread)** duy nhất trong nhà hàng.
-* ⛔ **Code Đồng Bộ (Đợi chết trân):** Bồi bàn đứng nguyên tại bếp chờ 30 phút thịt chín mới đem ra. Khách khác bị bỏ lơ (AutoCAD Not Responding).
-* ✅ **Code Bất Đồng Bộ (Async/Await):** Bạn yêu cầu nướng thịt (`Task`). Bồi bàn giao việc, ghi chú lại bằng chữ `await`, rồi quay ra phục vụ khách khác. Khi thịt chín, bồi bàn sẽ quay lại lấy thịt. Đừng bao giờ dùng `Thread.Sleep()`.
+Vì sao phải tách như vậy, và cái giá nếu không tách: [R05 — Golden Sample](R05_GOLDEN_SAMPLE.md).
 
 ---
 
-## 1.3 Lộ Trình Cho Người Mới (Fresher Roadmap) & Bài Toán Thực Tế
+## 6. Đọc tiếp
 
-> [!TIP]
-> Lộ trình **đầy đủ** — Giai đoạn 0 nhập môn C# (6 tuần, cho người chưa biết lập trình) rồi 14 tuần từ Fresher đến Senior, gồm 3 tuần của nhánh UI (khung năng lực, 19 bài lab, đồ án, đề đánh giá) — nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần cho người đã biết C#.
-
-Để nhanh chóng làm chủ Framework, Fresher nên tự thực hành bài toán **Vẽ Tủ Điện MSB** với lộ trình 3 tuần sau:
-
-### Tuần 1: Tư Duy & Kiến Trúc
-- Đọc kỹ tài liệu này và Phần 2 (Kiến trúc cốt lõi). 
-- Mở [`AppBootstrapper.cs`](../Core/AppBootstrapper.cs) để xem "Menu" đăng ký các Services (`AddSingleton`, `AddTransient`).
-- Đọc [Phần 9: Golden Sample](09_GOLDEN_SAMPLE.md) và chạy thử lệnh `SAMPLE_GRID` / `SHOW_PALETTE` — đây là khuôn mẫu chuẩn để copy khi viết tính năng mới.
-
-### Tuần 2: Thực Hành "Vẽ Tủ Điện MSB"
-Đây là bài tập giúp bạn "chạm tay" vào toàn bộ luồng dữ liệu của Framework. Làm **đúng thứ tự tầng của Golden Sample**:
-1. **Model + logic thuần:**
-   - `TuDienSpec` (bất biến: `TenTu`, `ChieuRong`, `ChieuCao`) có `Validate()` trả về **danh sách** lỗi.
-   - `TuDienPlanner` tính toạ độ khung và vị trí chữ bằng `double`, **không** dùng kiểu AutoCAD.
-2. **Service (không prompt):**
-   - `ITuDienService` / `TuDienService` với hàm **đồng bộ** `CadResult<ObjectId> Draw(TuDienSpec spec, double x, double y)`.
-   - Bên trong: `_cadContext.TryExecute(scope => { scope.DrawRectangle(…); scope.DrawMText(…); }, undoMarkName: "Vẽ Tủ Điện")`.
-   - ⚠️ **Không** gọi `CadPromptHelper` trong Service: Service được gọi cả từ palette (application context), nơi không prompt được. **Không** dùng `ExecuteAsync` khi không có việc gì thật sự async.
-3. **Điểm vào:**
-   - Lệnh `VE_TU_DIEN`: `CadPromptHelper.GetPoint("Chọn điểm đặt tủ")` **trước**, rồi validate, rồi gọi service.
-   - `TuDienViewModel` + `TuDienControl.xaml`: nhập toạ độ trên form, nút *Vẽ* gắn `CanExecute` với `Validate()`.
-4. **Đăng Ký Khởi Tạo:**
-   - Service `AddSingleton`, ViewModel `AddTransient` trong `AppBootstrapper.ConfigureServices`.
-   - `[assembly: CommandClass]` trong `Properties/AssemblyInfo.cs` cho class lệnh mới.
-
-### Tuần 3: Trở Thành Senior
-- Tìm hiểu về XRecord (Phần 4). Gắn dữ liệu JSON (`TenTu`, `ChieuRong`, `ChieuCao`, kèm trường version) vào **khung tủ** bằng `scope.SetXRecord(...)` ngay trong lambda của Service.
-- Viết Unit Test: `TuDienSpec`/`TuDienPlanner` bằng xUnit thuần (kiểm **kết quả**), `TuDienService` bằng `FakeCadContext { ExecuteAction = false }` (kiểm **hợp đồng**: đúng một `TryExecute`, đúng undo mark), ViewModel bằng Mock `ITuDienService`.
-- Phiên bản đồ án đầy đủ: [T10 §3: Bộ công cụ Tủ điện MSB](training/T10_LABS_AND_ASSESSMENT.md#3-đồ-án-cuối-khóa-bộ-công-cụ-tủ-điện-msb).
+| Bạn muốn | Đọc |
+| :--- | :--- |
+| Hiểu vì sao kiến trúc như hiện tại | [R02 — Kiến trúc cốt lõi](R02_ARCHITECTURE.md) |
+| Bắt tay làm tính năng mới | [R05 — Golden Sample](R05_GOLDEN_SAMPLE.md), rồi [T08 — Công thức mở rộng](../training/T08_RECIPES_EXTENDING.md) |
+| Tra một hàm | [R03 — API](R03_API.md) |
+| Học có lộ trình, có lab và đánh giá | [Học viện CadCoreFramework](../training/README.md) |
