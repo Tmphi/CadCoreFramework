@@ -79,7 +79,7 @@ Nhờ vậy `GridPlannerTests` kiểm được *"ô B3 nằm ở (40, −20) và
 `GridSpec.Validate()` trả về **danh sách** lỗi (không throw) để UI hiển thị tất cả lỗi cùng lúc. Cả Command và ViewModel đều gọi nó — không nơi nào tự viết lại luật.
 
 - **ViewModel:** mỗi khi input đổi → `Revalidate()` → cập nhật `ValidationSummary`, `HasValidationErrors` và `DrawCommand.NotifyCanExecuteChanged()`. Nút *Vẽ* tự disable khi input sai.
-- **Ô số trên palette** bind vào property **chuỗi** (`RowsText`, `SpacingText`…), không bind thẳng vào số. ViewModel đọc chuỗi bằng `ViewModels/NumberText`: dấu chấm thập phân như dòng lệnh, không phụ thuộc culture của máy. Ô nào không đọc được thành số thì `Revalidate()` báo lỗi của ô đó, **trước** các lỗi của `GridSpec.Validate()`. Đây là luật về cách *gõ* số trên UI, không phải luật của lưới, nên nó không lặp lại luật nào của `GridSpec`. Bind thẳng vào số thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống (B-31/B-32, [U01 §5](training/U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
+- **Ô số trên palette** bind vào property **chuỗi** (`RowsText`, `SpacingText`…), không bind thẳng vào số. ViewModel đọc chuỗi bằng `ViewModels/NumberText`: dấu chấm thập phân như dòng lệnh, không phụ thuộc culture của máy. Ô nào không đọc được thành số thì `Revalidate()` báo lỗi của ô đó, **trước** các lỗi của `GridSpec.Validate()`. Đây là luật về cách *gõ* số trên UI, không phải luật của lưới. `GridSpec` vẫn tự chặn mọi giá trị sai, kể cả `NaN` và vô cực mà code nào đó truyền thẳng vào (B-34). Bind thẳng vào số thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống (B-31/B-32, [U01 §5](training/U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
 - **Command:** sau khi prompt xong → `Validate()` → in từng lỗi bằng `notify.Warn` và dừng.
 - **Planner:** gọi `Validate()` lần cuối và **throw** nếu sai — hàng rào bảo vệ khi có caller quên validate.
 
@@ -143,7 +143,7 @@ Code-behind chỉ làm hạ tầng: lấy ViewModel từ DI (fail-loud nếu thi
 
 | File | Số test | Kiểm gì |
 | :--- | :---: | :--- |
-| `GridSpecTests` | 18 | Mọi luật validate, báo đủ nhiều lỗi cùng lúc |
+| `GridSpecTests` | 23 | Mọi luật validate, kể cả `NaN`/vô cực ở khoảng cách, cỡ ô, cao chữ; báo đủ nhiều lỗi cùng lúc |
 | `GridPlannerTests` | 18 | Số ô, tọa độ, thứ tự, nhãn A…Z/AA…/AAA, spec sai |
 | `GridMarkerServiceTests` | 8 | Một `TryExecute` + đúng undo mark, không mở transaction khi rỗng, publish khi thành công / không publish khi lỗi, subscriber lỗi không làm hỏng kết quả |
 | `GridMarkerViewModelTests` | 23 | `CanExecute` theo validate, truyền đúng spec/cells, trạng thái thành công/lỗi/exception, message → refresh, Dispose → ngừng nghe; ô số: `2,5`, ô trống, `NaN` là lỗi, số ↔ chuỗi đồng bộ hai chiều |

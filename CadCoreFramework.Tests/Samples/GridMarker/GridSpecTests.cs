@@ -58,6 +58,21 @@ namespace CadCoreFramework.Tests.Samples.GridMarker
         }
 
         [Theory]
+        [InlineData(double.NaN, 15, 4)]
+        [InlineData(20, double.NaN, 4)]
+        [InlineData(20, 15, double.NaN)]
+        [InlineData(double.PositiveInfinity, 15, 4)]
+        [InlineData(double.PositiveInfinity, double.PositiveInfinity, 4)]
+        public void Validate_SizeNotAFiniteNumber_ReturnsError(double spacing, double cellSize, double textHeight)
+        {
+            // So sánh <, <=, >, >= với NaN luôn ra false, vô cực thì lọt qua "> 0": các luật so sánh không chặn được (B-34).
+            var spec = new GridSpec(2, 2, spacing, cellSize, textHeight);
+
+            spec.IsValid.Should().BeFalse("NaN và vô cực không phải kích thước (B-34)");
+            spec.Validate().Should().ContainSingle(e => e.Contains("số hữu hạn"));
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]

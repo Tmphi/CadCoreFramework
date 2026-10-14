@@ -211,7 +211,7 @@ WPF đổi chuỗi thành số theo `Language` của phần tử, **mặc địn
 | `1,5` | **15**, không báo lỗi | 1.5 |
 | `abc` hoặc ô trống | giữ 20, ô viền đỏ | giữ 20, ô viền đỏ |
 
-Trên palette thật, trước PR #11: gõ **`2,5`** vào ô KHOẢNG CÁCH thì `Spacing` thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`. WPF còn nhận cả chuỗi `NaN` (và `∞`) mà không báo lỗi: `Spacing` thành `NaN`, mà `GridSpec.Validate()` cũng không chặn ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
+Trên palette thật, trước PR #11: gõ **`2,5`** vào ô KHOẢNG CÁCH thì `Spacing` thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`. WPF còn nhận cả chuỗi `NaN` (và `∞`) mà không báo lỗi: `Spacing` thành `NaN`, mà `GridSpec.Validate()` khi đó cũng không chặn ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), sửa ở PR #13).
 
 Dòng lệnh AutoCAD thì khác: luôn dùng dấu chấm, vì dấu phẩy là dấu ngăn cách tọa độ (`10,5` là một điểm). Gõ `1,5` vào `GetDouble` thì AutoCAD **từ chối** (đã chạy thật trên AutoCAD 2024):
 

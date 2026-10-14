@@ -80,6 +80,9 @@ namespace CadCoreFramework.Samples.GridMarker
             if (Rows >= 1 && Columns >= 1 && CellCount > MaxCells)
                 errors.Add($"Tổng số ô ({CellCount}) vượt quá giới hạn {MaxCells}.");
 
+            // So sánh <, <=, >, >= với NaN luôn ra false, vô cực thì lọt qua "> 0": ba luật bên dưới không chặn được (B-34).
+            if (!IsFinite(Spacing) || !IsFinite(CellSize) || !IsFinite(TextHeight))
+                errors.Add("Khoảng cách, kích thước ô và chiều cao chữ phải là số hữu hạn (không phải NaN hay vô cực).");
             if (CellSize <= 0)
                 errors.Add("Kích thước ô phải lớn hơn 0.");
             if (Spacing < CellSize)
@@ -97,5 +100,8 @@ namespace CadCoreFramework.Samples.GridMarker
 
         /// <summary>True nếu <see cref="Validate"/> không trả về lỗi nào.</summary>
         public bool IsValid => Validate().Count == 0;
+
+        // Không dùng double.IsFinite: .NET Framework 4.8 (AutoCAD 2021–2024) chưa có hàm này.
+        private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }
 }
