@@ -653,6 +653,19 @@ Framework cung cấp hai cách:
 > [!NOTE]
 > Tài liệu cũ từng nói "100 Line trong 1 transaction cần 100 lần Ctrl+Z". Điều đó **không đúng trong một lệnh**, vì AutoCAD đã gom theo lệnh. `undoMarkName` chủ yếu có giá trị ở **application context** (thao tác từ palette). Đó là lý do mọi Service của Golden Sample luôn truyền `undoMarkName`: Service dùng chung cho cả lệnh lẫn palette.
 
+### ✅ Tự kiểm tra §9–11
+
+1. Bạn tạo `new Hatch()`, chỉnh vài thuộc tính, rồi một dòng ném exception trước khi append. Ai giải phóng phần C++ của `Hatch`? Nếu không ai, chuyện gì xảy ra?
+2. Khi người dùng xóa một khung ô, bạn muốn xóa luôn nhãn đi kèm. Vì sao không làm ngay trong handler `ObjectErased`, và làm ở đâu?
+3. Nút "Vẽ lưới" trên palette vẽ 100 ô. Người dùng nhấn Ctrl+Z một lần thì chỉ mất một phần. Thiếu gì?
+
+<details><summary>Đáp án</summary>
+
+1. Không ai, trừ khi bạn tự `Dispose()` nó: đối tượng ngoài database thuộc trách nhiệm của bạn. Để mặc thì finalizer sẽ hủy phần C++ trên finalizer thread, gây lỗi khó tái hiện ([§9](#9-bộ-nhớ-và-vòng-đời-đối-tượng)). Các hàm `Draw*` của framework tự làm việc này (`CadScopeDrawingHelpers.AppendNew`).
+2. Handler chạy *giữa* một thao tác của AutoCAD; sửa database lúc đó là không an toàn. Hãy gom `ObjectId` lại, rồi xử lý ở `Application.Idle` hoặc `CommandEnded` qua `ICadContext` ([§10.2](#102-năm-quy-tắc)).
+3. `undoMarkName`. Palette chạy ở application context nên AutoCAD không tự gom Undo theo lệnh; Service phải bao thao tác bằng undo mark ([§11](#11-undo)).
+</details>
+
 ---
 
 ## 12. Vòng đời plugin và cơ chế nạp assembly

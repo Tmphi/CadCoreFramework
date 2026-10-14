@@ -17,6 +17,17 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 >
 > Nếu bạn thấy tài liệu lệch với code: **code là sự thật**. Hãy sửa tài liệu bằng một PR. Đó cũng là một bài tập.
 
+### Bắt đầu từ đâu?
+
+| Bạn là | Bắt đầu ở | Lộ trình |
+| :--- | :--- | :--- |
+| Chưa từng lập trình | [C00 — Bắt đầu từ đây](C00_START_HERE.md) | Giai đoạn 0 (6 tuần) rồi Giai đoạn 1–3: khoảng 20 tuần |
+| Biết một ngôn ngữ khác, chưa biết C# | [Bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) | Thường 2 tuần cho C01–C05, rồi Giai đoạn 1–3 |
+| Vững C#, mới với AutoCAD .NET | [Đồ án nhập môn](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện), rồi [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) | Giai đoạn 1–3: 12–14 tuần ([§3](#3-lộ-trình-đào-tạo)) |
+| Đã làm AutoCAD .NET, mới vào dự án | [T02](T02_ARCHITECTURE_DEEP_DIVE.md) → [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) → [T08](T08_RECIPES_EXTENDING.md) | Đọc theo thứ tự đó; gặp sự cố thì tra [T03](T03_PITFALLS_CASEBOOK.md) |
+| Cần làm giao diện: palette, hộp thoại, xem trước | [U00 — Nhánh UI](U00_UI_START_HERE.md), sau [T01 §5 và §7](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) | Nhánh UI: 3 tuần |
+| Mentor | [§6 — Dành cho mentor](#6-dành-cho-mentor) | — |
+
 ---
 
 ## 1. Bộ tài liệu gồm những gì
@@ -42,7 +53,7 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | [T09 — Sổ tay Senior](T09_SENIOR_PLAYBOOK.md) | ADR (vì sao kiến trúc như hiện tại), checklist code review, **backlog kỹ thuật đã kiểm chứng**, lộ trình kiến trúc | 🌳 → 🏔️ |
 | [T10 — Bài lab & đánh giá](T10_LABS_AND_ASSESSMENT.md) | 19 bài lab có tiêu chí đạt, đồ án cuối khóa, ngân hàng câu hỏi, đề đánh giá lên cấp | Mọi cấp |
 | **Nhánh UI — giao diện & vẽ thực thể lên UI** (tuần 7–9 của Giai đoạn 2) | | |
-| [U00 — Nhánh UI: bắt đầu từ đây](U00_UI_START_HERE.md) | Bản đồ UI của tool AutoCAD, quy tắc 20/80 (đếm trên code công khai và trong dự án), 6 quy tắc vàng, lộ trình 3 tuần, bài kiểm tra đầu vào | 🌱 → 🌳 |
+| [U00 — Nhánh UI: bắt đầu từ đây](U00_UI_START_HERE.md) | Bản đồ UI của tool AutoCAD, quy tắc 20/80 (đếm trên code công khai và trong dự án), 7 quy tắc vàng, lộ trình 3 tuần, bài kiểm tra đầu vào | 🌱 → 🌳 |
 | [U01 — WPF & MVVM](U01_WPF_MVVM_BASICS.md) | XAML, `Grid`/`StackPanel`, 8 control, binding, **3 bẫy nhập số** (đã kiểm trên palette thật), CommunityToolkit.Mvvm, `ObservableCollection`, luồng, theme; không cần AutoCAD | 🌱 → 🌿 |
 | [U02 — UI trong AutoCAD](U02_UI_IN_AUTOCAD.md) | Chọn bề mặt UI; prompt (mặc định, từ khóa, UCS); palette; hộp thoại modal có nút chọn điểm; Ribbon; chọn sẵn và zoom; bẫy | 🌱 → 🌳 |
 | [U03 — Vẽ thực thể lên UI](U03_DRAWING_ON_UI.md) | Một kế hoạch, hai nơi vẽ; biến đổi tọa độ; control `CadPreview`; khung xem trước cho Golden Sample; đọc entity và block thành hình; jig, transient; hiệu năng; bẫy | 🌿 → 🌳 |
@@ -184,9 +195,12 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - **C00–C05 trích nguyên văn code dự án** (nhiều nhất ở [C04 §12](C04_CSHARP_IN_THIS_PROJECT.md#12-giải-mã-dòng-code-thật) và [C03 §9](C03_OBJECT_ORIENTED.md#9-đọc-có-hướng-dẫn-gridspeccs)). PR đổi `GridSpec`, `GridPlanner`, `GridMarkerService`, `CadContext`, `RibbonService`, `ThemeManager`, `SelectionFilterBuilder` hay `DrawLine` phải kiểm lại các trích dẫn đó. Bảng số liệu 20/80 ở [C00 §1](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) đếm lại được bằng lệnh ghi ngay dưới bảng.
 - Ví dụ trong C01–C05 là chương trình hoàn chỉnh, đã chạy trên .NET 8 với `<LangVersion>10.0</LangVersion>`; kết quả ghi trong tài liệu là kết quả thật. Sửa ví dụ thì chạy lại trước khi commit.
 - **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
-- Trạng thái kiểm chứng của bộ tài liệu: viết dựa trên `main` tại thời điểm phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab — 2026-10-13/14). Các mục chỉ AutoCAD GUI kiểm được (T05 smoke 13–17: theme, Ribbon, vị trí palette, async nhiều bản vẽ, ô nhập số trên palette) đã được kiểm trên AutoCAD 2024 ngày 2026-10-14. Chỗ nào mô tả hành vi của v1.0.0 thì ghi rõ "trên v1.0.0". Giai đoạn 0 (C00–C05) thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày. Nhánh UI (U00–U03) thêm cùng ngày, với các kiểm chứng sau:
-  - Hành vi WPF chạy thật trên net48 và net8.
-  - Các bước của U03 áp vào một bản sao của dự án: build `-warnaserror` sạch, test xanh, ảnh palette render từ chính palette đó. Áp lại trên code của PR #11: 330/330 test, ảnh trùng từng byte.
-  - Hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 20/20 trên code của PR #11).
-  - PR #11 (sửa B-31…B-33, 2026-10-14) cập nhật các chỗ nhắc tới ba lỗi đó. Phần mô tả hành vi trước khi sửa ghi rõ "trước PR #11". Bản sửa đã được kiểm trong AutoCAD 2024 có giao diện cùng ngày: T05 smoke 17 và bước từ khóa của `DEMO_PROMPT`.
-  - Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm trên AutoCAD 2024 ngày 2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của tài liệu: palette có khung xem trước, xem trước đối tượng đang chọn, transient, hộp thoại chọn điểm, chọn sẵn và zoom từ application context. Danh sách chi tiết ở cuối U02 và U03.
+### Trạng thái kiểm chứng
+
+| Phần | Kiểm chứng thế nào |
+| :--- | :--- |
+| T01–T10 | Viết dựa trên `main` lúc phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab). Chỗ mô tả hành vi của v1.0.0 ghi rõ "trên v1.0.0". Các bước chỉ AutoCAD có giao diện mới kiểm được (T05 smoke 13–17: theme, Ribbon, vị trí palette, async nhiều bản vẽ, ô nhập số) đã kiểm trên AutoCAD 2024 ngày 2026-10-14 |
+| C00–C05 (Giai đoạn 0) | Thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày |
+| U00–U03 (nhánh UI) | Thêm cùng ngày. Hành vi WPF chạy thật trên net48 và net8. Các bước của U03 áp vào một bản sao của dự án; áp lại trên code của PR #11: 330/330 test, ảnh palette trùng từng byte. Hành vi AutoCAD chạy trong accoreconsole (HeadlessLab 20/20). Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm bằng một DLL kiểm thử chứa nguyên văn code của tài liệu (danh sách ở cuối U02 và U03) |
+| PR #11, #13 | Sửa B-31…B-34. Hành vi trước khi sửa được ghi rõ "trước PR #11". Bản sửa đã kiểm trong AutoCAD 2024 có giao diện: T05 smoke 17 và bước từ khóa của `DEMO_PROMPT` |
+| Rà soát toàn bộ (PR #14, 2026-10-14) | Link và anchor; mọi khối code đối chiếu với nguồn; công thức T08 biên dịch thử trong một bản sao dự án; 68 ví dụ của Giai đoạn 0 chạy lại, output không đổi; số liệu đo lại (số test, coverage); sửa các chỗ đã lệch với code |

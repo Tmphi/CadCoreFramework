@@ -11,6 +11,21 @@ Plugin AutoCAD **không thể** unit test theo kiểu thông thường: hầu h�
 
 ---
 
+## Mục lục
+
+1. [Vì sao khó](#1-vì-sao-khó)
+2. [Kim tự tháp test của dự án](#2-kim-tự-tháp-test-của-dự-án)
+3. [Logic thuần: kiểm kết quả](#3-logic-thuần-kiểm-kết-quả)
+4. [Lớp vỏ AutoCAD: `FakeCadContext` kiểm hợp đồng](#4-lớp-vỏ-autocad-fakecadcontext-kiểm-hợp-đồng)
+5. [ViewModel: Mock service](#5-viewmodel-mock-service)
+6. [XAML palette trên STA](#6-xaml-palette-trên-sta)
+7. [Những gì chỉ AutoCAD thật mới kiểm được](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)
+8. [Chạy test và coverage](#8-chạy-test-và-coverage)
+9. [Integration test headless: hiện trạng và hướng đi](#9-integration-test-headless-hiện-trạng-và-hướng-đi)
+10. [Quy tắc viết test](#10-quy-tắc-viết-test)
+
+---
+
 ## 1. Vì sao khó
 
 | Có trong test process (`dotnet test`) | Không có |
@@ -41,7 +56,7 @@ flowchart TB
 | Logic thuần | **Nhiều nhất** | ms | Sai công thức, biên, validate | Tương tác AutoCAD |
 | Vỏ AutoCAD (FakeCadContext) | Vừa | ms | Gọi sai overload, sai undo mark, publish sai thời điểm, không xử lý lỗi | Nội dung lambda |
 | ViewModel (Mock) | Vừa | ms | `CanExecute`, trạng thái, subscription | Binding XAML |
-| XAML (STA) | 1 / palette (+ test theme chung) | 100 ms | XAML sai, resource thiếu ở theme nào, DI chưa đăng ký | Hành vi trong PaletteSet thật |
+| XAML (STA) | 1 / palette (+ test theme chung) | 100 ms | XAML sai, resource thiếu ở theme nào, DI chưa đăng ký, ô số bind sai kiểu | Hành vi trong PaletteSet thật |
 | HeadlessLab | 1 / hành vi API đáng ngờ | giây | Hành vi **thật** của API AutoCAD (Erase, DeepClone, căn attribute, wildcard, in PDF…) | Lệnh, palette, Ribbon, `CadContext`; chỉ chạy trên máy có AutoCAD ([§9](#9-integration-test-headless-hiện-trạng-và-hướng-đi)) |
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
@@ -56,7 +71,7 @@ Tổng hiện tại (sau PR #13): **320 test × 2 runtime** (`net48`, `net8.0-wi
 Tên test mô tả **hành vi**, không mô tả cách cài đặt: `Plan_FirstCellIsAtOrigin`, `Plan_ColumnsGoRight_RowsGoDown`, `Plan_IsRowMajorOrdered`, `ToRowLetters_MatchesSpreadsheetConvention`, `Plan_InvalidSpec_ThrowsWithValidationMessage`.
 
 ```csharp
-// Nguyên văn từ GridPlannerTests.cs
+// Từ GridPlannerTests.cs — code nguyên văn; chú thích cuối dòng là của tài liệu
 [Fact]
 public void Plan_ColumnsGoRight_RowsGoDown()
 {
@@ -91,7 +106,7 @@ Kỹ thuật nên dùng:
 | `LastScope.AppendedEntities` | Chỉ dùng khi lambda tự tạo entity mà không cần lõi C++ (hiếm) |
 
 ```csharp
-// Nguyên văn từ GridMarkerServiceTests.cs
+// Từ GridMarkerServiceTests.cs — code nguyên văn; chú thích cuối dòng là của tài liệu
 private readonly FakeCadContext _ctx = new FakeCadContext { ExecuteAction = false };
 
 [Fact]
@@ -128,7 +143,8 @@ Các kịch bản *hợp đồng* đáng test cho mọi Service:
 Các test thật: `NewViewModel_DefaultsAreValid_DrawEnabled`, `InvalidInput_DisablesDraw_AndShowsErrors`, `FixingInput_ReenablesDraw`, `InputChange_RaisesCanExecuteChanged`, `Draw_PassesSpecAndPlannedCellsToService`, `Draw_ServiceReturnsFail_SetsErrorStatus`, `Draw_ServiceThrows_SetsErrorStatus_DoesNotCrash`, `GridDrawnMessage_RefreshesMarkerCount`, `Dispose_StopsListeningToMessages`, `Constructor_NullDependency_Throws`. Từ PR #11, ô số bind vào chuỗi ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)), nên có thêm các test như `CommaDecimal_IsAnError_NotTwentyFive`, `UnreadableRows_DisablesDraw_InsteadOfKeepingTheOldValue` và `SettingANumberFromCode_UpdatesTheText`.
 
 ```csharp
-// Nguyên văn từ GridMarkerViewModelTests.cs (_events là EventAggregator thật, _service là Mock<IGridMarkerService>)
+// Từ GridMarkerViewModelTests.cs — code nguyên văn; chú thích cuối dòng là của tài liệu
+// (_events là EventAggregator thật, _service là Mock<IGridMarkerService>)
 [Fact]
 public void Dispose_StopsListeningToMessages()
 {
@@ -216,7 +232,7 @@ dotnet tool restore
 dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"Html"
 ```
 
-**Coverage hiện khoảng 16% (line).** Con số thấp là **có lý do**: phần lớn code (Extensions, Utils, Core vỏ) gọi thẳng AutoCAD API nên không chạy được ngoài AutoCAD. Đừng chạy theo con số. Hãy đặt câu hỏi: *"logic nào đang kẹt trong lambda mà lẽ ra phải tách ra?"* Mỗi lần tách được một Planner là một lần coverage tăng **có ý nghĩa**.
+**Coverage hiện khoảng 21% (line).** Số đo bằng chính lệnh trên, ngày 2026-10-14 sau PR #13: 1.257/5.884 dòng, như nhau ở cả hai TFM. Con số thấp là **có lý do**: phần lớn code (Extensions, Utils, Core vỏ) gọi thẳng AutoCAD API nên không chạy được ngoài AutoCAD. Đừng chạy theo con số. Hãy đặt câu hỏi: *"logic nào đang kẹt trong lambda mà lẽ ra phải tách ra?"* Mỗi lần tách được một Planner là một lần coverage tăng **có ý nghĩa**.
 
 ---
 

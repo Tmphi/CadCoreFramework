@@ -189,6 +189,8 @@ Console.WriteLine(1.5.ToString(CultureInfo.InvariantCulture)); // 1.5 trên mọ
 
 > ⚠️ **Bẫy:** đọc số từ **file**, Excel, mạng (dữ liệu dùng chung giữa các máy) thì **luôn** truyền `CultureInfo.InvariantCulture`. Không thì cùng một file, máy định dạng Mỹ đọc ra 1,5 mm, máy định dạng Việt Nam đọc ra 15 mm. Còn số **hiển thị cho người dùng** thì để mặc định (theo máy của họ). 🔎 Dự án làm đúng điều này: [`CadApplicationHelper.IsDarkColorTheme`](../../Utils/CadApplicationHelper.cs) đổi số bằng `CultureInfo.InvariantCulture`.
 
+Dự án cũng từng dính một biến thể của bẫy này: ô số trên palette Grid Marker đọc theo định dạng **Mỹ**, nên người dùng gõ `2,5` thì thành **25** (backlog B-31, [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Bản sửa đọc mọi ô số bằng `CultureInfo.InvariantCulture`, trong [`ViewModels/NumberText.cs`](../../ViewModels/NumberText.cs). Bài học chung: chỗ nào **đổi chữ thành số**, hãy tự hỏi "đang dùng định dạng của ai?".
+
 ---
 
 ## 6. Ra quyết định: if, else, switch

@@ -227,11 +227,11 @@ dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj
 Build cần bộ **.NET Framework 4.8** (đích của plugin cho AutoCAD 2024). Cài Visual Studio 2022 với workload ".NET desktop development" là có sẵn; dùng VS Code thì cài thêm *.NET Framework 4.8 Developer Pack*. Kết quả `dotnet test`:
 
 ```text
-Passed!  - Failed:     0, Passed:   275, Skipped:     0, Total:   275, Duration: 3 s - CadCoreFramework.Tests.dll (net8.0)
-Passed!  - Failed:     0, Passed:   275, Skipped:     0, Total:   275, Duration: 5 s - CadCoreFramework.Tests.dll (net48)
+Passed!  - Failed:     0, Passed:   320, Skipped:     0, Total:   320, Duration: 2 s - CadCoreFramework.Tests.dll (net8.0)
+Passed!  - Failed:     0, Passed:   320, Skipped:     0, Total:   320, Duration: 4 s - CadCoreFramework.Tests.dll (net48)
 ```
 
-(Con số 275 là tại thời điểm viết, ngày 2026-10-14; test sẽ nhiều thêm theo thời gian.) Test chạy **hai lần**, một lần cho mỗi đích (`net48` và `net8.0-windows`), và cả bộ chạy trong vài giây. Chạy riêng phần Golden Sample:
+(Con số 320 là của `main` sau PR #13, ngày 2026-10-14; test sẽ nhiều thêm theo thời gian, nên máy bạn có thể ra số lớn hơn.) Test chạy **hai lần**, một lần cho mỗi đích (`net48` và `net8.0-windows`), và cả bộ chạy trong vài giây. Chạy riêng phần Golden Sample:
 
 ```powershell
 dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj --filter "FullyQualifiedName~GridPlanner"
@@ -273,9 +273,9 @@ dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj --filter "Fully
 ```
 
 ```text
-  Failed CadCoreFramework.Tests.Samples.GridMarker.GridPlannerTests.Plan_InvalidSpec_ThrowsWithValidationMessage [331 ms]
+  Failed CadCoreFramework.Tests.Samples.GridMarker.GridPlannerTests.Plan_InvalidSpec_ThrowsWithValidationMessage [340 ms]
    Expected exception message to match the equivalent of "*Số hàng*", but "Số dòng phải trong khoảng 1–100. (Parameter 'spec')" does not.
-Failed!  - Failed:     1, Passed:    35, Skipped:     0, Total:    36, …
+Failed!  - Failed:     1, Passed:    40, Skipped:     0, Total:    41, …
 ```
 
 Một chữ trong thông báo cho người dùng bị đổi là có test báo ngay. (`|` trong `--filter` nghĩa là "hoặc"; `-f net8.0-windows` chỉ chạy một đích cho nhanh.) Ngược lại, đổi `MaxDimension = 100` thành `99` thì **không** test nào fail: `GridSpecTests` viết `GridSpec.MaxDimension + 1` thay vì số cứng `101`, nên luôn kiểm đúng biên mới. Xong thì **hoàn tác**: `git checkout -- Samples/GridMarker/GridSpec.cs`.

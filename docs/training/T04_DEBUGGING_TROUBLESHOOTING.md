@@ -15,6 +15,22 @@ Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên t
 > 5. Sửa, rồi **chứng minh** bản sửa (test fail trước, pass sau).
 > 6. Ghi **incident report** ([§8](#8-mẫu-báo-cáo-sự-cố-incident-report)) và thêm mục vào T03 nếu đáng.
 
+**Đang gặp sự cố cụ thể?** Vào thẳng [§9 — Cây quyết định](#9-cây-quyết-định-triệu-chứng--nguyên-nhân), hoặc [bảng tra nhanh của T03](T03_PITFALLS_CASEBOOK.md#tra-nhanh-theo-triệu-chứng).
+
+---
+
+## Mục lục
+
+1. [Hộp đồ nghề chẩn đoán](#1-hộp-đồ-nghề-chẩn-đoán)
+2. [Vòng lặp phát triển: build → nạp → thử](#2-vòng-lặp-phát-triển-build--nạp--thử)
+3. [Gắn debugger vào AutoCAD](#3-gắn-debugger-vào-autocad)
+4. [Log, Debug Inspector, CommandHistory](#4-log-debug-inspector-commandhistory)
+5. [Đọc lỗi AutoCAD & phân tích crash](#5-đọc-lỗi-autocad--phân-tích-crash)
+6. [Kiểm chứng API bằng metadata](#6-kiểm-chứng-api-bằng-metadata)
+7. [Chẩn đoán nạp assembly](#7-chẩn-đoán-nạp-assembly)
+8. [Mẫu báo cáo sự cố (incident report)](#8-mẫu-báo-cáo-sự-cố-incident-report)
+9. [Cây quyết định: triệu chứng → nguyên nhân](#9-cây-quyết-định-triệu-chứng--nguyên-nhân)
+
 ---
 
 ## 1. Hộp đồ nghề chẩn đoán
@@ -277,6 +293,8 @@ Mục "Vì sao không bị phát hiện sớm hơn" là mục **quan trọng nh�
 | 14 | *"… được gọi từ thread N, không phải main thread của AutoCAD"* | Gọi `ICadContext` từ thread nền: `Task.Run`, `System.Timers.Timer`, `ConfigureAwait(false)`, hoặc phần sau `await` không có `SynchronizationContext` ([T03 B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền)). Đây là guard `CadThread` báo đúng chỗ — đừng tắt nó |
 | 15 | `ArgumentException` *"Tên ký hiệu '…' chứa ký tự không hợp lệ"* | Tên layer/block/style từ người dùng hoặc dữ liệu ngoài chứa `< > / \ " : ; ? * \| , = `` ` ``; validate ở tầng Model (`SymbolNameRules`) trước khi vẽ |
 | 16 | Lệnh async **không vẽ gì** khi người dùng chuyển bản vẽ trong lúc chờ (không chuyển thì chạy đúng) | Mở log hôm nay: `eNotApplicable` tại `Editor.WriteMessage` / `Regen` / `Get*` → code gọi Editor của bản vẽ không còn active trong giai đoạn vẽ ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)). Lỗi **không hiện** trên màn hình là manh mối: thông báo cũng bị ghi vào bản vẽ không active |
+| 17 | Palette đọc sai số: gõ `2,5` thành 25, hoặc xóa trắng ô số mà nút Vẽ vẫn bật | Ô số đang bind thẳng vào `int`/`double`: WPF đổi số theo `Language` mặc định `en-US`, và giữ số cũ khi không đổi được. Bind vào chuỗi rồi đọc bằng `NumberText` ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)). Test `EveryPaletteTextBox_BindsToAStringProperty` bắt lỗi này ở mọi palette |
+| 18 | Câu nhắc in danh sách từ khóa hai lần: `[Yes/No] [Yes/No] <Yes>:` | Câu nhắc tự viết thêm `[…]` trong khi AutoCAD đã tự nối (`AppendKeywordsToMessage` mặc định `true`) ([T03 B36](T03_PITFALLS_CASEBOOK.md#b36-danh-sách-từ-khóa-in-hai-lần)) |
 
 ---
 

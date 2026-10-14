@@ -8,6 +8,20 @@ Code chạy được trên máy bạn mới là một nửa. Nửa còn lại l�
 
 ---
 
+## Mục lục
+
+1. [Cấu trúc solution](#1-cấu-trúc-solution)
+2. [Giải phẫu `CadCoreFramework.csproj`](#2-giải-phẫu-cadcoreframeworkcsproj)
+3. [Build và chất lượng mã](#3-build-và-chất-lượng-mã)
+4. [CI: `build-and-test.yml`](#4-ci-build-and-testyml)
+5. [Quy trình phát hành (release)](#5-quy-trình-phát-hành-release)
+6. [Bundle Autoloader và cài đặt](#6-bundle-autoloader-và-cài-đặt)
+7. [Chính sách dependency](#7-chính-sách-dependency)
+8. [Template: tạo dự án mới](#8-template-tạo-dự-án-mới)
+9. [Quy trình Git](#9-quy-trình-git)
+
+---
+
 ## 1. Cấu trúc solution
 
 | Project | Target | Vai trò | Đóng gói vào plugin? |
@@ -109,7 +123,7 @@ flowchart LR
 | # | Việc | Ai |
 | :---: | :--- | :--- |
 | 1 | `main` xanh CI, không còn PR dở dang cho bản này | Người phát hành |
-| 2 | **HeadlessLab** (`.\tests\integration\run-headless-lab.ps1`) exit 0, rồi **smoke test thủ công** 16 bước ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) trên AutoCAD sạch, từ commit sắp gắn tag | Người phát hành |
+| 2 | **HeadlessLab** (`.\tests\integration\run-headless-lab.ps1`) exit 0, rồi **smoke test thủ công** 17 bước ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) trên AutoCAD sạch, từ commit sắp gắn tag | Người phát hành |
 | 3 | Chạy `package.ps1` **trên bản sao** của repo (không làm bẩn `dist/` thật), đọc lại mọi file người dùng sẽ thấy: `HDSD.txt`, thông điệp `Install.bat` ([A12](T03_PITFALLS_CASEBOOK.md#a12-gói-phát-hành-kèm-hướng-dẫn-của-một-sản-phẩm-khác)) | Người phát hành |
 | 4 | Thử `Install.bat`/`Uninstall.bat` với `APPDATA` trỏ thư mục tạm | Người phát hành |
 | 5 | PR đổi CHANGELOG `[Unreleased]` → `[x.y.z] — ngày`; merge | Owner merge |
@@ -140,7 +154,7 @@ CadCoreFramework.bundle/
 | `RuntimeRequirements SeriesMin/SeriesMax` | Dải phiên bản AutoCAD áp dụng (R24.0–R24.3 cho net48; R25.0–R26.0 cho net8) |
 | `ComponentEntry ModuleName` | Đường dẫn DLL **tương đối với bundle** |
 | `LoadOnAutoCADStartup="True"` | Nạp khi AutoCAD khởi động |
-| `<Commands>` | Khai báo lệnh cho cơ chế demand-load. Hiện chỉ liệt kê 3 lệnh; nếu chuyển sang demand-load phải liệt kê đủ |
+| `<Commands>` | Khai báo lệnh cho cơ chế demand-load. Mỗi `ComponentEntry` (net48, net8) liệt kê **đúng** mọi lệnh không phải demo (hiện 9 lệnh). Test `PackageManifestTests` quét `[CommandMethod]` trong mã nguồn và đỏ nếu thiếu hay thừa lệnh |
 
 - [`Install.bat`](../../Deployment/Install.bat): copy bundle vào `%APPDATA%\Autodesk\ApplicationPlugins\` (theo người dùng, không cần admin). [`Uninstall.bat`](../../Deployment/Uninstall.bat) xóa nó.
 - `Deployment/installer/`: khung MSI bằng WiX 4 (tùy chọn) cho người cần trình cài đặt chuẩn Windows.

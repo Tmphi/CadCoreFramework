@@ -38,6 +38,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **Event** (`+=` / `-=`) | Cơ chế báo tin cho những ai đăng ký; gỡ bằng đúng delegate đã đăng ký | [C04 §9](C04_CSHARP_IN_THIS_PROJECT.md#9-event-báo-tin-cho-người-đăng-ký) |
 | **Exception** (`throw`, `try`/`catch`/`finally`) | Báo lỗi và bắt lỗi | [C04 §7](C04_CSHARP_IN_THIS_PROJECT.md#7-exception-báo-lỗi-đúng-cách) |
 | **Extension method** | Hàm `static` có `this` ở tham số đầu, gọi như hàm của kiểu đó: `scope.DrawLine(…)` | [C04 §5](C04_CSHARP_IN_THIS_PROJECT.md#5-extension-method-thêm-hàm-cho-kiểu-có-sẵn) |
+| **Fail trước, pass sau** (fail-before) | Quy tắc khi sửa lỗi: viết test (hoặc bước tái hiện), chạy nó trên code **cũ** và thấy nó FAIL, rồi mới sửa cho nó pass. Đó là bằng chứng test thật sự bắt được lỗi | [T05 §10](T05_TESTING_STRATEGY.md#10-quy-tắc-viết-test) |
 | **Field / Property** | Biến bên trong object / "mặt tiền" dữ liệu của object (`{ get; }`) | [C03 §2](C03_OBJECT_ORIENTED.md#2-property-và-constructor) |
 | **Generic** (`<T>`, `where`) | Code viết một lần cho nhiều kiểu; `where` giới hạn kiểu được dùng | [C04 §6](C04_CSHARP_IN_THIS_PROJECT.md#6-generic-một-code-cho-nhiều-kiểu) |
 | **Immutable** (bất biến) | Tạo xong không đổi được nữa (`GridSpec`, `Point3d`, `string`) | [C03 §3](C03_OBJECT_ORIENTED.md#3-đóng-gói-đối-tượng-tự-giữ-luật-của-mình) |
@@ -49,8 +50,10 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **`List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>`** | Danh sách sửa được / chỉ đọc, có `Count` và `[i]` / chỉ duyệt được | [C02 §3](C02_DATA_AND_COLLECTIONS.md#3-list-danh-sách-co-giãn), [C02 §5](C02_DATA_AND_COLLECTIONS.md#5-trả-về-danh-sách-chỉ-đọc-ireadonlylist) |
 | **Main thread / ThreadPool** | Thread chính của AutoCAD — nơi duy nhất được chạm API / bể thread nền | [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) |
 | **Method** (hàm), **parameter** (tham số), **return value** | Khối lệnh có tên, nhận tham số, trả kết quả | [C01 §8](C01_FIRST_PROGRAM.md#8-hàm-method) |
+| **Mock / Fake** (bản giả) | Đối tượng thay cho phụ thuộc thật trong test. *Mock* (thư viện Moq) dựng sẵn kết quả và ghi lại lời gọi; *Fake* là bản viết tay chạy được, như `FakeCadContext` | [C03 §6](C03_OBJECT_ORIENTED.md#6-interface-hợp-đồng-và-bản-giả), [T05 §4](T05_TESTING_STRATEGY.md#4-lớp-vỏ-autocad-fakecadcontext-kiểm-hợp-đồng) |
 | **Namespace / `using`** | Nhóm tên của các class / cho phép gọi tắt tên | [C03 §5](C03_OBJECT_ORIENTED.md#5-namespace-using-và-phạm-vi-truy-cập) |
 | **`nameof`** | Lấy tên biến, hàm thành chuỗi — đổi tên không bị sót | [C04 §11](C04_CSHARP_IN_THIS_PROJECT.md#11-cú-pháp-nhỏ-hay-gặp-is-nameof-tuple) |
+| **NaN** (`double.NaN`) | *Not a Number*: giá trị đặc biệt của `double`, ví dụ kết quả của `0.0 / 0.0`. So sánh `<`, `<=`, `>`, `>=`, `==` với `NaN` đều ra `false` (chỉ `!=` ra `true`), nên luật `x <= 0` không bắt được nó; kiểm bằng `double.IsNaN` | [C03 §9](C03_OBJECT_ORIENTED.md#9-đọc-có-hướng-dẫn-gridspeccs) |
 | **NuGet package** | Thư viện cài vào project bằng `dotnet add package` | [C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit) |
 | **`null`, `?.`, `??`, `NullReferenceException`** | "Không có đối tượng", các toán tử xử lý nó, và lỗi khi quên xử lý | [C02 §6](C02_DATA_AND_COLLECTIONS.md#6-null-giá-trị-không-có) |
 | **Nullable** (`string?`, `short?`) | Ghi chú hoặc kiểu cho phép null; dự án đặt `<Nullable>annotations</Nullable>` | [C02 §6](C02_DATA_AND_COLLECTIONS.md#6-null-giá-trị-không-có) |
@@ -84,6 +87,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **AssemblyResolve** | Sự kiện CLR gọi khi không tự tìm được DLL phụ thuộc | [T01 §12.4](T01_AUTOCAD_NET_FOUNDATIONS.md#124-phân-giải-assembly-phụ-thuộc) |
 | **Attribute definition / reference** | Định nghĩa thuộc tính trong block / giá trị thuộc tính trên từng lần chèn | [`BlockHelper`](../../Utils/BlockHelper.cs) |
 | **Autoloader / Bundle** | Cơ chế tự nạp plugin từ thư mục `*.bundle` + `PackageContents.xml` | [T06 §6](T06_BUILD_RELEASE_DEVOPS.md#6-bundle-autoloader-và-cài-đặt) |
+| **Backlog** (`B-xx`) | Danh sách vấn đề thật đã kiểm chứng trong code, mã `B-01`, `B-02`…: mỗi mục có mức độ, bằng chứng, hướng sửa, trạng thái và PR đã sửa | [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) |
 | **Block definition** (`BlockTableRecord`) | Định nghĩa block; cũng là "nhà" của Model Space / Paper Space | [T01 §3.3](T01_AUTOCAD_NET_FOUNDATIONS.md#33-blocktablerecord-mọi-entity-đều-có-nhà) |
 | **Block reference** | Một lần chèn block vào bản vẽ | — |
 | **CAD001 / CAD002 / CAD003** | Analyzer của dự án: không `MdiActiveDocument` / không prompt trong Service-ViewModel; không ghi trong `ExecuteRead` | [T02 §11](T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001cad003) |
@@ -97,6 +101,7 @@ Trong code và khi trao đổi, **giữ nguyên thuật ngữ tiếng Anh**. Ph�
 | **DeepClone / WblockClone** | Sao chép sâu trong một database / giữa hai database | [T01 §9.1](T01_AUTOCAD_NET_FOUNDATIONS.md#91-sao-chép-đối-tượng-clone-vs-deepcloneobjects) |
 | **Document** | Một tab bản vẽ đang mở: Database + Editor + lock | [T01 §2](T01_AUTOCAD_NET_FOUNDATIONS.md#2-object-model-application--document--database) |
 | **Document lock** | Khóa bản vẽ để ghi; bắt buộc ở application context | [T01 §5.2](T01_AUTOCAD_NET_FOUNDATIONS.md#52-documentlock-và-documentlockmode) |
+| **DoD** (Definition of Done) | Tiêu chí đạt của một lab, đồ án hay PR. Chưa đủ mọi mục thì việc đó chưa xong | [T10 §1](T10_LABS_AND_ASSESSMENT.md#1-quy-tắc-làm-lab) |
 | **DXF code** | Mã nhóm dữ liệu (0 = loại, 8 = layer, 1001 = XData app…) dùng trong filter, XData | [T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter) |
 | **Dynamic block** | Block có tham số (kéo giãn, visibility…) | [T08 §10](T08_RECIPES_EXTENDING.md#10-làm-việc-với-dynamic-block) |
 | **Effective name** | Tên gốc của dynamic block, khác tên ẩn danh `*U` | [T03 B12](T03_PITFALLS_CASEBOOK.md#b12-lọc-block-theo-tên-bỏ-sót-dynamic-block) |

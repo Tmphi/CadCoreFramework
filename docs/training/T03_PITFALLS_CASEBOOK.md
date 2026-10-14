@@ -18,6 +18,25 @@ Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùn
 | **Sửa** | Thay đổi đã làm (hoặc nên làm) |
 | **Phòng ngừa** | Cơ chế để không tái diễn (test, analyzer, quy tắc) |
 
+## Tra nhanh theo triệu chứng
+
+| Bạn đang gặp | Đọc |
+| :--- | :--- |
+| Plugin không nạp được, lỗi khởi động, xung đột DLL | [A1](#a1-serilog-missingmethodexception-ngay-khi-khởi-động), [A2](#a2-palette-lỗi-does-not-have-a-resource-identified-by-the-uri), [A4](#a4-bản-net8-thiếu-toàn-bộ-dll-phụ-thuộc), [A5](#a5-accoreconsole-crash-0xc00000fd-khi-netload-plugin), [B30](#b30-assemblylocation-rỗng) |
+| Lock, transaction, ghi database | [B1](#b1-elockviolation-khi-bấm-nút-trên-palette), [B2](#b2-enotopenforwrite), [B3](#b3-thay-đổi-biến-mất-không-có-lỗi), [B5](#b5-dùng-dbobject-sau-khi-transaction-kết-thúc), [B10](#b10-quên-addnewlycreateddbobject), [B11](#b11-rò-rỉ-đối-tượng-chưa-vào-database), [B21](#b21-hatch-lỗi-enotindatabase) |
+| Prompt, tọa độ, chọn đối tượng | [B4](#b4-autocad-đơ-khi-chờ-người-dùng), [B12](#b12-lọc-block-theo-tên-bỏ-sót-dynamic-block), [B13](#b13-lọc-màu-bỏ-sót-entity-bylayer), [B14](#b14-tên-có-ký-tự-đặc-biệt-bị-hiểu-là-wildcard), [B15](#b15-tọa-độ-lệch-khi-ucs-bị-xoay), [B34](#b34-jig-nhận-wcs-getpoint-trả-ucs), [B36](#b36-danh-sách-từ-khóa-in-hai-lần) |
+| Async, thread, nhiều bản vẽ | [B6](#b6-vẽ-nhầm-bản-vẽ-sau-await), [B7](#b7-fatal-error-khi-bản-vẽ-bị-đóng-trong-lúc-chờ), [B8](#b8-gọi-autocad-api-từ-thread-nền), [B9](#b9-deadlock-khi-result--wait), [B31](#b31-gọi-editor-của-bản-vẽ-không-active) |
+| XData, XRecord, block, attribute | [B16](#b16-xdata-vượt-giới-hạn), [B17](#b17-ghi-xdata-khi-regapp-chưa-được-đăng-ký), [B18](#b18-xóa-xrecord-khỏi-dictionary-nhưng-đối-tượng-vẫn-còn), [B19](#b19-sao-chép-entity-mất-metadata-extension-dictionary), [B20](#b20-attribute-lệch-vị-trí-sau-khi-đổi-giá-trị), [B33](#b33-explode-không-trả-về-attribute) |
+| Sự kiện, vòng đời, rò rỉ bộ nhớ | [B22](#b22-sửa-database-trong-handler-sự-kiện-database), [B23](#b23-không-gỡ-được-event-handler), [B24](#b24-rò-rỉ-subscription-eventaggregator), [B25](#b25-autocad-crash-lúc-thoát-vì-overrule), [B26](#b26-com-gọi-từ-finalizer) |
+| Palette, WPF, theme | [A3](#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension), [A13](#a13-palette-luôn-theme-sáng-dù-autocad-đang-tối), [B27](#b27-palette-không-nhớ-vị-trí), [B28](#b28-resource-wpf-thiếu-nhưng-không-báo-lỗi); ô nhập số và luồng: [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số) |
+| Vẽ lên UI: xem trước, jig, transient | [B32](#b32-màu-bylayer-đọc-ra-là-trắng), [B35](#b35-cs0104-polyline-is-an-ambiguous-reference); thêm ở [U03 §11](U03_DRAWING_ON_UI.md#11-bẫy) |
+| In ấn | [B29](#b29-plot-thất-bại-hoặc-chạy-nền-ngoài-ý-muốn) |
+| Test "luôn pass", hoặc pass nhờ may | [A6](#a6-integration-test-báo-passed-dù-không-lệnh-nào-chạy), [A16](#a16-test-chỉ-pass-nhờ-thứ-tự-chạy) |
+| Build, template, phát hành | [A7](#a7-init-templateps1-không-parse-được-trên-windows-powershell-51), [A8](#a8-msb3270-làm-build--warnaserror-thất-bại), [A9](#a9-dotnet-new-cad-plugin--n-myplugin-sinh-ra-authorcsproj), [A10](#a10-release-workflow-lỗi-403-resource-not-accessible-by-integration), [A11](#a11-packageps1-làm-hỏng-xml-version-khi-đóng-dấu-version), [A12](#a12-gói-phát-hành-kèm-hướng-dẫn-của-một-sản-phẩm-khác), [A15](#a15-dự-án-tạo-bằng-dotnet-new-mất-các-khối-if) |
+| Tài liệu nói một đằng, code một nẻo | [A14](#a14-changelog-mô-tả-một-api-không-tồn-tại) |
+
+Chưa rõ triệu chứng thuộc nhóm nào: bắt đầu từ [cây quyết định ở T04 §9](T04_DEBUGGING_TROUBLESHOOTING.md#9-cây-quyết-định-triệu-chứng--nguyên-nhân).
+
 ---
 
 ## Phần A — Sự cố thật của dự án

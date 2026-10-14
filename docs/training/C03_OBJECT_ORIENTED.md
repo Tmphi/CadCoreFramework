@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** [C02](C02_DATA_AND_COLLECTIONS.md) · **Thời lượng:** tuần 3–4
 
-Toàn bộ dự án được tổ chức thành **class** (104 khai báo) và **interface** (20). Module này dạy bạn đọc và viết chúng. Mỗi khái niệm đi kèm đúng chỗ nó xuất hiện trong dự án, và kết thúc bằng việc đọc trọn một file thật: [`GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs).
+Toàn bộ dự án được tổ chức thành **class** (hơn 100 khai báo) và **interface** (20). Module này dạy bạn đọc và viết chúng. Mỗi khái niệm đi kèm đúng chỗ nó xuất hiện trong dự án, và kết thúc bằng việc đọc trọn một file thật: [`GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs).
 
 **Sau module này bạn phải làm được:**
 1. Giải thích từng dòng của `GridSpec.cs` ([§9](#9-đọc-có-hướng-dẫn-gridspeccs)).
@@ -451,10 +451,10 @@ Với `new Triangle(3, 4)` thêm vào mảng, dòng in thêm là `Tam giác: di�
 
 ```csharp
 IPanelRepository repo = new InMemoryPanelRepository();
-var planner = new PanelReport(repo);
+var report = new PanelReport(repo);
 repo.Add("MSB-01");
 repo.Add("DB-02");
-Console.WriteLine(planner.Summary());       // 2 tủ: MSB-01, DB-02
+Console.WriteLine(report.Summary());        // 2 tủ: MSB-01, DB-02
 
 public interface IPanelRepository
 {
