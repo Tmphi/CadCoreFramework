@@ -6,7 +6,7 @@
 
 U01 dạy WPF như một thư viện độc lập. Module này đưa UI vào **bên trong AutoCAD**, nơi có thêm ba ràng buộc: **ngữ cảnh** (command hay application context), **lock** của bản vẽ, và **nhiều bản vẽ** cùng mở. Thứ tự các mục theo đúng bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu): dòng lệnh trước, vì đó là UI mà tool AutoCAD dùng nhiều nhất.
 
-Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổi khung nhìn) đã **chạy thật** trên AutoCAD 2024 trong accoreconsole: input được gõ từ file script, giống người dùng gõ phím. Chỗ nào chỉ kiểm được trong AutoCAD có giao diện thì có ghi rõ.
+Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổi khung nhìn) đã **chạy thật** trên AutoCAD 2024 trong accoreconsole: input được gõ từ file script, giống người dùng gõ phím. Các mục cần AutoCAD có giao diện (hộp thoại có nút chọn điểm, chọn sẵn và zoom từ application context) cũng đã kiểm trên AutoCAD 2024; danh sách ở [cuối module](#trạng-thái-kiểm-chứng).
 
 ---
 
@@ -172,7 +172,7 @@ public void PanelSetup()
 }
 ```
 
-Lệnh này chạy trong **command context**: prompt hợp lệ, AutoCAD tự lock khi vẽ. Hàm `Editor.StartUserInteraction(window)` (27 file công khai) là cách thứ hai. Nó tạm ẩn cửa sổ trong lúc prompt (trả về `EditorUserInteraction`, gọi `End()`/`Dispose()` khi xong), nhưng hiếm gặp hơn nhiều. Hành vi đóng/mở lại của mẫu trên chỉ kiểm được trong AutoCAD có giao diện: xem [trạng thái kiểm chứng](#trạng-thái-kiểm-chứng) cuối module.
+Lệnh này chạy trong **command context**: prompt hợp lệ, AutoCAD tự lock khi vẽ. Hàm `Editor.StartUserInteraction(window)` (27 file công khai) là cách thứ hai. Nó tạm ẩn cửa sổ trong lúc prompt (trả về `EditorUserInteraction`, gọi `End()`/`Dispose()` khi xong), nhưng hiếm gặp hơn nhiều. Vòng đóng → hỏi → mở lại đã kiểm trên AutoCAD 2024 có giao diện: tên đã sửa vẫn giữ nguyên qua các lần mở lại, và điểm vừa chọn hiện ra khi hộp thoại mở lại ([trạng thái kiểm chứng](#trạng-thái-kiểm-chứng)).
 
 ---
 
@@ -222,7 +222,9 @@ _cadContext.ExecuteRead(scope =>
 });
 ```
 
-Đã kiểm trên AutoCAD 2024 (accoreconsole): sau `SetImpliedSelection` với 2 Line, `SelectImplied()` trả về đúng 2 đối tượng. Xin khung nhìn 110 × 55 thì AutoCAD giữ rộng 110 và **tự nới** cao thành 62,3 cho đúng tỉ lệ khung nhìn. Vì vậy chỉ cần đặt khung bao, phần còn lại AutoCAD lo. `GetCurrentView()` trả về một `ViewTableRecord` **không nằm trong database**, nên phải `using` ([T03 B11](T03_PITFALLS_CASEBOOK.md#b11-rò-rỉ-đối-tượng-chưa-vào-database)). Gọi từ nút palette (application context): xem [trạng thái kiểm chứng](#trạng-thái-kiểm-chứng).
+Đã kiểm trên AutoCAD 2024 (accoreconsole): sau `SetImpliedSelection` với 2 Line, `SelectImplied()` trả về đúng 2 đối tượng. Xin khung nhìn 110 × 55 thì AutoCAD giữ rộng 110 và **tự nới** cao thành 62,3 cho đúng tỉ lệ khung nhìn. Vì vậy chỉ cần đặt khung bao, phần còn lại AutoCAD lo. `GetCurrentView()` trả về một `ViewTableRecord` **không nằm trong database**, nên phải `using` ([T03 B11](T03_PITFALLS_CASEBOOK.md#b11-rò-rỉ-đối-tượng-chưa-vào-database)). Gọi từ nút của một cửa sổ modeless (application context, giống nút trên palette) cũng đã kiểm trên AutoCAD 2024 có giao diện: các đối tượng được chọn sẵn, màn hình zoom vừa chúng.
+
+💡 **Thí nghiệm thêm: không lock cũng chạy.** Cũng các thao tác đó, gọi từ application context mà **không** lock bản vẽ (đọc khung bao trong một transaction, `SetImpliedSelection`, `SetCurrentView`), cho kết quả `KHÔNG lock: xong, không exception` (AutoCAD 2024 có giao diện). Lý do: không thao tác nào **ghi** database. Quy tắc ở [U00 §3](U00_UI_START_HERE.md#3-sáu-quy-tắc-vàng) vẫn giữ nguyên: *ghi* bản vẽ từ application context thì phải lock. Công thức trên vẫn đi qua `ICadContext` vì hai lý do khác: Service không được đụng `MdiActiveDocument` (CAD001), và `ICadContext` bảo đảm code chạy trên main thread.
 
 ### 7.4 Bản vẽ đổi thì palette cập nhật
 
@@ -294,7 +296,10 @@ _cadContext.ExecuteRead(scope =>
 ### Trạng thái kiểm chứng
 
 - **Đã chạy trên AutoCAD 2024 (accoreconsole, input từ script):** giá trị mặc định khi Enter (§2.2); từ khóa, kể cả lỗi in hai lần và cách sửa (§2.3); `GetPoint` trả UCS so với `AcquirePoint` trả WCS (§2.4); dòng lệnh từ chối `1,5` (§2.5); `SetImpliedSelection`/`SelectImplied` và `SetCurrentView` tự nới tỉ lệ (§7.3), khi gọi bên trong một lệnh.
-- **Chỉ kiểm được trong AutoCAD có giao diện:** vòng "đóng → hỏi → mở lại" của hộp thoại (§4); `SetImpliedSelection` và zoom khi gọi từ nút **palette** (§7.3). Mentor dùng chúng làm bước smoke khi chấm U02-E3.
+- **Đã kiểm trên AutoCAD 2024 có giao diện** (2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của module; mọi bước đạt kỳ vọng):
+  - Vòng "đóng → hỏi → mở lại" của hộp thoại: dữ liệu đã nhập giữ nguyên, điểm vừa chọn hiện khi mở lại (§4).
+  - `SetImpliedSelection` + zoom gọi từ nút của một cửa sổ modeless (application context): đối tượng được chọn sẵn, màn hình zoom vừa chúng; gọi **không** lock cũng chạy, không exception (§7.3).
+- Mentor vẫn dùng các bước trên làm smoke khi chấm U02-E3: code của học viên có thể khác code đã kiểm.
 
 ---
 

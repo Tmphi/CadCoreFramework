@@ -16,6 +16,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - U02: UI trong AutoCAD (prompt, palette, hộp thoại có nút chọn điểm, Ribbon, chọn sẵn và zoom).
   - U03: **vẽ thực thể lên UI**. Hướng dẫn từng bước thêm khung xem trước vào palette Grid Marker (`PreviewShape`, `PreviewViewport`, control `CadPreview` tự vẽ bằng `OnRender`); đọc entity và block trong bản vẽ thành hình xem trước; jig và transient.
   - Kiểm chứng: hành vi WPF chạy thật trên net48 + net8; các bước của U03 áp vào bản sao dự án (build `-warnaserror` sạch, 290/290 test, ảnh palette hai theme ở `docs/training/img/`); hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 19/19).
+  - Các mục chỉ AutoCAD có giao diện mới kiểm được (palette có khung xem trước, xem trước đối tượng đang chọn, transient, hộp thoại chọn điểm, chọn sẵn + zoom từ application context) đã kiểm trên AutoCAD 2024 có giao diện, bằng một DLL kiểm thử chứa nguyên văn code của tài liệu. Thêm phát hiện: `SetImpliedSelection`/`SetCurrentView` chạy được từ application context cả khi **không** lock, vì chúng không ghi database.
 - **Backlog mới, còn mở** (PR này chỉ ghi nhận, không sửa code):
   - **B-31**: ô số thực trên palette đọc `2,5` thành 25, vì WPF mặc định dùng `en-US`.
   - **B-32**: ô số bị xóa trắng nhưng ViewModel vẫn giữ giá trị cũ, nút Vẽ vẫn bật.

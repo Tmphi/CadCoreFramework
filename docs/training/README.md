@@ -188,4 +188,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
   - Hành vi WPF chạy thật trên net48 và net8.
   - Các bước của U03 áp vào một bản sao của dự án: build `-warnaserror` sạch, 290/290 test xanh, ảnh palette render từ chính palette đó.
   - Hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 19/19).
-  - Những mục chỉ AutoCAD có giao diện mới kiểm được có ghi ở cuối U02 và U03.
+  - Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm trên AutoCAD 2024 ngày 2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của tài liệu: palette có khung xem trước, xem trước đối tượng đang chọn, transient, hộp thoại chọn điểm, chọn sẵn và zoom từ application context. Danh sách chi tiết ở cuối U02 và U03.

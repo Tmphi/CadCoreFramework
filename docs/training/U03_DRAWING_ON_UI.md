@@ -19,7 +19,8 @@ Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, l�
 **Mọi code trong module đã chạy thật**, với C# 10, trên net48 và net8.0-windows:
 - **Phần WPF (§2–6):** đã áp đúng các bước vào một bản sao của dự án. Kết quả: build `-warnaserror` sạch; 290/290 test xanh (275 test cũ + 15 test mới); palette Grid Marker được render ra ảnh ở cả hai theme. Ảnh trong module là ảnh thật.
 - **Phần đọc entity (§7):** chạy trên AutoCAD 2024 bằng HeadlessLab, 19/19 kiểm thử xanh.
-- **Phần vẽ tạm (§9):** đã gọi API thật trong accoreconsole. Phần *hiển thị* thì chỉ AutoCAD có giao diện mới kiểm được; xem [trạng thái kiểm chứng](#trạng-thái-kiểm-chứng).
+- **Phần vẽ tạm (§9):** đã gọi API thật trong accoreconsole.
+- **Trong AutoCAD 2024 có giao diện:** `CadPreview` trong một palette thật, xem trước các đối tượng đang chọn, và hình transient hiện ra rồi biến mất đều đã kiểm ([trạng thái kiểm chứng](#trạng-thái-kiểm-chứng)).
 
 ---
 
@@ -1215,7 +1216,12 @@ Chênh lệch khoảng 8 lần, và nó lớn dần theo số hình. Với vài 
 
 - **§2–6 (WPF):** áp vào bản sao của dự án; build Release `-warnaserror` sạch; 290/290 test xanh trên net48 và net8.0-windows; ảnh palette được render từ chính palette đó; đo hiệu năng trên cùng máy.
 - **§7 (đọc entity):** chạy trên AutoCAD 2024 bằng HeadlessLab (19/19), cộng một lab riêng in giá trị thật cho bảng ở §7.
-- **§9 (vẽ tạm):** chữ ký API kiểm trong metadata; `AddTransient`/`EraseTransient` và `Editor.Drag` (jig) đã chạy trong accoreconsole. Việc hình tạm *hiện ra và biến mất* trên màn hình chỉ AutoCAD có giao diện mới kiểm được. Mentor kiểm khi chấm L19 (bước smoke trong DoD).
+- **§9 (vẽ tạm):** chữ ký API kiểm trong metadata; `AddTransient`/`EraseTransient` và `Editor.Drag` (jig) đã chạy trong accoreconsole.
+- **AutoCAD 2024 có giao diện** (2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của module; mọi bước đạt kỳ vọng):
+  - `CadPreview` trong một `PaletteSet` thật: gõ số hàng/cột thì khung vẽ lại ngay; kéo giãn palette thì hình tự fit, nét vẫn mảnh (§4–5).
+  - `EntityPreviewBuilder` + `CadPreview` trong hộp thoại modal: hình xem trước các đối tượng đang chọn khớp bản vẽ về vị trí, góc xoay và màu (§7).
+  - `TransientPreview` (§9.2): 12 khung hiện ra trong lúc dòng lệnh hỏi "Vẽ lưới này?", biến mất sau khi trả lời; số entity trong bản vẽ trước và sau bằng nhau.
+- **Chưa kiểm:** hành vi lúc chạy của `GetBlockTRThumbnail` (§8, cách B); jig trong AutoCAD có giao diện (accoreconsole đã chạy `Editor.Drag`). Mentor kiểm jig khi chấm L19 (bước smoke trong DoD).
 
 ---
 
