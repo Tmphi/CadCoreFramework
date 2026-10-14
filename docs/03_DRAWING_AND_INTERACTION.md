@@ -110,3 +110,9 @@ if (result.Status != PromptStatus.OK)
 }
 CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(pline); });   // chốt: đưa vào database
 ```
+
+> [!NOTE]
+> Ba điều đã kiểm chứng trên AutoCAD 2024, chi tiết ở [U03 §9](training/U03_DRAWING_ON_UI.md#9-vẽ-tạm-lên-màn-hình-bản-vẽ):
+> - `AcquirePoint` trong jig trả tọa độ **WCS**, còn `GetPoint` trả **UCS**.
+> - `Sampler` nên trả `SamplerStatus.Cancel` khi `Status` khác `OK`. Các jig hiện có của dự án chưa kiểm điều này.
+> - Muốn xem trước **cả kết quả** của lệnh (không chạy theo chuột) thì dùng transient graphics.

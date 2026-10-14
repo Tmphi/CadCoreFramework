@@ -169,7 +169,7 @@ Trả lời 8 câu **không tra cứu**, rồi mở đáp án.
 ## 7. Sau giai đoạn 0
 
 - **Lên cấp 🌰 → 🌱 Fresher** khi: làm xong bài tập C01–C05, đồ án nhập môn đạt DoD, và vượt phần vấn đáp ở [C05 §6](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher) (cũng ghi trong [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp)).
-- **Tiếp theo:** [T01 — Nền tảng AutoCAD .NET](T01_AUTOCAD_NET_FOUNDATIONS.md) và [lộ trình 12 tuần](README.md#3-lộ-trình-đào-tạo) (Giai đoạn 1–3). Từ T01 bạn cần AutoCAD 2024.
+- **Tiếp theo:** [T01 — Nền tảng AutoCAD .NET](T01_AUTOCAD_NET_FOUNDATIONS.md) và [lộ trình 14 tuần](README.md#3-lộ-trình-đào-tạo) (Giai đoạn 1–3, gồm cả [nhánh UI](U00_UI_START_HERE.md) ở tuần 7–9). Từ T01 bạn cần AutoCAD 2024.
 - Gặp thuật ngữ lạ: [Thuật ngữ — phần Lập trình & C#](GLOSSARY.md#a-lập-trình--c-cho-người-mới).
 
 ---

@@ -2,7 +2,7 @@
 
 # T07 — Hiệu Năng & Quy Mô
 
-> **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md); LINQ và thực thi trì hoãn ([C04 §3–4](C04_CSHARP_IN_THIS_PROJECT.md#3-linq-hỏi-đáp-trên-danh-sách)) · **Trong lộ trình:** tuần 10 ([README §3](README.md#3-lộ-trình-đào-tạo))
+> **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md); LINQ và thực thi trì hoãn ([C04 §3–4](C04_CSHARP_IN_THIS_PROJECT.md#3-linq-hỏi-đáp-trên-danh-sách)) · **Trong lộ trình:** tuần 12 ([README §3](README.md#3-lộ-trình-đào-tạo))
 
 Plugin chạy nhanh với bản vẽ 50 entity có thể "đơ" với bản vẽ 200.000 entity của khách hàng. Module này dạy **mô hình chi phí** của AutoCAD API, các kỹ thuật framework đã áp dụng, và cách **đo** thay vì đoán.
 

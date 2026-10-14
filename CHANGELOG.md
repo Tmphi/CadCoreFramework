@@ -9,6 +9,25 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (PR #10 — đào tạo: nhánh UI, vẽ thực thể lên UI)
+- **`docs/training/U00`–`U03`**: nhánh UI theo quy tắc **20/80**. Bảng ưu tiên được đếm trên code C# công khai (GitHub) và trong dự án.
+  - U00: bắt đầu từ đây (bản đồ UI, 6 quy tắc vàng, lộ trình 3 tuần, bài kiểm tra đầu vào).
+  - U01: WPF & MVVM, không cần AutoCAD.
+  - U02: UI trong AutoCAD (prompt, palette, hộp thoại có nút chọn điểm, Ribbon, chọn sẵn và zoom).
+  - U03: **vẽ thực thể lên UI**. Hướng dẫn từng bước thêm khung xem trước vào palette Grid Marker (`PreviewShape`, `PreviewViewport`, control `CadPreview` tự vẽ bằng `OnRender`); đọc entity và block trong bản vẽ thành hình xem trước; jig và transient.
+  - Kiểm chứng: hành vi WPF chạy thật trên net48 + net8; các bước của U03 áp vào bản sao dự án (build `-warnaserror` sạch, 290/290 test, ảnh palette hai theme ở `docs/training/img/`); hành vi AutoCAD chạy trên AutoCAD 2024 (accoreconsole, HeadlessLab 19/19).
+- **Backlog mới, còn mở** (PR này chỉ ghi nhận, không sửa code):
+  - **B-31**: ô số thực trên palette đọc `2,5` thành 25, vì WPF mặc định dùng `en-US`.
+  - **B-32**: ô số bị xóa trắng nhưng ViewModel vẫn giữ giá trị cũ, nút Vẽ vẫn bật.
+  - **B-33**: `CadPromptHelper.GetKeywords` in danh sách từ khóa hai lần.
+  - T03 thêm bẫy B32–B36: màu ByLayer đọc ra trắng, `Explode` không trả attribute, jig nhận WCS, `CS0104 Polyline`, từ khóa in hai lần.
+- **Chuẩn hóa**:
+  - Lộ trình ~20 tuần: Giai đoạn 2 thêm tuần 7–9 cho nhánh UI; số tuần trong header T-module, README, Phần 1 và mục lục được cập nhật theo.
+  - Khung năng lực thêm dòng "UI & tương tác".
+  - T10 thêm lab L17–L19 và câu hỏi Q21–Q25; đồ án cuối khóa yêu cầu khung xem trước.
+  - Thuật ngữ thêm phần C (giao diện).
+  - Phần 3, Phần 5 và T08 dẫn sang nhánh UI.
+
 ### Added (PR #9 — đào tạo: Giai đoạn 0, nhập môn lập trình & C#)
 - **`docs/training/C00`–`C05`**: lộ trình 6 tuần cho người **chưa biết lập trình**, dạy C# theo quy tắc **20/80** — chọn và sắp xếp theo số lần tính năng xuất hiện trong 110 file `.cs` của dự án (có lệnh để tự đếm lại). Mỗi khái niệm đi kèm chỗ nó xuất hiện trong code thật; ví dụ là chương trình hoàn chỉnh đã chạy trên .NET 8 với C# 10 như dự án, kèm thông báo lỗi biên dịch thật và các khác biệt trên .NET Framework 4.8 đã chạy thử. C00 bắt đầu từ đây (bài kiểm tra đầu vào), C01 chương trình đầu tiên, C02 dữ liệu & collection, C03 hướng đối tượng (đọc trọn `GridSpec.cs`), C04 C# dự án dùng hằng ngày (giải mã 6 dòng code thật), C05 async, xUnit, Git & PR, đồ án nhập môn "Planner dãy tủ điện" (nửa đầu lab L07) và đánh giá 🌰 → 🌱.
 - **Chuẩn hóa bộ đào tạo**: khung năng lực **5 cấp** (thêm 🌰 Nhập môn và năng lực "C# & lập trình"); lộ trình ~18 tuần chia Giai đoạn 0–3; mỗi T-module có dòng *Cấp độ · Cần trước · Trong lộ trình*; T10 §4 thêm bậc 🌰 → 🌱; Thuật ngữ thêm phần A (lập trình & C#); README, `00_TOC`, Phần 1 dẫn người mới về C00. Sửa số tuần sai ở README đào tạo: gộp tuần 1–2 và 4–5 rút 12 tuần xuống **10** (trước ghi 8).

@@ -10,12 +10,12 @@ Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở �
 
 ## 1. Quy tắc làm lab
 
-1. **Mỗi lab một branch**: `lab/Lxx-<tên-bạn>`. Lab thí nghiệm (L02, L03) **không merge**. Lab sửa backlog thì mở PR như công việc thật, nhưng **base là branch tạo từ `v1.0.0`** (quy tắc 6) để mentor review — không merge vào `main`. Lab xây tính năng mới (L07, L09, L13, L14) theo quy trình bình thường.
+1. **Mỗi lab một branch**: `lab/Lxx-<tên-bạn>`. Lab thí nghiệm (L02, L03) **không merge**. Lab sửa backlog thì mở PR như công việc thật, nhưng **base là branch tạo từ `v1.0.0`** (quy tắc 6) để mentor review — không merge vào `main`. Lab xây tính năng mới (L07, L09, L13, L14, L17, L19) theo quy trình bình thường.
 2. **Definition of Done (DoD)** của từng lab là tiêu chí chấm. Chưa đạt DoD thì lab chưa xong.
 3. **Báo cáo lab** trong mô tả PR (hoặc issue "Lab report"): đã làm gì, kết quả thí nghiệm, trả lời câu hỏi phản tư.
 4. **Tái hiện trước, sửa sau.** Với lab sửa lỗi: viết test hoặc bước tái hiện *fail trước* rồi mới sửa.
 5. Thử nghiệm sysvar / script thì dùng accoreconsole `/isolate` ([T04 §5.3](T04_DEBUGGING_TROUBLESHOOTING.md#53-thí-nghiệm-an-toàn-với-accoreconsole)). **Không** thay đổi thiết lập AutoCAD thật của máy (`SECURELOAD`…).
-6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa.
+6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa. **Ngoại lệ:** B-31…B-33 (tìm thấy khi viết nhánh UI) **còn mở**. Lab L18 và bài tập U02-E1 làm trên `main` và mở PR thật như công việc bình thường.
 
 ---
 
@@ -39,6 +39,9 @@ Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở �
 | L14 | Xử lý hàng loạt bằng side database | 🌳→🏔️ | 1 ngày | — |
 | L15 | Phát hành thử | 🏔️ | 0.5 ngày | B-10 (mở rộng) |
 | L16 | Pháp y sự cố | 🏔️ | 0.5 ngày | — |
+| L17 | Xem trước trên palette | 🌿→🌳 | 1–2 ngày | — |
+| L18 | Sửa bẫy ô nhập số | 🌿 | 0.5 ngày | B-31, B-32 |
+| L19 | Xem trước trên màn hình bản vẽ | 🌳 | 1 ngày | — |
 
 ### L01 — Môi trường & chạy plugin
 
@@ -141,6 +144,25 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 - **Đề bài:** (1) tái hiện crash `0xC00000FD` bằng NETLOAD `acmgd.dll` trong accoreconsole `/isolate`, tìm entry trong Event Viewer ([T04 §5.2](T04_DEBUGGING_TROUBLESHOOTING.md#52-crash-không-có-thông-báo)); (2) lấy runner integration **cũ** từ lịch sử git (`git log -- tests/integration`), chỉ ra đủ **5 lỗi** của [A6](T03_PITFALLS_CASEBOOK.md#a6-integration-test-báo-passed-dù-không-lệnh-nào-chạy) bằng thí nghiệm.
 - **DoD:** một incident report theo [mẫu T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report), mục "Vì sao không bị phát hiện sớm hơn" đầy đủ.
 
+### L17 — Xem trước trên palette
+
+- **Mục tiêu:** vẽ thực thể lên UI theo đúng kiến trúc "một kế hoạch, hai nơi vẽ".
+- **Đề bài:** làm trọn [U03 §2–6](U03_DRAWING_ON_UI.md#2-bước-1--mô-hình-hình-học-thuần) trên palette Grid Marker: `PreviewShape`, `PreviewViewport`, `CadPreview`, `GridPreview`, nối ViewModel và XAML. Thêm `EntityPreviewBuilder` ([U03 §7](U03_DRAWING_ON_UI.md#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)) thì nhớ link mô hình cho HeadlessLab. **Mở rộng** (chọn một): (a) zoom bằng con lăn chuột và kéo để pan trong `CadPreview`; (b) tô ô theo màu layer (ACI 4) mà vẫn đọc rõ ở cả hai theme; (c) palette "xem trước đối tượng đang chọn" dùng `EntityPreviewBuilder`.
+- **DoD:** ≥ 10 test mới (viewport, `GridPreview`, ViewModel, render pixel) xanh trên net48 và net8.0-windows; CI xanh, kể cả HeadlessLab; ảnh palette ở **cả hai** theme; gõ số hàng/cột thì khung đổi ngay, input sai thì khung trống; smoke trong AutoCAD: bấm Vẽ xong, hình trong bản vẽ khớp hình xem trước.
+- **Phản tư:** vì sao đổi TÂM A1 thì khung xem trước không cần vẽ lại? Test pixel của bạn có **fail được** không? Chứng minh bằng cách làm hỏng code ([U03 §6](U03_DRAWING_ON_UI.md#6-bước-5--kiểm-thử)).
+
+### L18 — Sửa bẫy ô nhập số
+
+- **Đề bài:** sửa **B-31** và **B-32** trên palette Grid Marker theo [U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi): ô số bind vào chuỗi, parse `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào `ValidationSummary`. Viết test **fail trước** trên `main`: ViewModel nhận `"2,5"` hoặc `""` thì phải có lỗi và tắt nút Vẽ.
+- **DoD:** test fail trước, pass sau; gõ `2,5` thì có thông báo rõ ràng và nút tắt; xóa trắng ô thì nút tắt; `2.5` vẫn đúng; lệnh `SAMPLE_GRID` không đổi hành vi; các test hiện có vẫn xanh.
+- **Phản tư:** luật "phải là số" thuộc về ViewModel hay `GridSpec`? Lệnh `SAMPLE_GRID` (prompt bằng `GetDouble`) có cần luật đó không, và vì sao?
+
+### L19 — Xem trước trên màn hình bản vẽ
+
+- **Đề bài:** (1) lệnh `SAMPLE_GRID_PREVIEW`: như `SAMPLE_GRID`, nhưng hiện cả lưới bằng `TransientPreview` rồi hỏi "Vẽ lưới này? [Yes/No]" ([U03 §9.2](U03_DRAWING_ON_UI.md#92-transient-hình-tạm-đứng-yên)); (2) lệnh `SAMPLE_GRID_DRAG`: một `DrawJig` kéo cả lưới theo chuột, click để đặt ([U03 §9.1](U03_DRAWING_ON_UI.md#91-jig-hình-chạy-theo-chuột)), `Sampler` có kiểm `Status`.
+- **DoD:** trả lời No hoặc nhấn ESC thì không có entity mới (đếm trước/sau) và hình tạm biến mất; Yes thì vẽ đúng chỗ, một lần Ctrl+Z xóa hết; jig đúng khi UCS xoay 90° (không đổi hệ hai lần); ESC trong jig thoát êm; smoke ghi trong mô tả PR.
+- **Phản tư:** khi nào chọn transient, khi nào chọn jig, khi nào chọn khung xem trước trên palette?
+
 ---
 
 ## 3. Đồ án cuối khóa: Bộ công cụ Tủ điện MSB
@@ -153,6 +175,7 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 3. Dữ liệu tủ lưu bằng **XRecord** có trường version; lệnh `MSB_INFO` chọn tủ và in thông tin đọc lại.
 4. Nút trên **Ribbon** tab "CadCore".
 5. Palette hiển thị số tủ trong bản vẽ, tự cập nhật khi vẽ thêm hoặc xóa.
+6. Palette có **khung xem trước** thân tủ và các lộ ra, vẽ từ **cùng Planner** với lệnh `MSB_DRAW` ([U03](U03_DRAWING_ON_UI.md)); ô số nhập an toàn theo [U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi).
 
 **Yêu cầu kỹ thuật:** đúng mọi mục checklist [T09 §2](T09_SENIOR_PLAYBOOK.md#2-checklist-code-review); ≥ 30 unit test; một ADR cho một quyết định thiết kế bạn đã cân nhắc; release note như cho một bản MINOR.
 
@@ -174,8 +197,8 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 | Lên cấp | Điều kiện | Thực hành | Vấn đáp (chọn 5) |
 | :--- | :--- | :--- | :--- |
 | 🌰 → 🌱 Fresher | Bài tập C01–C05; đồ án nhập môn đạt DoD ([C05 §5](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện)) | Sửa một test fail do mentor cài vào đồ án (20 phút) | Đủ 10 câu ở [C05 §6](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher), đạt ≥ 7 |
-| 🌱 → 🌿 Junior | L01–L06 đạt; trắc nghiệm T01 ≥ 80% | Sửa một bug được giao trong 1 ngày (có test) | Q1, Q2, Q3, Q5, Q7, Q9, Q12 |
-| 🌿 → 🌳 Middle | L07–L10 đạt; review thành công bài "code có lỗi cài sẵn" bên dưới (≥ 7/9 lỗi) | Một tính năng nhỏ trọn vẹn theo Golden Sample | Q4, Q6, Q8, Q10, Q11, Q13, Q14 |
+| 🌱 → 🌿 Junior | L01–L06 đạt; trắc nghiệm T01 ≥ 80% | Sửa một bug được giao trong 1 ngày (có test) | Q1, Q2, Q3, Q5, Q7, Q9, Q12, Q21 |
+| 🌿 → 🌳 Middle | L07–L10 và L17–L19 đạt; review thành công bài "code có lỗi cài sẵn" bên dưới (≥ 7/9 lỗi) | Một tính năng nhỏ trọn vẹn theo Golden Sample, có palette và khung xem trước | Q4, Q6, Q8, Q10, Q11, Q13, Q14, Q22–Q25 |
 | 🌳 → 🏔️ Senior | L11–L16 + đồ án đạt; chủ trì một release thật; một incident report; một ADR được chấp nhận | Chẩn đoán một sự cố "lạ" do mentor dựng sẵn | Q15–Q20 + bảo vệ ADR |
 
 ### Bài review: code có lỗi cài sẵn
@@ -325,6 +348,31 @@ Tái hiện, đọc Event Viewer (mã lỗi, stack managed), thu hẹp (tắt t�
 <details><summary><b>Q20.</b> Bạn phát hiện CHANGELOG mô tả một API không tồn tại. Bạn làm gì, và rút ra quy tắc gì?</summary>
 
 Kiểm chứng bằng metadata, đính chính tài liệu (ghi rõ là đính chính), và thêm vào checklist review: mọi tên API trong tài liệu phải tồn tại. ([A14](T03_PITFALLS_CASEBOOK.md#a14-changelog-mô-tả-một-api-không-tồn-tại))
+</details>
+
+<details><summary><b>Q21.</b> Người dùng gõ <code>2,5</code> vào một ô số thực trên palette của dự án. Chuyện gì xảy ra, vì sao, và sửa thế nào?</summary>
+
+Giá trị thành **25**, không có lỗi nào. WPF đổi số theo `Language` mặc định `en-US` (không theo culture `vi-VN` của Windows), nên dấu phẩy là dấu phân cách hàng nghìn. Sửa: bind ô vào chuỗi, tự parse bằng `InvariantCulture` + `NumberStyles.Float`, lỗi đi vào validate (B-31, [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
+</details>
+
+<details><summary><b>Q22.</b> Nút trên palette cần người dùng chọn một điểm trên bản vẽ. Vì sao không gọi <code>GetPoint</code> trong ViewModel, và cách đúng là gì?</summary>
+
+Palette chạy ở application context: prompt ở đó sai ngữ cảnh, và ViewModel không được biết AutoCAD (CAD002). Cách đúng: nhập tọa độ trên form, hoặc để nút gửi một lệnh (`SendStringToExecute` sau interface `ICommandLauncher`) để lệnh prompt, hoặc dùng `ExecuteInCommandContextAsync` ([U02 §7.2](U02_UI_IN_AUTOCAD.md#72-nút-palette-chạy-một-lệnh-để-prompt), [T08 §5](T08_RECIPES_EXTENDING.md#5-palette-cần-người-dùng-chọn-điểm-trên-màn-hình)).
+</details>
+
+<details><summary><b>Q23.</b> Vì sao khung xem trước vẽ từ <code>PreviewShape</code> chứ không giữ <code>Entity</code>?</summary>
+
+`DBObject` chỉ dùng được trong transaction đã mở nó; ViewModel không được biết AutoCAD và phải test được; và preview cùng nơi vẽ thật đọc chung một kết quả của Planner nên không thể lệch nhau ([U03 §1](U03_DRAWING_ON_UI.md#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ)).
+</details>
+
+<details><summary><b>Q24.</b> Lật trục Y bằng <code>ScaleTransform(1, -1)</code> cho cả canvas thì hỏng gì? Cách đúng?</summary>
+
+Mọi thứ bị lật theo: chữ lộn ngược, và độ dày nét bị nhân theo scale. Cách đúng là đổi **từng điểm** sang pixel (`MaxY − y`) rồi mới vẽ ([U03 §3](U03_DRAWING_ON_UI.md#3-bước-2--biến-đổi-tọa-độ)).
+</details>
+
+<details><summary><b>Q25.</b> Chọn jig, transient hay khung xem trước trên palette cho: (a) đặt block theo chuột; (b) xem trước cả lưới rồi hỏi Yes/No trên dòng lệnh; (c) người dùng chỉnh 10 thông số trên form?</summary>
+
+(a) **Jig**; (b) **transient**; (c) **khung xem trước trên palette** (`CadPreview`). Cả ba đều không ghi vào database cho tới khi chốt ([U03](U03_DRAWING_ON_UI.md)).
 </details>
 
 ---

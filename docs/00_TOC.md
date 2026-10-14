@@ -3,7 +3,7 @@
 Chào mừng bạn đến với tài liệu hướng dẫn chính thức của **CadCoreFramework**! Đây là khung mẫu (Template) chuẩn Enterprise dành cho AutoCAD .NET.
 
 > [!TIP]
-> **Người kế thừa dự án — từ người chưa biết lập trình đến Senior:** bắt đầu từ **[🎓 Học viện CadCoreFramework](training/README.md)**. Chưa biết C#: học **Giai đoạn 0** trước ([C00 — Bắt đầu từ đây](training/C00_START_HERE.md) → C05, 6 tuần, không cần AutoCAD). Sau đó là lộ trình đào tạo chuyên sâu 12 tuần gồm T01 Nền tảng AutoCAD .NET · T02 Mổ xẻ kiến trúc · T03 Sổ tay sự cố · T04 Debug · T05 Kiểm thử · T06 Phát hành · T07 Hiệu năng · T08 Công thức mở rộng · T09 Sổ tay Senior · T10 Lab & đánh giá. Phần 1–9 bên dưới là tài liệu *tham khảo nhanh theo chủ đề*.
+> **Người kế thừa dự án — từ người chưa biết lập trình đến Senior:** bắt đầu từ **[🎓 Học viện CadCoreFramework](training/README.md)**. Chưa biết C#: học **Giai đoạn 0** trước ([C00 — Bắt đầu từ đây](training/C00_START_HERE.md) → C05, 6 tuần, không cần AutoCAD). Sau đó là lộ trình đào tạo chuyên sâu 14 tuần gồm T01 Nền tảng AutoCAD .NET · T02 Mổ xẻ kiến trúc · T03 Sổ tay sự cố · T04 Debug · T05 Kiểm thử · T06 Phát hành · T07 Hiệu năng · T08 Công thức mở rộng · T09 Sổ tay Senior · T10 Lab & đánh giá, cùng **nhánh UI** ([U00](training/U00_UI_START_HERE.md) → U03: WPF/MVVM, UI trong AutoCAD, **vẽ thực thể lên UI**). Phần 1–9 bên dưới là tài liệu *tham khảo nhanh theo chủ đề*.
 
 Hãy duyệt qua các tài liệu dưới đây theo thứ tự từ cơ bản đến nâng cao:
 

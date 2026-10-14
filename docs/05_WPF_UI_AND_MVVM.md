@@ -2,6 +2,9 @@
 
 Sử dụng thư viện WPF là cách chuyên nghiệp nhất để tạo giao diện trong AutoCAD .NET hiện đại. Framework này tuân thủ hoàn toàn mô hình MVVM (Model-View-ViewModel).
 
+> [!TIP]
+> Phần này là **tham khảo nhanh**. Muốn học bài bản theo quy tắc 20/80, từ WPF cơ bản tới **vẽ thực thể lên UI** (khung xem trước, jig, transient), hãy học **nhánh UI** của Học viện: [U00](training/U00_UI_START_HERE.md) → [U01 WPF & MVVM](training/U01_WPF_MVVM_BASICS.md) → [U02 UI trong AutoCAD](training/U02_UI_IN_AUTOCAD.md) → [U03 Vẽ thực thể lên UI](training/U03_DRAWING_ON_UI.md). Bẫy nhập số thập phân trên palette (gõ `2,5` thành 25): [U01 §5](training/U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số).
+
 ---
 
 ## 5.1 Palette & Ribbon

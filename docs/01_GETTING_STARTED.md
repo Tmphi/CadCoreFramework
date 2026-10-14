@@ -85,7 +85,7 @@ AutoCAD là phần mềm **Đơn luồng (Single-thread)** đối với giao di�
 ## 1.3 Lộ Trình Cho Người Mới (Fresher Roadmap) & Bài Toán Thực Tế
 
 > [!TIP]
-> Lộ trình **đầy đủ** — Giai đoạn 0 nhập môn C# (6 tuần, cho người chưa biết lập trình) rồi 12 tuần từ Fresher đến Senior (khung năng lực, 16 bài lab, đồ án, đề đánh giá) — nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần cho người đã biết C#.
+> Lộ trình **đầy đủ** — Giai đoạn 0 nhập môn C# (6 tuần, cho người chưa biết lập trình) rồi 14 tuần từ Fresher đến Senior, gồm 3 tuần của nhánh UI (khung năng lực, 19 bài lab, đồ án, đề đánh giá) — nằm ở **[Học viện CadCoreFramework](training/README.md)**. Phần dưới đây là phiên bản rút gọn 3 tuần cho người đã biết C#.
 
 Để nhanh chóng làm chủ Framework, Fresher nên tự thực hành bài toán **Vẽ Tủ Điện MSB** với lộ trình 3 tuần sau:
 
