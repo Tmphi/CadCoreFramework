@@ -42,7 +42,8 @@ if ($LASTEXITCODE -ne 0) { Write-Host 'HeadlessLab build FAILED.'; exit 1 }
 
 $scr = Join-Path $env:TEMP 'cadcore_headless_lab.scr'
 # KHÔNG comment, KHÔNG dòng trống trong .scr (T03 A6). Đường dẫn giữ nguyên "\".
-Set-Content -Path $scr -Encoding ASCII -Value @('SECURELOAD', '0', 'NETLOAD', "`"$Dll`"", 'LAB_ALL', 'QUIT', 'Y')
+# 'No' ngay sau LAB_ALL: câu trả lời cho prompt THẬT của kiểm thử KEYWORDS_PROMPT_LISTS_ONCE (B-33).
+Set-Content -Path $scr -Encoding ASCII -Value @('SECURELOAD', '0', 'NETLOAD', "`"$Dll`"", 'LAB_ALL', 'No', 'QUIT', 'Y')
 
 $profileDir = Join-Path $env:TEMP 'CadCoreFramework_accoreconsole_profile'
 # accoreconsole đặt bản vẽ mặc định (Drawing1.dwg) và plot.log của các kiểm thử in ấn vào THƯ MỤC HIỆN HÀNH
@@ -80,6 +81,9 @@ if (-not $countLine) { $problems += 'thiếu LAB|COUNT (DLL không nạp đượ
 elseif ($passes.Count -ne [int]($countLine.Split('|')[2])) { $problems += "PASS $($passes.Count)/$($countLine.Split('|')[2])" }
 if (-not ($lines -contains 'LAB|DONE')) { $problems += 'thiếu LAB|DONE' }
 if ($fails.Count -gt 0) { $problems += "$($fails.Count) kiểm thử FAIL" }
+# B-33: chỉ output mới cho thấy câu nhắc AutoCAD thật sự in ra — danh sách từ khóa phải xuất hiện đúng MỘT lần.
+if ($output -notmatch [regex]::Escape('LAB keyword prompt [Yes/No] <Yes>:')) { $problems += 'B-33: không thấy câu nhắc "LAB keyword prompt [Yes/No] <Yes>:"' }
+if ($output -match [regex]::Escape('[Yes/No] [Yes/No]')) { $problems += 'B-33: danh sách từ khóa bị in hai lần' }
 
 if ($problems.Count -gt 0) {
     Write-Host "Headless lab FAILED — log: $logPath"

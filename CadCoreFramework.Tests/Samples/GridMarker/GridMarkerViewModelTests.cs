@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using CadCoreFramework.Core;
 using CadCoreFramework.Samples.GridMarker;
+using CadCoreFramework.ViewModels;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -165,6 +166,123 @@ namespace CadCoreFramework.Tests.Samples.GridMarker
             Action act = () => new GridMarkerViewModel(null!, _events);
 
             act.Should().Throw<ArgumentNullException>();
+        }
+
+        // ─── Ô số: bind vào chuỗi, ViewModel tự đọc số (B-31, B-32) ────────────────
+
+        [Fact]
+        public void NewViewModel_TextsShowTheValues()
+        {
+            var vm = NewViewModel();
+
+            vm.RowsText.Should().Be(NumberText.Format(vm.Rows));
+            vm.ColumnsText.Should().Be(NumberText.Format(vm.Columns));
+            vm.SpacingText.Should().Be(NumberText.Format(vm.Spacing));
+            vm.CellSizeText.Should().Be(NumberText.Format(vm.CellSize));
+            vm.TextHeightText.Should().Be(NumberText.Format(vm.TextHeight));
+            vm.OriginXText.Should().Be(NumberText.Format(vm.OriginX));
+            vm.OriginYText.Should().Be(NumberText.Format(vm.OriginY));
+        }
+
+        [Fact]
+        public void CommaDecimal_IsAnError_NotTwentyFive()
+        {
+            var vm = NewViewModel();
+
+            vm.SpacingText = "2,5";
+
+            vm.Spacing.Should().Be(20, "giữ số cũ — WPF mặc định đọc '2,5' thành 25 (B-31)");
+            vm.HasValidationErrors.Should().BeTrue();
+            vm.ValidationSummary.Should().Contain("Khoảng cách").And.Contain("dấu chấm");
+            vm.DrawCommand.CanExecute(null).Should().BeFalse();
+        }
+
+        [Fact]
+        public void DotDecimal_IsRead()
+        {
+            var vm = NewViewModel();
+
+            vm.SpacingText = "25.5";
+
+            vm.Spacing.Should().Be(25.5);
+            vm.HasValidationErrors.Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("abc")]
+        [InlineData("2.5")]
+        public void UnreadableRows_DisablesDraw_InsteadOfKeepingTheOldValue(string typed)
+        {
+            var vm = NewViewModel();
+
+            vm.RowsText = typed;
+
+            vm.ValidationSummary.Should().Contain("Số hàng: nhập một số nguyên");
+            vm.DrawCommand.CanExecute(null).Should().BeFalse("ô sai không được âm thầm giữ số cũ (B-32)");
+        }
+
+        [Fact]
+        public void NotANumber_IsRejected()
+        {
+            var vm = NewViewModel();
+
+            vm.CellSizeText = "NaN";
+
+            vm.CellSize.Should().Be(15);
+            vm.DrawCommand.CanExecute(null).Should().BeFalse();
+        }
+
+        [Fact]
+        public void FixingTheText_ReenablesDraw()
+        {
+            var vm = NewViewModel();
+            vm.RowsText = "";
+
+            vm.RowsText = "2";
+
+            vm.Rows.Should().Be(2);
+            vm.HasValidationErrors.Should().BeFalse();
+            vm.DrawCommand.CanExecute(null).Should().BeTrue();
+        }
+
+        [Fact]
+        public void SettingANumberFromCode_UpdatesTheText()
+        {
+            var vm = NewViewModel();
+
+            vm.Rows = 7;
+            vm.Spacing = 2.5;
+
+            vm.RowsText.Should().Be("7");
+            vm.SpacingText.Should().Be("2.5", "luôn dấu chấm, kể cả trên máy vi-VN");
+        }
+
+        [Fact]
+        public void TextThatAlreadyShowsTheNumber_IsKept()
+        {
+            var vm = NewViewModel();
+
+            vm.SpacingText = "20.0";   // người dùng đang gõ: đọc ra 20 — đúng số hiện có
+
+            vm.SpacingText.Should().Be("20.0");
+            vm.Spacing.Should().Be(20);
+        }
+
+        [Fact]
+        public void Draw_UsesTheTypedOrigin()
+        {
+            SetupDraw(CadResult<int>.Success(12));
+            var vm = NewViewModel();
+
+            vm.OriginXText = "10.5";
+            vm.OriginYText = "-3";
+            vm.DrawCommand.Execute(null);
+
+            _service.Verify(s => s.Draw(
+                It.IsAny<GridSpec>(),
+                It.Is<IReadOnlyList<GridCell>>(cells => cells[0].CenterX == 10.5 && cells[0].CenterY == -3)),
+                Times.Once);
         }
     }
 }

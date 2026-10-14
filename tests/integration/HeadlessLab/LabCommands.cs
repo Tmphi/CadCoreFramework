@@ -27,6 +27,12 @@ namespace CadCoreFramework.HeadlessLab
     {
         private const string AttBlock = "LAB_ATT_BLOCK";
 
+        /// <summary>
+        /// Câu nhắc của kiểm thử KEYWORDS_PROMPT_LISTS_ONCE. Runner gõ "No" cho nó và tìm đúng dòng
+        /// "LAB keyword prompt [Yes/No] &lt;Yes&gt;:" trong output — đổi chuỗi này thì đổi cả run-headless-lab.ps1.
+        /// </summary>
+        internal const string KeywordPrompt = "LAB keyword prompt";
+
         private static readonly List<(string Name, Action<ICadScope> Body)> Tests = new List<(string, Action<ICadScope>)>
         {
             ("PING", scope => Assert(scope.Database != null, "Database null")),
@@ -236,6 +242,15 @@ namespace CadCoreFramework.HeadlessLab
                 Assert(logger.Errors.Any(e => e.Contains("KHONG_CO")), "Thông điệp lỗi không nêu tên layout: " + string.Join(" | ", logger.Errors));
                 Assert(LayoutManager.Current.CurrentLayout == layoutBefore, "Layout hiện hành bị đổi");
                 Assert(PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting, "Job in bị treo");
+            }),
+
+            // B-33: AutoCAD tự nối "[Yes/No] <Yes>:" vào câu nhắc — CadPromptHelper không được nối thêm lần nữa.
+            // Prompt THẬT: runner gõ "No" (không gõ Enter: dòng trống ở dấu nhắc lệnh sẽ lặp lại LAB_ALL — T03 A6),
+            // rồi kiểm trong output rằng danh sách chỉ xuất hiện MỘT lần.
+            ("KEYWORDS_PROMPT_LISTS_ONCE", doc =>
+            {
+                string answer = CadPromptHelper.GetKeywords(KeywordPrompt, new[] { "Yes", "No" }, "Yes");
+                Assert(answer == "No", $"GetKeywords trả '{answer ?? "null"}', kỳ vọng 'No' (runner gõ No)");
             }),
         };
 

@@ -128,15 +128,16 @@ namespace CadCoreFramework.Utils
 
         /// <summary>
         /// Yêu cầu người dùng chọn một từ khóa trong danh sách (ví dụ: [Yes/No], [Horizontal/Vertical]).
+        /// AutoCAD tự hiện danh sách và từ khóa mặc định sau câu nhắc: "message [Yes/No] &lt;Yes&gt;:".
         /// </summary>
         public static string GetKeywords(string message, string[] keywords, string defaultKeyword = null)
         {
             if (Editor == null || keywords == null || keywords.Length == 0) return null;
 
-            string joined = string.Join("/", keywords);
-            string prompt = $"\n{message} [{joined}]: ";
-
-            var options = new PromptKeywordOptions(prompt);
+            // Câu nhắc CHỈ có phần chữ: PromptOptions.AppendKeywordsToMessage mặc định true → AutoCAD tự nối
+            // "[Yes/No] <Yes>:". Tự viết thêm "[…]" ở đây thì danh sách bị in hai lần (B-33, đã kiểm chứng
+            // trên AutoCAD 2024; lab HeadlessLab KEYWORDS_PROMPT_LISTS_ONCE).
+            var options = new PromptKeywordOptions($"\n{message}");
             foreach (var kw in keywords)
             {
                 options.Keywords.Add(kw);
