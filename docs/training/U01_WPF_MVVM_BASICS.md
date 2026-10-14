@@ -115,7 +115,7 @@ Kích thước cột của `Grid`: `Auto` (vừa nội dung) · `*` (chia phần
 | `ComboBox` | `ItemsSource` + `SelectedItem` | Kiểu nhãn, danh sách layer |
 | `CheckBox` | `IsChecked` | UI Template |
 | `RadioButton` | `IsChecked`, `GroupName` | UI Template |
-| `DataGrid` | `ItemsSource` + các cột | Layer Manager, Debug Inspector (4) |
+| `DataGrid` | `ItemsSource` + các cột | Debug Inspector (2), Layer Manager, UI Template |
 | `ListBox` | `ItemsSource` + `SelectedItem` | Debug Inspector |
 
 Xem cả 8 control đang chạy: lệnh `SHOW_UI_TEMPLATE` mở palette [`CommonControlsPalette.xaml`](../../Views/CommonControlsPalette.xaml).
