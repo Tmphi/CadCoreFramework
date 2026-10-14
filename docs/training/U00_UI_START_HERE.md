@@ -19,7 +19,7 @@
 
 1. [Bản đồ UI của một tool AutoCAD](#1-bản-đồ-ui-của-một-tool-autocad)
 2. [Quy tắc 20/80: số liệu](#2-quy-tắc-2080-số-liệu)
-3. [Sáu quy tắc vàng](#3-sáu-quy-tắc-vàng)
+3. [Bảy quy tắc vàng](#3-bảy-quy-tắc-vàng)
 4. [Lộ trình 3 tuần](#4-lộ-trình-3-tuần)
 5. [Chuẩn bị](#5-chuẩn-bị)
 6. [Bài kiểm tra đầu vào](#6-bài-kiểm-tra-đầu-vào)
@@ -98,7 +98,7 @@ Get-ChildItem Views,Samples -Recurse -Filter *.xaml | Select-String -Pattern 'Dy
 
 ---
 
-## 3. Sáu quy tắc vàng
+## 3. Bảy quy tắc vàng
 
 20% quy tắc này tránh được 80% lỗi UI mà dự án đã gặp hoặc đã kiểm chứng:
 
@@ -110,6 +110,7 @@ Get-ChildItem Views,Samples -Recurse -Filter *.xaml | Select-String -Pattern 'Dy
 | 4 | **Màu chỉ lấy từ theme, qua `DynamicResource`** | Theme đổi được lúc palette đang mở; key thiếu thì WPF im lặng | [Phần 5 §5.3](../05_WPF_UI_AND_MVVM.md#53-autocad-theme-tự-động-darklight), [T03 B28](T03_PITFALLS_CASEBOOK.md#b28-resource-wpf-thiếu-nhưng-không-báo-lỗi) |
 | 5 | **Mọi thứ chạm UI hoặc AutoCAD chạy trên main thread**; luồng nền chỉ để tính toán | WPF ném lỗi khi collection hoặc `CanExecute` đổi từ luồng khác (đã kiểm chứng ở [U01 §8](U01_WPF_MVVM_BASICS.md#8-luồng-thread)) | [T03 B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền) |
 | 6 | **UI không giữ `DBObject`**: giữ `ObjectId`, hoặc bản sao dữ liệu thuần (`PreviewShape`) | `DBObject` chỉ dùng được trong transaction đã mở nó | [U03 §1](U03_DRAWING_ON_UI.md#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ), [T03 B5](T03_PITFALLS_CASEBOOK.md#b5-dùng-dbobject-sau-khi-transaction-kết-thúc) |
+| 7 | **Ô nhập số bind vào chuỗi**, rồi tự đọc số bằng `NumberText` (dấu chấm thập phân, như dòng lệnh) | Bind thẳng vào `double` thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống: lỗi thật của dự án (B-31, B-32) | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số) |
 
 ---
 

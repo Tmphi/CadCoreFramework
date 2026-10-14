@@ -4,7 +4,24 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [Phần 9 — Golden Sample](../09_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 
-Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../09_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**.
+Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../09_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–11 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../09_GOLDEN_SAMPLE.md).
+
+---
+
+## Mục lục
+
+1. [Thêm một lệnh](#1-thêm-một-lệnh)
+2. [Thêm một tính năng trọn vẹn](#2-thêm-một-tính-năng-trọn-vẹn)
+3. [Thêm một service](#3-thêm-một-service)
+4. [Thêm một palette](#4-thêm-một-palette)
+5. [Palette cần người dùng chọn điểm trên màn hình](#5-palette-cần-người-dùng-chọn-điểm-trên-màn-hình)
+6. [Thêm Ribbon tab](#6-thêm-ribbon-tab)
+7. [Thêm Overrule](#7-thêm-overrule)
+8. [Lưu metadata: XData hay XRecord?](#8-lưu-metadata-xdata-hay-xrecord)
+9. [Thêm thiết lập người dùng](#9-thêm-thiết-lập-người-dùng)
+10. [Làm việc với dynamic block](#10-làm-việc-với-dynamic-block)
+11. [Lắng nghe sự kiện bản vẽ đúng cách](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách)
+12. [Checklist trước khi mở PR](#12-checklist-trước-khi-mở-pr)
 
 ---
 
@@ -78,6 +95,7 @@ public interface IPanelService
 public sealed class PanelService : IPanelService
 {
     public const string UndoMarkName = "Vẽ tủ điện";
+    public const string DataKey = "PANEL_DATA";          // key XRecord — Overrule (§7) lọc theo key này
     private readonly ICadContext _cad;
 
     public PanelService(ICadContext cad) => _cad = cad ?? throw new ArgumentNullException(nameof(cad));
@@ -90,7 +108,7 @@ public sealed class PanelService : IPanelService
                 new Point3d(x + spec.Width, y + spec.Height, 0), layer: "E-PANEL");
             scope.DrawMText(spec.Name, new Point3d(x + spec.Width / 2, y + spec.Height + 50, 0),
                 textHeight: 50, layer: "E-PANEL");
-            scope.SetXRecord(frame, "PANEL_DATA", new { spec.Name, spec.Width, spec.Height });
+            scope.SetXRecord(frame, DataKey, new { spec.Name, spec.Width, spec.Height });
             return frame;
         }, undoMarkName: UndoMarkName);
 }
@@ -176,20 +194,24 @@ Dự án có sẵn tab **"CadCore"**: [`Commands/CadCoreRibbon.cs`](../../Comman
 | NETLOAD khi AutoCAD **đã mở xong** | Ribbon đã có → gọi build action **ngay** (trong `InitializeRibbon` hoặc `RegisterBuildAction`, cái nào đến sau) |
 | Người dùng chạy `CUI` / `MENULOAD` / `WSCURRENT` … | `CommandEnded` → `Application.Idle` → gọi lại build action |
 
-Trên v1.0.0, trường hợp NETLOAD muộn **không ai** gọi build, và `AddButton` không idempotent (dựng lại khi tab còn sẽ nhân đôi nút). Từ PR #6: thứ tự `RegisterBuildAction`/`InitializeRibbon` không còn quan trọng; `AddButton` bỏ qua nút trùng lệnh; và có `RemoveTab` để build luôn dựng lại từ đầu:
+Trên v1.0.0, trường hợp NETLOAD muộn **không ai** gọi build, và `AddButton` không idempotent (dựng lại khi tab còn sẽ nhân đôi nút). Từ PR #6: thứ tự `RegisterBuildAction`/`InitializeRibbon` không còn quan trọng; `AddButton` bỏ qua nút trùng lệnh; và có `RemoveTab` để build luôn dựng lại từ đầu. Rút gọn từ [`Commands/CadCoreRibbon.cs`](../../Commands/CadCoreRibbon.cs): code nguyên văn, `…` là phần lược bớt, chú thích cuối dòng là của tài liệu:
 
 ```csharp
 public static class CadCoreRibbon
 {
     public const string TabId = "CADCORE_TAB";
 
+    private const string ToolsPanel = "CADCORE_PANEL_TOOLS";
+
     public static void Build(IRibbonService ribbon)
     {
         ribbon.RemoveTab(TabId);                                   // idempotent: luôn dựng lại từ đầu
         ribbon.AddTab(TabId, "CadCore", TabId);
-        ribbon.AddPanel(TabId, "CADCORE_PANEL_TOOLS", "Công cụ");
-        ribbon.AddButton(TabId, "CADCORE_PANEL_TOOLS", "Grid\nMarker", "SAMPLE_GRID", tooltip: "SAMPLE_GRID — Vẽ lưới ô đánh nhãn");
-        // … (bản đầy đủ: Commands/CadCoreRibbon.cs)
+
+        ribbon.AddPanel(TabId, ToolsPanel, "Công cụ");
+        ribbon.AddButton(TabId, ToolsPanel, "Grid\nMarker", "SAMPLE_GRID",
+            tooltip: "SAMPLE_GRID — Vẽ lưới ô đánh nhãn tại điểm chọn");
+        // …
     }
 }
 ```
@@ -224,7 +246,7 @@ public sealed class PanelTagOverrule : DrawableOverrule, ICadOverrule
 {
     public void Register()
     {
-        SetXDataFilter(PanelService.XDataAppName);                         // chỉ áp cho entity có XData của ta
+        SetExtensionDictionaryEntryFilter(PanelService.DataKey);           // chỉ áp cho entity có XRecord của ta
         Overrule.AddOverrule(RXObject.GetClass(typeof(Polyline)), this, false);
     }
     public void Unregister() => Overrule.RemoveOverrule(RXObject.GetClass(typeof(Polyline)), this);
@@ -241,7 +263,7 @@ public sealed class PanelTagOverrule : DrawableOverrule, ICadOverrule
 
 Quy tắc:
 - **Luôn qua `OverruleManager`** (Singleton). `Terminate` gỡ mọi Overrule. Overrule còn treo khi AutoCAD thoát có thể gây crash ([T03 B25](T03_PITFALLS_CASEBOOK.md#b25-autocad-crash-lúc-thoát-vì-overrule)).
-- **Giới hạn phạm vi** bằng filter của `Overrule` (đã kiểm chứng trong AutoCAD 2024): `SetXDataFilter(app)`, `SetExtensionDictionaryEntryFilter(key)`, `SetIdFilter(ObjectId[])`, `SetCustomFilter()`. Không có filter thì `WorldDraw` chạy cho *mọi* entity cùng lớp, *rất nhiều lần*.
+- **Giới hạn phạm vi** bằng filter của `Overrule` (đã kiểm chứng trong AutoCAD 2024): `SetXDataFilter(app)`, `SetExtensionDictionaryEntryFilter(key)`, `SetIdFilter(ObjectId[])`, `SetCustomFilter()`. Chọn filter theo **chỗ lưu dữ liệu**: `PanelService` ở §3 lưu bằng `SetXRecord`, tức một Xrecord tên `PANEL_DATA` trong Extension Dictionary của khung tủ, nên ví dụ trên lọc bằng `SetExtensionDictionaryEntryFilter`; dữ liệu lưu bằng XData thì dùng `SetXDataFilter(app)` ([§8](#8-lưu-metadata-xdata-hay-xrecord)). Không có filter thì `WorldDraw` chạy cho *mọi* entity cùng lớp, *rất nhiều lần*.
 - Trong Overrule: không mở transaction thường, không sửa database, không ném exception. Cần đọc dữ liệu thì dùng `StartOpenCloseTransaction` ([T01 §4.5](T01_AUTOCAD_NET_FOUNDATIONS.md#45-startopenclosetransaction)).
 
 ---
@@ -345,11 +367,29 @@ public sealed class ErasedWatcher : IDisposable
 - [ ] Subscription qua `TrackSubscription`; event AutoCAD được gỡ trong `Dispose`/`Shutdown`
 - [ ] Logic tách khỏi lambda; có test kết quả cho logic, test hợp đồng cho service
 - [ ] Đăng ký DI + `CommandClass`; palette mới có test XAML (`ThemeManager.Attach`, không mã màu cứng); lệnh mới có trong `PackageContents.xml`
+- [ ] Ô nhập số trên palette bind vào chuỗi và đọc bằng `NumberText` ([§4](#4-thêm-một-palette)); có validate, nút gắn `CanExecute`
 - [ ] Sửa helper trong `Extensions/`/`Utils/` → chạy `tests\integration\run-headless-lab.ps1` (nếu có AutoCAD) và thêm kiểm thử lab FAIL trên code cũ
 - [ ] Smoke test thủ công các kịch bản bị ảnh hưởng ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)), ghi kết quả vào PR
 - [ ] CHANGELOG `[Unreleased]`; cập nhật T-module nếu đổi quy ước
 
 Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK.md#2-checklist-code-review).
+
+---
+
+## ✅ Tự kiểm tra T08
+
+1. Bạn thêm class `PanelCommands`, build, NETLOAD, gõ `PANEL_DRAW` thì báo `Unknown command`. Bạn đã quên gì? Còn file nào phải thêm tên lệnh, và test nào sẽ nhắc bạn?
+2. Palette mới có ô "Chiều rộng". Bind ô đó thế nào, và vì sao không bind thẳng vào `double`?
+3. Bạn viết một Overrule vẽ thêm nhãn cho khung tủ của §3. Dùng filter nào, và chuyện gì xảy ra nếu không đặt filter?
+4. Vì sao `PanelService` luôn truyền `undoMarkName`, dù lệnh `PANEL_DRAW` đã được AutoCAD gom Undo theo lệnh?
+
+<details><summary>Gợi ý</summary>
+
+1. Dòng `[assembly: CommandClass(typeof(PanelCommands))]` trong `Properties/AssemblyInfo.cs` ([§1](#1-thêm-một-lệnh)). Lệnh mới còn phải có trong `Deployment/PackageContents.xml`; `PackageManifestTests` đỏ nếu thiếu ([§4](#4-thêm-một-palette)).
+2. Bind vào một property **chuỗi**, rồi đọc số bằng `NumberText` như `SpacingText` của Golden Sample. Bind thẳng vào `double` thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
+3. `SetExtensionDictionaryEntryFilter(PanelService.DataKey)`, vì dữ liệu tủ nằm trong Xrecord của Extension Dictionary ([§7](#7-thêm-overrule)). Không filter thì `WorldDraw` chạy cho mọi `Polyline` trong bản vẽ, rất nhiều lần.
+4. Service còn được gọi từ palette, tức application context, nơi AutoCAD không tự gom Undo theo lệnh ([T01 §11](T01_AUTOCAD_NET_FOUNDATIONS.md#11-undo)).
+</details>
 
 ---
 

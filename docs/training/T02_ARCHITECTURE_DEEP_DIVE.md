@@ -14,6 +14,25 @@
 
 ---
 
+## Mục lục
+
+1. [Bản đồ dự án và quy tắc phụ thuộc](#1-bản-đồ-dự-án-và-quy-tắc-phụ-thuộc)
+2. [Khởi động và tắt: AppBootstrapper](#2-khởi-động-và-tắt-appbootstrapper)
+3. [Dependency Injection](#3-dependency-injection)
+4. [ICadContext: hợp đồng giao dịch](#4-icadcontext-hợp-đồng-giao-dịch)
+5. [CadCommandBase: biên giới của mọi lệnh](#5-cadcommandbase-biên-giới-của-mọi-lệnh)
+6. [Extensions và Utils: API vẽ một dòng](#6-extensions-và-utils-api-vẽ-một-dòng)
+7. [EventAggregator và EventService](#7-eventaggregator-và-eventservice)
+8. [PaletteService và vòng đời ViewModel](#8-paletteservice-và-vòng-đời-viewmodel)
+9. [RibbonService](#9-ribbonservice)
+10. [ThemeManager, Styles và hệ màu](#10-thememanager-styles-và-hệ-màu)
+11. [Analyzer CAD001–CAD003](#11-analyzer-cad001cad003)
+12. [Logger, Notification, Settings, Path](#12-logger-notification-settings-path)
+13. [Golden Sample: theo dấu một lệnh từ đầu đến cuối](#13-golden-sample-theo-dấu-một-lệnh-từ-đầu-đến-cuối)
+14. [Lộ trình đọc code](#14-lộ-trình-đọc-code)
+
+---
+
 ## 1. Bản đồ dự án và quy tắc phụ thuộc
 
 ```mermaid
@@ -189,8 +208,11 @@ Câu hỏi để đọc kỹ (đáp án ở cuối mục):
 ### 4.4 `ExecuteAsync`: hai giai đoạn
 
 ```csharp
-Task ExecuteAsync(Func<Task<Action<ICadScope>>> asyncPreparation, bool autoRegen = false,
-                  string? undoMarkName = null, CancellationToken cancellationToken = default);
+Task ExecuteAsync(
+    Func<Task<Action<ICadScope>>> asyncPreparation,
+    bool autoRegen = false,
+    string? undoMarkName = null,
+    CancellationToken cancellationToken = default);
 ```
 
 1. **Chụp `Document` trước `await`.** Đây là điểm giá trị nhất: người dùng đổi tab trong lúc chờ cũng không vẽ nhầm.
@@ -264,7 +286,7 @@ flowchart TD
 | :--- | :--- |
 | `ExecuteCommand(Action, [CallerMemberName])` | Bọc try/catch như sơ đồ. Tên lệnh trong lịch sử lấy từ tên method nhờ `CallerMemberName` |
 | `ExecuteWithScope(Action<ICadScope>, undoMarkName)` | Rút gọn của `ExecuteCommand(() => CadContext.Execute(...))`, cho lệnh nhỏ không prompt |
-| `ExecuteWithScopeAsync(...)` | Biến thể async. **Chụp `Document` trước `await`** và in lỗi ra đúng bản vẽ đã chạy lệnh (`WriteMessageSafe` bỏ qua nếu bản vẽ đã đóng) |
+| `ExecuteWithScopeAsync(...)` → `Task<bool>` | Biến thể async: trả `true` khi giai đoạn vẽ đã chạy xong và commit. **Chụp `Document` trước `await`**. Lỗi được báo lên bản vẽ **đang active**, kèm tên bản vẽ gốc nếu người dùng đã chuyển bản vẽ hoặc đóng nó (`WriteMessageSafe`; B-30, PR #7). Action vẽ không được gọi `scope.Editor` ([§4.4](#44-executeasync-hai-giai-đoạn)) |
 | `GetRequiredService<T>()` | Lấy service, ném lỗi rõ ràng nếu thiếu. Gọi **bên trong** `ExecuteCommand` để lỗi được bắt |
 | `Logger`, `CadContext`, `CommandHistory` | `Lazy<>` từ container. `CadContext` ném lỗi nếu DI chưa sẵn sàng |
 | Constructor `(ILoggerService, ICadContext, ICommandHistoryService? = null)` | Constructor injection **cho unit test**. AutoCAD không dùng constructor này |
@@ -281,18 +303,39 @@ Ghi chú:
 
 ### 6.1 Mẫu chung của mọi hàm `Draw*`
 
+Mỗi hàm `Draw*` chỉ dựng **hình học**, rồi giao entity cho **một** hàm chung. Ví dụ [`DrawLine`](../../Extensions/CadScopeLineExtensions.cs) (nguyên văn):
+
 ```csharp
 public static ObjectId DrawLine(this ICadScope scope, Point3d startPoint, Point3d endPoint,
     string layer = null, short? colorIndex = null, LineWeight lineWeight = LineWeight.ByLayer,
     Action<Line> configure = null)
 {
-    var line = new Line(startPoint, endPoint);
-    line.SetDatabaseDefaults(scope.Database);          // 1. thuộc tính mặc định của bản vẽ
-    line.LineWeight = lineWeight;
-    CadScopeDrawingHelpers.ApplyCommonProperties(      // 2. layer (tự EnsureLayer) + màu
-        scope, line, layer, colorIndex);
-    configure?.Invoke(line);                            // 3. hook tùy biến của caller
-    return scope.AppendEntityToCurrentSpace(line);      // 4. append + AddNewlyCreatedDBObject
+    return CadScopeDrawingHelpers.AppendNew(scope, new Line(startPoint, endPoint), line =>
+    {
+        line.SetDatabaseDefaults(scope.Database);
+        line.LineWeight = lineWeight;
+    }, layer, colorIndex, configure);
+}
+```
+
+Hàm chung [`CadScopeDrawingHelpers.AppendNew`](../../Extensions/CadScopeDrawingHelpers.cs) làm bốn bước theo thứ tự cố định (code nguyên văn; chú thích cuối dòng là của tài liệu):
+
+```csharp
+internal static ObjectId AppendNew<T>(ICadScope scope, T entity, Action<T> setup,
+    string layer, short? colorIndex, Action<T> configure) where T : Entity
+{
+    try
+    {
+        setup?.Invoke(entity);                                // 1. hình học, thuộc tính mặc định của bản vẽ
+        ApplyCommonProperties(scope, entity, layer, colorIndex);   // 2. layer (tự EnsureLayer) + màu
+        configure?.Invoke(entity);                            // 3. hook tùy biến của caller
+        return scope.AppendEntityToCurrentSpace(entity);      // 4. append + AddNewlyCreatedDBObject
+    }
+    catch
+    {
+        DisposeIfNotInDatabase(entity);                       // lỗi trước khi vào DB → tự giải phóng
+        throw;
+    }
 }
 ```
 
@@ -304,7 +347,9 @@ public static ObjectId DrawLine(this ICadScope scope, Point3d startPoint, Point3
 | Tọa độ **WCS** | Chuyển từ UCS ở bước prompt (`CadPromptHelper`) |
 | Trả `ObjectId.Null` khi input không hợp lệ (ví dụ polyline < 2 điểm) | Caller phải kiểm tra `IsNull` |
 
-⚠️ Bước 3 chạy **trước** bước 4. Nếu `configure` ném lỗi, entity chưa vào DB và không được `Dispose` ([B-14](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). ⚠️ `ApplyCommonProperties` gọi `EnsureLayer` cho **mỗi** entity: đúng nhưng tốn khi vẽ hàng nghìn entity ([T07 §3](T07_PERFORMANCE_AND_SCALE.md#3-chi-phí-ẩn-trong-vòng-lặp)).
+Bước nào ném lỗi **trước** khi entity vào database (kể cả `configure` của bạn) thì `AppendNew` `Dispose` entity rồi ném lại lỗi: đối tượng ngoài database phải tự giải phóng ([T01 §9](T01_AUTOCAD_NET_FOUNDATIONS.md#9-bộ-nhớ-và-vòng-đời-đối-tượng)). Trên v1.0.0, mỗi `Draw*` tự làm bốn bước mà không có `try/catch`, nên `configure` ném lỗi là rò rỉ entity ([B-14](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), sửa ở PR #6; HeadlessLab `DRAW_CONFIGURE_THROWS_DISPOSES`). Viết một `Draw*` mới thì đi qua `AppendNew`, đừng tự append.
+
+⚠️ `ApplyCommonProperties` gọi `EnsureLayer` cho **mỗi** entity có truyền `layer`: đúng nhưng tốn khi vẽ hàng nghìn entity ([T07 §3](T07_PERFORMANCE_AND_SCALE.md#3-chi-phí-ẩn-trong-vòng-lặp)).
 
 ### 6.2 Nhóm chức năng
 
@@ -504,8 +549,8 @@ sequenceDiagram
 | `GridSpec` | xUnit thuần | Mọi luật validate, báo nhiều lỗi cùng lúc |
 | `GridPlanner` | xUnit thuần | **Kết quả**: tọa độ, nhãn A…Z/AA, thứ tự |
 | `GridMarkerService` | `FakeCadContext { ExecuteAction = false }` | **Hợp đồng**: đúng một `TryExecute`, đúng undo mark, publish khi thành công |
-| `GridMarkerViewModel` | Mock `IGridMarkerService` | `CanExecute` theo validate, trạng thái, Dispose thì ngừng nghe |
-| `GridMarkerPalette` | `XamlPaletteTests` (STA thread) | XAML + resource + DI dựng được |
+| `GridMarkerViewModel` | Mock `IGridMarkerService` | `CanExecute` theo validate, trạng thái, Dispose thì ngừng nghe; ô số đọc đúng (`2,5`, ô trống là lỗi) |
+| `GridMarkerPalette` | `XamlPaletteTests` (STA thread) | XAML + resource + DI dựng được; gõ vào ô số thật của palette ([T05 §6](T05_TESTING_STRATEGY.md#6-xaml-palette-trên-sta)) |
 | `GridMarkerCommands` | **Chạy tay trong AutoCAD** | Prompt, ESC, Undo, đa bản vẽ |
 
 ---

@@ -11,6 +11,20 @@ Plugin chạy nhanh với bản vẽ 50 entity có thể "đơ" với bản vẽ
 
 ---
 
+## Mục lục
+
+1. [Mô hình chi phí (tương đối)](#1-mô-hình-chi-phí-tương-đối)
+2. [Lọc trước khi mở: ObjectClass](#2-lọc-trước-khi-mở-objectclass)
+3. [Chi phí ẩn trong vòng lặp](#3-chi-phí-ẩn-trong-vòng-lặp)
+4. [Xử lý nhiều bản vẽ: side database](#4-xử-lý-nhiều-bản-vẽ-side-database)
+5. [Batch và tiến trình](#5-batch-và-tiến-trình)
+6. [Đồ họa và regen](#6-đồ-họa-và-regen)
+7. [Tính toán nặng và async](#7-tính-toán-nặng-và-async)
+8. [Đo đạc](#8-đo-đạc)
+9. [Bộ nhớ](#9-bộ-nhớ)
+
+---
+
 ## 1. Mô hình chi phí (tương đối)
 
 | Thao tác | Chi phí | Ghi chú |

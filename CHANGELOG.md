@@ -9,6 +9,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (PR #14 — rà soát toàn bộ tài liệu training)
+- **Chỗ tài liệu đã lệch với code**:
+  - T02 §5: `ExecuteWithScopeAsync` trả `Task<bool>` và báo lỗi lên bản vẽ đang active (từ PR #7).
+  - T02 §6.1: mẫu `Draw*` theo `CadScopeDrawingHelpers.AppendNew`, tức bản sửa B-14; tài liệu vẫn dạy mẫu cũ bị rò rỉ entity.
+  - T08 §3/§7: Overrule gọi `PanelService.XDataAppName`, hằng không tồn tại (biên dịch báo `CS0117`). Giờ dùng `PanelService.DataKey` và `SetExtensionDictionaryEntryFilter`, khớp với chỗ §3 lưu dữ liệu.
+  - T06: smoke test giờ có 17 bước; manifest liệt kê đúng 9 lệnh không phải demo (`PackageManifestTests`).
+  - T05: coverage đo lại (21%); ghi rõ chú thích cuối dòng trong ba khối test là của tài liệu.
+  - C05: kết quả `dotnet test` (320) và thí nghiệm "Thử ngay" (40/41), chạy lại thật. C03: số class.
+- **Trải nghiệm người học**:
+  - README: bảng "Bắt đầu từ đâu?" theo từng kiểu người học; bảng trạng thái kiểm chứng gọn lại.
+  - Mục lục cho T02–T10.
+  - T03: bảng tra nhanh 52 mục theo triệu chứng. T04: cây quyết định thêm hai triệu chứng (ô số, từ khóa).
+  - Tự kiểm tra mới ở T01 §9–11 và T08. U00: quy tắc vàng thứ 7 (ô nhập số).
+  - C01 nối bẫy định dạng số với lỗi thật B-31. T09: checklist review có mục palette; lộ trình ghi đợt sửa của nhánh UI. T10: quy tắc chọn base cho lab.
+  - GLOSSARY thêm NaN, Mock/Fake, fail trước, backlog, DoD.
+- **Kiểm chứng**: link và anchor; mọi khối code đối chiếu với nguồn; công thức T08 biên dịch thử trong một bản sao dự án (`-warnaserror` sạch); 68 ví dụ Giai đoạn 0 chạy lại, output không đổi.
+
 ### Fixed (PR #13 — `GridSpec` chặn `NaN` và vô cực)
 - **`GridSpec.Validate()` coi `NaN` và vô cực là kích thước hợp lệ** (B-34): so sánh `<`, `<=`, `>`, `>=` với `NaN` đều ra `false`, nên `Spacing = NaN` hay `CellSize = NaN` cho 0 lỗi; `Spacing = ∞` cũng lọt. Giờ `Validate()` báo lỗi "Khoảng cách, kích thước ô và chiều cao chữ phải là số hữu hạn…", và `GridPlanner` từ chối spec đó như mọi spec sai khác. Từ PR #11 người dùng không gõ ra được các giá trị này (palette và `GetDouble` đều chặn); bản sửa này chặn cả code gọi thẳng `GridSpec`.
 - Test: 315 → **320 × 2 TFM**: `Validate_SizeNotAFiniteNumber_ReturnsError`, 5 trường hợp, đều FAIL trên `74e32ca` (code cũ coi chúng là hợp lệ).

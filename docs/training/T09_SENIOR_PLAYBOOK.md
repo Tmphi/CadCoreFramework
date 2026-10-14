@@ -8,6 +8,16 @@ Senior không chỉ viết code đúng. Senior **giữ cho cả hệ thống đ�
 
 ---
 
+## Mục lục
+
+1. [ADR: Vì sao kiến trúc như hiện tại](#1-adr-vì-sao-kiến-trúc-như-hiện-tại)
+2. [Checklist code review](#2-checklist-code-review)
+3. [Backlog kỹ thuật đã kiểm chứng](#3-backlog-kỹ-thuật-đã-kiểm-chứng)
+4. [Lộ trình kiến trúc](#4-lộ-trình-kiến-trúc)
+5. [Trách nhiệm của Senior](#5-trách-nhiệm-của-senior)
+
+---
+
 ## 1. ADR: Vì sao kiến trúc như hiện tại
 
 *Architecture Decision Record*: mỗi quyết định ghi **bối cảnh → quyết định → hệ quả**. Muốn đổi một quyết định, viết ADR mới thay thế, đừng âm thầm làm khác.
@@ -71,6 +81,7 @@ Người review đi theo thứ tự này. Người viết PR **tự chạy check
 - [ ] Lỗi nghiệp vụ dự đoán được → `CadResult`; lỗi lập trình → exception
 - [ ] Đăng ký DI đúng lifetime (service Singleton, ViewModel Transient); `CommandClass` đầy đủ
 - [ ] Không thêm dependency mới mà chưa qua [chính sách dependency](T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency)
+- [ ] Palette: chỉ binding; màu và style qua `DynamicResource`; ô số bind vào chuỗi và đọc bằng `NumberText` (B-31, B-32); nút gắn `CanExecute` với validate ([U00 §3](U00_UI_START_HERE.md#3-bảy-quy-tắc-vàng))
 
 ### C. Chất lượng
 - [ ] Build 0 warning; test xanh hai TFM; test mới **fail trên code cũ** (nếu là sửa lỗi)
@@ -140,6 +151,7 @@ Bằng chứng "Lab `TÊN`" là kiểm thử [HeadlessLab](../../tests/integrati
 | :--- | :--- | :--- |
 | ~~Ngắn hạn~~ ✅ | Theme (B-01/02/03/23), Guid palette (B-04), Ribbon (B-05), lỗi đúng/sai (B-09, B-12…B-17, B-25), comment (B-19), context async (B-06) | Xong ở PR #6 (2026-10-13) |
 | ~~Trung hạn~~ ✅ | Headless (B-20 → HeadlessLab, ADR-015), CAD002/CAD003 (B-18/B-07), settings atomic (B-22), PlotService (B-10, B-28) | Xong ở PR #6; B-20 một phần |
+| ~~Nhánh UI~~ ✅ | Ô số trên palette (B-31, B-32), danh sách từ khóa in hai lần (B-33), `GridSpec` chặn `NaN`/vô cực (B-34) | Xong ở PR #11 và #13 (2026-10-14); đã kiểm trong AutoCAD GUI |
 | **Tiếp theo** | ~~Kiểm trong GUI các mục chỉ GUI mới thấy (B-04, B-05, B-23, B-30)~~ — xong 2026-10-14. Mở rộng HeadlessLab tới `CadContext` (cần tách phần COM undo mark khỏi `AcMgd`) | Mỗi mục mới vào backlog phải kèm kiểm thử FAIL trên code cũ |
 | **Dài hạn** | Kiểm chứng AutoCAD 2025+/net8 khi vào phạm vi (B-21); báo cáo lỗi có cấu trúc (telemetry nội bộ, chỉ khi người dùng đồng ý); đa ngôn ngữ thông điệp; ngân sách hiệu năng cho từng tính năng | Theo nhu cầu sản phẩm |
 
