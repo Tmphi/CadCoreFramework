@@ -301,6 +301,9 @@ _cadContext.ExecuteRead(scope =>
 - **Đã kiểm trên AutoCAD 2024 có giao diện** (2026-10-14, bằng một DLL kiểm thử chứa nguyên văn code của module; mọi bước đạt kỳ vọng):
   - Vòng "đóng → hỏi → mở lại" của hộp thoại: dữ liệu đã nhập giữ nguyên, điểm vừa chọn hiện khi mở lại (§4).
   - `SetImpliedSelection` + zoom gọi từ nút của một cửa sổ modeless (application context): đối tượng được chọn sẵn, màn hình zoom vừa chúng; gọi **không** lock cũng chạy, không exception (§7.3).
+- **Bản sửa B-31…B-33 (PR #11), kiểm trên AutoCAD 2024 có giao diện** (2026-10-14, người dùng, bằng chính plugin):
+  - Bước từ khóa của `DEMO_PROMPT`: danh sách từ khóa in một lần (§2.3). Log của plugin ghi 3 lần chạy; bước 5 trả `Horizontal` (từ khóa mặc định) hai lần và `Vertical` một lần.
+  - Ô nhập số trên palette Grid Marker, theo [T05 smoke 17](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được): gõ `2,5` hay xóa trắng ô thì palette báo lỗi và nút Vẽ tắt (§2.5).
 - Mentor vẫn dùng các bước trên làm smoke khi chấm U02-E3: code của học viên có thể khác code đã kiểm.
 
 ---
