@@ -107,7 +107,7 @@ Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run
 | `npm run reading-time` | Mỗi mục `##` của module có nhãn 🎯/🔍/📖, và số phút trên dòng ⏱ khớp số từ thật ([quy ước](README.md#5-quy-ước-đọc)) |
 | `npm run mermaid` | Mọi sơ đồ mermaid parse được |
 
-Chạy cả ba trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`.
+Chạy cả ba trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`. Dự án tạo bằng template với `IncludeDemos=false` không còn `Demos/`: link vào thư mục đó được bỏ qua (script ghi rõ số link bỏ qua), để CI của dự án mới không đỏ.
 
 **Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). Mỗi tháng có thêm một PR `docs-tools` cho package npm của `tools/docs`. CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
 

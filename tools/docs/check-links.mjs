@@ -3,7 +3,7 @@
 // Chạy: node tools/docs/check-links.mjs
 import fs from 'node:fs';
 import path from 'node:path';
-import { markdownFiles, linesWithFence, headingAnchors, report, finish } from './lib.mjs';
+import { markdownFiles, linesWithFence, headingAnchors, removedByTemplate, report, finish } from './lib.mjs';
 
 const anchorCache = new Map();
 function anchorsOf(file) {
@@ -27,7 +27,7 @@ function existsExactCase(target) {
   return true;
 }
 
-let total = 0;
+let total = 0, removed = 0;
 for (const file of markdownFiles()) {
   for (const { line, no, inFence } of linesWithFence(fs.readFileSync(file, 'utf8'))) {
     if (inFence) continue;
@@ -38,6 +38,7 @@ for (const file of markdownFiles()) {
       total++;
       const [p, frag] = href.split('#');
       const target = p ? path.resolve(path.dirname(file), decodeURIComponent(p)) : file;
+      if (removedByTemplate(target)) { removed++; continue; }
       if (!existsExactCase(target)) report(file, no, `không có file: ${href}`);
       else if (frag && target.endsWith('.md') && !anchorsOf(target).has(decodeURIComponent(frag))) {
         report(file, no, `không có anchor: ${href}`);
@@ -45,4 +46,4 @@ for (const file of markdownFiles()) {
     }
   }
 }
-finish(`${total} link`);
+finish(`${total} link${removed ? ` (bỏ qua ${removed} link vào thư mục template đã xóa)` : ''}`);

@@ -8,6 +8,16 @@ export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 const skipDirs = new Set(['.git', 'bin', 'obj', '.vs', 'node_modules', 'coverage', 'TestResults', 'dist']);
 
+// Thư mục mà template được phép xóa (`dotnet new cad-plugin --IncludeDemos false`, `init-template.ps1 -RemoveDemos`).
+// Tài liệu vẫn trỏ vào đó; khi thư mục không còn, link/trích đoạn tới nó được bỏ qua thay vì làm đỏ CI.
+const optionalDirs = ['Demos'];
+
+/** true nếu `target` nằm trong một thư mục tùy chọn đã bị template xóa. */
+export function removedByTemplate(target) {
+  const first = path.relative(repoRoot, target).split(path.sep)[0];
+  return optionalDirs.includes(first) && !fs.existsSync(path.join(repoRoot, first));
+}
+
 /** Mọi file .md trong repo, bỏ qua thư mục build và node_modules. */
 export function markdownFiles(dir = repoRoot, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
