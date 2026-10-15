@@ -12,6 +12,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added (tài liệu — luyện nhớ lại, GĐ3 phần 1)
 - Khối **✅ Tự kiểm tra** ngay sau mỗi mục 🎯 của T02, T04, T05, T06, T07, T08 (30 khối; T01 đã có từ trước), đáp án thu gọn. Câu hỏi là tình huống ("chuyện gì xảy ra nếu…", "tầng nào bắt lỗi này sớm nhất") thay vì nhắc lại định nghĩa, và không trùng khối ✅ cuối module.
 - training/README §5 hướng dẫn cách dùng: gấp tài liệu, tự trả lời, sai thì đọc lại đúng đoạn đó. Thẻ ⏱ đã tính cả chữ của các khối ✅. Tổng của lộ trình nhanh thành ≈ 4 giờ đọc.
+- training/README, trạng thái kiểm chứng của `labs/`: phần thử tay trên AutoCAD 2024 có giao diện (NETLOAD DLL lab, `TRAIN_DUMP`, `TRAIN_DOORS`, `TRAIN_LINE2P` với UCS xoay, ESC) đã kiểm ngày 2026-10-16.
 - T05 §9: bộ chấm `labs/` đã chạy `CadContext` thật trong accoreconsole nhờ shim `GetAcadDocument`. T06 §4: bảng bước CI có thêm hai bước build lab. T07 §2: `SelectAll` chọn trong mọi không gian (đã thử trên AutoCAD 2024).
 
 ### Added (lab chấm trên AutoCAD — `labs/`)
