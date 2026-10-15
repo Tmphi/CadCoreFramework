@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) §1–6; C# ở mức [C03](C03_OBJECT_ORIENTED.md)–[C04](C04_CSHARP_IN_THIS_PROJECT.md) (interface, DI, lambda, `using`) · **Trong lộ trình:** tuần 4–5 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 60 phút (phần 🎯 ≈ 40 phút) · **Thực hành:** L06 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 75 phút (phần 🎯 ≈ 55 phút) · **Thực hành:** L06 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) dạy luật chơi của AutoCAD. Module này cho thấy framework **áp dụng các luật đó ở đâu, bằng dòng code nào**, và những chỗ nó chưa làm trọn. Hãy đọc với file nguồn mở bên cạnh: mọi link 🔎 đều trỏ vào code thật.
 
@@ -75,6 +75,19 @@ flowchart TB
 
 > [!TIP]
 > Quy tắc "mũi tên chỉ đi một chiều" là thứ giúp dự án **test được**. ViewModel không biết AutoCAD, nên test được bằng xUnit thường. Logic thuần không biết gì, nên test được 100%. Phần phụ thuộc AutoCAD bị dồn vào lớp vỏ mỏng nhất có thể.
+
+### ✅ Tự kiểm tra §1
+
+1. Palette cần tô xám những layer đang tắt. ViewModel được phép gọi gì để biết layer nào tắt, và không được dùng những gì?
+2. Trong các mũi tên sau, mũi tên nào **không** được có: Command → Service, Service → Command, ViewModel → Service, Core → Service?
+3. Bạn viết `PanelPlanner` cho một tính năng mới. Vì sao nên để nó không biết gì về AutoCAD?
+
+<details><summary>Đáp án</summary>
+
+1. Gọi một **interface service**, ví dụ một hàm trả danh sách layer kèm cờ tắt/bật, rồi giữ kết quả thành trạng thái của chính nó. Không dùng AutoCAD API, không prompt, không dùng kiểu WPF như `Brush`: ViewModel giữ một `bool`, việc đổi thành màu xám là của View (binding, style).
+2. Service → Command và Core → Service. Mũi tên chỉ đi một chiều, từ biên vào trong. Core là hạ tầng, không chứa nghiệp vụ cụ thể.
+3. Logic thuần test được 100% bằng xUnit thường, không cần AutoCAD. Phần phụ thuộc AutoCAD dồn vào lớp vỏ mỏng (Service, Command), nên chỗ phải test bằng tay nhỏ nhất có thể.
+</details>
 
 ---
 
@@ -153,6 +166,19 @@ AutoCAD tự tạo instance class lệnh và WPF tự tạo `UserControl` (cả 
 (Trên v1.0.0 còn một biên thứ ba, `ViewModelLocator` trong XAML của `CommonControlsPalette`: trả `null` âm thầm và gắn ViewModel vào một `Grid` con nên `PaletteService` không Dispose được nó. Đã bỏ ở PR #6 — B-26.)
 
 Bên trong (Service, ViewModel) **luôn** dùng constructor injection. Đây là ranh giới để code nghiệp vụ test được.
+
+### ✅ Tự kiểm tra §3
+
+1. Vì sao dự án không dùng lifetime `Scoped`?
+2. Một lệnh gọi `GetRequiredService<IPanelService>()`, nhưng bạn quên đăng ký `IPanelService` trong `ConfigureServices`. Người dùng thấy gì?
+3. `PanelService` mới cần `ILoggerService`. Lấy nó bằng cách nào?
+
+<details><summary>Đáp án</summary>
+
+1. AutoCAD không có khái niệm "request scope". Service là Singleton suốt phiên, ViewModel là Transient.
+2. `GetRequiredService` ném `InvalidOperationException` có thông điệp rõ. Gọi nó **bên trong** `ExecuteCommand` thì lỗi được bắt và hiện lên dòng lệnh dạng `[Lỗi Hệ Thống]: …` ([§5](#5-cadcommandbase-biên-giới-của-mọi-lệnh)), không làm lệnh "câm".
+3. Constructor injection: thêm tham số `ILoggerService logger` vào constructor, DI tự truyền. Service locator chỉ được dùng ở biên (class lệnh, code-behind palette), vì AutoCAD và WPF tạo hai loại đó bằng constructor không tham số.
+</details>
 
 ---
 
@@ -262,6 +288,21 @@ Khi nào dùng Result, khi nào dùng exception:
 (c) `GetAcadDocument()` trả về đối tượng COM. Dùng `dynamic` thì không cần tham chiếu thư viện interop COM của AutoCAD (late binding). Cái giá là cần `Microsoft.CSharp` (đã thêm cho net48 trong csproj) và không có kiểm tra lúc biên dịch.
 </details>
 
+### ✅ Tự kiểm tra §4
+
+1. Service vẽ lưới phải trả **số ô đã vẽ**, và khi layer bị khóa thì để palette tự quyết cách báo lỗi. Dùng method nào của `ICadContext`?
+2. Trong lambda của `ExecuteRead`: (a) gọi `scope.AppendEntityToCurrentSpace(…)`; (b) gọi `scope.Transaction.GetObject(id, OpenMode.ForWrite)` rồi đổi màu. Mỗi trường hợp xảy ra gì?
+3. `ExecuteBatch` vẽ 500 phần tử, phần tử thứ 300 ném lỗi. Bản vẽ còn bao nhiêu phần tử mới? Nếu không có lỗi, người dùng phải Ctrl+Z mấy lần để xóa cả 500?
+4. Trong `ExecuteAsync`, vì sao `Document` được chụp **trước** `await`? Và trong Action vẽ, vì sao không được gọi `scope.Editor`?
+
+<details><summary>Đáp án</summary>
+
+1. `TryExecute<T>(Func<ICadScope, T>)`, trả `CadResult<T>`: không ném, lỗi thành giá trị để caller quyết định, như `GridMarkerService.Draw`.
+2. (a) Ném `InvalidOperationException`: scope có `IsReadOnly = true`. (b) Thay đổi **được commit**: transaction của `ExecuteRead` kết thúc bằng `Commit`, "read-only" chỉ là hợp đồng (B-07). Analyzer CAD003 cảnh báo trường hợp này lúc build.
+3. 0 phần tử: một transaction, nên một lỗi là cả batch rollback. Khi thành công, cả batch là **một** bước Undo (mặc định tên `"Batch"`), nên một lần Ctrl+Z.
+4. Người dùng có thể chuyển sang bản vẽ khác trong lúc chờ; chụp trước thì phần vẽ vẫn vào đúng bản vẽ gốc. Còn Editor của một bản vẽ không active thì mọi lời gọi (kể cả `WriteMessage`) ném `eNotApplicable`, hủy cả transaction ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)).
+</details>
+
 ---
 
 ## 5. CadCommandBase: biên giới của mọi lệnh
@@ -296,6 +337,21 @@ flowchart TD
 Ghi chú:
 - `Document`, `Database`, `Editor` của base class đọc `MdiActiveDocument` **mỗi lần truy cập**. Trong một lệnh đồng bộ thì an toàn (người dùng không đổi tab giữa chừng được), nhưng **không** dùng chúng sau `await`.
 - Lệnh async kiểu "fire-and-forget" được ghi lịch sử là *thành công* ngay khi phần đồng bộ kết thúc ([T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)).
+
+### ✅ Tự kiểm tra §5
+
+1. Bên trong `ExecuteCommand`, code ném `ArgumentNullException`. Người dùng thấy gì trên dòng lệnh? Log và lịch sử lệnh ghi gì?
+2. Cũng lệnh đó, nhưng người dùng nhấn ESC và code ném `Autodesk.AutoCAD.Runtime.Exception` với `ErrorStatus.UserBreak`. Khác gì câu 1?
+3. Một lệnh async dùng `this.Document` **sau** `await`. Vì sao đó là lỗi tiềm ẩn?
+4. Vì sao `GetRequiredService<T>()` phải gọi **bên trong** `ExecuteCommand`, không gọi trước nó?
+
+<details><summary>Đáp án</summary>
+
+1. Dòng lệnh: `[Lỗi Hệ Thống]: <thông điệp>`. Log: `Logger.Error` kèm exception. Lịch sử: một bản ghi với `success = false` (ghi trong `finally`).
+2. Im lặng: không in lỗi, không ghi lịch sử (`record = false`). ESC là người dùng chủ động hủy, không phải lỗi.
+3. `Document`, `Database`, `Editor` của base class đọc `MdiActiveDocument` **mỗi lần truy cập**. Sau `await`, người dùng có thể đã chuyển bản vẽ, nên `this.Document` là bản vẽ khác. Chụp `Document` vào biến trước `await`, như `ExecuteWithScopeAsync`.
+4. Thiếu service thì nó ném `InvalidOperationException`; chỉ bên trong `ExecuteCommand` lỗi đó mới được bắt và báo rõ cho người dùng.
+</details>
 
 ---
 
@@ -373,6 +429,23 @@ Bước nào ném lỗi **trước** khi entity vào database (kể cả `config
 | `Utils/Jigs/` | `RectangleJig`, `BlockPlacementJig`, base class cho EntityJig/DrawJig |
 
 `Sampler` và `Update` của Jig chạy **tuần tự trên main thread** bên trong `Editor.Drag`, không chạy song song như một bản cũ của tài liệu tham khảo từng viết.
+
+### ✅ Tự kiểm tra §6
+
+1. Gọi `scope.DrawLine(…)` từ một nút trên palette, **ngoài** lambda của `Execute`. Có được không, và vì sao?
+2. `scope.DrawLine(a, b, configure: l => throw new InvalidOperationException("x"))`. Entity `Line` vừa tạo đi đâu? Exception đi đâu?
+3. Người dùng click hai điểm khi UCS đang xoay. Tọa độ truyền vào `DrawLine` phải ở hệ nào, và việc đổi hệ làm ở đâu?
+4. `DrawPolyline` nhận một danh sách chỉ có 1 điểm. Hàm trả gì, caller phải làm gì?
+5. Bạn viết hàm `DrawCross` mới. Vì sao phải đi qua `CadScopeDrawingHelpers.AppendNew` thay vì tự `AppendEntityToCurrentSpace`?
+
+<details><summary>Đáp án</summary>
+
+1. Không. `Draw*` là extension method của `ICadScope`, mà scope chỉ có bên trong lambda của `Execute` (đã có lock + transaction). `Draw*` không tự mở transaction.
+2. `AppendNew` bắt lỗi, `Dispose` entity vì nó chưa vào database, rồi ném lại. Exception nổi lên `Execute`, transaction rollback, rồi tới biên (`ExecuteCommand`) để báo người dùng.
+3. WCS. Đổi UCS → WCS ở bước prompt, bằng `CadPromptHelper`.
+4. `ObjectId.Null`. Caller kiểm `IsNull` trước khi dùng id.
+5. `AppendNew` làm đúng thứ tự bốn bước (hình học, layer + màu, `configure`, append) và tự `Dispose` entity khi một bước ném lỗi trước lúc vào database. Tự append thì phải tự lo cả hai, dễ rò rỉ như B-14 trên v1.0.0.
+</details>
 
 ---
 
@@ -498,6 +571,19 @@ Kiểm thử bảo vệ thiết kế này (`XamlPaletteTests`): hai file theme c
 - Ngoại lệ có chủ đích được đánh dấu bằng `#pragma warning disable CADxxx` kèm comment giải thích (ví dụ CAD001 trong `NotificationService`).
 - Giới hạn chung: chỉ thấy lời gọi **trực tiếp**; không theo vào method được gọi từ đó (Service gọi một helper mà helper prompt thì lọt), và CAD003 không xét method group (`ExecuteRead(DocRead)`). Viết thêm rule là đề bài tốt cho người muốn học Roslyn — mẫu test ở `AnalyzerTests` (biên dịch đoạn mã kèm stub kiểu AutoCAD, không cần AutoCAD).
 
+### ✅ Tự kiểm tra §11
+
+1. Trong `LayerManagerViewModel`: `Application.DocumentManager.MdiActiveDocument.Editor.GetPoint("…")`. Analyzer báo những rule nào?
+2. `PanelService` gọi `PromptTools.AskPoint()`, một helper tự viết bên trong gọi `CadPromptHelper.GetPoint`. CAD002 có bắt không?
+3. Analyzer chỉ báo **warning**. Vì sao CI vẫn đỏ? Nếu có lý do chính đáng để vi phạm một rule thì làm thế nào?
+
+<details><summary>Đáp án</summary>
+
+1. CAD001 (ViewModel truy cập `.MdiActiveDocument`) và CAD002 (ViewModel gọi `Editor.GetPoint`).
+2. Không. Analyzer chỉ thấy lời gọi **trực tiếp**, không theo vào method được gọi. Đây là giới hạn đã ghi; review vẫn phải bắt.
+3. CI build với `-warnaserror`. Ngoại lệ có chủ đích thì `#pragma warning disable CADxxx` kèm comment giải thích vì sao, như CAD001 trong `NotificationService`.
+</details>
+
 ---
 
 ## 12. Logger, Notification, Settings, Path
@@ -512,6 +598,21 @@ Kiểm thử bảo vệ thiết kế này (`XamlPaletteTests`): hai file theme c
 | `IDataFileService` | [`DataFileService.cs`](../../Services/DataFileService.cs) | JSON, CSV, `.xlsx` (MiniExcel 1.44.1). Trả `CadResult` thay vì ném lỗi với lỗi người dùng tự sửa được; bảng đi qua `DataSheet` ([R03 §8](../reference/R03_API.md#đọc-ghi-file-dữ-liệu-idatafileservice)) |
 | `IPlotService` | [`PlotService.cs`](../../Services/PlotService.cs) | In layout ra PDF. Chỉ in bản vẽ đang làm việc; kiểm tên layout và `ProcessPlotState` trước; tạm đặt `BACKGROUNDPLOT = 0`, chuyển layout hiện hành (bắt buộc với `PlotInfoValidator`), rồi khôi phục cả hai; vùng in `Extents`, fit + center. Kiểm chứng in thật bằng HeadlessLab `PLOT_*` (B-10, B-28) |
 | `ICommandHistoryService` | [`CommandHistoryService.cs`](../../Core/CommandHistoryService.cs) | 50 bản ghi gần nhất trong bộ nhớ, thread-safe. Hiện trong Debug Inspector |
+
+### ✅ Tự kiểm tra §12
+
+1. Người dùng báo "lệnh không chạy". Bạn mở log ở đâu, tên file ra sao? Bản Release có ghi dòng mức Debug không?
+2. Vì sao `GetSetting<int>("Rows")` phải đi vòng qua JSON thay vì ép kiểu `(int)value`?
+3. Hai phiên AutoCAD cùng mở, mỗi phiên đổi một key khác nhau rồi `Save()`. Có phiên nào làm mất key của phiên kia không?
+4. Muốn báo "Đã vẽ 6 ô" cho người dùng **và** lưu lại để tra sau. Gọi service nào?
+
+<details><summary>Đáp án</summary>
+
+1. `%AppData%\CadCoreFramework\Logs\log-yyyyMMdd.txt`, mỗi ngày một file, giữ 31 file. Bản Release ghi từ mức Information, nên không có dòng Debug.
+2. Newtonsoft đọc số trong JSON thành `Int64`; ép `object` đang chứa `long` sang `int` ném `InvalidCastException`. Round-trip JSON đổi đúng kiểu.
+3. Không. `Save()` đọc lại tệp, chỉ áp các key phiên này đã đổi, khóa bằng named mutex giữa hai tiến trình, rồi ghi atomic (B-22).
+4. `INotificationService.Info`: in `[✔]` lên dòng lệnh **và** ghi log.
+</details>
 
 ---
 
@@ -555,6 +656,21 @@ sequenceDiagram
 | `GridMarkerViewModel` | Mock `IGridMarkerService` | `CanExecute` theo validate, trạng thái, Dispose thì ngừng nghe; ô số đọc đúng (`2,5`, ô trống là lỗi) |
 | `GridMarkerPalette` | `XamlPaletteTests` (STA thread) | XAML + resource + DI dựng được; gõ vào ô số thật của palette ([T05 §6](T05_TESTING_STRATEGY.md#6-xaml-palette-trên-sta)) |
 | `GridMarkerCommands` | **Chạy tay trong AutoCAD** | Prompt, ESC, Undo, đa bản vẽ |
+
+### ✅ Tự kiểm tra §13
+
+1. Người dùng nhập 0 hàng ở `SAMPLE_GRID`. Lệnh dừng ở bước nào? Có transaction nào được mở không?
+2. Vì sao `GridMarkerService` publish `GridDrawnMessage` **sau** khi `TryExecute` trả về, không publish ngay trong lambda vẽ?
+3. Test của `GridMarkerService` dùng `FakeCadContext { ExecuteAction = false }`. Test đó chứng minh được gì, và **không** chứng minh được gì?
+4. Tầng nào của Golden Sample chỉ kiểm được bằng tay trong AutoCAD, và vì sao?
+
+<details><summary>Đáp án</summary>
+
+1. Dừng ở `new GridSpec(…).Validate()`: có lỗi thì `notify.Warn` rồi `return`. Chưa gọi service, nên không có lock, transaction hay undo mark nào.
+2. Subscriber (`GridMarkerViewModel.RefreshCount`) gọi `ExecuteRead`. Publish trong lambda thì `CadContextGuard` coi đó là gọi lồng nhau và ném lỗi; hơn nữa lúc đó dữ liệu chưa commit. Publish sau commit thì cả hai vấn đề đều không có.
+3. Chứng minh **hợp đồng**: gọi đúng một lần `TryExecute`, đúng tên undo mark, publish khi thành công. Không chứng minh nội dung lambda vẽ ra đúng hình gì: phần đó dựa vào `GridPlanner` (test thuần) và thử trong AutoCAD.
+4. `GridMarkerCommands`: prompt, ESC, Undo và đa bản vẽ cần AutoCAD có người dùng tương tác. Vì vậy lệnh được giữ mỏng nhất có thể.
+</details>
 
 ---
 

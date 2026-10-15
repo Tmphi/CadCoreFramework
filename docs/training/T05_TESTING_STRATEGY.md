@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md); viết unit test xUnit ([C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit)) · **Trong lộ trình:** tuần 6 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L07 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 25 phút) · **Thực hành:** L07 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Plugin AutoCAD **không thể** unit test theo kiểu thông thường: hầu hết API cần lõi C++ của AutoCAD đang chạy. Chiến lược của dự án vì vậy không phải "mock AutoCAD", mà là **thiết kế để phần cần AutoCAD càng mỏng càng tốt**, rồi test mỗi tầng bằng công cụ phù hợp với nó.
 
@@ -43,6 +43,22 @@ Plugin AutoCAD **không thể** unit test theo kiểu thông thường: hầu h�
 
 Project test tham chiếu `AutoCAD.NET` **không** có `ExcludeAssets`, nên các DLL managed được copy vào thư mục test và dùng được cho *kiểu dữ liệu*. Còn mọi thứ chạm tới lõi C++ sẽ hỏng ngay khi chạy.
 
+### ✅ Tự kiểm tra §1
+
+Dòng nào chạy được trong `dotnet test`, dòng nào hỏng ngay khi chạy?
+1. `var p = new Point3d(1, 2, 0);`
+2. `var line = new Line(Point3d.Origin, p);`
+3. `var spec = new GridSpec(2, 3, spacing: 20);`
+4. `Application.DocumentManager.MdiActiveDocument`
+
+<details><summary>Đáp án</summary>
+
+1. Chạy được: `Point3d` là kiểu thuần .NET (struct).
+2. Hỏng: `Line` cần lõi C++ của AutoCAD.
+3. Chạy được: kiểu của plugin, logic thuần.
+4. Hỏng: không có AutoCAD thì không có `DocumentManager`.
+</details>
+
 ---
 
 ## 2. Kim tự tháp test của dự án
@@ -68,6 +84,24 @@ flowchart TB
 | Thủ công trong AutoCAD | Checklist | phút | Mọi thứ còn lại | — |
 
 Tổng hiện tại (sau PR #18): **376 test × 2 runtime** (`net48`, `net8.0-windows`) chạy trên CI mỗi PR, cộng **22 kiểm thử HeadlessLab** chạy trên máy có AutoCAD 2024 (CI chỉ biên dịch lab).
+
+### ✅ Tự kiểm tra §2
+
+Mỗi lỗi sau được tầng nào bắt **sớm nhất** (rẻ nhất)?
+1. `GridPlanner` đặt hàng B lên trên hàng A.
+2. Service mở hai transaction thay vì một.
+3. XAML của palette tham chiếu một resource chỉ có ở theme sáng.
+4. `RemoveMetadata` gỡ key nhưng không Erase Xrecord.
+5. Nhấn ESC ở prompt thứ hai làm lệnh ghi lịch sử là "thất bại".
+
+<details><summary>Đáp án</summary>
+
+1. Logic thuần (xUnit): kiểm kết quả tọa độ, nhãn.
+2. Vỏ AutoCAD (`FakeCadContext`): `ExecuteCount` phải là 1.
+3. XAML trên STA (`XamlPaletteTests`, chạy cả hai theme).
+4. HeadlessLab: hành vi thật của API (`XRECORD_REMOVE_ERASES`).
+5. Thủ công trong AutoCAD: prompt và ESC cần người dùng thật.
+</details>
 
 ---
 
@@ -97,6 +131,19 @@ Kỹ thuật nên dùng:
 - `[Theory]` + `[InlineData]` cho bảng giá trị (`ToRowLetters`: 0→A, 25→Z, 26→AA, 701→ZZ, 702→AAA).
 - Test **biên**: 1 ô, tối đa (`MaxDimension`, `MaxCells`), giá trị 0/âm.
 - Validate trả **danh sách lỗi**: kiểm rằng *nhiều* lỗi được báo cùng lúc.
+
+### ✅ Tự kiểm tra §3
+
+1. Đặt lại tên cho test `Test1` kiểm rằng ô đầu tiên nằm đúng ở điểm gốc.
+2. Vì sao `GridCell` dùng `double CenterX/CenterY` dù `Point3d` vẫn dùng được trong test?
+3. Liệt kê các giá trị **biên** nên có trong `[InlineData]` của test `ToRowLetters`.
+
+<details><summary>Đáp án</summary>
+
+1. Tên mô tả hành vi: `Plan_FirstCellIsAtOrigin`.
+2. Để logic thuần không phụ thuộc kiểu AutoCAD: dùng được ở dự án khác, ở server, test bằng framework bất kỳ.
+3. 0→A, 25→Z, 26→AA (lần đầu sang hai chữ), 701→ZZ, 702→AAA (lần đầu sang ba chữ).
+</details>
 
 ---
 
@@ -141,6 +188,19 @@ Các kịch bản *hợp đồng* đáng test cho mọi Service:
 4. Publish message **chỉ khi thành công**, sau khi `TryExecute` trả về.
 5. Subscriber ném lỗi **không** làm kết quả thành thất bại (`PublishSafely`).
 
+### ✅ Tự kiểm tra §4
+
+1. Lambda của service dùng `scope.Transaction.GetObject(…)`. Vì sao test phải đặt `ExecuteAction = false`?
+2. Làm sao giả lập "layer bị khóa" để kiểm service trả `Fail` mà không ném?
+3. Service của bạn gọi `Execute` lồng trong `Execute`. Test với `FakeCadContext` có đỏ không?
+
+<details><summary>Đáp án</summary>
+
+1. Trong `FakeCadScope`, `Transaction` và `Database` là `null`: chạy lambda thì `NullReferenceException`. Test kiểm **hợp đồng** (số lần gọi, undo mark), không kiểm nội dung lambda.
+2. Đặt `ExceptionToThrow`: khi đó `TryExecute` trả `Fail`, còn `Execute` ném.
+3. Không. Fake không mô phỏng `CadContextGuard`, nên lỗi này chỉ bắt được bằng review và chạy trong AutoCAD.
+</details>
+
 ---
 
 ## 5. ViewModel: Mock service
@@ -165,6 +225,19 @@ public void Dispose_StopsListeningToMessages()
 ```
 
 ViewModel test được *vì* nó tuân thủ quy tắc: **không kiểu WPF, không AutoCAD API** ([T02 §1](T02_ARCHITECTURE_DEEP_DIVE.md#1-bản-đồ-dự-án-và-quy-tắc-phụ-thuộc)). Trạng thái là enum `GridMarkerStatus`, màu sắc do XAML tự chọn.
+
+### ✅ Tự kiểm tra §5
+
+1. Trong `Dispose_StopsListeningToMessages`, vì sao `_events` là `EventAggregator` **thật** còn `_service` là mock?
+2. ViewModel lưu trạng thái bằng một `Brush` đỏ/xanh. Vì sao đó là vấn đề cho test?
+3. Viết tên test kiểm rằng service trả `Fail` thì ViewModel chuyển sang trạng thái lỗi.
+
+<details><summary>Đáp án</summary>
+
+1. Test cần kiểm việc đăng ký và gỡ đăng ký message **thật**. Service thì chỉ cần biết nó có bị gọi hay không (`Verify(…, Times.Never)`), nên mock là đủ.
+2. `Brush` là kiểu WPF: ViewModel phụ thuộc WPF và lẫn việc của View. Giữ một enum trạng thái (`GridMarkerStatus`), để XAML chọn màu.
+3. `Draw_ServiceReturnsFail_SetsErrorStatus`.
+</details>
 
 ---
 
@@ -241,6 +314,17 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 
 **Coverage hiện khoảng 21% (line).** Số đo bằng chính lệnh trên, ngày 2026-10-14 sau PR #13: 1.257/5.884 dòng, như nhau ở cả hai TFM. Con số thấp là **có lý do**: phần lớn code (Extensions, Utils, Core vỏ) gọi thẳng AutoCAD API nên không chạy được ngoài AutoCAD. Đừng chạy theo con số. Hãy đặt câu hỏi: *"logic nào đang kẹt trong lambda mà lẽ ra phải tách ra?"* Mỗi lần tách được một Planner là một lần coverage tăng **có ý nghĩa**.
 
+### ✅ Tự kiểm tra §8
+
+1. Chạy riêng các test của Golden Sample bằng lệnh nào?
+2. Trưởng nhóm muốn coverage lên 60% trong tháng này. Bạn trả lời thế nào?
+
+<details><summary>Đáp án</summary>
+
+1. `dotnet test CadCoreFramework.Tests/CadCoreFramework.Tests.csproj --filter "FullyQualifiedName~GridMarker"`.
+2. Phần lớn code còn lại gọi thẳng AutoCAD API, không chạy được ngoài AutoCAD; ép con số chỉ sinh test giòn. Đề xuất đi tìm logic đang kẹt trong lambda để tách ra Planner. Mỗi lần tách là coverage tăng có ý nghĩa.
+</details>
+
 ---
 
 ## 9. Integration test headless: hiện trạng và hướng đi
@@ -260,7 +344,7 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 | Lệnh, palette, Ribbon, `CadContext` | AutoCAD GUI (smoke tay) | Phần còn lại ([§7](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) |
 
 HeadlessLab đã chứng minh giá trị ngay lần đầu: bắt được lỗi `PlotService` luôn thất bại (B-28) mà không unit test nào thấy được, và **bác bỏ** một giả thuyết sai trong tài liệu (B-13: `Clone()` không làm mất attribute). Quy tắc: sửa helper → viết kiểm thử lab **FAIL trên code cũ** trước.
-- Còn lại của hướng đi ([B-20](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): phủ `CadContext` (cần tách phần COM undo mark/`AcMgd` khỏi nó), hoặc tách hẳn `CadCoreFramework.Core.dll` + `CadCoreFramework.UI.dll` để smoke test cả lệnh. Cái giá: hai DLL cần nạp, cơ chế đăng ký DI cho module UI, thay đổi quy trình nạp của nhóm — quyết định kiến trúc, cần ADR ([T09 §1](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
+- Còn lại của hướng đi ([B-20](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)): phủ `CadContext` (bộ chấm lab [`labs/`](../../labs/README.md) đã chạy `CadContext` thật trong accoreconsole mà không phải sửa nó: một shim thay `GetAcadDocument`, hàm COM duy nhất của `AcMgd` mà `CadContext` dùng, để gom undo mark), hoặc tách hẳn `CadCoreFramework.Core.dll` + `CadCoreFramework.UI.dll` để smoke test cả lệnh. Cái giá: hai DLL cần nạp, cơ chế đăng ký DI cho module UI, thay đổi quy trình nạp của nhóm — quyết định kiến trúc, cần ADR ([T09 §1](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)).
 
 ---
 
@@ -272,6 +356,19 @@ HeadlessLab đã chứng minh giá trị ngay lần đầu: bắt được lỗi
 4. **FluentAssertions** cho thông điệp lỗi dễ đọc. **Moq** chỉ cho interface.
 5. **Test phải chứng minh nó đã chạy** ([A6](T03_PITFALLS_CASEBOOK.md#a6-integration-test-báo-passed-dù-không-lệnh-nào-chạy)): khi viết test mới cho một bug, chạy nó **trên code cũ trước** và xác nhận nó **fail**.
 6. Test chạy trên **cả hai TFM**. Đừng dùng API chỉ có ở một runtime mà không `#if`.
+
+### ✅ Tự kiểm tra §10
+
+1. Bạn viết test cho một bug vừa sửa, chạy lên xanh ngay. Còn thiếu bước nào?
+2. `LoggerService` ghi giờ vào mỗi dòng log. Làm sao test được định dạng giờ mà không phụ thuộc đồng hồ máy?
+3. Test của bạn dùng `string.Contains(char)` và xanh trên `net8.0-windows`. Có vấn đề gì không?
+
+<details><summary>Đáp án</summary>
+
+1. Chạy test đó trên **code cũ** (trước khi sửa) và xác nhận nó **đỏ**. Không thì chưa có bằng chứng test kiểm đúng bug.
+2. `LoggerService` nhận `Func<DateTimeOffset>`: test truyền một đồng hồ giả trả giờ cố định.
+3. Có. Test còn chạy trên `net48`, mà `string.Contains(char)` không có ở .NET Framework 4.8: dùng `Contains("x")` hoặc `IndexOf`.
+</details>
 
 ---
 

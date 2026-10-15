@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md); LINQ và thực thi trì hoãn ([C04 §3–4](C04_CSHARP_IN_THIS_PROJECT.md#3-linq-hỏi-đáp-trên-danh-sách)) · **Trong lộ trình:** tuần 12 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 20 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L13, L14 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 25 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L13, L14 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Plugin chạy nhanh với bản vẽ 50 entity có thể "đơ" với bản vẽ 200.000 entity của khách hàng. Module này dạy **mô hình chi phí** của AutoCAD API, các kỹ thuật framework đã áp dụng, và cách **đo** thay vì đoán.
 
@@ -67,6 +67,19 @@ foreach (ObjectId id in scope.CurrentSpace)
 - Lọc theo tên DXF: `id.ObjectClass.DxfName == "LWPOLYLINE"`.
 - Cần lọc theo layer / XData / loại cùng lúc trên **toàn bản vẽ**: `SelectAll(filter)` thường tốt hơn duyệt tay, vì lọc diễn ra trong lõi C++.
 
+### ✅ Tự kiểm tra §2
+
+1. Trong `CountMarkers`, dòng nào rẻ, dòng nào đắt? Vì sao thứ tự hai dòng đó quan trọng?
+2. Bạn muốn đếm mọi đường cong (Line, Arc, Polyline…). Viết điều kiện lọc bằng `ObjectClass`.
+3. Đếm mọi `INSERT` trên layer `LAB_CUA` của cả bản vẽ, mọi layout. Duyệt tay hay `SelectAll(filter)`?
+
+<details><summary>Đáp án</summary>
+
+1. `id.ObjectClass != polylineClass` rẻ: đọc từ `ObjectId`, không mở đối tượng. `GetObject` đắt. Lọc trước rồi mới mở, nên chỉ những polyline mới bị mở.
+2. `id.ObjectClass.IsDerivedFrom(RXObject.GetClass(typeof(Curve)))`. So `==`/`!=` chỉ khớp đúng một lớp, không gồm lớp con.
+3. `SelectAll` với filter loại + layer: việc lọc chạy trong lõi C++, và nó chọn trong **mọi** không gian, không chỉ không gian hiện hành (đã thử trên AutoCAD 2024: bản vẽ có 4 `LINE` ở Model và 1 ở Layout1, đang ở Model, `SelectAll` lọc `LINE` trả 5). Muốn giới hạn một layout thì thêm mã 410 (tên layout) vào filter.
+</details>
+
 ---
 
 ## 3. Chi phí ẩn trong vòng lặp
@@ -84,6 +97,19 @@ Với N = 6 (smoke test) thì không đáng kể. Với N = 2.500 (`GridSpec.Max
 
 > [!TIP]
 > `GridSpec.MaxCells = 2500` không phải giới hạn kỹ thuật. Đó là **hàng rào sản phẩm**, chặn việc người dùng gõ nhầm `1000 × 1000` tạo ra một triệu entity. Mọi tính năng sinh hàng loạt entity nên có hàng rào tương tự ở tầng Model.
+
+### ✅ Tự kiểm tra §3
+
+1. Vẽ lưới N ô bằng `DrawRectangle(layer: …)` và `DrawText(layer: …)`: `EnsureLayer` chạy bao nhiêu lần? Sửa thế nào?
+2. Người dùng gõ 1000 × 1000 ô. Chặn ở đâu, bằng gì?
+3. Lưới 6 ô chạy tức thì. Có nên tối ưu ngay các chi phí trong bảng không?
+
+<details><summary>Đáp án</summary>
+
+1. 2N lần, cộng 1 lần ở đầu hàm. Gọi `EnsureLayer` **một lần** trước vòng lặp, rồi gán `entity.Layer` qua `configure` (hoặc thêm overload không ensure).
+2. Ở tầng Model: `GridSpec.MaxCells = 2500`, một hàng rào sản phẩm trong `Validate`, chặn trước khi vẽ gì.
+3. Chưa. Với N nhỏ thì không đáng kể; với N = 2.500 thì **đo** trước (§8), rồi mới tối ưu chỗ thật sự tốn (Lab L13).
+</details>
 
 ---
 
@@ -176,6 +202,19 @@ Phương pháp đo trong AutoCAD đáng tin:
 2. Chạy **lần đầu** (bỏ, vì JIT và cache) rồi lấy trung bình **5 lần** sau.
 3. Cùng một bản vẽ, cùng trạng thái (đóng/mở palette như nhau).
 4. Ghi: máy, phiên bản AutoCAD, kích thước bản vẽ, số trước/sau.
+
+### ✅ Tự kiểm tra §8
+
+1. Bạn đo `DrawCells` trên bản Debug, có attach Visual Studio, chạy một lần: 340 ms. Con số này sai ở những đâu?
+2. Muốn so hai cách tính nhãn ô trong `GridPlanner`. Dùng công cụ nào?
+3. Đo một đoạn code bên trong lệnh và để kết quả lại trong log. Viết dòng code.
+
+<details><summary>Đáp án</summary>
+
+1. Bản Debug và debugger làm chậm. Lần chạy đầu gồm cả JIT và cache. Phải dùng bản Release, không debugger, bỏ lần đầu, lấy trung bình 5 lần sau, cùng bản vẽ và cùng trạng thái.
+2. BenchmarkDotNet (`CadCoreFramework.Benchmarks`): đó là code thuần, đo ngoài AutoCAD được.
+3. `var sw = Stopwatch.StartNew(); …; _logger.Performance("DrawCells", sw.Elapsed);`, log ghi `[PERF] DrawCells took …ms`.
+</details>
 
 ---
 
