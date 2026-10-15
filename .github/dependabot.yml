@@ -1,0 +1,57 @@
+# Dependabot: mỗi tuần mở PR khi GitHub Actions / NuGet có bản mới.
+# CI (build-and-test.yml) chạy trên mọi PR nên bản nâng nào làm đỏ build/test sẽ lộ ngay.
+# CI KHÔNG có AutoCAD: PR nhóm "plugin-runtime" (DLL đi theo bundle) phải qua checklist
+# docs/training/T06_BUILD_RELEASE_DEVOPS.md §7 trước khi merge.
+# Lưu ý: `ignore` chặn cả PR security update của package đó (cảnh báo bảo mật vẫn hiện nếu bật).
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "deps"
+    ignore:
+      # Version API AutoCAD gắn với dải AutoCAD đích: 24.x = AutoCAD 2024 (net48), 25.x = 2025+ (net8).
+      # Đổi bản là quyết định có chủ đích, không phải việc tự động.
+      - dependency-name: "AutoCAD.NET*"
+      # Ghim 1.44.1: từ 1.45 kéo theo Microsoft.Bcl.AsyncInterfaces 10.x trên net48.
+      - dependency-name: "MiniExcel"
+      # Ghim 4.6.0 làm sàn: analyzer không được đòi Roslyn mới hơn VS/SDK của người dùng.
+      - dependency-name: "Microsoft.CodeAnalysis*"
+      # Từ v8 cần license thương mại (Xceed); v7 vẫn Apache 2.0.
+      - dependency-name: "FluentAssertions"
+        versions: [">= 8.0.0"]
+      # Bản major thường đổi bộ dependency bắc cầu cho net48 → rủi ro xung đột trong AppDomain AutoCAD.
+      - dependency-name: "CommunityToolkit.Mvvm"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.DependencyInjection"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Newtonsoft.Json"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # Package đi theo bundle vào AutoCAD: tách riêng để thấy rõ PR nào cần thử trong AutoCAD thật.
+      plugin-runtime:
+        patterns:
+          - "CommunityToolkit.Mvvm"
+          - "Microsoft.Extensions.DependencyInjection"
+          - "Newtonsoft.Json"
+      # Test, benchmark, tool: chỉ ảnh hưởng máy dev/CI.
+      dev-tools:
+        patterns: ["*"]
+        exclude-patterns:
+          - "CommunityToolkit.Mvvm"
+          - "Microsoft.Extensions.DependencyInjection"
+          - "Newtonsoft.Json"
