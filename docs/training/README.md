@@ -246,7 +246,18 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
   ((Get-Content docs\training\T01_AUTOCAD_NET_FOUNDATIONS.md -Raw -Encoding UTF8) -split '\s+' | Where-Object { $_ }).Count
   ```
 - **C00–C05 trích nguyên văn code dự án** (nhiều nhất ở [C04 §12](C04_CSHARP_IN_THIS_PROJECT.md#12-giải-mã-dòng-code-thật) và [C03 §9](C03_OBJECT_ORIENTED.md#9-đọc-có-hướng-dẫn-gridspeccs)). PR đổi `GridSpec`, `GridPlanner`, `GridMarkerService`, `CadContext`, `RibbonService`, `ThemeManager`, `SelectionFilterBuilder` hay `DrawLine` phải kiểm lại các trích dẫn đó. Bảng số liệu 20/80 ở [C00 §1](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) đếm lại được bằng lệnh ghi ngay dưới bảng.
-- Ví dụ trong C01–C05 là chương trình hoàn chỉnh, đã chạy trên .NET 8 với `<LangVersion>10.0</LangVersion>`; kết quả ghi trong tài liệu là kết quả thật. Sửa ví dụ thì chạy lại trước khi commit.
+- Ví dụ trong C01–C05 là chương trình hoàn chỉnh, đã chạy trên .NET 8 với `<LangVersion>10.0</LangVersion>`; kết quả ghi trong tài liệu là kết quả thật. **CI chạy lại chúng ở mọi PR** ([`check-snippets.mjs`](../../tools/docs/check-snippets.mjs)). Mỗi khối `csharp` trong C01–C05 và U01 phải có, ngay trước nó, một dòng chú thích mà GitHub không hiển thị:
+
+  | Chú thích | CI làm gì |
+  | :--- | :--- |
+  | `<!-- doc-check: run -->` | Biên dịch như `dotnet new console` + C# 10 (cảnh báo là lỗi), chạy, phải thoát với mã 0 |
+  | `<!-- doc-check: run output -->` | Như trên, và stdout phải trùng khối `text` ngay sau khối code. Culture là InvariantCulture (dấu chấm thập phân), như tài liệu |
+  | `<!-- doc-check: compile -->`, `compile-error CS0029` | Chỉ biên dịch; hoặc phải lỗi đúng mã đó |
+  | `<!-- doc-check: test -->` | File xUnit + FluentAssertions (version lấy từ csproj test của repo); `dotnet test` phải pass |
+  | `<!-- doc-check: verbatim Samples/GridMarker/GridSpec.cs -->` | Trích code dự án: bỏ comment `//` và dòng trống, mọi dòng còn lại phải có trong file đó, đúng thứ tự |
+  | `<!-- doc-check: skip <lý do> -->` | Không kiểm; bắt buộc ghi lý do (mã giả có "…", test cần lời giải của học viên…) |
+
+  Thêm `pkg CommunityToolkit.Mvvm` nếu khối cần NuGet, `allow CS8602` nếu khối cố ý sinh một cảnh báo. Viết khối mới thì thử nhanh trước khi gắn chú thích: `node tools/docs/check-snippets.mjs C02 --assume-run`. Module khác (T, U02, U03) chưa bắt buộc chú thích, nhưng khối nào có chú thích cũng được kiểm.
 - **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
 ### Trạng thái kiểm chứng
 
@@ -260,3 +271,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | T08 §12 (công thức thao tác bản vẽ, PR #16) | Code build sạch trên cả hai TFM; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab (19 kiểm thử). Cả 5 lệnh `TOOLS_*` chạy trên AutoCAD 2024 có giao diện ngày 2026-10-15, kể cả Ctrl+Z sau khi gộp layer và nhánh layer đích đóng băng |
 | Bản đồ học (thẻ module, nhãn 🎯/🔍/📖, lộ trình nhanh; 2026-10-15) | Số phút trên mọi thẻ được một script đối chiếu với số từ thật của trang, sau lần sửa cuối; lệnh PowerShell ở §7 cho cùng số từ. Sơ đồ phụ thuộc parse được bằng mermaid 11.4.1, cùng 16 sơ đồ có sẵn. Link và anchor: 0 lỗi. Thời gian **làm** lab lấy từ T10 §2, chưa đo lại trên học viên thật |
 | Kiểm tự động (job `docs` của CI, 2026-10-15) | Ba script trong `tools/docs` (link/anchor, thẻ ⏱ + nhãn, mermaid) chạy ở mọi PR. Mỗi script đã thử với lỗi cài sẵn trên một bản sao repo: link sai chữ hoa, anchor sai, số phút sai, mục thiếu nhãn, nhãn lẻ ở module không gắn nhãn, sơ đồ sai cú pháp; cả 6 đều bị bắt. Chạy được cả trong dự án sinh từ template `dotnet new cad-plugin` |
+| Code mẫu C01–C05, U01 (job `docs`, 2026-10-15) | 76 khối có chú thích `doc-check`: 50 chạy (20 so output với khối `text`), 1 biên dịch, 1 test xUnit, 21 trích nguyên văn so với file nguồn, 3 bỏ qua có lý do. Đối chứng với 8 lỗi cài sẵn (thiếu chú thích, trích sai, khối không biên dịch, sai mã lỗi mong đợi, ném exception, output lệch, test fail; một khối đúng mã lỗi thì qua): cả 8 đều đúng kết quả |

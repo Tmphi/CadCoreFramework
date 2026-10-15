@@ -34,6 +34,7 @@ Toàn bộ dự án được tổ chức thành **class** (hơn 100 khai báo) v
 
 **Class** là *bản thiết kế*: mô tả một loại đối tượng có những dữ liệu gì và làm được gì. **Object** (đối tượng) là *một thứ cụ thể* làm theo bản thiết kế đó, tạo bằng `new` — từ khóa đứng thứ hai trong bảng 20/80 (439 dòng).
 
+<!-- doc-check: run -->
 ```csharp
 var cell = new GridCell(0, 0, 100, 50, "A1");          // new: tạo một ĐỐI TƯỢNG từ class
 var other = new GridCell(1, 2, 140, 30, "B3");
@@ -89,6 +90,7 @@ error CS0200: Property or indexer 'GridCell.Label' cannot be assigned to -- it i
 
 **Đóng gói** (encapsulation) nghĩa là dữ liệu và **luật** của dữ liệu ở cùng một chỗ. Người dùng class không cần biết luật — chỉ cần hỏi `IsValid`:
 
+<!-- doc-check: run output -->
 ```csharp
 var ok = new PanelSpec("MSB-01", 800);
 var bad = new PanelSpec("", 200, height: 0);
@@ -144,6 +146,7 @@ Ba quyết định thiết kế, giống hệt `GridSpec`:
 
 Thành viên `static` thuộc về **class**, không thuộc object nào — gọi qua tên class, không cần `new`:
 
+<!-- doc-check: run -->
 ```csharp
 Console.WriteLine(PanelMath.TotalWidth(3, 600, 50));    // 1900  ← gọi qua TÊN CLASS, không cần new
 
@@ -167,6 +170,7 @@ Bạn đã dùng `static` từ bài đầu: `Console.WriteLine`, `string.Join`, 
 
 Năm dòng đầu của [`GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridSpec.cs -->
 ```csharp
 using System.Collections.Generic;              // dùng List<T>, IReadOnlyList<T> mà không cần gõ tên đầy đủ
 using CadCoreFramework.Utils;                  // dùng SymbolNameRules
@@ -196,6 +200,7 @@ namespace CadCoreFramework.Samples.GridMarker  // "địa chỉ" của các clas
 
 **Interface** liệt kê những gì một class **phải có**, không nói làm thế nào. Class nào "ký" hợp đồng (`: ITên`) thì phải viết đủ. Nhờ vậy, code chỉ cần biết hợp đồng, không cần biết class cụ thể — và ta **thay được** bản thật bằng bản giả:
 
+<!-- doc-check: run -->
 ```csharp
 var morning = new FakeClock(new DateTime(2026, 10, 14, 8, 0, 0));
 var evening = new FakeClock(new DateTime(2026, 10, 14, 19, 0, 0));
@@ -241,6 +246,7 @@ Vì [`GridMarkerService`](../../Samples/GridMarker/GridMarkerService.cs) chỉ b
 
 **Kế thừa** cho một class (con) nhận lại mọi thứ của class khác (cha) và bổ sung hoặc viết lại một phần:
 
+<!-- doc-check: run output -->
 ```csharp
 Shape[] shapes = { new Rect(3, 4), new Circle(1) };
 foreach (Shape s in shapes)
@@ -300,6 +306,7 @@ Một class cần class khác để làm việc (service vẽ cần `ICadContext
 - **Tự tạo:** `var ctx = new CadContext();` bên trong class → bị "hàn chết" vào AutoCAD thật, không test được.
 - **Nhận qua constructor:** người tạo object đưa phụ thuộc vào → test đưa bản giả, AutoCAD đưa bản thật.
 
+<!-- doc-check: run -->
 ```csharp
 var service = new GreetingService(new FakeClock(new DateTime(2026, 1, 1, 9, 0, 0)));
 Console.WriteLine(service.Greet("Minh"));       // Chào buổi sáng, Minh!
@@ -328,6 +335,7 @@ public sealed class GreetingService
 
 🔎 Đây đúng là hình dạng constructor của [`GridMarkerService`](../../Samples/GridMarker/GridMarkerService.cs):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerService.cs -->
 ```csharp
 public GridMarkerService(ICadContext cadContext, IEventAggregator events, ILoggerService logger)
 {
@@ -339,6 +347,7 @@ public GridMarkerService(ICadContext cadContext, IEventAggregator events, ILogge
 
 Vậy **ai** gọi constructor đó với đủ ba tham số? Một "nhà máy" có tên **DI container** (Dependency Injection). [`AppBootstrapper`](../../Core/AppBootstrapper.cs) khai báo một lần khi plugin khởi động:
 
+<!-- doc-check: verbatim Core/AppBootstrapper.cs -->
 ```csharp
 services.AddSingleton<ICadContext, CadContext>();
 services.AddSingleton<Samples.GridMarker.IGridMarkerService, Samples.GridMarker.GridMarkerService>();
@@ -390,6 +399,7 @@ Trả lời được ba câu này là bạn đã đọc *hiểu*, không chỉ �
 
 <details><summary>Đáp án E1</summary>
 
+<!-- doc-check: run -->
 ```csharp
 var tall = new PanelSpec("MSB-02", 800, 2600);
 Console.WriteLine(tall.IsTall);                     // True
@@ -430,6 +440,7 @@ public sealed class PanelSpec
 
 <details><summary>Đáp án E2</summary>
 
+<!-- doc-check: skip mảnh ghép vào ví dụ §7, cần class Shape của khối đó -->
 ```csharp
 public sealed class Triangle : Shape
 {
@@ -451,6 +462,7 @@ Với `new Triangle(3, 4)` thêm vào mảng, dòng in thêm là `Tam giác: di�
 
 <details><summary>Đáp án E3</summary>
 
+<!-- doc-check: run -->
 ```csharp
 IPanelRepository repo = new InMemoryPanelRepository();
 var report = new PanelReport(repo);

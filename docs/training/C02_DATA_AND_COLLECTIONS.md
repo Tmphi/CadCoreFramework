@@ -34,6 +34,7 @@ Chương trình thật xử lý **nhiều** dữ liệu cùng lúc: danh sách l
 
 Có hai loại kiểu dữ liệu, và chúng hành xử **khác nhau khi gán**:
 
+<!-- doc-check: run -->
 ```csharp
 var p1 = new PointValue(1, 2);
 var p2 = p1;                 // struct: SAO CHÉP toàn bộ giá trị
@@ -82,6 +83,7 @@ Hình dung: biến kiểu **struct** là *tờ giấy ghi sẵn con số* — đ
 
 **Mảng** chứa một dãy phần tử cùng kiểu, số phần tử **cố định** từ lúc tạo:
 
+<!-- doc-check: run -->
 ```csharp
 int[] widths = { 600, 800, 600 };          // mảng: số phần tử CỐ ĐỊNH
 Console.WriteLine(widths.Length);          // 3
@@ -109,6 +111,7 @@ catch (IndexOutOfRangeException ex)
 
 `List<T>` đọc là "list của T": `List<string>` là danh sách chuỗi, `List<GridCell>` là danh sách ô lưới. Khác mảng, nó **thêm/bớt** được:
 
+<!-- doc-check: run -->
 ```csharp
 var layers = new List<string> { "0", "E-POWER" };   // List: thêm/bớt thoải mái
 layers.Add("A-WALL");
@@ -136,6 +139,7 @@ foreach (string layer in layers)
 
 `Dictionary<TKey, TValue>` lưu các cặp **khóa → giá trị**, tra cứu theo khóa rất nhanh — như tra từ điển theo từ:
 
+<!-- doc-check: run -->
 ```csharp
 var attributes = new Dictionary<string, string>    // từ điển: tra theo KHÓA
 {
@@ -165,6 +169,7 @@ Console.WriteLine(palettes.ContainsKey("GRID MARKER"));   // True  ← không ph
 
 Bên trong hàm, bạn cần `List` để `Add`. Nhưng khi **trả ra ngoài**, dự án trả về một kiểu "chỉ đọc", để người gọi không vô tình sửa kết quả:
 
+<!-- doc-check: run -->
 ```csharp
 IReadOnlyList<string> errors = Validate(0, 200);
 Console.WriteLine(errors.Count);                 // 2
@@ -200,6 +205,7 @@ error CS1061: 'IReadOnlyList<string>' does not contain a definition for 'Add' an
 
 `null` nghĩa là "biến này **không trỏ tới** đối tượng nào". Gọi một thứ trên `null` là lỗi lúc chạy hay gặp nhất: `NullReferenceException`.
 
+<!-- doc-check: run -->
 ```csharp
 string? layer = null;                             // dấu ? : biến này ĐƯỢC PHÉP null
 Console.WriteLine(layer?.Length);                 // (dòng trống) ← ?. trả null thay vì ném lỗi
@@ -243,6 +249,7 @@ catch (NullReferenceException)
 
 `enum` đặt **tên** cho một nhóm lựa chọn cố định, thay cho các "con số ma thuật" khó hiểu:
 
+<!-- doc-check: run -->
 ```csharp
 GridLabelStyle style = GridLabelStyle.Sequential;
 Console.WriteLine(style);            // Sequential
@@ -271,6 +278,7 @@ Cả hai đều nghĩa là "không được gán lại", nhưng khác thời đi
 | Kiểu được phép | số, `bool`, `char`, `string` | mọi kiểu |
 | Ví dụ thật | `public const int MaxDimension = 100;` ([`GridSpec`](../../Samples/GridMarker/GridSpec.cs)) | `private readonly ICadContext _cadContext;` ([`GridMarkerService`](../../Samples/GridMarker/GridMarkerService.cs)) |
 
+<!-- doc-check: run -->
 ```csharp
 Console.WriteLine(Rules.MaxDimension);   // 100
 Console.WriteLine(Rules.Invalid[0]);     // <
@@ -294,6 +302,7 @@ static class Rules
 
 Các thao tác chuỗi dùng nhiều nhất trong dự án:
 
+<!-- doc-check: run -->
 ```csharp
 string input = "  e-power  ";
 string clean = input.Trim().ToUpperInvariant();     // bỏ khoảng trắng hai đầu, viết hoa
@@ -321,6 +330,7 @@ Console.WriteLine(sb.ToString());                   // AB
 
 Hai cái bẫy hay gặp:
 
+<!-- doc-check: run -->
 ```csharp
 string name = "  E-POWER ";
 name.Trim();                        // ⚠️ kết quả bị bỏ đi — chuỗi KHÔNG BAO GIỜ tự đổi
@@ -342,6 +352,7 @@ Console.WriteLine(string.Equals("E-Power", "E-POWER", StringComparison.OrdinalIg
 
 <details><summary>Đáp án E1</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 var names = new List<string> { "E-POWER", "A*B", "", "Lưới trục", "LAYER:1", "M.EQUIP" };
 char[] invalid = { '<', '>', '/', '\\', '"', ':', ';', '?', '*', '|', ',', '=', '`' };
@@ -365,6 +376,7 @@ Chú ý `'\\'` là **một** ký tự `\` (trong `'…'` và `"…"`, dấu `\` 
 
 <details><summary>Đáp án E2</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 string[] entityLayers = { "E-POWER", "A-WALL", "E-POWER", "0", "E-POWER", "A-WALL" };
 var counts = new Dictionary<string, int>();
@@ -389,6 +401,7 @@ Thứ tự in ra thường trùng thứ tự thêm vào, nhưng `Dictionary` **k
 
 <details><summary>Đáp án E3</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 foreach (string error in Validate(0, 120))
     Console.WriteLine(error);
