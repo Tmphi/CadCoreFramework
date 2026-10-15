@@ -114,6 +114,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm"                    Version="8.2.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json"                          Version="13.0.3" />
+    <PackageReference Include="MiniExcel"                                Version="1.44.1" />
     <!--
       KHÔNG thêm Serilog: AutoCAD 2024 tự nạp Serilog 2.9 / Sinks.File 4.1 (AssemblyVersion 2.0.0.0)
       trước plugin → MissingMethodException. Core/LoggerService.cs là file logger tự viết.

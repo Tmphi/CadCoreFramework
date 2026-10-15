@@ -182,6 +182,7 @@ namespace CadCoreFramework.Demos
                     ("IProgressMeterService",    typeof(IProgressMeterService)),
                     ("IDialogService",           typeof(IDialogService)),
                     ("IFileSystemService",       typeof(IFileSystemService)),
+                    ("IDataFileService",         typeof(IDataFileService)),
                     ("IPathProvider",            typeof(IPathProvider)),
                     ("IWindowManagerService",    typeof(IWindowManagerService)),
                     ("IPlotService",             typeof(IPlotService)),

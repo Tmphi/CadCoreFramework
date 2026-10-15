@@ -28,7 +28,21 @@ namespace CadCoreFramework.Services
 
         public string ReadAllText(string path) => File.ReadAllText(path);
 
-        public void WriteAllText(string path, string content)
+        public void WriteAllText(string path, string content) => WriteAtomic(path, tmp => File.WriteAllText(tmp, content));
+
+        public byte[] ReadAllBytes(string path)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var buffer = new MemoryStream())
+            {
+                stream.CopyTo(buffer);
+                return buffer.ToArray();
+            }
+        }
+
+        public void WriteAllBytes(string path, byte[] content) => WriteAtomic(path, tmp => File.WriteAllBytes(tmp, content));
+
+        private static void WriteAtomic(string path, System.Action<string> writeTemp)
         {
             // Ghi ATOMIC: ghi ra tệp tạm CÙNG thư mục (cùng ổ đĩa) rồi thay thế tệp đích. Người đọc — hoặc
             // AutoCAD bị tắt ngang — không bao giờ thấy tệp ghi dở. Tên tạm duy nhất: hai tiến trình ghi
@@ -37,7 +51,7 @@ namespace CadCoreFramework.Services
             string tmp = full + "." + System.Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
-                File.WriteAllText(tmp, content);
+                writeTemp(tmp);
                 if (File.Exists(full))
                 {
                     ReplaceFile(tmp, full);

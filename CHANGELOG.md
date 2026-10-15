@@ -9,6 +9,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (đọc/ghi file JSON, CSV, Excel)
+- **`IDataFileService`** (đăng ký DI): `ReadJson<T>`/`WriteJson<T>`, `ReadCsv`/`WriteCsv`, `ReadExcel`/`WriteExcel`/`GetExcelSheetNames` (`.xlsx`), `ReadTable`/`WriteTable` chọn định dạng theo đuôi file. Lỗi thường gặp trả `CadResult` thất bại kèm thông điệp tiếng Việt: không thấy file, file đang mở trong Excel, JSON/CSV sai cấu trúc (có số dòng), `.xls` cũ, CSV không phải UTF-8. Ghi atomic, đọc được file đang mở.
+- **`Models/DataSheet`**: bảng dùng chung cho ba định dạng; `GetText`/`TryGetDouble` đọc ô bất kể nguồn. **`Utils/CsvCodec`**: CSV theo RFC 4180, tự viết, tự nhận dấu phân cách `,` `;` hoặc tab; ghi UTF-8 có BOM, số theo InvariantCulture.
+- **Dependency mới: MiniExcel 1.44.1** (Apache-2.0). Bản 1.44.1 không kéo theo DLL nào trên net48 và net8; bản 1.45 và 1.46 kéo theo `Microsoft.Bcl.AsyncInterfaces 10.0.9` trên net48. Thư mục cài AutoCAD 2024 không có sẵn MiniExcel, nên không có nguy cơ xung đột phiên bản như Serilog.
+- `IFileSystemService`: thêm `ReadAllBytes` (`FileShare.ReadWrite`) và `WriteAllBytes` (atomic, chung đường ghi với `WriteAllText`).
+- Lệnh demo **`DEMO_ATTR_EXPORT` / `DEMO_ATTR_IMPORT`**: xuất attribute của mọi block (model + layout) ra `.xlsx`/`.csv`/`.json`, sửa trong Excel, nhập lại theo handle. Phần lõi nằm ở `Demos/BlockAttributeTable.cs`. Tài liệu: T08 §12.6, R03 §8, README §5.4.
+- **Kiểm chứng**:
+  - 56 unit test mới (376 × 2 runtime).
+  - 4 kiểm thử HeadlessLab mới (22/22 trên AutoCAD 2024; MiniExcel chạy trong tiến trình AutoCAD). Ba kiểm thử `ATTR_*` chỉ biên dịch khi còn `Demos/`, để dự án tạo bằng `IncludeDemos=false` vẫn build được lab. Tạm bỏ dòng kiểm layer khóa thì `ATTR_IMPORT_REPORTS_MISSING_LOCKED_UNKNOWN` FAIL.
+  - Excel 16 thật mở file do service ghi: `.xlsx` giữ `001`/`2E5` là chữ. CSV thì bị Excel đổi `001` → `1`, `2E5` → `200000`, và trên máy dùng dấu phẩy thập phân thì CSV phân cách `,` bị dồn vào một cột. Đọc `.xlsx` đang mở trong Excel được, ghi đè thì báo lỗi rõ ràng. CSV ANSI do Excel lưu bị từ chối kèm hướng dẫn.
+  - Hai lệnh demo chưa chạy trên AutoCAD có giao diện.
+
 ### Added (T08 §12 — công thức thao tác bản vẽ)
 - Năm công thức thay cho các chủ đề của Cookbook cũ, mỗi công thức gồm phần lõi chạy trên `ICadScope` và một lệnh `TOOLS_*`: khung tên A3/A2/A1 dạng block có attribute; xuất mọi layout ra một PDF qua `PlotService`; purge nhiều lượt + `AUDIT`; attach xref với đường dẫn tương đối; gộp layer (mọi block table record, attribute, layer khóa, layer hiện hành, chỉ xóa layer mà `Purge` cho phép).
 - Hành vi AutoCAD đã kiểm và ghi vào tài liệu:

@@ -308,7 +308,8 @@ Mọi service được đăng ký trong `AppBootstrapper.ConfigureServices`. Tro
 | `IPlotService` | `PlotLayoutToPdf(Database db, string layoutName, string outputFilePath, string printerName = "DWG To PDF.pc3")`, `PlotMultipleLayouts(…)`, `GetAvailablePlotters()`, `GetMediaNames(plotterName)` |
 | `ISettingsService` | `GetSetting<T>(key, defaultValue)`, `SetSetting<T>(key, value)`, `Save()` ([T08 §9](../training/T08_RECIPES_EXTENDING.md#9-thêm-thiết-lập-người-dùng)) |
 | `IDialogService` | `ShowOpenFileDialog`, `ShowSaveFileDialog`, `ShowFolderBrowserDialog` |
-| `IFileSystemService` | `FileExists`, `DirectoryExists`, `CreateDirectory`, `DeleteFile`, `DeleteDirectory`, `ReadAllText`, `WriteAllText`, `GetFiles` |
+| `IFileSystemService` | `FileExists`, `DirectoryExists`, `CreateDirectory`, `DeleteFile`, `DeleteDirectory`, `ReadAllText`, `WriteAllText`, `ReadAllBytes`, `WriteAllBytes`, `GetFiles` |
+| `IDataFileService` | `ReadJson<T>`, `WriteJson<T>`, `ReadCsv(path, delimiter = null)`, `WriteCsv(path, sheet, delimiter = ',')`, `ReadExcel(path, sheetName = null)`, `WriteExcel(path, sheet, sheetName = "Sheet1")`, `GetExcelSheetNames`, `ReadTable`, `WriteTable` ([xem dưới bảng](#đọc-ghi-file-dữ-liệu-idatafileservice)) |
 | `IPathProvider` | `GetPluginDirectory`, `GetAppDataDirectory`, `GetTemplatesDirectory` |
 
 [`LayerService`](../../Services/LayerService.cs) là service ngắn nhất của dự án, đáng đọc trọn như mẫu: đọc bằng `ExecuteRead`, ghi bằng `TryExecute` kèm `undoMarkName` để dùng được từ palette. Phần đọc, nguyên văn:
@@ -339,6 +340,33 @@ public List<LayerModel> GetAllLayers()
 ```
 
 ViewModel chỉ gọi `_layerService.GetAllLayers()` và gán vào property hiển thị, không đụng `Transaction` hay `OpenMode`. Thêm service mới: [T08 §3](../training/T08_RECIPES_EXTENDING.md#3-thêm-một-service).
+
+### Đọc, ghi file dữ liệu: `IDataFileService`
+
+[`IDataFileService`](../../Services/IDataFileService.cs) đọc và ghi JSON (Newtonsoft.Json), CSV (tự viết, [`Utils/CsvCodec.cs`](../../Utils/CsvCodec.cs)) và Excel `.xlsx` ([MiniExcel](https://github.com/mini-software/MiniExcel) 1.44.1, giấy phép Apache-2.0, không kéo theo DLL nào khác). Service không dùng API AutoCAD, gọi được ở mọi thread.
+
+- **Không ném exception với lỗi thường gặp.** Mọi hàm trả `CadResult` / `CadResult<T>`. Thông điệp lỗi tiếng Việt đọc được ngay: không thấy file, file đang mở trong Excel, JSON hoặc CSV sai cấu trúc (kèm số dòng), `.xls` cũ, CSV không phải UTF-8. Lỗi người dùng tự sửa được ghi log mức Warning, lỗi lạ ghi mức Error kèm stack trace.
+- **Ghi atomic.** Ghi ra tệp tạm rồi thay thế. Ghi thất bại (ví dụ file đang mở trong Excel) thì file cũ còn nguyên.
+- **Đọc được file đang mở trong Excel.** Service mở file với `FileShare.ReadWrite`. Ghi vào file đó thì thất bại kèm lời nhắc đóng file.
+
+Dữ liệu dạng bảng đi qua [`DataSheet`](../../Models/DataSheet.cs): một dòng tiêu đề (tên cột không rỗng, không trùng, không phân biệt hoa thường) và các dòng giá trị `object?`. Kiểu của ô phụ thuộc định dạng file, nên khi đọc hãy dùng `GetText` / `TryGetDouble` thay vì ép kiểu:
+
+| Định dạng | Ghi | Đọc lại |
+| :--- | :--- | :--- |
+| `.xlsx` | số → ô số, `bool` → ô logic, `DateTime` → ô ngày, chuỗi giữ nguyên (`"001"` vẫn là chữ) | số → `double` (cả số nguyên), ngày → `DateTime`, ô rỗng → `null`. Dòng có dữ liệu đầu tiên là tiêu đề; bỏ dòng trống |
+| `.csv` | UTF-8 **có BOM** (thiếu BOM thì Excel đọc tiếng Việt thành ký tự rác), số và ngày theo InvariantCulture (`12.5`, `2026-10-15`), CRLF | mọi ô là `string`, ô rỗng là `""`. Tự nhận dấu phân cách `,` `;` hoặc tab từ dòng tiêu đề |
+| `.json` (`ReadTable`/`WriteTable`) | mảng đối tượng `[{"Cột": giá trị, …}]`, giữ thứ tự cột; `DateTime` ghi thành chuỗi như CSV | số → `double`, chuỗi dạng ngày **giữ nguyên là chuỗi**, giá trị lồng → chuỗi JSON |
+
+`ReadTable` / `WriteTable` chọn định dạng theo đuôi file. Ví dụ dùng: lệnh `DEMO_ATTR_EXPORT` / `DEMO_ATTR_IMPORT` ([T08 §12.6](../training/T08_RECIPES_EXTENDING.md#126-xuất-nhập-bảng-attribute-excel-csv-json)).
+
+> [!WARNING]
+> **Dữ liệu cần đi qua Excel thì dùng `.xlsx`, đừng dùng CSV.** Đã kiểm với Excel 16 trên máy dùng dấu phẩy thập phân, mở file do service ghi:
+> - CSV phân cách bằng `,`: Excel dùng `;` làm dấu phân cách danh sách, nên **cả dòng dồn vào cột A**.
+> - CSV phân cách bằng `;`: Excel tách đúng cột nhưng tự đổi kiểu. `001` thành `1`, handle `2E5` thành `200000`, còn `12.5` thành chữ chứ không phải số.
+> - Lưu lại bằng "CSV (Comma delimited)" thì file thành ANSI: `ReadCsv` từ chối và hướng dẫn lưu bằng "CSV UTF-8".
+> - `.xlsx` do service ghi mở đúng: `001` và `2E5` vẫn là chữ, `12.5` là số.
+>
+> CSV hợp với việc trao đổi giữa các chương trình. Còn file mà người dùng sẽ mở và sửa bằng Excel thì dùng `.xlsx`.
 
 ---
 

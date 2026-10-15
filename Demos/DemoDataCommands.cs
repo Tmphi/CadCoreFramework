@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadCoreFramework.Commands;
 using CadCoreFramework.Core;
 using CadCoreFramework.Extensions;
+using CadCoreFramework.Models;
+using CadCoreFramework.Services;
 using CadCoreFramework.Utils;
 
 namespace CadCoreFramework.Demos
@@ -197,6 +200,63 @@ namespace CadCoreFramework.Demos
                 });
 
                 Notify.Section("HOÀN TẤT: DEMO DYNAMIC BLOCK");
+            });
+        }
+
+        private const string TableFileFilter = "Excel (*.xlsx)|*.xlsx|CSV UTF-8 (*.csv)|*.csv|JSON (*.json)|*.json";
+
+        /// <summary>
+        /// DEMO_ATTR_EXPORT — Xuất attribute của mọi block reference (model + layout) ra Excel, CSV hoặc JSON
+        /// (chọn bằng đuôi file trong hộp thoại). Đọc bản vẽ trong ExecuteRead, ghi file SAU khi transaction đóng.
+        /// </summary>
+        [CommandMethod("DEMO_ATTR_EXPORT")]
+        public void DemoAttributeExport()
+        {
+            ExecuteCommand(() =>
+            {
+                DataSheet sheet = null;
+                CadContext.ExecuteRead(scope => sheet = BlockAttributeTable.Export(scope));
+                if (sheet.RowCount == 0)
+                {
+                    Notify.Warn("Bản vẽ không có block reference nào có attribute.");
+                    return;
+                }
+
+                string path = GetRequiredService<IDialogService>().ShowSaveFileDialog(TableFileFilter, ".xlsx", "Xuất bảng attribute");
+                if (string.IsNullOrEmpty(path)) return;
+
+                CadResult written = GetRequiredService<IDataFileService>().WriteTable(path, sheet);
+                if (!written.IsSuccess) { Notify.Error(written.ErrorMessage); return; }
+                Notify.Info($"Đã xuất {sheet.RowCount} block, {sheet.Columns.Count - BlockAttributeTable.FixedColumns.Length} tag ra {path}");
+            });
+        }
+
+        /// <summary>
+        /// DEMO_ATTR_IMPORT — Đọc file đã xuất bằng DEMO_ATTR_EXPORT (đã sửa trong Excel…) và ghi giá trị attribute
+        /// vào bản vẽ, khớp theo HANDLE. Đọc file TRƯỚC, rồi mới mở transaction ghi (một undo mark).
+        /// </summary>
+        [CommandMethod("DEMO_ATTR_IMPORT")]
+        public void DemoAttributeImport()
+        {
+            ExecuteCommand(() =>
+            {
+                string path = GetRequiredService<IDialogService>().ShowOpenFileDialog(TableFileFilter, "Nhập bảng attribute");
+                if (string.IsNullOrEmpty(path)) return;
+
+                CadResult<DataSheet> read = GetRequiredService<IDataFileService>().ReadTable(path);
+                if (!read.IsSuccess) { Notify.Error(read.ErrorMessage); return; }
+
+                AttributeImportResult result = null;
+                CadContext.Execute(scope => { result = BlockAttributeTable.Import(scope, read.Value); },
+                    undoMarkName: "Nhập attribute");
+
+                Notify.Info($"Đã đổi {result.AttributesChanged} attribute trên {result.BlocksChanged} block.");
+                if (result.MissingHandles.Count > 0)
+                    Notify.Warn($"{result.MissingHandles.Count} handle không còn trong bản vẽ: {string.Join(", ", result.MissingHandles.Take(10))}");
+                if (result.LockedHandles.Count > 0)
+                    Notify.Warn($"Bỏ qua {result.LockedHandles.Count} block trên layer khóa: {string.Join(", ", result.LockedHandles.Take(10))}");
+                if (result.UnknownColumns.Count > 0)
+                    Notify.Warn("Cột không khớp tag nào: " + string.Join(", ", result.UnknownColumns));
             });
         }
     }

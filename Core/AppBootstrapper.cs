@@ -190,6 +190,7 @@ namespace CadCoreFramework.Core
             services.AddSingleton<IProgressMeterService, ProgressMeterService>();
             services.AddSingleton<IPaletteService, PaletteService>();
             services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<IDataFileService, DataFileService>();
 
             // ── Tầng Dịch Vụ Cốt Lõi AutoCAD (Core Services) ────────────────────
             services.AddSingleton<ICadContext, CadContext>();

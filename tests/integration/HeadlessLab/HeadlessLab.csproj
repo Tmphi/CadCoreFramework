@@ -22,11 +22,16 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="Exists('..\..\..\Demos\BlockAttributeTable.cs')">
+    <DefineConstants>$(DefineConstants);HAS_DEMOS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- CHỈ Core + Model: KHÔNG tham chiếu package AutoCAD.NET (AcMgd). -->
     <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
     <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
     <PackageReference Include="Newtonsoft.Json"   Version="13.0.3" />
+    <PackageReference Include="MiniExcel"         Version="1.44.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +45,12 @@
     <Compile Include="..\..\..\Services\PlotService.cs" Link="Linked\Services\PlotService.cs" />
     <Compile Include="..\..\..\Services\IFileSystemService.cs" Link="Linked\Services\IFileSystemService.cs" />
     <Compile Include="..\..\..\Services\FileSystemService.cs" Link="Linked\Services\FileSystemService.cs" />
+    <!-- Đọc/ghi JSON, CSV, Excel + bảng attribute của DEMO_ATTR_EXPORT/IMPORT (DataFileLab.cs). -->
+    <Compile Include="..\..\..\Models\DataSheet.cs" Link="Linked\Models\DataSheet.cs" />
+    <Compile Include="..\..\..\Services\IDataFileService.cs" Link="Linked\Services\IDataFileService.cs" />
+    <Compile Include="..\..\..\Services\DataFileService.cs" Link="Linked\Services\DataFileService.cs" />
+    <!-- Demos/ bị xóa khi tạo dự án bằng IncludeDemos=false / -RemoveDemos → chỉ link khi còn, kèm hằng HAS_DEMOS. -->
+    <Compile Include="..\..\..\Demos\BlockAttributeTable.cs" Link="Linked\Demos\BlockAttributeTable.cs" Condition="Exists('..\..\..\Demos\BlockAttributeTable.cs')" />
     <Compile Include="..\..\..\Extensions\**\*.cs" Link="Linked\Extensions\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\..\..\Utils\**\*.cs" Exclude="..\..\..\Utils\WpfCadHelper.cs" Link="Linked\Utils\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
