@@ -66,7 +66,7 @@
 
     <!-- Templates\**: file nguồn của `dotnet new cad-command` — không biên dịch vào plugin DLL.
          tests\**: HeadlessLab (project test riêng, link lại mã nguồn của plugin) — không được lẫn vào plugin. -->
-    <DefaultItemExcludes>$(DefaultItemExcludes);CadCoreFramework.Tests\**;CadCoreFramework.Testing\**;CadCoreFramework.Benchmarks\**;CadCoreFramework.Analyzers\**;Templates\**;tests\**;tools\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);CadCoreFramework.Tests\**;CadCoreFramework.Testing\**;CadCoreFramework.Benchmarks\**;CadCoreFramework.Analyzers\**;Templates\**;tests\**;tools\**;exercises\**</DefaultItemExcludes>
 
     <!--
       MSB3277: benign assembly-conflict warning triggered when dist/ packaging

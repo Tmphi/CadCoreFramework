@@ -59,7 +59,7 @@ Project plugin nằm **ở gốc repo**, nên các thư mục project khác ph�
 | `EnforceCodeStyleInBuild`, `AnalysisLevel=latest`, `AnalysisMode=Recommended` | | Rule IDE/CA chạy **lúc build**, không chỉ trong IDE |
 | `GenerateDocumentationFile` + `NoWarn CS1591` | | Bắt buộc để IDE0005 (using thừa) chạy khi build; không bắt doc cho mọi member |
 | `AssemblyName` (Debug) | `CadCoreFramework_yyyyMMdd_HHmmss` | Hot-reload ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)). Target `PostBuild` copy về tên cố định |
-| `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` | Không biên dịch lẫn code test / template |
+| `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` + `tools\**` + `exercises\**` | Không biên dịch lẫn code test / template / bài tập vào plugin, không kéo `node_modules` vào project |
 | `IncludeDemos` | mặc định `true` | `false` thì loại `Demos/**` khỏi DLL |
 | `MSBuildWarningsAsMessages` | `MSB3277` | Xung đột version vô hại khi có thư mục `dist/` cạnh NuGet |
 | `PackageReference AutoCAD.NET*` | `24.0.0` (net48) / `25.0.1`+`25.0.0` (net8), `ExcludeAssets="runtime"` | Biên dịch theo API, **không** copy DLL AutoCAD ra output. `25.0.1` để tránh NU1608 (bản `25.0.0` ghim `Core` pre-release) |
@@ -99,7 +99,7 @@ Runner **không có AutoCAD**. CI chỉ kiểm build + unit test, nên smoke tes
 
 Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run view <id> --log-failed`.
 
-**Job `docs`** (runner `ubuntu-latest`, Node 24, .NET SDK 8) chạy bốn script trong [`tools/docs/`](../../tools/docs/package.json), và báo lỗi ngay trên dòng của PR:
+**Job `docs`** (runner `ubuntu-latest`, Node 24, .NET SDK 8) chạy năm script trong [`tools/docs/`](../../tools/docs/package.json), và báo lỗi ngay trên dòng của PR:
 
 | Bước | Kiểm gì |
 | :--- | :--- |
@@ -107,8 +107,9 @@ Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run
 | `npm run reading-time` | Mỗi mục `##` của module có nhãn 🎯/🔍/📖, và số phút trên dòng ⏱ khớp số từ thật ([quy ước](README.md#5-quy-ước-đọc)) |
 | `npm run mermaid` | Mọi sơ đồ mermaid parse được |
 | `npm run snippets` | Code mẫu C01–C05, U01: mỗi khối `csharp` có một chú thích ẩn `<!-- doc-check: … -->` nói cách kiểm. Khối `run` được biên dịch (C# 10, net8.0, cảnh báo là lỗi) và chạy; `run output` so stdout với khối `text` ngay sau; `test` chạy `dotnet test`; `verbatim <file>` so với file nguồn của dự án ([README §7](README.md#7-duy-trì-bộ-tài-liệu)) |
+| `npm run exercises` | Bài tập chấm tự động ([`exercises/`](../../exercises/README.md)): lời giải mẫu qua mọi test, code khởi đầu đỏ ở mọi bài |
 
-Chạy cả bốn trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`; bước cuối cần .NET SDK 8 trở lên. Dự án tạo bằng template với `IncludeDemos=false` không còn `Demos/`: link vào thư mục đó được bỏ qua (script ghi rõ số link bỏ qua), để CI của dự án mới không đỏ.
+Chạy cả năm trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`; hai bước cuối cần .NET SDK 8 trở lên. Dự án tạo bằng template với `IncludeDemos=false` không còn `Demos/`: link vào thư mục đó được bỏ qua (script ghi rõ số link bỏ qua), để CI của dự án mới không đỏ.
 
 **Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). Mỗi tháng có thêm một PR `docs-tools` cho package npm của `tools/docs`. CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
 

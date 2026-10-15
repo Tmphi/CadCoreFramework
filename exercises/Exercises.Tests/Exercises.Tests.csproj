@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Cùng version với CadCoreFramework.Tests (FluentAssertions chỉ 7.x — T06 §7). -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk"    Version="18.11.0" />
+    <PackageReference Include="xunit"                     Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions"          Version="7.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Exercises\Exercises.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- "Bản thật" của dự án (code thuần, không cần AutoCAD) để so với bài làm. -->
+    <Compile Include="..\..\Samples\GridMarker\GridSpec.cs" Link="BanThat\GridSpec.cs" />
+    <Compile Include="..\..\Samples\GridMarker\GridPlanner.cs" Link="BanThat\GridPlanner.cs" />
+    <Compile Include="..\..\Utils\SymbolNameRules.cs" Link="BanThat\SymbolNameRules.cs" />
+  </ItemGroup>
+
+</Project>

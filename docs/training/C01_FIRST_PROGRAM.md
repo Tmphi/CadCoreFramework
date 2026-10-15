@@ -372,7 +372,7 @@ string Label(int row, int col, string prefix = "")              // prefix có gi
 
 ## 10. Bài tập
 
-Làm vào các dự án console riêng (`dotnet new console -n BaiTapC01E1`…). Đáp án ở khối thu gọn — **tự làm trước**.
+Làm trong [`exercises/`](../../exercises/README.md) để được **chấm tự động**: viết bài vào `exercises/Exercises/C01/E1.cs`…, rồi chạy `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C01.E1`. (Muốn thì vẫn làm được trong dự án console riêng như §2.) Đáp án ở khối thu gọn — **tự làm trước**.
 
 **E1.** Tủ điện rộng 600, cao 2100 (mm). In diện tích và chu vi, 2 chữ số thập phân.
 

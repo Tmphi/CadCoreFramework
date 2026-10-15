@@ -348,6 +348,8 @@ Console.WriteLine(string.Equals("E-Power", "E-POWER", StringComparison.OrdinalIg
 
 ## 10. Bài tập
 
+Chấm tự động trong [`exercises/`](../../exercises/README.md): `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C02.E1` (đổi `E1` theo bài). Test của E3 còn so bài làm với `GridSpec.Validate` thật.
+
 **E1.** Cho `names = { "E-POWER", "A*B", "", "Lưới trục", "LAYER:1", "M.EQUIP" }`. Dùng `foreach`, `List<string>`, `string.IsNullOrWhiteSpace` và `IndexOfAny` để giữ lại các tên **hợp lệ** — không rỗng, không chứa ký tự cấm `` < > / \ " : ; ? * | , = ` `` (đúng danh sách trong [`SymbolNameRules`](../../Utils/SymbolNameRules.cs)). In kết quả cách nhau dấu phẩy.
 
 <details><summary>Đáp án E1</summary>

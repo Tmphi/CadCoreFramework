@@ -395,6 +395,8 @@ Trả lời được ba câu này là bạn đã đọc *hiểu*, không chỉ �
 
 ## 10. Bài tập
 
+Chấm tự động trong [`exercises/`](../../exercises/README.md): `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C03.E1` (đổi `E1` theo bài). Test của E3 truyền cho `PanelReport` một repository **giả**, đúng kiểu `FakeClock` ở §6.
+
 **E1.** Mở rộng `PanelSpec` ở §3: thêm hằng `MaxHeight = 2400`, luật "Chiều cao phải ≤ 2400.", và property `IsTall` (đúng khi cao hơn 2000). Kiểm với `new PanelSpec("MSB-02", 800, 2600)`.
 
 <details><summary>Đáp án E1</summary>
