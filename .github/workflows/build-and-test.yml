@@ -36,10 +36,12 @@ jobs:
 
       # labs/ (bài lab L02–L06) chỉ chấm được trên máy có AutoCAD (labs/run-lab.ps1). CI biên dịch cả
       # code khởi đầu lẫn lời giải mẫu: đổi API framework làm hỏng lab thì đỏ ngay ở đây.
-      - name: Build labs (starter + solutions)
-        run: |
-          dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror
-          dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror -p:UseSolutions=true
+      # Hai bước riêng: trong một bước pwsh nhiều dòng, chỉ exit code của lệnh CUỐI quyết định bước đỏ hay xanh.
+      - name: Build labs (starter)
+        run: dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror
+
+      - name: Build labs (solutions)
+        run: dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror -p:UseSolutions=true
 
       # Runs the suite twice: net48 (AutoCAD 2021–2024) and net8.0-windows (AutoCAD 2025+).
       # LogFilePrefix (not LogFileName) so the two TFMs don't overwrite each other's .trx.
