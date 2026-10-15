@@ -96,10 +96,10 @@ Hai workflow trong [`.github/workflows/`](../../.github/workflows/):
 
 | File | Kích hoạt | Làm gì |
 | :--- | :--- | :--- |
-| `build-and-test.yml` | Push/PR vào `main` | Build Release `-warnaserror` → chạy toàn bộ unit test trên net48 + net8 → thu thập coverage → upload báo cáo HTML |
+| `build-and-test.yml` | Push/PR vào `main` | Job `build`: build Release `-warnaserror` → chạy toàn bộ unit test trên net48 + net8 → thu thập coverage → upload báo cáo HTML. Job `docs`: kiểm link và anchor, thẻ ⏱ và nhãn 🎯/🔍/📖, sơ đồ mermaid trong tài liệu ([T06 §4](../training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)) |
 | `release.yml` | Tag `v*` (ví dụ `v1.2.0`) | Build → Test → `package.ps1` → tạo GitHub Release với `.bundle` đính kèm |
 
-[`.github/dependabot.yml`](../../.github/dependabot.yml) mở PR nâng version Actions và NuGet mỗi tuần. Danh sách package được bỏ qua hoặc ghim, kèm lý do: [T06 §7](../training/T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency).
+[`.github/dependabot.yml`](../../.github/dependabot.yml) mở PR nâng version Actions và NuGet mỗi tuần, npm của `tools/docs` mỗi tháng. Danh sách package được bỏ qua hoặc ghim, kèm lý do: [T06 §7](../training/T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency).
 
 Vì CI build với `-warnaserror`, mọi warning (kể cả CAD001–CAD003 ở §5) làm PR đỏ. Chi tiết từng bước, quy trình release và checklist phát hành: [T06 §4–5](../training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml). Badge CI của dự án tạo từ template: [T06 §8](../training/T06_BUILD_RELEASE_DEVOPS.md#8-template-tạo-dự-án-mới).
 

@@ -1,4 +1,4 @@
-# Dependabot: mỗi tuần mở PR khi GitHub Actions / NuGet có bản mới.
+# Dependabot: mỗi tuần mở PR khi GitHub Actions / NuGet có bản mới; mỗi tháng cho npm của tools/docs.
 # CI (build-and-test.yml) chạy trên mọi PR nên bản nâng nào làm đỏ build/test sẽ lộ ngay.
 # CI KHÔNG có AutoCAD: PR nhóm "plugin-runtime" (DLL đi theo bundle) phải qua checklist
 # docs/training/T06_BUILD_RELEASE_DEVOPS.md §7 trước khi merge.
@@ -55,3 +55,15 @@ updates:
           - "CommunityToolkit.Mvvm"
           - "Microsoft.Extensions.DependencyInjection"
           - "Newtonsoft.Json"
+
+  # Công cụ kiểm tài liệu (tools/docs: mermaid, jsdom): chỉ chạy trên CI, không vào plugin.
+  # Mỗi tháng một PR là đủ; job "docs" của CI chạy trên PR đó.
+  - package-ecosystem: "npm"
+    directory: "/tools/docs"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      docs-tools:
+        patterns: ["*"]

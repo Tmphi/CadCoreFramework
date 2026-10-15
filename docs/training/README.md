@@ -240,7 +240,8 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - Tài liệu sống cùng code: **PR thay đổi hành vi phải cập nhật T-module liên quan** (checklist review có mục này).
 - Khi gặp sự cố mới: thêm một mục vào [T03](T03_PITFALLS_CASEBOOK.md) theo đúng format, *sau khi* đã có cách tái hiện.
 - Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó.
-- Thêm hoặc đổi một mục `##` của module: gắn nhãn 🎯/🔍/📖 ở cuối dòng Mục lục, rồi cập nhật dòng ⏱ ở đầu module ([§5](#5-quy-ước-đọc)). Đổi nhãn 🎯 của module trong [lộ trình nhanh](#lộ-trình-nhanh) thì cập nhật cả con số "Tổng" ở đó. Đếm số từ của một trang bằng:
+- Thêm hoặc đổi một mục `##` của module: gắn nhãn 🎯/🔍/📖 ở cuối dòng Mục lục, rồi cập nhật dòng ⏱ ở đầu module ([§5](#5-quy-ước-đọc)). Đổi nhãn 🎯 của module trong [lộ trình nhanh](#lộ-trình-nhanh) thì cập nhật cả con số "Tổng" ở đó.
+- **CI kiểm tài liệu ở mọi PR** (job `docs`, [T06 §4](T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)): link và anchor, nhãn và số phút trên dòng ⏱, sơ đồ mermaid. Khi sửa một module, số từ đổi nên số phút có thể phải đổi theo; CI báo đúng con số cần ghi. Chạy trước trên máy: `cd tools/docs`, `npm ci` (một lần), `npm run check`. Con số "Tổng" của lộ trình nhanh thì CI **không** kiểm. Đếm số từ của một trang bằng tay:
   ```powershell
   ((Get-Content docs\training\T01_AUTOCAD_NET_FOUNDATIONS.md -Raw -Encoding UTF8) -split '\s+' | Where-Object { $_ }).Count
   ```
@@ -258,3 +259,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | Rà soát toàn bộ (PR #14, 2026-10-14) | Link và anchor; mọi khối code đối chiếu với nguồn; công thức T08 biên dịch thử trong một bản sao dự án; 68 ví dụ của Giai đoạn 0 chạy lại, output không đổi; số liệu đo lại (số test, coverage); sửa các chỗ đã lệch với code |
 | T08 §12 (công thức thao tác bản vẽ, PR #16) | Code build sạch trên cả hai TFM; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab (19 kiểm thử). Cả 5 lệnh `TOOLS_*` chạy trên AutoCAD 2024 có giao diện ngày 2026-10-15, kể cả Ctrl+Z sau khi gộp layer và nhánh layer đích đóng băng |
 | Bản đồ học (thẻ module, nhãn 🎯/🔍/📖, lộ trình nhanh; 2026-10-15) | Số phút trên mọi thẻ được một script đối chiếu với số từ thật của trang, sau lần sửa cuối; lệnh PowerShell ở §7 cho cùng số từ. Sơ đồ phụ thuộc parse được bằng mermaid 11.4.1, cùng 16 sơ đồ có sẵn. Link và anchor: 0 lỗi. Thời gian **làm** lab lấy từ T10 §2, chưa đo lại trên học viên thật |
+| Kiểm tự động (job `docs` của CI, 2026-10-15) | Ba script trong `tools/docs` (link/anchor, thẻ ⏱ + nhãn, mermaid) chạy ở mọi PR. Mỗi script đã thử với lỗi cài sẵn trên một bản sao repo: link sai chữ hoa, anchor sai, số phút sai, mục thiếu nhãn, nhãn lẻ ở module không gắn nhãn, sơ đồ sai cú pháp; cả 6 đều bị bắt. Chạy được cả trong dự án sinh từ template `dotnet new cad-plugin` |

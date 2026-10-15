@@ -60,6 +60,7 @@
             "**/TestResults/**",
             "dist/**",
             "coverage/**",
+            "**/node_modules/**",
             "packages/**",
             "nuget.exe",
             "*.log",

@@ -9,6 +9,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (CI — kiểm tài liệu)
+- Job **`docs`** trong `build-and-test.yml` (ubuntu, Node 24) chạy ba script của `tools/docs/` ở mọi PR, báo lỗi ngay trên dòng của PR:
+  - link tương đối và `#anchor`, kể cả sai chữ hoa/thường (Windows bỏ qua lỗi này, GitHub thì không);
+  - nhãn 🎯/🔍/📖 cho mọi mục và số phút trên dòng ⏱ so với số từ thật;
+  - cú pháp mọi sơ đồ mermaid (mermaid 11.17.2, ghim trong `package-lock.json`).
+- Chạy trên máy: `cd tools/docs`, `npm ci`, `npm run check` ([T06 §4](docs/training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)).
+- Dependabot thêm nhóm `docs-tools` (npm, mỗi tháng). `tools\**` được loại khỏi glob của project plugin; template `dotnet new` bỏ qua `node_modules`.
+
 ### Added (tài liệu — bản đồ học)
 - **Thẻ module** ở đầu cả 20 module C00–C05, T01–T10, U00–U03: dòng ⏱ thời gian đọc (cả trang và riêng phần cốt lõi), bài tập/lab để thực hành, và nhãn mục. Thời gian tính từ số từ thật của trang (kể cả code) ÷ 100 từ/phút; chưa gồm thời gian chạy thử và làm lab.
 - **Nhãn 🎯 cốt lõi / 🔍 đào sâu / 📖 tra cứu** ở cuối từng dòng Mục lục. Giai đoạn 0 (C01–C05) giữ mọi mục là 🎯, vì đã được lọc theo quy tắc 20/80.
