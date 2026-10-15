@@ -9,6 +9,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (dependency — PR #20–#24)
+- **Package đi theo bundle:** `CommunityToolkit.Mvvm` 8.2.2 → 8.4.2, `Microsoft.Extensions.DependencyInjection` 8.0.0 → 8.0.1, `Newtonsoft.Json` 13.0.3 → 13.0.4.
+  - Trên net48, bundle có `Microsoft.Bcl.AsyncInterfaces` **10.0.0.1** (trước đây 8.0.0.0) và các bản `System.Memory`/`Buffers`/`Unsafe`/`Threading.Tasks.Extensions` mới hơn. Số file không đổi.
+  - DI 8.0.1 vẫn tham chiếu `Bcl.AsyncInterfaces` 8.0.0.0; chỗ lệch này được resolver của `AppBootstrapper` xử lý ([T06 §7](docs/training/T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency)).
+  - Đã kiểm trong AutoCAD 2024 (GUI): khởi tạo plugin, palette, `DEMO_ATTR_EXPORT` ra `.json` và `.xlsx`; log không có lỗi.
+- **Package test và tool:** FluentAssertions 6.12.0 → 7.2.2 (không lên 8 vì license), xunit 2.9.3, xunit.runner.visualstudio 4.0.1, Microsoft.NET.Test.Sdk 18.11.0, coverlet 10.1.0, Moq 4.21.0, BenchmarkDotNet 0.15.8, ReportGenerator 5.5.11.
+- **CI:** GitHub Actions lên các bản chạy Node 24 (checkout v7, setup-dotnet v6, cache v6, upload-artifact v7, action-gh-release v3). Thêm `.github/dependabot.yml`: mỗi tuần mở PR nâng version, có danh sách package bỏ qua hoặc ghim ([T06 §7](docs/training/T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency)).
+
 ---
 
 ## [1.1.0] — 2026-10-15
