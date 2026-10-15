@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //      Số hiệu bản dựng (Build Number)
 //      Bản sửa đổi (Revision)
 //
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]
 
 // CA1416: Suppress Windows-platform warnings on .NET 8 — this plugin only targets AutoCAD on Windows.
 // The two marker lines keep this conditional block intact in projects created with `dotnet new` (the

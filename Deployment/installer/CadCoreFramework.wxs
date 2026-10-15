@@ -26,7 +26,7 @@
 
   <Package Name="CadCoreFramework"
            Manufacturer="CadCoreFramework"
-           Version="1.1.0.0"
+           Version="1.1.1.0"
            UpgradeCode="7C5F7C3A-A212-4DE6-A6F9-183637C0C793"
            Scope="perUser"
            InstallerVersion="500"
