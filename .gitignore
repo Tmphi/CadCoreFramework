@@ -31,6 +31,9 @@ dist/
 coverage/
 TestResults/
 
+# ─── Docs check (tools/docs, npm) ─────────────────────────────────────────────
+node_modules/
+
 # ─── Build Logs ───────────────────────────────────────────────────────────────
 build_log.txt
 *.log

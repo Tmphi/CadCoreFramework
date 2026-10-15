@@ -54,6 +54,7 @@ Dự án tách mỗi loại trách nhiệm vào một thư mục. Vai trò của
 ├── 📁 Templates/     Template `dotnet new cad-command`
 ├── 📁 snippets/      Snippet Visual Studio: cadcmd, cadscope, cadsvc, cadvm
 ├── 📁 tests/         Kiểm thử tích hợp: smoke.scr, HeadlessLab
+├── 📁 tools/docs/    Script kiểm tài liệu (link, thẻ ⏱, mermaid), chạy trong CI
 ├── 📁 CadCoreFramework.Tests/       Unit test (xUnit), chạy trên cả net48 và net8.0-windows
 ├── 📁 CadCoreFramework.Testing/     FakeCadContext và các test double
 ├── 📁 CadCoreFramework.Analyzers/   Analyzer CAD001–CAD003 (R06 §5)

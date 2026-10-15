@@ -84,7 +84,7 @@ Quy ước file: 4 dấu cách, CRLF trong working tree, `utf-8-bom`. Riêng `*.
 
 ## 4. CI: `build-and-test.yml`
 
-🔎 [`.github/workflows/build-and-test.yml`](../../.github/workflows/build-and-test.yml). Chạy trên mọi push/PR vào `main`, runner `windows-latest`.
+🔎 [`.github/workflows/build-and-test.yml`](../../.github/workflows/build-and-test.yml). Chạy trên mọi push/PR vào `main`, gồm hai job chạy song song: `build` (runner `windows-latest`, bảng dưới) và `docs` (kiểm tài liệu, cuối mục).
 
 | Bước | Làm gì | Ghi chú |
 | :--- | :--- | :--- |
@@ -99,7 +99,17 @@ Runner **không có AutoCAD**. CI chỉ kiểm build + unit test, nên smoke tes
 
 Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run view <id> --log-failed`.
 
-**Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
+**Job `docs`** (runner `ubuntu-latest`, Node 24) chạy ba script trong [`tools/docs/`](../../tools/docs/package.json), và báo lỗi ngay trên dòng của PR:
+
+| Bước | Kiểm gì |
+| :--- | :--- |
+| `npm run links` | Mọi link tương đối trong file `.md`: file đích tồn tại, **đúng chữ hoa/thường** (GitHub phân biệt, Windows thì không), `#anchor` khớp một heading |
+| `npm run reading-time` | Mỗi mục `##` của module có nhãn 🎯/🔍/📖, và số phút trên dòng ⏱ khớp số từ thật ([quy ước](README.md#5-quy-ước-đọc)) |
+| `npm run mermaid` | Mọi sơ đồ mermaid parse được |
+
+Chạy cả ba trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`.
+
+**Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). Mỗi tháng có thêm một PR `docs-tools` cho package npm của `tools/docs`. CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
 
 ---
 
@@ -201,6 +211,7 @@ Trên net48, các DLL **tham chiếu version khác** với bản nằm trong bun
 | `FluentAssertions` | Chỉ tới 7.x | Từ v8 dùng license của Xceed, phải trả phí khi dùng thương mại; v7 vẫn Apache 2.0 |
 | `CommunityToolkit.Mvvm`, `Microsoft.Extensions.DependencyInjection`, `Newtonsoft.Json` | Minor + patch (nhóm `plugin-runtime`) | Bản major thường đổi dependency bắc cầu cho net48 |
 | Còn lại (test, benchmark, tool) | Mọi bản (nhóm `dev-tools`) | Chỉ chạy trên máy dev/CI; CI xanh là đủ |
+| npm trong `tools/docs` (`mermaid`, `jsdom`) | Mọi bản, mỗi tháng (nhóm `docs-tools`) | Chỉ dùng để kiểm tài liệu; job `docs` xanh là đủ |
 
 > [!WARNING]
 > **PR `plugin-runtime` xanh CI vẫn chưa được merge ngay.** CI không có AutoCAD, nên không thấy được xung đột với host. Trước khi merge, làm bước 2–5 của checklist trên với bản mới: so danh sách DLL trong `bin\x64\Release\net48\` trước và sau khi nâng, rồi thử trong AutoCAD thật. `ignore` trong `dependabot.yml` cũng chặn PR security update của chính package đó, nên package bị bỏ qua phải tự theo dõi cảnh báo bảo mật.

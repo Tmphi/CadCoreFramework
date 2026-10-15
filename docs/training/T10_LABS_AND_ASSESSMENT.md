@@ -4,7 +4,7 @@
 
 > **Cấp độ:** mọi cấp · **Cần trước:** module ghi ở từng lab · **Trong lộ trình:** suốt Giai đoạn 1–3; đánh giá 🌰 → 🌱 nằm ở [C05 §6](C05_ASYNC_TESTING_GIT.md#6-đánh-giá-nhập-môn--fresher) ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 50 phút nếu đọc hết, nhưng không cần: đọc §1 (≈ 5 phút), rồi chỉ mở bài lab đang làm. Thời lượng **làm** từng lab ở bảng [§2](#2-danh-sách-bài-lab) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 50 phút nếu đọc hết (phần 🎯 ≈ 5 phút), nhưng không cần: đọc §1, rồi chỉ mở bài lab đang làm. Thời lượng **làm** từng lab ở bảng [§2](#2-danh-sách-bài-lab) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở đây đi từ thí nghiệm nhỏ tới sửa **lỗi có thật** mà dự án đã gặp ([backlog T09](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)) — làm trên code cũ (thường là `v1.0.0`, [quy tắc 6](#1-quy-tắc-làm-lab)), rồi đối chiếu với lời giải đã merge. Lỗi thật dạy nhiều hơn bài tập bịa: chúng có bằng chứng, có cạm bẫy, và có lời giải để so.
 
