@@ -3,26 +3,33 @@
 # T08 — Công Thức Mở Rộng Dự Án
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 85 phút (phần 🎯 ≈ 20 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
+
+**Sau module này bạn phải làm được:**
+1. Thêm một lệnh, một tính năng trọn vẹn theo Golden Sample, một service và một palette, chạm đủ mọi file mà checklist của từng công thức yêu cầu.
+2. Biết công thức nào có sẵn cho việc mình sắp làm (Ribbon, Overrule, metadata, settings, dynamic block, sự kiện, thao tác bản vẽ), mở đúng mục 📖 khi cần thay vì tự nghĩ lại từ đầu.
+3. Tự kiểm PR của mình bằng [checklist §13](#13-checklist-trước-khi-mở-pr) trước khi gửi review.
 
 ---
 
 ## Mục lục
 
-1. [Thêm một lệnh](#1-thêm-một-lệnh)
-2. [Thêm một tính năng trọn vẹn](#2-thêm-một-tính-năng-trọn-vẹn)
-3. [Thêm một service](#3-thêm-một-service)
-4. [Thêm một palette](#4-thêm-một-palette)
-5. [Palette cần người dùng chọn điểm trên màn hình](#5-palette-cần-người-dùng-chọn-điểm-trên-màn-hình)
-6. [Thêm Ribbon tab](#6-thêm-ribbon-tab)
-7. [Thêm Overrule](#7-thêm-overrule)
-8. [Lưu metadata: XData hay XRecord?](#8-lưu-metadata-xdata-hay-xrecord)
-9. [Thêm thiết lập người dùng](#9-thêm-thiết-lập-người-dùng)
-10. [Làm việc với dynamic block](#10-làm-việc-với-dynamic-block)
-11. [Lắng nghe sự kiện bản vẽ đúng cách](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách)
-12. [Công thức thao tác bản vẽ](#12-công-thức-thao-tác-bản-vẽ): khung tên, xuất PDF, purge + audit, xref, gộp layer, xuất/nhập attribute qua Excel, CSV, JSON
-13. [Checklist trước khi mở PR](#13-checklist-trước-khi-mở-pr)
+1. [Thêm một lệnh](#1-thêm-một-lệnh) 🎯
+2. [Thêm một tính năng trọn vẹn](#2-thêm-một-tính-năng-trọn-vẹn) 🎯
+3. [Thêm một service](#3-thêm-một-service) 🎯
+4. [Thêm một palette](#4-thêm-một-palette) 🎯
+5. [Palette cần người dùng chọn điểm trên màn hình](#5-palette-cần-người-dùng-chọn-điểm-trên-màn-hình) 🔍
+6. [Thêm Ribbon tab](#6-thêm-ribbon-tab) 📖
+7. [Thêm Overrule](#7-thêm-overrule) 📖
+8. [Lưu metadata: XData hay XRecord?](#8-lưu-metadata-xdata-hay-xrecord) 📖
+9. [Thêm thiết lập người dùng](#9-thêm-thiết-lập-người-dùng) 📖
+10. [Làm việc với dynamic block](#10-làm-việc-với-dynamic-block) 📖
+11. [Lắng nghe sự kiện bản vẽ đúng cách](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách) 📖
+12. [Công thức thao tác bản vẽ](#12-công-thức-thao-tác-bản-vẽ): khung tên, xuất PDF, purge + audit, xref, gộp layer, xuất/nhập attribute qua Excel, CSV, JSON 📖
+13. [Checklist trước khi mở PR](#13-checklist-trước-khi-mở-pr) 🎯
 
 ---
 

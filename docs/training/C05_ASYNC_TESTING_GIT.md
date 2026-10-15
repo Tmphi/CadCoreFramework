@@ -3,6 +3,8 @@
 # C05 — Async, Unit Test, Git Và Đồ Án Nhập Môn
 
 > **Cấp độ:** 🌰 Nhập môn → 🌱 Fresher · **Cần trước:** [C04](C04_CSHARP_IN_THIS_PROJECT.md) · **Thời lượng:** tuần 5–6
+>
+> **⏱ Đọc:** ≈ 40 phút · **Thực hành:** [đồ án nhập môn §5](#5-đồ-án-nhập-môn-planner-dãy-tủ-điện), [đánh giá §6](#6-đánh-giá-nhập-môn--fresher) · **Nhãn mục:** mọi mục đều 🎯, vì Giai đoạn 0 đã lọc theo [quy tắc 20/80](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) ([README §5](README.md#5-quy-ước-đọc))
 
 Module cuối của giai đoạn 0 dạy ba kỹ năng làm việc thật: **chờ mà không đứng hình** (`async`/`await`), **để máy kiểm code giùm** (unit test), và **làm việc nhóm** (Git, Pull Request). Sau đó bạn áp dụng tất cả vào đồ án nhập môn, rồi làm bài đánh giá lên 🌱 Fresher.
 

@@ -3,26 +3,33 @@
 # T05 — Chiến Lược Kiểm Thử
 
 > **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md); viết unit test xUnit ([C05 §2](C05_ASYNC_TESTING_GIT.md#2-unit-test-với-xunit)) · **Trong lộ trình:** tuần 6 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L07 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Plugin AutoCAD **không thể** unit test theo kiểu thông thường: hầu hết API cần lõi C++ của AutoCAD đang chạy. Chiến lược của dự án vì vậy không phải "mock AutoCAD", mà là **thiết kế để phần cần AutoCAD càng mỏng càng tốt**, rồi test mỗi tầng bằng công cụ phù hợp với nó.
 
 > [!IMPORTANT]
 > Nguyên tắc: **nếu một đoạn code không bắt buộc phải gọi AutoCAD API, nó không được nằm trong lambda của `ICadContext.Execute`.** Code trong lambda chỉ test được *"có gọi Execute không"*. Code ngoài lambda test được *"kết quả có đúng không"*. ([R05 §2](../reference/R05_GOLDEN_SAMPLE.md#2-nguyên-tắc-1--functional-core-imperative-shell))
 
+**Sau module này bạn phải làm được:**
+1. Chọn đúng tầng test cho một đoạn code: logic thuần, `FakeCadContext`, ViewModel với Mock, XAML trên STA, HeadlessLab, hay smoke thủ công.
+2. Tách logic ra khỏi lambda của `ICadContext.Execute` để test được *kết quả*, và viết test *hợp đồng* cho phần còn lại bằng `FakeCadContext`.
+3. Chạy test và coverage giống CI, và kể ra những gì chỉ AutoCAD thật mới kiểm được ([§7](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)).
+
 ---
 
 ## Mục lục
 
-1. [Vì sao khó](#1-vì-sao-khó)
-2. [Kim tự tháp test của dự án](#2-kim-tự-tháp-test-của-dự-án)
-3. [Logic thuần: kiểm kết quả](#3-logic-thuần-kiểm-kết-quả)
-4. [Lớp vỏ AutoCAD: `FakeCadContext` kiểm hợp đồng](#4-lớp-vỏ-autocad-fakecadcontext-kiểm-hợp-đồng)
-5. [ViewModel: Mock service](#5-viewmodel-mock-service)
-6. [XAML palette trên STA](#6-xaml-palette-trên-sta)
-7. [Những gì chỉ AutoCAD thật mới kiểm được](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)
-8. [Chạy test và coverage](#8-chạy-test-và-coverage)
-9. [Integration test headless: hiện trạng và hướng đi](#9-integration-test-headless-hiện-trạng-và-hướng-đi)
-10. [Quy tắc viết test](#10-quy-tắc-viết-test)
+1. [Vì sao khó](#1-vì-sao-khó) 🎯
+2. [Kim tự tháp test của dự án](#2-kim-tự-tháp-test-của-dự-án) 🎯
+3. [Logic thuần: kiểm kết quả](#3-logic-thuần-kiểm-kết-quả) 🎯
+4. [Lớp vỏ AutoCAD: `FakeCadContext` kiểm hợp đồng](#4-lớp-vỏ-autocad-fakecadcontext-kiểm-hợp-đồng) 🎯
+5. [ViewModel: Mock service](#5-viewmodel-mock-service) 🎯
+6. [XAML palette trên STA](#6-xaml-palette-trên-sta) 🔍
+7. [Những gì chỉ AutoCAD thật mới kiểm được](#7-những-gì-chỉ-autocad-thật-mới-kiểm-được) 📖
+8. [Chạy test và coverage](#8-chạy-test-và-coverage) 🎯
+9. [Integration test headless: hiện trạng và hướng đi](#9-integration-test-headless-hiện-trạng-và-hướng-đi) 🔍
+10. [Quy tắc viết test](#10-quy-tắc-viết-test) 🎯
 
 ---
 

@@ -3,10 +3,17 @@
 # T03 — Sổ Tay Sự Cố & Bẫy (Casebook)
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md) · **Trong lộ trình:** tuần 10 (Phần B) và 11 (Phần A); sau đó dùng như sổ tra cứu ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 45 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** [Tra nhanh theo triệu chứng](#tra-nhanh-theo-triệu-chứng) 🎯 · [Phần A](#phần-a--sự-cố-thật-của-dự-án) 🔍 · [Phần B](#phần-b--bẫy-autocad-api-kinh-điển) 🔍; học xong thì cả module là 📖 ([README §5](README.md#5-quy-ước-đọc))
 
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
 - **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
 - **Phần B:** 36 bẫy AutoCAD .NET kinh điển, mỗi bẫy dẫn về chỗ framework đã (hoặc chưa) phòng tránh. B32–B36 được phát hiện và kiểm chứng khi viết [nhánh UI](U00_UI_START_HERE.md).
+
+**Sau module này bạn phải làm được:**
+1. Từ một triệu chứng (thông điệp lỗi nguyên văn, hành vi lạ), tìm ra mục tương ứng qua [bảng tra nhanh](#tra-nhanh-theo-triệu-chứng), rồi dùng phần **Phát hiện** để xác nhận đúng nguyên nhân trước khi sửa.
+2. Nêu được bài học chung của các sự cố thật ở Phần A, và dùng nó để nghi ngờ đúng chỗ, ví dụ một test integration "luôn pass".
+3. Viết một mục mới cho sổ tay theo đúng format Triệu chứng → Gốc rễ → Phát hiện → Sửa → Phòng ngừa.
 
 Mỗi mục theo cùng một format, và đó cũng là format bạn phải dùng khi viết báo cáo sự cố ([T04 §8](T04_DEBUGGING_TROUBLESHOOTING.md#8-mẫu-báo-cáo-sự-cố-incident-report)):
 

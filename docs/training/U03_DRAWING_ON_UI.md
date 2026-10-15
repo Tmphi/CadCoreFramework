@@ -3,8 +3,15 @@
 # U03 — Vẽ Thực Thể Lên UI: Xem Trước Trên Palette Và Trên Màn Hình Bản Vẽ
 
 > **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [U01](U01_WPF_MVVM_BASICS.md), [U02](U02_UI_IN_AUTOCAD.md), [T01 §3–4](T01_AUTOCAD_NET_FOUNDATIONS.md#3-bên-trong-database-objectid-bảng-ký-hiệu-dictionary) · **Trong lộ trình:** tuần 9 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 90 phút (phần 🎯 ≈ 60 phút) · **Thực hành:** [bài tập §12](#12-bài-tập-và-tự-kiểm-tra), L17, L19 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, lưới, mặt bằng) cần vẽ hình ở những chỗ **không phải bản vẽ**: một khung trên palette, hay hình tạm trên màn hình trước khi người dùng xác nhận. Module này là hướng dẫn từng bước cho việc đó.
+
+**Sau module này bạn phải làm được:**
+1. Thêm khung xem trước `CadPreview` vào palette Grid Marker: vẽ từ dữ liệu thuần, biến đổi tọa độ đúng, màu theo theme (lab L17).
+2. Kiểm thử phần xem trước bằng số (tọa độ) và bằng ảnh render ở cả hai theme.
+3. Đọc entity và block trong bản vẽ thành hình xem trước, và vẽ tạm lên màn hình bản vẽ bằng jig hoặc transient (lab L19).
 
 | Vẽ ở đâu | Công cụ | Vào database? | Dùng khi | Mục |
 | :--- | :--- | :---: | :--- | :---: |
@@ -26,18 +33,18 @@ Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, l�
 
 ## Mục lục
 
-1. [Kiến trúc: một kế hoạch, hai nơi vẽ](#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ)
-2. [Bước 1 — Mô hình hình học thuần](#2-bước-1--mô-hình-hình-học-thuần)
-3. [Bước 2 — Biến đổi tọa độ](#3-bước-2--biến-đổi-tọa-độ)
-4. [Bước 3 — Control `CadPreview`](#4-bước-3--control-cadpreview)
-5. [Bước 4 — Nối vào Golden Sample](#5-bước-4--nối-vào-golden-sample)
-6. [Bước 5 — Kiểm thử](#6-bước-5--kiểm-thử)
-7. [Đọc entity trong bản vẽ thành hình xem trước](#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)
-8. [Xem trước block (thumbnail)](#8-xem-trước-block-thumbnail)
-9. [Vẽ tạm lên màn hình bản vẽ](#9-vẽ-tạm-lên-màn-hình-bản-vẽ)
-10. [Hiệu năng](#10-hiệu-năng)
-11. [Bẫy](#11-bẫy)
-12. [Bài tập và tự kiểm tra](#12-bài-tập-và-tự-kiểm-tra)
+1. [Kiến trúc: một kế hoạch, hai nơi vẽ](#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ) 🎯
+2. [Bước 1 — Mô hình hình học thuần](#2-bước-1--mô-hình-hình-học-thuần) 🎯
+3. [Bước 2 — Biến đổi tọa độ](#3-bước-2--biến-đổi-tọa-độ) 🎯
+4. [Bước 3 — Control `CadPreview`](#4-bước-3--control-cadpreview) 🎯
+5. [Bước 4 — Nối vào Golden Sample](#5-bước-4--nối-vào-golden-sample) 🎯
+6. [Bước 5 — Kiểm thử](#6-bước-5--kiểm-thử) 🎯
+7. [Đọc entity trong bản vẽ thành hình xem trước](#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước) 🔍
+8. [Xem trước block (thumbnail)](#8-xem-trước-block-thumbnail) 🔍
+9. [Vẽ tạm lên màn hình bản vẽ](#9-vẽ-tạm-lên-màn-hình-bản-vẽ) 🔍
+10. [Hiệu năng](#10-hiệu-năng) 🔍
+11. [Bẫy](#11-bẫy) 🎯
+12. [Bài tập và tự kiểm tra](#12-bài-tập-và-tự-kiểm-tra) 🎯
 
 ---
 

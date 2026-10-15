@@ -3,6 +3,8 @@
 # C03 — Hướng Đối Tượng Qua Code Dự Án
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** [C02](C02_DATA_AND_COLLECTIONS.md) · **Thời lượng:** tuần 3–4
+>
+> **⏱ Đọc:** ≈ 40 phút · **Thực hành:** [bài tập §10](#10-bài-tập) · **Nhãn mục:** mọi mục đều 🎯, vì Giai đoạn 0 đã lọc theo [quy tắc 20/80](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) ([README §5](README.md#5-quy-ước-đọc))
 
 Toàn bộ dự án được tổ chức thành **class** (hơn 100 khai báo) và **interface** (20). Module này dạy bạn đọc và viết chúng. Mỗi khái niệm đi kèm đúng chỗ nó xuất hiện trong dự án, và kết thúc bằng việc đọc trọn một file thật: [`GridSpec.cs`](../../Samples/GridMarker/GridSpec.cs).
 

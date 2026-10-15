@@ -3,27 +3,34 @@
 # U01 — WPF & MVVM Cho Tool AutoCAD (Chưa Cần AutoCAD)
 
 > **Cấp độ:** 🌱 Fresher → 🌿 Junior · **Cần trước:** [C03](C03_OBJECT_ORIENTED.md) (class, interface), [C04](C04_CSHARP_IN_THIS_PROJECT.md) (lambda, event, attribute), [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) (`async`) · **Trong lộ trình:** tuần 7 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 40 phút (phần 🎯 ≈ 40 phút) · **Thực hành:** [bài tập §12](#12-bài-tập), L18 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 **WPF** (Windows Presentation Foundation) là thư viện giao diện của .NET mà dự án dùng cho mọi palette. Module này dạy đúng **phần WPF mà 4 palette của dự án dùng** (đã đếm ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu)): bố cục `Grid`/`StackPanel`, 8 control, binding, MVVM với CommunityToolkit.Mvvm, `ObservableCollection`, resource và theme. Module cũng chỉ ra các **bẫy đã kiểm chứng trên chính palette của dự án**.
 
 Mọi khẳng định về hành vi WPF ở đây đều đã **chạy thật** trên .NET Framework 4.8 (môi trường của AutoCAD 2024) và .NET 8, với C# 10. Hai nền tảng cho kết quả giống hệt nhau. Thông báo lỗi được chép nguyên văn.
 
+**Sau module này bạn phải làm được:**
+1. Dựng một form WPF bằng `Grid`/`StackPanel` và các control dùng nhiều, binding tới ViewModel viết bằng CommunityToolkit.Mvvm.
+2. Làm ô nhập số an toàn (bind vào chuỗi rồi tự parse, báo lỗi rõ ràng) và bật/tắt nút theo `CanExecute`.
+3. Tránh bẫy luồng khi cập nhật `ObservableCollection`, và dùng `DynamicResource` để palette theo theme sáng/tối.
+
 ---
 
 ## Mục lục
 
-1. [WPF trong 5 phút](#1-wpf-trong-5-phút)
-2. [Bố cục: `Grid` và `StackPanel`](#2-bố-cục-grid-và-stackpanel)
-3. [Tám control dùng nhiều](#3-tám-control-dùng-nhiều)
-4. [Binding: nối View với ViewModel](#4-binding-nối-view-với-viewmodel)
-5. [Ba bẫy khi nhập số](#5-ba-bẫy-khi-nhập-số)
-6. [MVVM với CommunityToolkit.Mvvm](#6-mvvm-với-communitytoolkitmvvm)
-7. [Danh sách: `ObservableCollection`](#7-danh-sách-observablecollection)
-8. [Luồng (thread)](#8-luồng-thread)
-9. [Resource, style và theme](#9-resource-style-và-theme)
-10. [Gỡ lỗi binding](#10-gỡ-lỗi-binding)
-11. [Code-behind: chỉ làm hạ tầng](#11-code-behind-chỉ-làm-hạ-tầng)
-12. [Bài tập](#12-bài-tập)
+1. [WPF trong 5 phút](#1-wpf-trong-5-phút) 🎯
+2. [Bố cục: `Grid` và `StackPanel`](#2-bố-cục-grid-và-stackpanel) 🎯
+3. [Tám control dùng nhiều](#3-tám-control-dùng-nhiều) 🎯
+4. [Binding: nối View với ViewModel](#4-binding-nối-view-với-viewmodel) 🎯
+5. [Ba bẫy khi nhập số](#5-ba-bẫy-khi-nhập-số) 🎯
+6. [MVVM với CommunityToolkit.Mvvm](#6-mvvm-với-communitytoolkitmvvm) 🎯
+7. [Danh sách: `ObservableCollection`](#7-danh-sách-observablecollection) 🎯
+8. [Luồng (thread)](#8-luồng-thread) 🎯
+9. [Resource, style và theme](#9-resource-style-và-theme) 🎯
+10. [Gỡ lỗi binding](#10-gỡ-lỗi-binding) 📖
+11. [Code-behind: chỉ làm hạ tầng](#11-code-behind-chỉ-làm-hạ-tầng) 🎯
+12. [Bài tập](#12-bài-tập) 🎯
 
 ---
 

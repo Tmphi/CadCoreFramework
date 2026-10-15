@@ -3,6 +3,8 @@
 # C01 — Chương Trình Đầu Tiên & Tư Duy Lập Trình
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** [C00 §3](C00_START_HERE.md#3-chuẩn-bị-môi-trường) (đã cài .NET SDK) · **Thời lượng:** tuần 1–2
+>
+> **⏱ Đọc:** ≈ 35 phút · **Thực hành:** [bài tập §10](#10-bài-tập) · **Nhãn mục:** mọi mục đều 🎯, vì Giai đoạn 0 đã lọc theo [quy tắc 20/80](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) ([README §5](README.md#5-quy-ước-đọc))
 
 Module này dạy những viên gạch đầu tiên: chạy một chương trình, đọc lỗi, lưu dữ liệu vào biến, ra quyết định bằng `if`, lặp bằng vòng lặp, và gom code thành hàm. Đây là phần **tầng 1** của bảng 20/80 — dòng nào trong dự án cũng có.
 

@@ -3,8 +3,15 @@
 # T07 — Hiệu Năng & Quy Mô
 
 > **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md); LINQ và thực thi trì hoãn ([C04 §3–4](C04_CSHARP_IN_THIS_PROJECT.md#3-linq-hỏi-đáp-trên-danh-sách)) · **Trong lộ trình:** tuần 12 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 20 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L13, L14 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Plugin chạy nhanh với bản vẽ 50 entity có thể "đơ" với bản vẽ 200.000 entity của khách hàng. Module này dạy **mô hình chi phí** của AutoCAD API, các kỹ thuật framework đã áp dụng, và cách **đo** thay vì đoán.
+
+**Sau module này bạn phải làm được:**
+1. Dùng mô hình chi phí để chỉ ra chỗ có thể chậm trong một lệnh, kể cả chi phí ẩn trong vòng lặp (regen, event handler, serialize).
+2. Lọc bằng `ObjectId.ObjectClass` hoặc `SelectAll` có filter thay vì mở mọi entity; xử lý hàng loạt file bằng side database.
+3. Đo trước và sau theo [§8](#8-đo-đạc), và chỉ tối ưu khi đã có số đo.
 
 > [!IMPORTANT]
 > Tài liệu này **không đưa ra con số thời gian cụ thể**. Chi phí phụ thuộc máy, phiên bản AutoCAD và bản vẽ. Hãy tự đo bằng Lab L13 ([T10](T10_LABS_AND_ASSESSMENT.md)) rồi ghi số liệu của bạn vào PR. Quy tắc: **không tối ưu khi chưa có số đo trước/sau.**
@@ -13,15 +20,15 @@ Plugin chạy nhanh với bản vẽ 50 entity có thể "đơ" với bản vẽ
 
 ## Mục lục
 
-1. [Mô hình chi phí (tương đối)](#1-mô-hình-chi-phí-tương-đối)
-2. [Lọc trước khi mở: ObjectClass](#2-lọc-trước-khi-mở-objectclass)
-3. [Chi phí ẩn trong vòng lặp](#3-chi-phí-ẩn-trong-vòng-lặp)
-4. [Xử lý nhiều bản vẽ: side database](#4-xử-lý-nhiều-bản-vẽ-side-database)
-5. [Batch và tiến trình](#5-batch-và-tiến-trình)
-6. [Đồ họa và regen](#6-đồ-họa-và-regen)
-7. [Tính toán nặng và async](#7-tính-toán-nặng-và-async)
-8. [Đo đạc](#8-đo-đạc)
-9. [Bộ nhớ](#9-bộ-nhớ)
+1. [Mô hình chi phí (tương đối)](#1-mô-hình-chi-phí-tương-đối) 🔍
+2. [Lọc trước khi mở: ObjectClass](#2-lọc-trước-khi-mở-objectclass) 🎯
+3. [Chi phí ẩn trong vòng lặp](#3-chi-phí-ẩn-trong-vòng-lặp) 🎯
+4. [Xử lý nhiều bản vẽ: side database](#4-xử-lý-nhiều-bản-vẽ-side-database) 🔍
+5. [Batch và tiến trình](#5-batch-và-tiến-trình) 🔍
+6. [Đồ họa và regen](#6-đồ-họa-và-regen) 🔍
+7. [Tính toán nặng và async](#7-tính-toán-nặng-và-async) 🔍
+8. [Đo đạc](#8-đo-đạc) 🎯
+9. [Bộ nhớ](#9-bộ-nhớ) 🔍
 
 ---
 

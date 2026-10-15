@@ -3,6 +3,8 @@
 # C04 — C# Mà Dự Án Dùng Hằng Ngày
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** [C03](C03_OBJECT_ORIENTED.md) · **Thời lượng:** tuần 4–5
+>
+> **⏱ Đọc:** ≈ 55 phút · **Thực hành:** [bài tập §13](#13-bài-tập) · **Nhãn mục:** mọi mục đều 🎯, vì Giai đoạn 0 đã lọc theo [quy tắc 20/80](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) ([README §5](README.md#5-quy-ước-đọc))
 
 Bạn đã biết biến, vòng lặp, class, interface. Module này dạy phần còn lại của bảng 20/80 — những thứ khiến code dự án trông "lạ" với người mới: `scope => …`, `.Where(…).ToList()`, `this ICadScope`, `<T>`, `using (…)`, `+=`, `[CommandMethod]`. Học xong, bạn **giải mã được từng ký tự** của các dòng code thật ở [§12](#12-giải-mã-dòng-code-thật).
 

@@ -9,6 +9,13 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (tài liệu — bản đồ học)
+- **Thẻ module** ở đầu cả 20 module C00–C05, T01–T10, U00–U03: dòng ⏱ thời gian đọc (cả trang và riêng phần cốt lõi), bài tập/lab để thực hành, và nhãn mục. Thời gian tính từ số từ thật của trang (kể cả code) ÷ 100 từ/phút; chưa gồm thời gian chạy thử và làm lab.
+- **Nhãn 🎯 cốt lõi / 🔍 đào sâu / 📖 tra cứu** ở cuối từng dòng Mục lục. Giai đoạn 0 (C01–C05) giữ mọi mục là 🎯, vì đã được lọc theo quy tắc 20/80.
+- **Mục tiêu đầu ra** ("Sau module này bạn phải làm được") cho T03–T09 và U01–U03, các module trước đây chưa có.
+- **Lộ trình nhanh** cho người đã vững C# ([training/README §3](docs/training/README.md#lộ-trình-nhanh)): chỉ đọc các mục 🎯 (≈ 3,5 giờ) rồi làm L01, L03, L04, L07. Đích đến là tự làm một tính năng trọn vẹn theo Golden Sample. Có thêm hướng dẫn mở rộng khi cần làm giao diện xem trước.
+- **Bản đồ phụ thuộc** giữa các module (sơ đồ mermaid, lấy từ dòng "Cần trước" của mỗi module) và quy tắc duy trì nhãn/thời gian ở [training/README §7](docs/training/README.md#7-duy-trì-bộ-tài-liệu).
+
 ---
 
 ## [1.1.1] — 2026-10-15

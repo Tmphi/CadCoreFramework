@@ -23,7 +23,7 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | :--- | :--- | :--- |
 | Chưa từng lập trình | [C00 — Bắt đầu từ đây](C00_START_HERE.md) | Giai đoạn 0 (6 tuần) rồi Giai đoạn 1–3: khoảng 20 tuần |
 | Biết một ngôn ngữ khác, chưa biết C# | [Bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) | Thường 2 tuần cho C01–C05, rồi Giai đoạn 1–3 |
-| Vững C#, mới với AutoCAD .NET | [Đồ án nhập môn](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện), rồi [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) | Giai đoạn 1–3: 12–14 tuần ([§3](#3-lộ-trình-đào-tạo)) |
+| Vững C#, mới với AutoCAD .NET | [Đồ án nhập môn](C05_ASYNC_TESTING_GIT.md#5-đồ-án-nhập-môn-planner-dãy-tủ-điện), rồi [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) | Giai đoạn 1–3: 12–14 tuần ([§3](#3-lộ-trình-đào-tạo)). Cần làm được việc sớm: [lộ trình nhanh](#lộ-trình-nhanh), đọc ≈ 3,5 giờ + lab |
 | Đã làm AutoCAD .NET, mới vào dự án | [T02](T02_ARCHITECTURE_DEEP_DIVE.md) → [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) → [T08](T08_RECIPES_EXTENDING.md) | Đọc theo thứ tự đó; gặp sự cố thì tra [T03](T03_PITFALLS_CASEBOOK.md) |
 | Cần làm giao diện: palette, hộp thoại, xem trước | [U00 — Nhánh UI](U00_UI_START_HERE.md), sau [T01 §5 và §7](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) | Nhánh UI: 3 tuần |
 | Mentor | [§6 — Dành cho mentor](#6-dành-cho-mentor) | — |
@@ -60,6 +60,32 @@ Bộ tài liệu này dành cho người **kế thừa và phát triển tiếp*
 | [Thuật ngữ](GLOSSARY.md) | Từ điển Anh–Việt: lập trình & C# cho người mới (phần A), AutoCAD .NET & dự án (phần B), giao diện WPF & UI trong AutoCAD (phần C) | — |
 
 Bộ **C00–C05** là *nền tảng lập trình và C#*, dạy trên chính code của dự án. Bộ **T01–T10** là tài liệu *đào tạo theo chiều sâu*. **Nhánh UI U00–U03** là *chuyên đề giao diện*, học trong Giai đoạn 2. Ngoài Học viện, lớp **Tra cứu** [R01–R06](../README.md#-tra-cứu-reference) (`docs/reference/`) là bản tóm tắt để mở nhanh khi đang làm việc: hợp đồng API, Golden Sample, quy ước. Các bộ bổ sung cho nhau: T-modules và U-modules dẫn sang R01–R06 khi cần bảng tóm tắt, và về C01–C05 khi cần nhắc lại cú pháp C#.
+
+### Bản đồ phụ thuộc
+
+Mũi tên `A --> B` nghĩa là "học A trước B", lấy từ dòng **Cần trước** ở đầu mỗi module. Viền đậm là các module của [lộ trình nhanh](#lộ-trình-nhanh).
+
+```mermaid
+flowchart LR
+    subgraph G0["Giai đoạn 0: C#"]
+        C00 --> C01 --> C02 --> C03 --> C04 --> C05
+    end
+    C05 -- "hoặc nền C# tương đương" --> T01
+    T01 --> T02 & T04
+    T02 --> T03 & T05 & T07 & T08
+    R05["R05 Golden Sample"] --> T08
+    T05 --> T06
+    T03 --> T09
+    subgraph UI["Nhánh UI"]
+        U00 --> U01 --> U02 --> U03
+    end
+    C05 --> U01
+    T01 --> U00 & U02
+    classDef nhanh stroke-width:3px
+    class T01,T02,T04,T05,T06,T08,T09,R05,U01 nhanh
+```
+
+T10 không có trong sơ đồ: mỗi lab ghi module cần học trước ở chính lab đó.
 
 ---
 
@@ -134,6 +160,24 @@ Mỗi tuần ≈ 60% đọc và thực hành, 40% làm lab. Đầu ra mỗi tu�
 
 Lên cấp không tự động theo tuần: mỗi cấp phải vượt đề đánh giá ở [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp). Riêng 🏔️ Senior còn cần kinh nghiệm thật (chủ trì release, incident report, ADR được chấp nhận), nên thường đến sau tuần 14.
 
+### Lộ trình nhanh
+
+Dành cho người **đã vững C#** (đạt 7–8 điểm [bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu)) cần **làm được việc trong dự án** sớm. Đích đến là tự làm một tính năng trọn vẹn theo Golden Sample (lab L07), tức năng lực "Kiến trúc dự án" ở cột 🌿 Junior của [§2](#2-khung-năng-lực-5-cấp). Ở mỗi module chỉ đọc các mục 🎯 ([§5](#5-quy-ước-đọc)). Mục 🔍 để dành tới khi gặp đúng vấn đề, hoặc khi đi lộ trình đầy đủ.
+
+| Bước | Đọc (chỉ mục 🎯) | Lab ([T10](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) | Đầu ra kiểm chứng được |
+| :---: | :--- | :--- | :--- |
+| 1 | README dự án, [R01](../reference/R01_QUICKSTART.md) | L01 Môi trường (2 giờ) | Chạy đủ 6 lệnh smoke; chỉ ra được file log |
+| 2 | [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) | L03 Transaction & context (3 giờ), L04 Prompt & UCS (2 giờ) | Giải thích được `eNotOpenForWrite`, `eLockViolation` bằng ví dụ tự chạy; lệnh vẽ đúng khi UCS xoay |
+| 3 | [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05](../reference/R05_GOLDEN_SAMPLE.md) | — | Theo dấu được `SAMPLE_GRID` qua mọi tầng ([T02 §13](T02_ARCHITECTURE_DEEP_DIVE.md#13-golden-sample-theo-dấu-một-lệnh-từ-đầu-đến-cuối)) |
+| 4 | [T04](T04_DEBUGGING_TROUBLESHOOTING.md), [T05](T05_TESTING_STRATEGY.md), [T06](T06_BUILD_RELEASE_DEVOPS.md), [T08](T08_RECIPES_EXTENDING.md), [T09 §2](T09_SENIOR_PLAYBOOK.md#2-checklist-code-review); chưa biết WPF thì thêm [U01](U01_WPF_MVVM_BASICS.md) | — | Gắn được debugger vào AutoCAD; nói được mỗi phần của tính năng sắp làm sẽ test ở tầng nào |
+| 5 | — | L07 Nhân bản Golden Sample (2–3 ngày) | Tính năng mới + ≥ 15 unit test, PR qua CI, tự review bằng [T08 §13](T08_RECIPES_EXTENDING.md#13-checklist-trước-khi-mở-pr) và T09 §2 |
+
+**Tổng:** đọc ≈ 3,5 giờ (thêm ≈ 40 phút nếu học U01) và lab ≈ 7 giờ + 2–3 ngày. Thời gian đọc tính như dòng ⏱ ([§5](#5-quy-ước-đọc)), cộng cả README dự án, R01 và R05; thời lượng lab lấy ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab). Chưa tính thời gian chạy thử các ví dụ 🧪. Ghi thời gian thực tế của bạn vào mô tả PR của lab để hiệu chỉnh các con số này.
+
+**Cần làm giao diện xem trước?** Sau bước 5, học các mục 🎯 của [U00](U00_UI_START_HERE.md), [U02](U02_UI_IN_AUTOCAD.md), [U03](U03_DRAWING_ON_UI.md) (đọc ≈ 1 giờ 45 phút), rồi làm L17 Xem trước trên palette (1–2 ngày).
+
+Lộ trình nhanh **không** thay cho lộ trình đầy đủ và không tự động lên cấp: nó đưa bạn tới chỗ làm được việc. Các mục 🔍, T03 và T07 học dần theo nhu cầu; đánh giá lên cấp vẫn theo [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp).
+
 ---
 
 ## 4. Chuẩn bị môi trường
@@ -169,6 +213,10 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | ⚠️ **Bẫy** | Lỗi đã từng xảy ra (với dự án này hoặc rất phổ biến) |
 | ✅ **Tự kiểm tra** | Câu hỏi cuối mục. Đáp án nằm trong khối thu gọn, hãy tự trả lời trước khi mở |
 | 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
+| 🎯 **Cốt lõi** | Nhãn ở cuối dòng Mục lục: mục cần để làm việc hằng ngày với dự án và để học module sau. [Lộ trình nhanh](#lộ-trình-nhanh) chỉ đọc các mục này |
+| 🔍 **Đào sâu** | Giải thích gốc rễ hoặc chủ đề nâng cao. Học ở lộ trình đầy đủ, hoặc khi gặp đúng vấn đề. Mục tiêu đầu ra ở đầu module là của **cả** module, nên vài mục tiêu cần cả phần 🔍 |
+| 📖 **Tra cứu** | Không học tuần tự, mở khi cần: bảng mã lỗi, công thức, backlog, đề đánh giá |
+| ⏱ **Đọc** | Thời gian đọc kỹ cả trang và riêng phần 🎯, tính bằng số từ (kể cả code) ÷ 100 từ/phút, làm tròn 5 phút. **Chưa** gồm mở file nguồn, chạy thử, bài tập và lab; thời lượng lab ghi ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab) |
 | 🌰 🌱 🌿 🌳 🏔️ | Năm cấp: Nhập môn → Fresher → Junior → Middle → Senior ([§2](#2-khung-năng-lực-5-cấp)) |
 | `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code. B-01…B-27 lập tại v1.0.0, B-28…B-30 tìm thấy khi sửa; hầu hết đã sửa ở PR #6/#7. B-31…B-34 tìm thấy khi viết nhánh UI; B-31…B-33 đã sửa ở PR #11, B-34 ở PR #13. Xem cột Trạng thái |
 | Lab `TÊN` / HeadlessLab | Một kiểm thử trên AutoCAD thật trong [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) |
@@ -192,6 +240,10 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 - Tài liệu sống cùng code: **PR thay đổi hành vi phải cập nhật T-module liên quan** (checklist review có mục này).
 - Khi gặp sự cố mới: thêm một mục vào [T03](T03_PITFALLS_CASEBOOK.md) theo đúng format, *sau khi* đã có cách tái hiện.
 - Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó.
+- Thêm hoặc đổi một mục `##` của module: gắn nhãn 🎯/🔍/📖 ở cuối dòng Mục lục, rồi cập nhật dòng ⏱ ở đầu module ([§5](#5-quy-ước-đọc)). Đổi nhãn 🎯 của module trong [lộ trình nhanh](#lộ-trình-nhanh) thì cập nhật cả con số "Tổng" ở đó. Đếm số từ của một trang bằng:
+  ```powershell
+  ((Get-Content docs\training\T01_AUTOCAD_NET_FOUNDATIONS.md -Raw -Encoding UTF8) -split '\s+' | Where-Object { $_ }).Count
+  ```
 - **C00–C05 trích nguyên văn code dự án** (nhiều nhất ở [C04 §12](C04_CSHARP_IN_THIS_PROJECT.md#12-giải-mã-dòng-code-thật) và [C03 §9](C03_OBJECT_ORIENTED.md#9-đọc-có-hướng-dẫn-gridspeccs)). PR đổi `GridSpec`, `GridPlanner`, `GridMarkerService`, `CadContext`, `RibbonService`, `ThemeManager`, `SelectionFilterBuilder` hay `DrawLine` phải kiểm lại các trích dẫn đó. Bảng số liệu 20/80 ở [C00 §1](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) đếm lại được bằng lệnh ghi ngay dưới bảng.
 - Ví dụ trong C01–C05 là chương trình hoàn chỉnh, đã chạy trên .NET 8 với `<LangVersion>10.0</LangVersion>`; kết quả ghi trong tài liệu là kết quả thật. Sửa ví dụ thì chạy lại trước khi commit.
 - **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
@@ -205,3 +257,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | PR #11, #13 | Sửa B-31…B-34. Hành vi trước khi sửa được ghi rõ "trước PR #11". Bản sửa đã kiểm trong AutoCAD 2024 có giao diện: T05 smoke 17 và bước từ khóa của `DEMO_PROMPT` |
 | Rà soát toàn bộ (PR #14, 2026-10-14) | Link và anchor; mọi khối code đối chiếu với nguồn; công thức T08 biên dịch thử trong một bản sao dự án; 68 ví dụ của Giai đoạn 0 chạy lại, output không đổi; số liệu đo lại (số test, coverage); sửa các chỗ đã lệch với code |
 | T08 §12 (công thức thao tác bản vẽ, PR #16) | Code build sạch trên cả hai TFM; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab (19 kiểm thử). Cả 5 lệnh `TOOLS_*` chạy trên AutoCAD 2024 có giao diện ngày 2026-10-15, kể cả Ctrl+Z sau khi gộp layer và nhánh layer đích đóng băng |
+| Bản đồ học (thẻ module, nhãn 🎯/🔍/📖, lộ trình nhanh; 2026-10-15) | Số phút trên mọi thẻ được một script đối chiếu với số từ thật của trang, sau lần sửa cuối; lệnh PowerShell ở §7 cho cùng số từ. Sơ đồ phụ thuộc parse được bằng mermaid 11.4.1, cùng 16 sơ đồ có sẵn. Link và anchor: 0 lỗi. Thời gian **làm** lab lấy từ T10 §2, chưa đo lại trên học viên thật |

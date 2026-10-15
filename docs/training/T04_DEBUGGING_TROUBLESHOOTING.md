@@ -3,6 +3,8 @@
 # T04 — Debug & Chẩn Đoán
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md); dùng debugger cơ bản ([C01 §9](C01_FIRST_PROGRAM.md#9-debug-xem-chương-trình-chạy-từng-bước)) · **Trong lộ trình:** tuần 11 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L12, L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên trong* một tiến trình lớn của hãng khác, crash nhiều khi không có stack trace, và lỗi phụ thuộc vào bản vẽ, phiên bản AutoCAD, plugin khác đang chạy. Module này trang bị **quy trình** chẩn đoán, không chỉ công cụ.
 
@@ -17,19 +19,24 @@ Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên t
 
 **Đang gặp sự cố cụ thể?** Vào thẳng [§9 — Cây quyết định](#9-cây-quyết-định-triệu-chứng--nguyên-nhân), hoặc [bảng tra nhanh của T03](T03_PITFALLS_CASEBOOK.md#tra-nhanh-theo-triệu-chứng).
 
+**Sau module này bạn phải làm được:**
+1. Chạy vòng lặp build → nạp → thử, gắn debugger vào AutoCAD, và nói được vì sao một breakpoint không dừng.
+2. Thu hẹp nguyên nhân bằng dữ liệu thật: log, Debug Inspector, `ErrorStatus`, metadata của assembly, thay vì đoán.
+3. Chẩn đoán một lỗi nạp assembly hoặc một crash theo quy trình 6 bước ở trên, rồi viết incident report theo [mẫu §8](#8-mẫu-báo-cáo-sự-cố-incident-report).
+
 ---
 
 ## Mục lục
 
-1. [Hộp đồ nghề chẩn đoán](#1-hộp-đồ-nghề-chẩn-đoán)
-2. [Vòng lặp phát triển: build → nạp → thử](#2-vòng-lặp-phát-triển-build--nạp--thử)
-3. [Gắn debugger vào AutoCAD](#3-gắn-debugger-vào-autocad)
-4. [Log, Debug Inspector, CommandHistory](#4-log-debug-inspector-commandhistory)
-5. [Đọc lỗi AutoCAD & phân tích crash](#5-đọc-lỗi-autocad--phân-tích-crash)
-6. [Kiểm chứng API bằng metadata](#6-kiểm-chứng-api-bằng-metadata)
-7. [Chẩn đoán nạp assembly](#7-chẩn-đoán-nạp-assembly)
-8. [Mẫu báo cáo sự cố (incident report)](#8-mẫu-báo-cáo-sự-cố-incident-report)
-9. [Cây quyết định: triệu chứng → nguyên nhân](#9-cây-quyết-định-triệu-chứng--nguyên-nhân)
+1. [Hộp đồ nghề chẩn đoán](#1-hộp-đồ-nghề-chẩn-đoán) 🎯
+2. [Vòng lặp phát triển: build → nạp → thử](#2-vòng-lặp-phát-triển-build--nạp--thử) 🎯
+3. [Gắn debugger vào AutoCAD](#3-gắn-debugger-vào-autocad) 🎯
+4. [Log, Debug Inspector, CommandHistory](#4-log-debug-inspector-commandhistory) 🎯
+5. [Đọc lỗi AutoCAD & phân tích crash](#5-đọc-lỗi-autocad--phân-tích-crash) 🔍
+6. [Kiểm chứng API bằng metadata](#6-kiểm-chứng-api-bằng-metadata) 🔍
+7. [Chẩn đoán nạp assembly](#7-chẩn-đoán-nạp-assembly) 🔍
+8. [Mẫu báo cáo sự cố (incident report)](#8-mẫu-báo-cáo-sự-cố-incident-report) 📖
+9. [Cây quyết định: triệu chứng → nguyên nhân](#9-cây-quyết-định-triệu-chứng--nguyên-nhân) 📖
 
 ---
 

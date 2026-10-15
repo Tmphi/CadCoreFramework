@@ -3,25 +3,32 @@
 # U02 — Giao Diện Trong AutoCAD: Dòng Lệnh, Palette, Hộp Thoại, Ribbon
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [U01](U01_WPF_MVVM_BASICS.md), [T01 §5–7](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) · **Trong lộ trình:** tuần 8 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 30 phút) · **Thực hành:** [bài tập §10](#10-bài-tập), L08 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 U01 dạy WPF như một thư viện độc lập. Module này đưa UI vào **bên trong AutoCAD**, nơi có thêm ba ràng buộc: **ngữ cảnh** (command hay application context), **lock** của bản vẽ, và **nhiều bản vẽ** cùng mở. Thứ tự các mục theo đúng bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu): dòng lệnh trước, vì đó là UI mà tool AutoCAD dùng nhiều nhất.
 
 Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổi khung nhìn) đã **chạy thật** trên AutoCAD 2024 trong accoreconsole: input được gõ từ file script, giống người dùng gõ phím. Các mục cần AutoCAD có giao diện (hộp thoại có nút chọn điểm, chọn sẵn và zoom từ application context) cũng đã kiểm trên AutoCAD 2024; danh sách ở [cuối module](#trạng-thái-kiểm-chứng).
 
+**Sau module này bạn phải làm được:**
+1. Chọn bề mặt UI (dòng lệnh, palette, hộp thoại, Ribbon) cho một yêu cầu, và nói được hệ quả về context và lock.
+2. Viết prompt đúng hệ tọa độ, có giá trị mặc định và từ khóa, xử lý được khi người dùng nhấn ESC.
+3. Nối palette hoặc hộp thoại với bản vẽ (chọn điểm, chọn sẵn, zoom) qua `ICadContext`, để ViewModel không phải biết AutoCAD.
+
 ---
 
 ## Mục lục
 
-1. [Chọn bề mặt UI](#1-chọn-bề-mặt-ui)
-2. [Dòng lệnh: bề mặt UI dùng nhiều nhất](#2-dòng-lệnh-bề-mặt-ui-dùng-nhiều-nhất)
-3. [Palette](#3-palette)
-4. [Hộp thoại modal](#4-hộp-thoại-modal)
-5. [Cửa sổ modeless](#5-cửa-sổ-modeless)
-6. [Ribbon](#6-ribbon)
-7. [Từ UI tới bản vẽ và ngược lại](#7-từ-ui-tới-bản-vẽ-và-ngược-lại)
-8. [Phản hồi cho người dùng](#8-phản-hồi-cho-người-dùng)
-9. [Bẫy UI trong AutoCAD](#9-bẫy-ui-trong-autocad)
-10. [Bài tập](#10-bài-tập)
+1. [Chọn bề mặt UI](#1-chọn-bề-mặt-ui) 🎯
+2. [Dòng lệnh: bề mặt UI dùng nhiều nhất](#2-dòng-lệnh-bề-mặt-ui-dùng-nhiều-nhất) 🎯
+3. [Palette](#3-palette) 🎯
+4. [Hộp thoại modal](#4-hộp-thoại-modal) 🔍
+5. [Cửa sổ modeless](#5-cửa-sổ-modeless) 🔍
+6. [Ribbon](#6-ribbon) 📖
+7. [Từ UI tới bản vẽ và ngược lại](#7-từ-ui-tới-bản-vẽ-và-ngược-lại) 🎯
+8. [Phản hồi cho người dùng](#8-phản-hồi-cho-người-dùng) 🎯
+9. [Bẫy UI trong AutoCAD](#9-bẫy-ui-trong-autocad) 🎯
+10. [Bài tập](#10-bài-tập) 🎯
 
 ---
 
