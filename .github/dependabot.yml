@@ -17,8 +17,9 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: "nuget"
-    # exercises/ có solution riêng (bài tập chấm tự động); version phải đi cùng repo chính.
-    directories: ["/", "/exercises"]
+    # exercises/ có solution riêng (bài tập chấm tự động), labs/ là project riêng (lab chấm trên AutoCAD);
+    # version phải đi cùng repo chính.
+    directories: ["/", "/exercises", "/labs"]
     schedule:
       interval: "weekly"
       day: "monday"

@@ -56,6 +56,7 @@ Dự án tách mỗi loại trách nhiệm vào một thư mục. Vai trò của
 ├── 📁 tests/         Kiểm thử tích hợp: smoke.scr, HeadlessLab
 ├── 📁 tools/docs/    Script kiểm tài liệu (link, thẻ ⏱, mermaid, code mẫu, bài tập), chạy trong CI
 ├── 📁 exercises/     Bài tập C01–C04, U01 có test chấm tự động (không thuộc plugin)
+├── 📁 labs/          Lab L02–L06 chấm tự động trên AutoCAD thật bằng accoreconsole (không thuộc plugin)
 ├── 📁 CadCoreFramework.Tests/       Unit test (xUnit), chạy trên cả net48 và net8.0-windows
 ├── 📁 CadCoreFramework.Testing/     FakeCadContext và các test double
 ├── 📁 CadCoreFramework.Analyzers/   Analyzer CAD001–CAD003 (R06 §5)

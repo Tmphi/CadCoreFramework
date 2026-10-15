@@ -34,6 +34,13 @@ jobs:
       - name: Build (Release, warnings as errors)
         run: dotnet build CadCoreFramework.sln -c Release -v minimal -warnaserror
 
+      # labs/ (bài lab L02–L06) chỉ chấm được trên máy có AutoCAD (labs/run-lab.ps1). CI biên dịch cả
+      # code khởi đầu lẫn lời giải mẫu: đổi API framework làm hỏng lab thì đỏ ngay ở đây.
+      - name: Build labs (starter + solutions)
+        run: |
+          dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror
+          dotnet build labs/Labs.csproj -c Release -v minimal -warnaserror -p:UseSolutions=true
+
       # Runs the suite twice: net48 (AutoCAD 2021–2024) and net8.0-windows (AutoCAD 2025+).
       # LogFilePrefix (not LogFileName) so the two TFMs don't overwrite each other's .trx.
       - name: Test with coverage (net48 + net8.0-windows)

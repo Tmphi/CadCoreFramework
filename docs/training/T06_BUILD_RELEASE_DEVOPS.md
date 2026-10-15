@@ -59,7 +59,7 @@ Project plugin nằm **ở gốc repo**, nên các thư mục project khác ph�
 | `EnforceCodeStyleInBuild`, `AnalysisLevel=latest`, `AnalysisMode=Recommended` | | Rule IDE/CA chạy **lúc build**, không chỉ trong IDE |
 | `GenerateDocumentationFile` + `NoWarn CS1591` | | Bắt buộc để IDE0005 (using thừa) chạy khi build; không bắt doc cho mọi member |
 | `AssemblyName` (Debug) | `CadCoreFramework_yyyyMMdd_HHmmss` | Hot-reload ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)). Target `PostBuild` copy về tên cố định |
-| `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` + `tools\**` + `exercises\**` | Không biên dịch lẫn code test / template / bài tập vào plugin, không kéo `node_modules` vào project |
+| `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` + `tools\**` + `exercises\**` + `labs\**` | Không biên dịch lẫn code test / template / bài tập / lab vào plugin, không kéo `node_modules` vào project |
 | `IncludeDemos` | mặc định `true` | `false` thì loại `Demos/**` khỏi DLL |
 | `MSBuildWarningsAsMessages` | `MSB3277` | Xung đột version vô hại khi có thư mục `dist/` cạnh NuGet |
 | `PackageReference AutoCAD.NET*` | `24.0.0` (net48) / `25.0.1`+`25.0.0` (net8), `ExcludeAssets="runtime"` | Biên dịch theo API, **không** copy DLL AutoCAD ra output. `25.0.1` để tránh NU1608 (bản `25.0.0` ghim `Core` pre-release) |

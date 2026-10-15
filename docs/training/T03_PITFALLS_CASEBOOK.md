@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md), [T02](T02_ARCHITECTURE_DEEP_DIVE.md) · **Trong lộ trình:** tuần 10 (Phần B) và 11 (Phần A); sau đó dùng như sổ tra cứu ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 45 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** [Tra nhanh theo triệu chứng](#tra-nhanh-theo-triệu-chứng) 🎯 · [Phần A](#phần-a--sự-cố-thật-của-dự-án) 🔍 · [Phần B](#phần-b--bẫy-autocad-api-kinh-điển) 🔍; học xong thì cả module là 📖 ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 50 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** [Tra nhanh theo triệu chứng](#tra-nhanh-theo-triệu-chứng) 🎯 · [Phần A](#phần-a--sự-cố-thật-của-dự-án) 🔍 · [Phần B](#phần-b--bẫy-autocad-api-kinh-điển) 🔍; học xong thì cả module là 📖 ([README §5](README.md#5-quy-ước-đọc))
 
 Kinh nghiệm của Senior phần lớn là **kho sự cố đã từng gặp**. Module này chuyển kho đó thành tài liệu:
 - **Phần A:** 16 sự cố **thật** đã xảy ra với chính dự án này. Mỗi mục có bằng chứng và cách tái hiện.
@@ -178,7 +178,7 @@ Chưa rõ triệu chứng thuộc nhóm nào: bắt đầu từ [cây quyết đ
 Ghi database từ **application context** mà không `LockDocument()`. → Mọi thao tác ghi đi qua `ICadContext` (luôn lock). [T01 §5](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi)
 
 ### B2. `eNotOpenForWrite`
-Sửa thuộc tính của đối tượng mở `ForRead`. → Mở `ForWrite` hoặc `UpgradeOpen()`. Lưu ý các helper tự upgrade (`XDataHelper`, `CadScope.AppendEntityToCurrentSpace`).
+Sửa đối tượng mở `ForRead` (đã thử: gán `ColorIndex`, `AppendEntity`, `Erase`). Đây **không** phải exception: AutoCAD dừng hẳn với `INTERNAL ERROR: !dbobji.cpp@…: eNotOpenForWrite`, `try/catch` không bắt được (lab L03 thí nghiệm 2). → Mở `ForWrite` hoặc `UpgradeOpen()`. Lưu ý các helper tự upgrade (`XDataHelper`, `CadScope.AppendEntityToCurrentSpace`).
 
 ### B3. Thay đổi biến mất, không có lỗi
 Quên `Commit()`, hoặc exception bị nuốt *bên trong* lambda. → `ICadContext` tự Commit. **Đừng** `try/catch` nuốt lỗi bên trong lambda, hãy để nó nổi lên cho transaction rollback đúng.
@@ -187,7 +187,7 @@ Quên `Commit()`, hoặc exception bị nuốt *bên trong* lambda. → `ICadCon
 Prompt (`GetPoint`…) **bên trong** transaction/lock. → HỎI trước, VẼ sau. `scope.Ask*()` đã `[Obsolete]`. [T01 §7.2](T01_AUTOCAD_NET_FOUNDATIONS.md#72-luật-thép-hỏi-trước-vẽ-sau)
 
 ### B5. Dùng `DBObject` sau khi transaction kết thúc
-Giữ `Line`/`Entity` trong field để dùng lại. → Giữ `ObjectId` (trong phiên) / `Handle` (bền vững).
+Giữ `Line`/`Entity` trong field để dùng lại. Đọc thuộc tính của nó sau khi transaction đóng có khi vẫn "chạy được" (hành vi không xác định); gọi `GetObject` trên transaction đã Dispose thì AutoCAD dừng hẳn (Access Violation, lab L03 thí nghiệm 3). → Giữ `ObjectId` (trong phiên) / `Handle` (bền vững).
 
 ### B6. Vẽ nhầm bản vẽ sau `await`
 Đọc `MdiActiveDocument` *sau* `await`: người dùng có thể đã đổi tab. → Chụp `Document` trước `await` như `CadContext.ExecuteAsync` và `CadCommandBase.ExecuteWithScopeAsync`. Ví dụ phản diện có thật: `DEMO_ASYNC_AWAIT` trên v1.0.0 (B-08). Bản sửa ở PR #6 lại mắc [B31](#b31-gọi-editor-của-bản-vẽ-không-active); từ PR #7 nó là ví dụ **đúng** (xem `Demos/DemoServicesCommands.cs`). [T01 §8.3](T01_AUTOCAD_NET_FOUNDATIONS.md#83-lệnh-async-thực-chất-chạy-thế-nào)

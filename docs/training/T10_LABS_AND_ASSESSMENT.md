@@ -27,7 +27,7 @@ Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở �
 3. **Báo cáo lab** trong mô tả PR (hoặc issue "Lab report"): đã làm gì, kết quả thí nghiệm, trả lời câu hỏi phản tư.
 4. **Tái hiện trước, sửa sau.** Với lab sửa lỗi: viết test hoặc bước tái hiện *fail trước* rồi mới sửa.
 5. Thử nghiệm sysvar / script thì dùng accoreconsole `/isolate` ([T04 §5.3](T04_DEBUGGING_TROUBLESHOOTING.md#53-thí-nghiệm-an-toàn-với-accoreconsole)). **Không** thay đổi thiết lập AutoCAD thật của máy (`SECURELOAD`…).
-6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L05-ten v1.0.0`), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Để có kiểm thử FAIL trên code cũ, chép `tests/integration/HeadlessLab/` từ `main` sang và giữ các kiểm thử liên quan ([cách chạy](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật)). Lab sửa backlog **không merge** vào `main` nữa. **Riêng B-31…B-33** (tìm thấy khi viết nhánh UI, sửa ở **PR #11**): lab L18 và bài tập U02-E1 làm trên commit **`632a6c1`** (`git switch -c lab/L18-ten 632a6c1`, tức `main` ngay trước PR #11), rồi đối chiếu với PR #11 theo cùng cách.
+6. **Các mục backlog trong lab đã được sửa ở PR #6** ([T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)). Làm lab trên branch tạo từ tag **`v1.0.0`** (`git switch -c lab/L08-ten v1.0.0`; riêng L05 phần 2 và L06 thì dùng `git worktree`, xem dưới), tự giải, **rồi mới** đọc lời giải trong PR #6 và ghi vào báo cáo: chỗ bạn làm khác, vì sao, cách nào tốt hơn. Kiểm thử FAIL trên code cũ: L05 phần 2 và L06 có bộ chấm [`labs/`](../../labs/README.md#l05-phần-2-và-l06-làm-trên-v100) chạy thẳng trên code `v1.0.0` (làm trong một `git worktree`, chấm bằng `-FrameworkRoot`). `tests/integration/HeadlessLab/` của `main` thì **không** chép sang `v1.0.0` được: nó cần những file framework mà `v1.0.0` chưa có, và csproj plugin của `v1.0.0` biên dịch nhầm nó vào plugin. Với các lab sửa backlog khác, đọc kiểm thử tương ứng trên `main` (HeadlessLab, `CadCoreFramework.Tests`) rồi viết lại bản của bạn trên branch lab (quy tắc 4). Lab sửa backlog **không merge** vào `main` nữa. **Riêng B-31…B-33** (tìm thấy khi viết nhánh UI, sửa ở **PR #11**): lab L18 và bài tập U02-E1 làm trên commit **`632a6c1`** (`git switch -c lab/L18-ten 632a6c1`, tức `main` ngay trước PR #11), rồi đối chiếu với PR #11 theo cùng cách.
 
 ---
 
@@ -70,6 +70,7 @@ Học AutoCAD .NET chỉ thật sự diễn ra khi **làm**. Các bài lab ở �
   3. Đếm block reference theo **effective name** (dùng `DynamicBlockHelper.GetEffectiveName`).
 - **DoD:** chạy trên một bản vẽ thật có dynamic block; không có `ForWrite` nào; giải thích vì sao bước 2 không cần mở entity.
 - **Phản tư:** chạy `TRAIN_DUMP` khi đang ở Layout thì kết quả bước 2 khác gì?
+- **Chấm:** làm bài trong [`labs/L02/TrainDump.cs`](../../labs/L02/TrainDump.cs), chạy `.\labs\run-lab.ps1 -Lab L02`. Bộ chấm dựng bản vẽ mẫu có dynamic block, kiểm cả ba bước, kiểm rằng bước 2 không mở entity nào và không có gì mở `ForWrite` ([labs/](../../labs/README.md)).
 
 ### L03 — Thí nghiệm transaction & context
 
@@ -78,11 +79,14 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 | # | Thí nghiệm | Kỳ vọng tự kiểm |
 | :---: | :--- | :--- |
 | 1 | API thô: vẽ Line, **không** `Commit` | Không có Line, không crash |
-| 2 | Mở Line `ForRead`, đổi màu | `eNotOpenForWrite` |
-| 3 | Dùng `DBObject` sau khi transaction Dispose | Lỗi (ghi lại thông điệp) |
+| 2 | Mở Line `ForRead`, đổi màu | AutoCAD **dừng hẳn**: `INTERNAL ERROR: !dbobji.cpp@…: eNotOpenForWrite`. Đây là fatal error, `try/catch` không bắt được |
+| 3 | Gọi `GetObject` trên transaction đã Dispose | AutoCAD **dừng hẳn**: `FATAL ERROR: Unhandled Access Violation`. (Chỉ *đọc* thuộc tính của `DBObject` sau khi transaction đóng thì có thể không báo lỗi gì: đó là hành vi không xác định, không phải an toàn) |
 | 4 | Lệnh `CommandFlags.Session`, ghi DB **không** lock | `eLockViolation` |
 | 5 | Gọi `ICadContext.Execute` bên trong lambda của `Execute` khác | Thông điệp của `CadContextGuard` |
 | 6 | Trong `ExecuteRead`: `GetObject(id, ForWrite)` rồi đổi màu | **Thay đổi được commit** (B-07). Đề xuất cách phòng (trên `main`: analyzer CAD003 cảnh báo ngay lúc build — so với đề xuất của bạn) |
+
+> [!WARNING]
+> Thí nghiệm 2 và 3 làm sập AutoCAD (đã thử trên accoreconsole của AutoCAD 2024). **Đừng** chạy chúng trong AutoCAD bạn đang làm việc. Viết cả 6 thí nghiệm trong [`labs/L03/Experiments.cs`](../../labs/L03/Experiments.cs), rồi chạy `.\labs\run-lab.ps1 -Lab L03`. Runner chạy mỗi thí nghiệm trong một phiên accoreconsole riêng, kiểm rằng code của bạn tái hiện đúng hiện tượng, và in ra điều quan sát được (cả thông báo fatal error) để bạn chép vào bảng.
 
 - **DoD:** bảng đủ 6 dòng, phần giải thích dẫn được tới đúng mục T01/T02. Code thí nghiệm **không merge**.
 
@@ -91,17 +95,20 @@ Làm từng thí nghiệm, ghi bảng **thí nghiệm → kết quả quan sát 
 - **Đề bài:** `TRAIN_LINE2P` vẽ Line giữa 2 điểm pick; prompt thứ hai có `basePoint` (đường cao su). Thử với `UCS Z 30`. Làm thêm một bản dùng `Editor.GetPoint` thô không đổi hệ để so sánh.
 - **DoD:** bản dùng `CadPromptHelper` vẽ đúng chỗ click khi UCS xoay; ESC ở cả 2 prompt đều thoát êm, không ghi lịch sử lệnh.
 - **Phản tư:** vì sao `basePoint` phải đổi WCS → UCS, ngược chiều với kết quả?
+- **Chấm:** [`labs/L04/Line2P.cs`](../../labs/L04/Line2P.cs), `.\labs\run-lab.ps1 -Lab L04`. Runner đặt UCS xoay 30°, gõ hai điểm cho từng bản, kiểm toạ độ WCS của Line và kiểm rằng không có prompt nào chạy khi đang mở transaction. Đường cao su và ESC vẫn thử bằng tay.
 
 ### L05 — Selection filter & dynamic block
 
 - **Đề bài:** (1) lệnh chọn mọi block "DOOR" kể cả dynamic block đã chỉnh (`` "DOOR,`*U*" `` + lọc lại bằng effective name); (2) sửa **B-17**: thêm cách escape ký tự wildcard trong `SelectionFilterBuilder` (ví dụ `OnLayersExact(...)`) kèm unit test (`SelectionFilterBuilderTests` chạy được không cần AutoCAD).
 - **DoD:** test escape cho `* ? # @ . ~ [ ] - , `` ` ``; thử tay với layer `LAB#1` (không khớp chính nó nếu không escape — `#` là "một chữ số"), `M.EQUIP` và `M-EQUIP` (`.` khớp mọi ký tự không phải chữ/số). Tên kiểu `A*B` **không tồn tại được**: `*` không hợp lệ trong tên ký hiệu.
+- **Chấm:** phần 1 trong [`labs/L05/DoorSelector.cs`](../../labs/L05/DoorSelector.cs), `.\labs\run-lab.ps1 -Lab L05` (bản vẽ mẫu có 3 DOOR, 2 cái mang tên `*U…`, và 2 WINDOW cũng mang tên `*U…`). Phần 2 làm trên worktree `v1.0.0`, chấm bằng `-FrameworkRoot` ([labs/](../../labs/README.md#l05-phần-2-và-l06-làm-trên-v100)); đặt tên hàm đúng là `OnLayersExact(params string[])`.
 
 ### L06 — Metadata XRecord, xóa đúng cách
 
 - **Đề bài:** sửa **B-09**: `RemoveMetadata` phải `Erase` Xrecord (mở `ForWrite` rồi `Erase()`). Viết lệnh thử: Set → Get → Remove → kiểm `extDict.Contains(key) == false` **và** Xrecord cũ có `IsErased == true`.
 - **DoD:** PR sửa + mô tả cách kiểm chứng trong AutoCAD; CHANGELOG.
 - **Phản tư:** có nên `ReleaseExtensionDictionary()` khi dictionary rỗng không? Ưu/nhược?
+- **Chấm:** trên worktree `v1.0.0`, `.\labs\run-lab.ps1 -Lab L06 -FrameworkRoot ..\cadcore-lab` phải **đỏ** trước khi sửa (bằng chứng lỗi có thật), xanh sau khi sửa ([labs/](../../labs/README.md#l05-phần-2-và-l06-làm-trên-v100)).
 
 ### L07 — Nhân bản Golden Sample
 
@@ -253,7 +260,7 @@ public class BadPanelService
 3. **Prompt trong Service**, mà Service lại được gọi từ palette (application context) ([ADR-004](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)). `.Value` không kiểm `Status` nên ESC vẫn vẽ ở (0,0). Điểm UCS chưa đổi sang WCS ([B15](T03_PITFALLS_CASEBOOK.md#b15-tọa-độ-lệch-khi-ucs-bị-xoay)).
 4. `ConfigureAwait(false)` khiến phần sau chạy trên **ThreadPool**, rồi gọi AutoCAD API ([B8](T03_PITFALLS_CASEBOOK.md#b8-gọi-autocad-api-từ-thread-nền)). Sau `await`, `doc` có thể đã đóng hoặc không còn active ([B6](T03_PITFALLS_CASEBOOK.md#b6-vẽ-nhầm-bản-vẽ-sau-await), [B7](T03_PITFALLS_CASEBOOK.md#b7-fatal-error-khi-bản-vẽ-bị-đóng-trong-lúc-chờ)).
 5. Ghi DB từ application context **không `LockDocument`**, nên `eLockViolation` ([B1](T03_PITFALLS_CASEBOOK.md#b1-elockviolation-khi-bấm-nút-trên-palette)). Không undo mark.
-6. `ms` mở `ForRead` rồi `AppendEntity`, nên `eNotOpenForWrite`. Thiếu `tr.AddNewlyCreatedDBObject(pl, true)` ([B10](T03_PITFALLS_CASEBOOK.md#b10-quên-addnewlycreateddbobject)). Thiếu `SetDatabaseDefaults`.
+6. `ms` mở `ForRead` rồi `AppendEntity`, nên `eNotOpenForWrite`: AutoCAD dừng hẳn, không phải exception bắt được (giống thí nghiệm 2 của L03). Thiếu `tr.AddNewlyCreatedDBObject(pl, true)` ([B10](T03_PITFALLS_CASEBOOK.md#b10-quên-addnewlycreateddbobject)). Thiếu `SetDatabaseDefaults`.
 7. Indexer layer không kiểm `Has` nên `eKeyNotFound` nếu layer chưa có ([T01 §3.2](T01_AUTOCAD_NET_FOUNDATIONS.md#32-bảng-ký-hiệu-symbol-tables)). `.ToString()` của `ObjectId` **không phải tên layer**: phải gán `pl.Layer = "E-PANEL"` hoặc `pl.LayerId = id`.
 8. `catch { }` nuốt lỗi commit, nên thay đổi có thể biến mất mà không ai biết ([B3](T03_PITFALLS_CASEBOOK.md#b3-thay-đổi-biến-mất-không-có-lỗi)).
 9. `Publish` không bọc try/catch (subscriber lỗi làm thao tác đã commit trông như "thất bại"), và publish ngay cả khi commit thất bại vì lỗi ở (8) bị nuốt.

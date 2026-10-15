@@ -7,6 +7,8 @@ Thư mục này có HAI bộ kiểm thử chạy trên AutoCAD THẬT:
 | **HeadlessLab** | `.\tests\integration\run-headless-lab.ps1` | Helper của framework (Extensions, Utils, PlotService) trên AutoCAD thật, không UI | ✅ chạy được (AutoCAD 2024) |
 | Smoke (plugin đầy đủ) | `.\tests\integration\run-integration-tests.ps1` | Toàn bộ plugin qua `smoke.scr` | ⛔ plugin không nạp được trong accoreconsole (xem "Giới hạn") |
 
+Lab L02–L06 của học viên có bộ chấm riêng, cũng chạy trên accoreconsole: [`labs/`](../../labs/README.md).
+
 ## HeadlessLab — kiểm thử headless trên AutoCAD thật
 
 Plugin chính tham chiếu `acmgd.dll` (PaletteSet, Ribbon) nên không nạp được trong accoreconsole.

@@ -270,7 +270,7 @@ using (Transaction tr = db.TransactionManager.StartTransaction())
 | Mode | Dùng khi | Ghi chú |
 | :--- | :--- | :--- |
 | `ForRead` | Chỉ đọc | Rẻ, nhiều nơi cùng đọc được |
-| `ForWrite` | Sẽ sửa | AutoCAD ghi nhận undo và gửi thông báo. Sửa thuộc tính của đối tượng mở `ForRead` ném **`eNotOpenForWrite`** |
+| `ForWrite` | Sẽ sửa | AutoCAD ghi nhận undo và gửi thông báo. Sửa đối tượng mở `ForRead` làm AutoCAD **dừng hẳn**: `INTERNAL ERROR: … eNotOpenForWrite`, `try/catch` không bắt được (đã thử gán `ColorIndex`, `AppendEntity`, `Erase` trên accoreconsole AutoCAD 2024) |
 | `ForNotify` | Hiếm (chỉ cần gửi thông báo) | — |
 
 Hai thao tác chuyển mode trên đối tượng đã mở: `UpgradeOpen()` (Read → Write) và `DowngradeOpen()`.
@@ -305,10 +305,12 @@ Framework gom hai bước vào **một chỗ duy nhất**: `ICadScope.AppendEnti
 
 ### 🧪 Thử ngay (Lab L03)
 
-Trong một lệnh thử nghiệm (đừng commit vào repo), dùng API thô:
+Dùng API thô, viết trong [`labs/L03/Experiments.cs`](../../labs/L03/Experiments.cs) rồi chạy `.\labs\run-lab.ps1 -Lab L03`:
 1. Vẽ một Line nhưng **bỏ** `tr.Commit()`. Quan sát: không crash, không có Line.
-2. Mở một Line có sẵn `ForRead` rồi gán `line.ColorIndex = 1`. Quan sát `eNotOpenForWrite`.
-3. Gọi `tr.GetObject` **sau khi** transaction đã Dispose. Quan sát lỗi.
+2. Mở một Line có sẵn `ForRead` rồi gán `line.ColorIndex = 1`. Quan sát: AutoCAD **dừng hẳn** với `INTERNAL ERROR: !dbobji.cpp@…: eNotOpenForWrite`. Đó là fatal error, không phải exception.
+3. Gọi `tr.GetObject` **sau khi** transaction đã Dispose. Quan sát: AutoCAD dừng hẳn với `FATAL ERROR: Unhandled Access Violation`.
+
+Thí nghiệm 2 và 3 làm sập AutoCAD (đã thử trên accoreconsole của AutoCAD 2024). Runner chạy mỗi thí nghiệm trong một phiên accoreconsole riêng, nên AutoCAD bạn đang làm việc không bị ảnh hưởng. Bài học: với hai lỗi này, `try/catch` không cứu được; chỉ có viết đúng ngay từ đầu.
 
 ### ✅ Tự kiểm tra §4
 
@@ -757,7 +759,7 @@ Trong .NET, mã lỗi là enum `Autodesk.AutoCAD.Runtime.ErrorStatus` **không c
 | Thông điệp | Enum | Nguyên nhân điển hình | Cách sửa |
 | :--- | :--- | :--- | :--- |
 | `eLockViolation` | `LockViolation` | Ghi DB từ application context mà không lock | Đi qua `ICadContext` (luôn lock) |
-| `eNotOpenForWrite` | `NotOpenForWrite` | Sửa đối tượng mở `ForRead` | Mở `ForWrite` hoặc `UpgradeOpen()` |
+| `eNotOpenForWrite` | `NotOpenForWrite` | Sửa đối tượng mở `ForRead`. Với `ColorIndex`, `AppendEntity`, `Erase`, AutoCAD dừng hẳn (`INTERNAL ERROR`) chứ không ném exception ([§4.2](#42-openmode)) | Mở `ForWrite` hoặc `UpgradeOpen()` |
 | `eWasOpenForWrite` | `WasOpenForWrite` | Mở lại `ForWrite` đối tượng đang mở ở mô hình Open/Close | Dùng transaction, tránh `Open()` thủ công |
 | `eWasErased` | `WasErased` | Mở đối tượng đã xóa | Kiểm tra `id.IsErased`, hoặc `GetObject(id, mode, openErased: true)` |
 | `eKeyNotFound` | `KeyNotFound` | `table["TÊN"]` khi tên không tồn tại | Kiểm tra `Has()` trước |

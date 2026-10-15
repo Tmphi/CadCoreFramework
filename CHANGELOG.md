@@ -9,6 +9,19 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (lab chấm trên AutoCAD — `labs/`)
+- Bộ chấm tự động cho lab L02–L06 của T10, chạy trên **AutoCAD thật** (accoreconsole `/isolate`, không đổi thiết lập AutoCAD của máy): `.\labs\run-lab.ps1 -Lab L02`. Học viên viết bài vào `labs/L02…L05/` (có sẵn chữ ký, `TODO`). Lời giải mẫu ở `labs/LoiGiai/`, chấm bằng `-Solution`.
+- 20 kiểm tra. L02: layer, đếm theo `DxfName` mà không mở entity nào (đọc danh sách đối tượng mà transaction đã mở), tên thật của dynamic block `*U…`, không có gì mở `ForWrite`, paper space của Layout1. L03: mỗi thí nghiệm một phiên accoreconsole riêng, kiểm rằng code tái hiện đúng hiện tượng. L04: prompt **thật** với UCS xoay 30°, kiểm toạ độ WCS và không prompt khi đang mở transaction. L05: chọn DOOR đã chỉnh mà không chọn nhầm WINDOW; `OnLayersExact` (B-17). L06: `RemoveMetadata` Erase Xrecord (B-09).
+- `CadContext` **thật** chạy được trong accoreconsole nhờ shim cho `GetAcadDocument` (COM của AcMgd, chỉ dùng để gom Undo).
+- Bản vẽ mẫu (`LAB_SAMPLE`, hoặc `run-lab.ps1 -SaveSample` ra `labs/out/lab-sample.dwg`) có dynamic block DOOR/WINDOW chép từ bộ mẫu Autodesk cài cùng AutoCAD, nên không nằm trong repo. Máy không có bộ mẫu thì kiểm tra cần chúng báo SKIP.
+- L05 phần 2 và L06 sửa code `v1.0.0`: làm trong một `git worktree`, chấm bằng `-FrameworkRoot <worktree>`. Đã kiểm: trên `v1.0.0` hai kiểm tra đỏ, sửa xong thì xanh.
+- Runner đóng hộp thoại Error Report (CER) do chính phiên crash của nó mở, để không gửi báo cáo nào cho Autodesk. Runner giữ stdin mở, nên bài làm hỏi thừa điểm thì hết giờ chứ không làm accoreconsole crash.
+- CI biên dịch `labs/Labs.csproj` (code khởi đầu và lời giải mẫu, cảnh báo là lỗi). Dependabot quét `/labs`. Plugin loại `labs\**` khỏi glob biên dịch.
+
+### Fixed (tài liệu — hành vi kiểm trên AutoCAD 2024)
+- T01 §4.2 và "Thử ngay", T03 B2, B5, T10 L03: sửa đối tượng mở `ForRead`, và gọi `GetObject` trên transaction đã Dispose, **không** ném exception. AutoCAD dừng hẳn (`INTERNAL ERROR … eNotOpenForWrite`, `FATAL ERROR: Unhandled Access Violation`) và `try/catch` không bắt được. Trước đây tài liệu ghi là exception `eNotOpenForWrite`. Học viên làm theo sẽ làm sập AutoCAD đang dùng; giờ hai thí nghiệm đó chạy qua runner.
+- T10 quy tắc 6: bỏ hướng dẫn chép `tests/integration/HeadlessLab/` sang `v1.0.0`. Làm vậy thì HeadlessLab không biên dịch được (thiếu file framework mới), và csproj plugin của `v1.0.0` biên dịch nhầm nó vào plugin.
+
 ### Added (bài tập chấm tự động — `exercises/`)
 - 14 bài tập của C01–C04 và phần ViewModel của U01-E1 thành solution riêng `exercises/Exercises.sln` (net8.0, C# 10, không cần AutoCAD). Học viên viết bài vào file có sẵn chữ ký, chạy `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C01.E3` để chấm một bài.
 - 521 test. Nhiều bài so với **bản thật** của dự án (link `GridSpec.cs`, `GridPlanner.cs`, `SymbolNameRules.cs` vào project test): `ToRowLetters` trên 20.000 giá trị, `Validate` trên 169 cặp (hàng, cột), tên ký hiệu với độ dài 255/256 và từng ký tự ASCII. Test đặt tạm InvariantCulture, để máy định dạng Việt Nam không bị chấm sai.
@@ -25,7 +38,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Job **`docs`** trong `build-and-test.yml` (ubuntu, Node 24) chạy ba script của `tools/docs/` ở mọi PR, báo lỗi ngay trên dòng của PR:
   - link tương đối và `#anchor`, kể cả sai chữ hoa/thường (Windows bỏ qua lỗi này, GitHub thì không);
   - nhãn 🎯/🔍/📖 cho mọi mục và số phút trên dòng ⏱ so với số từ thật;
-  - cú pháp mọi sơ đồ mermaid (mermaid 11.17.2, ghim trong `package-lock.json`).
+  - cú pháp mọi sơ đồ mermaid (mermaid 12.1.0 sau PR #30 của Dependabot, ghim trong `package-lock.json`).
 - Chạy trên máy: `cd tools/docs`, `npm ci`, `npm run check` ([T06 §4](docs/training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)).
 - Dependabot thêm nhóm `docs-tools` (npm, mỗi tháng). `tools\**` được loại khỏi glob của project plugin; template `dotnet new` bỏ qua `node_modules`.
 - Dự án tạo với `IncludeDemos=false`: link và trích đoạn trỏ vào `Demos/` (đã bị xóa) được bỏ qua, để CI của dự án mới không đỏ.

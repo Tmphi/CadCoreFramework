@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    LAB L02–L06 — bài làm của học viên + bộ chấm, trong MỘT DLL chỉ dùng để học (không phát hành).
+
+    Chỉ tham chiếu AcDbMgd + AcCoreMgd (giống tests/integration/HeadlessLab) nên DLL này:
+      - nạp được trong accoreconsole → run-lab.ps1 chấm tự động trên AutoCAD THẬT, không mở giao diện;
+      - nạp được trong AutoCAD đầy đủ (NETLOAD) → học viên tự chạy TRAIN_* và LAB_SAMPLE bằng tay.
+    Mã nguồn framework được LINK (không copy) từ $(FrameworkRoot), mặc định là repo chứa thư mục này.
+    Lab sửa backlog (L05 phần 2, L06) làm trên một worktree tạo từ v1.0.0: run-lab.ps1 -FrameworkRoot <worktree>
+    chấm đúng code cũ đó mà không phải chép labs/ sang (csproj plugin của v1.0.0 không loại labs\**, nên sẽ biên dịch nhầm cả lab vào plugin).
+    `-p:UseSolutions=true` thay bài làm (L02…L05) bằng lời giải mẫu trong LoiGiai/.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>annotations</Nullable>
+    <RootNamespace>CadCoreFramework.Labs</RootNamespace>
+    <AssemblyName>CadCoreFramework.Labs</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <FrameworkRoot Condition="'$(FrameworkRoot)' == ''">$(MSBuildThisFileDirectory)..\</FrameworkRoot>
+    <!-- -p:FrameworkRoot=… là thuộc tính toàn cục, không gán lại được: chuẩn hoá vào một tên khác. -->
+    <FrameworkDir>$([MSBuild]::EnsureTrailingSlash('$(FrameworkRoot)'))</FrameworkDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoCAD.NET.Core"  Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Newtonsoft.Json"   Version="13.0.4" />
+    <!-- CadContext dùng `dynamic` cho COM UndoMark. -->
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseSolutions)' == 'true'">
+    <Compile Remove="L0*\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseSolutions)' != 'true'">
+    <Compile Remove="LoiGiai\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CadContext THẬT (Execute/ExecuteRead/guard lồng nhau), không phải bản giả. -->
+    <Compile Include="$(FrameworkDir)Core\CadContext.cs" Link="Linked\Core\CadContext.cs" />
+    <Compile Include="$(FrameworkDir)Core\CadContextGuard.cs" Link="Linked\Core\CadContextGuard.cs" />
+    <Compile Include="$(FrameworkDir)Core\ICadContext.cs" Link="Linked\Core\ICadContext.cs" />
+    <Compile Include="$(FrameworkDir)Core\ICadScope.cs" Link="Linked\Core\ICadScope.cs" />
+    <Compile Include="$(FrameworkDir)Core\CadResult.cs" Link="Linked\Core\CadResult.cs" />
+    <Compile Include="$(FrameworkDir)Core\ILoggerService.cs" Link="Linked\Core\ILoggerService.cs" />
+    <Compile Include="$(FrameworkDir)Core\INotificationService.cs" Link="Linked\Core\INotificationService.cs" />
+    <!-- CadThread có từ PR #6: v1.0.0 không có file này. -->
+    <Compile Include="$(FrameworkDir)Core\CadThread.cs" Link="Linked\Core\CadThread.cs" Condition="Exists('$(FrameworkDir)Core\CadThread.cs')" />
+    <!-- Utils/CsvCodec dùng DataSheet; cả hai có từ PR #18. -->
+    <Compile Include="$(FrameworkDir)Models\DataSheet.cs" Link="Linked\Models\DataSheet.cs" Condition="Exists('$(FrameworkDir)Models\DataSheet.cs')" />
+    <Compile Include="$(FrameworkDir)Extensions\**\*.cs" Link="Linked\Extensions\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(FrameworkDir)Utils\**\*.cs" Exclude="$(FrameworkDir)Utils\WpfCadHelper.cs" Link="Linked\Utils\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>
