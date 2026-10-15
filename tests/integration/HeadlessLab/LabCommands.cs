@@ -269,8 +269,8 @@ namespace CadCoreFramework.HeadlessLab
         public void RunAll()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
-            Write(doc, $"LAB|COUNT|{Tests.Count + DocumentTests.Count}");
-            foreach (var (name, body) in Tests)
+            Write(doc, $"LAB|COUNT|{Tests.Count + DataFileLab.Tests.Count + DocumentTests.Count}");
+            foreach (var (name, body) in Tests.Concat(DataFileLab.Tests))
             {
                 Run(doc, name, () =>
                 {

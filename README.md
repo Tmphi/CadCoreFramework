@@ -243,6 +243,20 @@ if (Editor.Drag(jig).Status != PromptStatus.OK) { blockRef.Dispose(); return; }
 CadContext.Execute(scope => { scope.AppendEntityToCurrentSpace(blockRef); });
 ```
 
+### 4. Đọc/Ghi File JSON, CSV, Excel
+`IDataFileService` đọc/ghi `.xlsx` (MiniExcel), `.csv` (UTF-8 có BOM) và `.json`; lỗi thường gặp (file đang mở trong Excel, sai cấu trúc…) trả `CadResult` thất bại kèm thông điệp tiếng Việt. Ví dụ đầy đủ: `DEMO_ATTR_EXPORT` / `DEMO_ATTR_IMPORT` ([T08 §12.6](docs/training/T08_RECIPES_EXTENDING.md#126-xuất-nhập-bảng-attribute-excel-csv-json)), quy tắc kiểu dữ liệu: [R03 §8](docs/reference/R03_API.md#đọc-ghi-file-dữ-liệu-idatafileservice).
+```csharp
+var notify = GetRequiredService<INotificationService>();
+var files = GetRequiredService<IDataFileService>();
+var sheet = new DataSheet(new[] { "Tên", "Công suất" });
+sheet.AddRow("Máy bơm", 55.0);
+CadResult written = files.WriteTable(@"C:\temp\thiet-bi.xlsx", sheet);   // .xlsx / .csv / .json theo đuôi file
+if (!written.IsSuccess) { notify.Error(written.ErrorMessage, written.Exception); return; }
+
+CadResult<DataSheet> read = files.ReadTable(@"C:\temp\thiet-bi.xlsx");
+if (read.IsSuccess && read.Value.TryGetDouble(0, "Công suất", out double kw)) notify.Info($"{read.Value.GetText(0, "Tên")}: {kw} kW");
+```
+
 ---
 
 ## 💣 6. Xử Lý Sự Cố (Troubleshooting)

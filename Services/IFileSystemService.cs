@@ -46,6 +46,15 @@ namespace CadCoreFramework.Services
         void WriteAllText(string path, string content);
 
         /// <summary>
+        /// Đọc toàn bộ tệp dạng byte. Bản triển khai chuẩn mở tệp với <c>FileShare.ReadWrite</c>: đọc được cả
+        /// tệp đang mở trong chương trình khác (ví dụ Excel).
+        /// </summary>
+        byte[] ReadAllBytes(string path);
+
+        /// <summary>Ghi mảng byte ra tệp, ATOMIC như <see cref="WriteAllText"/>.</summary>
+        void WriteAllBytes(string path, byte[] content);
+
+        /// <summary>
         /// Lấy danh sách đường dẫn các tệp trong thư mục theo mẫu tìm kiếm và tùy chọn duyệt thư mục con.
         /// </summary>
         IEnumerable<string> GetFiles(string path, string searchPattern = "*.*", SearchOption searchOption = SearchOption.TopDirectoryOnly);

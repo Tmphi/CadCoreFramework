@@ -21,7 +21,7 @@ Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu 
 9. [Thêm thiết lập người dùng](#9-thêm-thiết-lập-người-dùng)
 10. [Làm việc với dynamic block](#10-làm-việc-với-dynamic-block)
 11. [Lắng nghe sự kiện bản vẽ đúng cách](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách)
-12. [Công thức thao tác bản vẽ](#12-công-thức-thao-tác-bản-vẽ): khung tên, xuất PDF, purge + audit, xref, gộp layer
+12. [Công thức thao tác bản vẽ](#12-công-thức-thao-tác-bản-vẽ): khung tên, xuất PDF, purge + audit, xref, gộp layer, xuất/nhập attribute qua Excel, CSV, JSON
 13. [Checklist trước khi mở PR](#13-checklist-trước-khi-mở-pr)
 
 ---
@@ -360,15 +360,15 @@ public sealed class ErasedWatcher : IDisposable
 
 ## 12. Công thức thao tác bản vẽ
 
-Năm việc hay gặp khi làm tool cho người vẽ: chèn khung tên, xuất PDF, dọn bản vẽ, gắn xref, gộp layer. Mỗi công thức có hai phần, theo đúng cách tách của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md):
+Sáu việc hay gặp khi làm tool cho người vẽ: chèn khung tên, xuất PDF, dọn bản vẽ, gắn xref, gộp layer, trao đổi attribute với Excel. Mỗi công thức có hai phần, theo đúng cách tách của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md):
 
 - **Phần lõi:** một lớp `static` nhận `ICadScope` (hoặc `Database` + `Transaction`), chạy *bên trong* `ICadContext.Execute*`. Phần tính toán thuần (hình học, đường dẫn, kiểm tra tên) tách thành hàm riêng, không dùng kiểu AutoCAD.
 - **Lệnh:** prompt trước, rồi gọi phần lõi trong một transaction có `undoMarkName`. Muốn gọi từ palette thì bọc phần lõi vào một service dùng `TryExecute` như [§3](#3-thêm-một-service). Prompt vẫn ở lệnh, ViewModel nhận dữ liệu qua binding.
 
-Chép vào dự án: đặt các file vào `Features/DrawingTools/`, thêm `[assembly: CommandClass(typeof(CadCoreFramework.Features.DrawingTools.DrawingToolsCommands))]` vào `Properties/AssemblyInfo.cs`, thêm 5 lệnh `TOOLS_*` vào `Deployment/PackageContents.xml` ([§1](#1-thêm-một-lệnh)).
+Công thức §12.1–12.5 chép vào dự án như sau: đặt các file vào `Features/DrawingTools/`, thêm `[assembly: CommandClass(typeof(CadCoreFramework.Features.DrawingTools.DrawingToolsCommands))]` vào `Properties/AssemblyInfo.cs`, thêm 5 lệnh `TOOLS_*` vào `Deployment/PackageContents.xml` ([§1](#1-thêm-một-lệnh)). Công thức §12.6 đã có sẵn trong repo.
 
 > [!NOTE]
-> **Đã kiểm chứng thế nào.** Toàn bộ code dưới đây được chép vào một bản sao của dự án và build `-c Release -warnaserror` sạch trên cả `net48` lẫn `net8.0-windows`. Phần lõi được link vào [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) và chạy trên AutoCAD 2024 thật: 19 kiểm thử, tất cả PASS. Các kiểm thử này dựng sẵn bản vẽ mẫu: block chưa dùng, layer đang khóa, file xref thật, thư mục dự án bị chuyển đi nơi khác. Những câu "đã kiểm" trong mục này đều là kết quả của các lần chạy đó. Ở lần chạy đầu có ba kiểm thử FAIL. Một lần cho thấy công thức xref sai, và công thức đã được sửa ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)). Hai lần còn lại cho thấy hành vi của API mà kiểm thử phải tính tới ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối), [§12.5](#125-gộp-nhiều-layer-thành-một)). Riêng **lệnh** (prompt, hộp thoại chọn file, `SendStringToExecute`) cần AutoCAD có giao diện, vì plugin không nạp được trong accoreconsole. Ngày 2026-10-15, cả 5 lệnh đã chạy trên AutoCAD 2024 có giao diện, bằng một DLL dựng từ `main` cộng nguyên văn code của mục này, trên các bản vẽ mẫu dựng sẵn. Chỗ nào log của plugin xác nhận thì ghi kèm số liệu trong log ở từng mục.
+> **Đã kiểm chứng thế nào (§12.1–12.5; §12.6 ghi riêng ở cuối mục đó).** Toàn bộ code của các mục này được chép vào một bản sao của dự án và build `-c Release -warnaserror` sạch trên cả `net48` lẫn `net8.0-windows`. Phần lõi được link vào [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) và chạy trên AutoCAD 2024 thật: 19 kiểm thử, tất cả PASS. Các kiểm thử này dựng sẵn bản vẽ mẫu: block chưa dùng, layer đang khóa, file xref thật, thư mục dự án bị chuyển đi nơi khác. Những câu "đã kiểm" trong mục này đều là kết quả của các lần chạy đó. Ở lần chạy đầu có ba kiểm thử FAIL. Một lần cho thấy công thức xref sai, và công thức đã được sửa ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)). Hai lần còn lại cho thấy hành vi của API mà kiểm thử phải tính tới ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối), [§12.5](#125-gộp-nhiều-layer-thành-một)). Riêng **lệnh** (prompt, hộp thoại chọn file, `SendStringToExecute`) cần AutoCAD có giao diện, vì plugin không nạp được trong accoreconsole. Ngày 2026-10-15, cả 5 lệnh đã chạy trên AutoCAD 2024 có giao diện, bằng một DLL dựng từ `main` cộng nguyên văn code của mục này, trên các bản vẽ mẫu dựng sẵn. Chỗ nào log của plugin xác nhận thì ghi kèm số liệu trong log ở từng mục.
 
 ### 12.1 Khung tên A3/A2/A1 dạng block có attribute
 
@@ -1079,6 +1079,102 @@ Toàn bộ thao tác gộp (chuyển entity, đổi layer hiện hành, xóa lay
 
 Khi chép công thức vào dự án, đưa ba bước đầu vào smoke test thủ công.
 
+### 12.6 Xuất, nhập bảng attribute: Excel, CSV, JSON
+
+Việc hay gặp: xuất attribute của mọi block ra Excel, người dùng sửa trong Excel, rồi nhập ngược vào bản vẽ. Khác §12.1–12.5, công thức này **có sẵn trong repo**, chép là dùng được:
+
+| File | Vai trò |
+| :--- | :--- |
+| [`Services/IDataFileService.cs`](../../Services/IDataFileService.cs), [`DataFileService.cs`](../../Services/DataFileService.cs) | Đọc/ghi JSON, CSV, `.xlsx`; đã đăng ký DI. Quy tắc kiểu dữ liệu từng định dạng: [R03 §8](../reference/R03_API.md#đọc-ghi-file-dữ-liệu-idatafileservice) |
+| [`Models/DataSheet.cs`](../../Models/DataSheet.cs) | Bảng dữ liệu dùng chung cho cả ba định dạng |
+| [`Demos/BlockAttributeTable.cs`](../../Demos/BlockAttributeTable.cs) | Phần lõi: `Export(scope)` → `DataSheet`; `Import(scope, sheet)` → `AttributeImportResult` |
+| [`Demos/DemoDataCommands.cs`](../../Demos/DemoDataCommands.cs) | Lệnh `DEMO_ATTR_EXPORT`, `DEMO_ATTR_IMPORT` |
+
+Bảng xuất ra có các cột cố định `HANDLE`, `BLOCK`, `LAYOUT`, `X`, `Y`, rồi mỗi tag attribute một cột. Khi nhập, chỉ các cột tag được ghi vào bản vẽ; cột `X`, `Y` không dời block.
+
+Lệnh xuất, nguyên văn. Đọc bản vẽ trong `ExecuteRead`, **hỏi đường dẫn và ghi file sau khi transaction đã đóng**:
+
+```csharp
+[CommandMethod("DEMO_ATTR_EXPORT")]
+public void DemoAttributeExport()
+{
+    ExecuteCommand(() =>
+    {
+        DataSheet sheet = null;
+        CadContext.ExecuteRead(scope => sheet = BlockAttributeTable.Export(scope));
+        if (sheet.RowCount == 0)
+        {
+            Notify.Warn("Bản vẽ không có block reference nào có attribute.");
+            return;
+        }
+
+        string path = GetRequiredService<IDialogService>().ShowSaveFileDialog(TableFileFilter, ".xlsx", "Xuất bảng attribute");
+        if (string.IsNullOrEmpty(path)) return;
+
+        CadResult written = GetRequiredService<IDataFileService>().WriteTable(path, sheet);
+        if (!written.IsSuccess) { Notify.Error(written.ErrorMessage, written.Exception); return; }
+        Notify.Info($"Đã xuất {sheet.RowCount} block, {sheet.Columns.Count - BlockAttributeTable.FixedColumns.Length} tag ra {path}");
+    });
+}
+```
+
+Lệnh nhập, nguyên văn. **Đọc file trước**, rồi mới mở một transaction ghi có `undoMarkName`:
+
+```csharp
+[CommandMethod("DEMO_ATTR_IMPORT")]
+public void DemoAttributeImport()
+{
+    ExecuteCommand(() =>
+    {
+        string path = GetRequiredService<IDialogService>().ShowOpenFileDialog(TableFileFilter, "Nhập bảng attribute");
+        if (string.IsNullOrEmpty(path)) return;
+
+        CadResult<DataSheet> read = GetRequiredService<IDataFileService>().ReadTable(path);
+        if (!read.IsSuccess) { Notify.Error(read.ErrorMessage, read.Exception); return; }
+
+        AttributeImportResult result = null;
+        CadContext.Execute(scope => { result = BlockAttributeTable.Import(scope, read.Value); },
+            undoMarkName: "Nhập attribute");
+
+        Notify.Info($"Đã đổi {result.AttributesChanged} attribute trên {result.BlocksChanged} block.");
+        if (result.MissingHandles.Count > 0)
+            Notify.Warn($"{result.MissingHandles.Count} handle không còn trong bản vẽ: {string.Join(", ", result.MissingHandles.Take(10))}");
+        if (result.LockedHandles.Count > 0)
+            Notify.Warn($"Bỏ qua {result.LockedHandles.Count} block trên layer khóa: {string.Join(", ", result.LockedHandles.Take(10))}");
+        if (result.UnknownColumns.Count > 0)
+            Notify.Warn("Cột không khớp tag nào: " + string.Join(", ", result.UnknownColumns));
+    });
+}
+```
+
+Những chỗ dễ sai, và phần lõi xử lý thế nào:
+
+| Chỗ dễ sai | Cách làm | Kiểm thử HeadlessLab |
+| :--- | :--- | :--- |
+| Khớp dòng với block bằng `ObjectId` | `ObjectId` đổi sau mỗi lần mở bản vẽ. **Handle** được lưu trong DWG nên không đổi: `Database.TryGetObjectId(new Handle(…))`, bỏ qua id đã bị xóa | `ATTR_ROUNDTRIP_XLSX_CSV_JSON` |
+| Chỉ duyệt model space | Duyệt mọi block table record có `IsLayout`; cột `LAYOUT` ghi tên tab | `ATTR_EXPORT_MODEL_AND_LAYOUT` |
+| Block động có tên `*U…` | So tên bằng `DynamicBlockHelper.GetEffectiveName` | |
+| Tag trùng tên cột cố định (`X`) | Cột của tag đó thành `ATTR:X` | `ATTR_EXPORT_MODEL_AND_LAYOUT` |
+| Attribute căn giữa bị lệch sau khi đổi chữ | Ghi qua `BlockHelper.SetBlockAttribute`, hàm này gọi `AdjustAlignment` | `ATTRIBUTE_REALIGNED_AFTER_SET` (có sẵn) |
+| Sửa block trên layer khóa | Tự kiểm `LayerTableRecord.IsLocked` của block và attribute; bỏ qua và báo trong `LockedHandles` | `ATTR_IMPORT_REPORTS_MISSING_LOCKED_UNKNOWN` |
+| Handle sai, block đã xóa, cột gõ sai | Không ném lỗi; báo trong `MissingHandles` và `UnknownColumns` | `ATTR_IMPORT_REPORTS_MISSING_LOCKED_UNKNOWN` |
+| File đang mở trong Excel | `ReadTable` vẫn đọc được; `WriteTable` trả lỗi "đang được mở trong chương trình khác", file cũ còn nguyên | unit test + Excel thật (dưới bảng) |
+
+**Vì sao phải tự kiểm layer khóa.** Kiểm thử `ATTR_IMPORT_REPORTS_MISSING_LOCKED_UNKNOWN` khóa layer trong cùng transaction với lần nhập. Tạm bỏ dòng kiểm `IsLocked` thì kiểm thử FAIL với "Block trên layer khóa bị sửa": AutoCAD không ném `eOnLockedLayer` khi trạng thái khóa chưa commit (đúng như [§12.5](#125-gộp-nhiều-layer-thành-một)). Còn với layer khóa đã commit, §12.5 đã kiểm rằng mở entity để ghi sẽ ném `eOnLockedLayer`, tức lệnh dừng giữa chừng. Kiểm `IsLocked` trước thì cả hai trường hợp đều chỉ bỏ qua block đó và báo lại.
+
+**Chọn định dạng nào.** Người dùng sẽ mở và sửa trong Excel thì dùng `.xlsx` (mặc định của hộp thoại). Đừng đưa CSV qua Excel: đã kiểm với Excel 16, Excel tự đổi `001` thành `1` và handle `2E5` thành `200000`. Trên máy dùng dấu phẩy thập phân, CSV phân cách bằng `,` còn bị dồn cả vào cột A ([R03 §8](../reference/R03_API.md#đọc-ghi-file-dữ-liệu-idatafileservice)). CSV và JSON hợp với việc trao đổi với chương trình khác.
+
+**Đã kiểm chứng:**
+- 56 unit test mới (`DataSheetTests`, `CsvCodecTests`, `DataFileServiceTests`) chạy trên đĩa thật, xanh trên cả `net48` lẫn `net8.0-windows`.
+- 4 kiểm thử HeadlessLab trên AutoCAD 2024: 3 kiểm thử `ATTR_*` cho phần lõi, cộng `DATAFILE_FORMATS_INSIDE_AUTOCAD`. Các kiểm thử ghi rồi đọc lại cả ba định dạng ngay trong tiến trình AutoCAD, tức MiniExcel chạy được trên net48 bên trong AutoCAD.
+- Excel 16 thật mở file do service ghi: `.xlsx` giữ `001` và `2E5` là chữ, `12.5` là số. Đọc `.xlsx` trong lúc Excel đang mở nó thì được. Ghi đè thì nhận đúng thông báo "đang được mở trong chương trình khác". File Excel lưu bằng "CSV (Comma delimited)" bị `ReadCsv` từ chối kèm hướng dẫn.
+- Hai lệnh `DEMO_ATTR_*` chạy trên AutoCAD 2024 có giao diện (2026-10-15), với bản vẽ mẫu có 4 block: 3 trong model (1 trên layer khóa) và 1 trên `Layout1`. Log của plugin ghi:
+  - `Đã xuất 4 block, 2 tag ra …\EXP.xlsx`.
+  - Sau khi sửa cả 4 dòng trong Excel: `Đã đổi 3 attribute trên 3 block.` và `Bỏ qua 1 block trên layer khóa: 2C8`. File đang mở trong Excel vẫn được đọc.
+  - Xuất đè lên file đang mở: `File 'EXP.xlsx' đang được mở trong chương trình khác (Excel?)…`.
+  - Một lần Ctrl+Z trả cả 3 attribute về giá trị cũ (người dùng xác nhận; bước này không ghi log).
+- Lần chạy đó lộ ra một lỗi: mỗi lỗi bị **ghi log hai lần**, một lần `WRN` do service ghi và một lần `ERR` do `Notify.Error`. Đã sửa: service không tự ghi log, lệnh truyền `result.Exception` cho `Notify.Error`.
+
 ---
 
 ## 13. Checklist trước khi mở PR
@@ -1108,6 +1204,7 @@ Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK
 4. Vì sao `PanelService` luôn truyền `undoMarkName`, dù lệnh `PANEL_DRAW` đã được AutoCAD gom Undo theo lệnh?
 5. Bạn gọi `db.Purge(ids)` một lần rồi `Erase` mọi id còn lại, nhưng sau đó lệnh `PURGE` của AutoCAD vẫn tìm thấy layer để xóa. Vì sao?
 6. Người dùng attach xref vào bản vẽ `Drawing1.dwg` chưa lưu, rồi lưu bản vẽ vào thư mục dự án. Mở lại thì xref báo "Not Found". Chuyện gì đã xảy ra, và công thức §12.4 tránh nó thế nào?
+7. Người dùng xuất bảng attribute ra CSV, mở bằng Excel sửa vài ô, lưu lại, rồi chạy `DEMO_ATTR_IMPORT`: hàng loạt handle bị báo "không còn trong bản vẽ". Vì sao, và nên dặn người dùng làm gì?
 
 <details><summary>Gợi ý</summary>
 
@@ -1117,6 +1214,7 @@ Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK
 4. Service còn được gọi từ palette, tức application context, nơi AutoCAD không tự gom Undo theo lệnh ([T01 §11](T01_AUTOCAD_NET_FOUNDATIONS.md#11-undo)).
 5. Xóa một block không dùng làm layer chỉ được block đó dùng trở thành "không dùng", nhưng chỉ ở lượt `Purge` kế tiếp. Phải lặp cho tới khi `Purge` không trả về gì ([§12.3](#123-purge-nhiều-lượt-và-audit)).
 6. Với `REFPATHTYPE = 1`, `AttachXref` ghi đường dẫn tương đối ngay cả khi bản vẽ chủ chưa lưu, và tính theo thư mục hiện hành của tiến trình chứ không theo thư mục dự án. Công thức kiểm `DWGTITLED`: bản vẽ chưa lưu thì luôn ghi đường dẫn tuyệt đối và cảnh báo người dùng ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)).
+7. Excel mở CSV là tự đổi kiểu từng ô: handle `2E5` thành số `200000`, `001` thành `1`. Lưu lại thì handle đã đổi, nên không còn khớp block nào. Dặn người dùng xuất ra `.xlsx` (mặc định của hộp thoại): ô chữ trong `.xlsx` giữ nguyên là chữ ([§12.6](#126-xuất-nhập-bảng-attribute-excel-csv-json)).
 </details>
 
 ---

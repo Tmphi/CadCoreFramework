@@ -39,6 +39,8 @@ namespace CadCoreFramework.Demos
             Notify.Info("   • DEMO_XDATA            : Ghi & đọc JSON qua XData (nhanh, giới hạn 16KB)");
             Notify.Info("   • DEMO_XRECORD          : Ghi & đọc JSON qua XRecord (không giới hạn dung lượng)");
             Notify.Info("   • DEMO_DYNAMIC_BLOCK    : Đọc thuộc tính và Visibility của Block động");
+            Notify.Info("   • DEMO_ATTR_EXPORT      : Xuất attribute của mọi block ra Excel / CSV / JSON (IDataFileService)");
+            Notify.Info("   • DEMO_ATTR_IMPORT      : Nhập lại attribute đã sửa từ Excel / CSV / JSON, khớp theo HANDLE");
 
             Notify.Info("\n4. NHÓM DỊCH VỤ HẠ TẦNG (DemoServicesCommands):");
             Notify.Info("   • DEMO_SETTINGS         : Quản lý cấu hình JSON tự động (ISettingsService)");
