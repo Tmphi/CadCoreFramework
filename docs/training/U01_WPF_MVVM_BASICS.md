@@ -479,7 +479,7 @@ Câu hỏi để tự kiểm: một đoạn code-behind có `if`, có tính toá
 
 ## 12. Bài tập
 
-Làm trên project `HocWpf` ([U00 §5](U00_UI_START_HERE.md#5-chuẩn-bị)), không cần AutoCAD. Gõ lại code, đừng copy.
+Làm trên project `HocWpf` ([U00 §5](U00_UI_START_HERE.md#5-chuẩn-bị)), không cần AutoCAD. Gõ lại code, đừng copy. Riêng **ViewModel** của E1 có test chấm tự động trong [`exercises/`](../../exercises/README.md): `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~U01.E1`.
 
 **U01-E1 — Form tủ điện.** Ba ô: Tên tủ (chữ), Số ngăn (số nguyên 1–30), Rộng (số thực > 0). Thêm một dòng báo lỗi và nút Vẽ. Tên tủ bind thẳng; hai ô số bind vào chuỗi theo §5.3.
 - **DoD:** gõ `2,5` vào Rộng thì có thông báo và nút tắt; xóa trắng Số ngăn thì nút tắt; mọi ô đúng thì nút bật. Nút đổi trạng thái **theo từng phím gõ**.

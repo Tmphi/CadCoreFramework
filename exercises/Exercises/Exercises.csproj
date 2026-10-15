@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Bài làm của học viên: mỗi thư mục C01…C04, U01 là bài tập của module cùng tên.
+    `-p:UseSolutions=true` thay bài làm bằng lời giải mẫu trong ../LoiGiai (CI dùng để kiểm chính bộ test).
+  -->
+  <PropertyGroup>
+    <RootNamespace>Exercises</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseSolutions)' == 'true'">
+    <Compile Remove="@(Compile)" />
+    <Compile Include="..\LoiGiai\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- U01-E1: ViewModel dùng đúng bản CommunityToolkit.Mvvm của plugin. -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+</Project>

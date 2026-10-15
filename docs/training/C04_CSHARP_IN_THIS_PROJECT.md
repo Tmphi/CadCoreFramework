@@ -672,6 +672,8 @@ private bool CanDraw() => !HasValidationErrors && !IsBusy;
 
 ## 13. Bài tập
 
+Chấm tự động trong [`exercises/`](../../exercises/README.md): `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C04.E1` (đổi `E1` theo bài). Test của E2 so bài làm với `SymbolNameRules.IsValid` thật.
+
 **E1 — LINQ.** Cho `layers = { "0", "E-POWER", "A-WALL", "E-LIGHT", "Defpoints", "E-DATA", "A-DOOR" }`. Viết **mỗi câu một dòng**: (1) tên các layer bắt đầu bằng `"A-"`, xếp theo bảng chữ cái; (2) số layer có tên dài hơn 5 ký tự; (3) có layer nào chứa chữ `"LIGHT"` không; (4) danh sách tên viết thường.
 
 <details><summary>Đáp án E1</summary>

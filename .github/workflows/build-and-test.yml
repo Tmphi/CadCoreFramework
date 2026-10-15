@@ -110,3 +110,8 @@ jobs:
       - name: Code samples
         if: ${{ !cancelled() }}
         run: npm run snippets
+
+      # Bài tập chấm tự động (exercises/): lời giải mẫu qua mọi test, code khởi đầu đỏ ở mọi bài.
+      - name: Exercises
+        if: ${{ !cancelled() }}
+        run: npm run exercises

@@ -110,6 +110,12 @@ Nếu `dotnet --version` báo "không nhận ra lệnh", hãy đóng rồi mở 
 4. **Sửa một chỗ**, viết ra giấy kết quả bạn **đoán**, rồi mới chạy. Đoán sai là lúc bạn học được nhiều nhất.
 5. Mở file dự án ở mục 🔎 và **tìm đúng khái niệm đó** trong code thật.
 
+Cuối mỗi module C01–C04 là phần **Bài tập**. Làm chúng trong [`exercises/`](../../exercises/README.md): mỗi bài có sẵn test chấm. Bạn biết ngay mình đúng hay sai, sai ở dòng nào, không phải đợi mentor:
+
+```powershell
+dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C01.E3
+```
+
 > [!IMPORTANT]
 > **Kẹt quá 20 phút thì hỏi** — nhưng hỏi đúng cách: (1) bạn muốn làm gì, (2) **nguyên văn** thông báo lỗi (copy, đừng gõ lại), (3) bạn đã thử những gì. Câu hỏi "code không chạy" không ai trả lời được; câu hỏi có đủ 3 phần thường tự bạn trả lời được trước khi gửi.
 

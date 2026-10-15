@@ -17,7 +17,8 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: "nuget"
-    directory: "/"
+    # exercises/ có solution riêng (bài tập chấm tự động); version phải đi cùng repo chính.
+    directories: ["/", "/exercises"]
     schedule:
       interval: "weekly"
       day: "monday"

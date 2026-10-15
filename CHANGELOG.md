@@ -9,6 +9,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (bài tập chấm tự động — `exercises/`)
+- 14 bài tập của C01–C04 và phần ViewModel của U01-E1 thành solution riêng `exercises/Exercises.sln` (net8.0, C# 10, không cần AutoCAD). Học viên viết bài vào file có sẵn chữ ký, chạy `dotnet test exercises/Exercises.Tests --filter FullyQualifiedName~C01.E3` để chấm một bài.
+- 521 test. Nhiều bài so với **bản thật** của dự án (link `GridSpec.cs`, `GridPlanner.cs`, `SymbolNameRules.cs` vào project test): `ToRowLetters` trên 20.000 giá trị, `Validate` trên 169 cặp (hàng, cột), tên ký hiệu với độ dài 255/256 và từng ký tự ASCII. Test đặt tạm InvariantCulture, để máy định dạng Việt Nam không bị chấm sai.
+- Lời giải mẫu `exercises/LoiGiai/` giống đáp án trong tài liệu. CI (job `docs`, `check-exercises.mjs`) kiểm:
+  - lời giải mẫu qua mọi test;
+  - code khởi đầu đỏ ở **mọi** bài;
+  - mỗi bài có đúng một lớp test.
+- Tài liệu:
+  - mục Bài tập của C01–C04, U01 và C00 §4 chỉ cách dùng;
+  - training/README §6–7, T06 §2 và §4, cây thư mục ở R01.
+- Dependabot quét cả `/exercises`. Plugin loại `exercises\**` khỏi glob biên dịch.
+
 ### Added (CI — kiểm tài liệu)
 - Job **`docs`** trong `build-and-test.yml` (ubuntu, Node 24) chạy ba script của `tools/docs/` ở mọi PR, báo lỗi ngay trên dòng của PR:
   - link tương đối và `#anchor`, kể cả sai chữ hoa/thường (Windows bỏ qua lỗi này, GitHub thì không);

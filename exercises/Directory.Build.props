@@ -1,0 +1,9 @@
+<Project>
+  <!-- Giống project người học tạo ở C00/C01: `dotnet new console -f net8.0` + C# 10. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>
