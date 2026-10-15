@@ -36,7 +36,7 @@
     <PackageReference Include="Moq"                           Version="4.20.70" />
 
     <!-- Shared serialisation library (same version as production) -->
-    <PackageReference Include="Newtonsoft.Json"               Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json"               Version="13.0.4" />
 
     <!-- Code Coverage — collect coverage data during test run -->
     <PackageReference Include="coverlet.collector"            Version="6.0.2">
