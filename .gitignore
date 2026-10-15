@@ -34,6 +34,9 @@ TestResults/
 # ─── Docs check (tools/docs, npm) ─────────────────────────────────────────────
 node_modules/
 
+# ─── Lab chấm trên AutoCAD (labs/run-lab.ps1): log từng phiên + bản vẽ mẫu ─────
+labs/out/
+
 # ─── Build Logs ───────────────────────────────────────────────────────────────
 build_log.txt
 *.log

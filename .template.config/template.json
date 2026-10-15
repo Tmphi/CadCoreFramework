@@ -61,6 +61,7 @@
             "dist/**",
             "coverage/**",
             "**/node_modules/**",
+            "labs/out/**",
             "packages/**",
             "nuget.exe",
             "*.log",
