@@ -135,10 +135,10 @@ Nhánh UI chiếm **tuần 7–9** của Giai đoạn 2 ([README §3](README.md#
   ```powershell
   dotnet new wpf -n HocWpf -f net8.0
   cd HocWpf
-  dotnet add package CommunityToolkit.Mvvm --version 8.2.2
+  dotnet add package CommunityToolkit.Mvvm --version 8.4.2
   ```
 
-  Rồi mở `HocWpf.csproj`, thêm vào `<PropertyGroup>`: `<LangVersion>10.0</LangVersion>`, `<Nullable>annotations</Nullable>`, `<ImplicitUsings>disable</ImplicitUsings>`. Đó là thiết lập của dự án ([C04](C04_CSHARP_IN_THIS_PROJECT.md)), và `CommunityToolkit.Mvvm` 8.2.2 là đúng phiên bản dự án dùng.
+  Rồi mở `HocWpf.csproj`, thêm vào `<PropertyGroup>`: `<LangVersion>10.0</LangVersion>`, `<Nullable>annotations</Nullable>`, `<ImplicitUsings>disable</ImplicitUsings>`. Đó là thiết lập của dự án ([C04](C04_CSHARP_IN_THIS_PROJECT.md)), và `CommunityToolkit.Mvvm` 8.4.2 là đúng phiên bản dự án dùng.
 - **U02–U03 cần AutoCAD 2024** và repo build được ([README §4](README.md#4-chuẩn-bị-môi-trường)).
 
 ---

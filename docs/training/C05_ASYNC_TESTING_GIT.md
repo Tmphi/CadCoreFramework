@@ -100,10 +100,10 @@ Tạo dự án test để luyện:
 cd $HOME\hoc-csharp
 dotnet new xunit -n HocTest
 cd HocTest
-dotnet add package FluentAssertions --version 6.12.0
+dotnet add package FluentAssertions --version 7.2.2
 ```
 
-> ⚠️ **Đúng phiên bản 6.12.0** như dự án ([`CadCoreFramework.Tests.csproj`](../../CadCoreFramework.Tests/CadCoreFramework.Tests.csproj)). Từ bản 8, FluentAssertions đổi giấy phép: dùng cho mục đích thương mại phải mua license. Đừng tự nâng cấp lên bản mới nhất — việc đổi phiên bản là quyết định của nhóm.
+> ⚠️ **Đúng phiên bản 7.2.2** như dự án ([`CadCoreFramework.Tests.csproj`](../../CadCoreFramework.Tests/CadCoreFramework.Tests.csproj)). Từ bản 8, FluentAssertions đổi giấy phép: dùng cho mục đích thương mại phải mua license. Đừng tự nâng cấp lên bản mới nhất. Dự án chỉ nhận bản 7.x ([T06 §7](T06_BUILD_RELEASE_DEVOPS.md#7-chính-sách-dependency)).
 
 Thay nội dung `UnitTest1.cs` bằng:
 
@@ -336,7 +336,7 @@ dotnet new classlib -n PanelRow.Core -f net8.0
 dotnet new xunit -n PanelRow.Tests -f net8.0
 dotnet sln add PanelRow.Core/PanelRow.Core.csproj PanelRow.Tests/PanelRow.Tests.csproj
 dotnet add PanelRow.Tests/PanelRow.Tests.csproj reference PanelRow.Core/PanelRow.Core.csproj
-dotnet add PanelRow.Tests/PanelRow.Tests.csproj package FluentAssertions --version 6.12.0
+dotnet add PanelRow.Tests/PanelRow.Tests.csproj package FluentAssertions --version 7.2.2
 ```
 
 Xóa `Class1.cs` và `UnitTest1.cs`. Thêm `<LangVersion>10.0</LangVersion>` vào `PanelRow.Core.csproj` để code chép sang dự án ở L07 mà không phải sửa ([C04](C04_CSHARP_IN_THIS_PROJECT.md)). (SDK .NET 10 trở lên tạo `PanelRow.slnx` thay cho `PanelRow.sln` — dùng như nhau.)

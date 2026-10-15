@@ -314,7 +314,7 @@ Test `EveryPaletteTextBox_BindsToAStringProperty` trong `XamlPaletteTests` kiể
 
 ## 6. MVVM với CommunityToolkit.Mvvm
 
-Dự án dùng **CommunityToolkit.Mvvm 8.2.2**. Gói này có *source generator*: bạn viết vài dòng có attribute, nó viết thay phần code lặp lại ([C04 §10](C04_CSHARP_IN_THIS_PROJECT.md#10-attribute-nhãn-cho-công-cụ-đọc)).
+Dự án dùng **CommunityToolkit.Mvvm 8.4.2**. Gói này có *source generator*: bạn viết vài dòng có attribute, nó viết thay phần code lặp lại ([C04 §10](C04_CSHARP_IN_THIS_PROJECT.md#10-attribute-nhãn-cho-công-cụ-đọc)).
 
 **Property thông báo thay đổi.** Nguyên văn từ [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs):
 

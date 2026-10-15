@@ -180,7 +180,9 @@ Plugin sống chung AppDomain với AutoCAD và các plugin khác ([T01 §1](T01
 4. Có bản cho **cả `net48` và `net8`** không?
 5. **Kiểm thử trong AutoCAD thật**, vì CI không phát hiện được xung đột với host.
 
-Dependency hiện tại: `CommunityToolkit.Mvvm 8.2.2`, `Microsoft.Extensions.DependencyInjection 8.0.0`, `Newtonsoft.Json 13.0.3`, `MiniExcel 1.44.1` (+ dependency bắc cầu `System.*` cho net48).
+Dependency hiện tại: `CommunityToolkit.Mvvm 8.4.2`, `Microsoft.Extensions.DependencyInjection 8.0.1`, `Newtonsoft.Json 13.0.4`, `MiniExcel 1.44.1` (+ dependency bắc cầu cho net48: `Microsoft.Bcl.AsyncInterfaces`, `System.*`).
+
+Trên net48, các DLL **tham chiếu version khác** với bản nằm trong bundle. Ví dụ `Microsoft.Extensions.DependencyInjection` 8.0.1 đòi `Microsoft.Bcl.AsyncInterfaces` 8.0.0.0, mà Mvvm 8.4.2 kéo bundle lên 10.0.0.1. Plugin không có binding redirect có hiệu lực: AutoCAD chỉ đọc `acad.exe.config`. `app.config` ở gốc repo chỉ sinh ra `CadCoreFramework.dll.config` trong `bin\`; .NET Framework không đọc file này cho một DLL, và `package.ps1` cũng không đóng nó vào bundle. Các DLL chạy được là nhờ [`AppBootstrapper.CurrentDomain_AssemblyResolve`](../../Core/AppBootstrapper.cs): không có assembly đã nạp khớp tên và version thì nó nạp file **cùng tên** cạnh plugin, bất kể version. Đừng sửa resolver thành "chỉ nạp đúng version" ([T01 §12.4](T01_AUTOCAD_NET_FOUNDATIONS.md#124-phân-giải-assembly-phụ-thuộc)).
 
 **Nâng version (Dependabot, xem [§4](#4-ci-build-and-testyml)):**
 
