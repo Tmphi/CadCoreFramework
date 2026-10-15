@@ -53,6 +53,7 @@ dotnet run                         # biên dịch + chạy
 
 Mở `Program.cs`, xóa hết nội dung, gõ:
 
+<!-- doc-check: run -->
 ```csharp
 Console.OutputEncoding = System.Text.Encoding.UTF8;   // hiển thị đúng tiếng Việt trong cửa sổ console
 Console.WriteLine("Xin chào CadCoreFramework!");
@@ -98,6 +99,7 @@ Bốn lỗi người mới gặp nhiều nhất — thông báo dưới đây l�
 
 **Biến** là một cái hộp có **tên** và **kiểu**, chứa một giá trị:
 
+<!-- doc-check: run -->
 ```csharp
 int rows = 3;                     // số nguyên
 int columns = 4;
@@ -131,6 +133,7 @@ Console.WriteLine(spacing * 2);   // 41
 
 Tính toán — có hai cái bẫy:
 
+<!-- doc-check: run -->
 ```csharp
 Console.WriteLine(7 / 2);       // 3     ← chia hai số NGUYÊN: bỏ phần lẻ
 Console.WriteLine(7 % 2);       // 1     ← phần dư
@@ -145,6 +148,7 @@ Console.WriteLine(Math.Abs((0.1 + 0.2) - 0.3) < 1e-9);  // True  ← so sánh "g
 
 ## 5. Chuỗi và định dạng số — bẫy định dạng Việt Nam
 
+<!-- doc-check: run output -->
 ```csharp
 string name = "SAMPLE_GRID";
 int count = 12;
@@ -178,6 +182,7 @@ Dòng 2
 
 Máy tính dùng **định dạng khu vực** (culture) của Windows khi đổi số ↔ chữ. Ở Việt Nam, dấu **phẩy** là dấu thập phân và dấu **chấm** là dấu phân cách hàng nghìn — ngược với Mỹ. Hậu quả có thật:
 
+<!-- doc-check: run -->
 ```csharp
 using System.Globalization;
 
@@ -199,6 +204,7 @@ Dự án cũng từng dính một biến thể của bẫy này: ô số trên p
 
 `if` là từ khóa dùng nhiều nhất trong dự án (488 dòng):
 
+<!-- doc-check: run -->
 ```csharp
 int rows = 120;
 const int MaxDimension = 100;              // const: hằng số, không gán lại được
@@ -226,6 +232,7 @@ else
 
 `switch` chọn một nhánh theo giá trị — gọn hơn chuỗi `if/else if` dài:
 
+<!-- doc-check: run -->
 ```csharp
 string style = "Sequential";
 switch (style)
@@ -247,6 +254,7 @@ switch (style)
 
 ## 7. Vòng lặp: for, foreach, while
 
+<!-- doc-check: run output -->
 ```csharp
 for (int i = 0; i < 3; i++)                  // khởi tạo; điều kiện; bước tăng
 {
@@ -286,6 +294,7 @@ A-WALL
 
 Vòng lặp **lồng nhau** — chính là cách `GridPlanner.Plan` duyệt từng hàng, rồi từng cột trong hàng:
 
+<!-- doc-check: run output -->
 ```csharp
 string[] rowNames = { "A", "B", "C" };
 for (int row = 0; row < 3; row++)
@@ -312,6 +321,7 @@ C1 C2 C3 C4
 
 **Hàm** gom một nhóm câu lệnh thành một khối có tên, nhận **tham số** vào và trả **kết quả** ra. Viết một lần, gọi nhiều lần:
 
+<!-- doc-check: run -->
 ```csharp
 Console.WriteLine(Area(3, 4));             // 12
 Console.WriteLine(Perimeter(3, 4));        // 14
@@ -368,6 +378,7 @@ Làm vào các dự án console riêng (`dotnet new console -n BaiTapC01E1`…).
 
 <details><summary>Đáp án E1</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 double width = 600, height = 2100;
 Console.WriteLine($"Diện tích: {width * height:F2}");
@@ -392,6 +403,7 @@ Thay `rowNames[row]` trong ví dụ vòng lặp lồng nhau ở §7 bằng `(cha
 
 <details><summary>Đáp án E3</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 foreach (int i in new[] { 0, 25, 26, 701, 702 })
 {
@@ -426,6 +438,7 @@ Bản trong dự án dùng `StringBuilder` thay cho nối chuỗi ([C02 §9](C02
 
 <details><summary>Đáp án E4</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 int rows = 60, columns = 50;
 const int MaxDimension = 100, MaxCells = 2500;

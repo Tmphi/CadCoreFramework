@@ -59,6 +59,7 @@ flowchart LR
 
 tương đương đúng đoạn C# mà [`DemoUiCommands.cs`](../../Demos/DemoUiCommands.cs) viết tay (trích):
 
+<!-- doc-check: verbatim Demos/DemoUiCommands.cs -->
 ```csharp
 var stack = new StackPanel { Margin = new Thickness(20) };
 stack.Children.Add(new TextBlock
@@ -241,6 +242,7 @@ Người dùng bấm Vẽ thì được lưới 3 hàng trong khi ô đang trố
 
 Cho ViewModel thấy **đúng thứ người dùng gõ** bằng cách bind ô vào một property `string`. ViewModel tự đổi sang số theo **một quy tắc duy nhất**: chỉ nhận dấu chấm, giống dòng lệnh AutoCAD. Lỗi đi vào cùng chỗ với các lỗi validate khác. Ví dụ hoàn chỉnh (đã chạy):
 
+<!-- doc-check: compile pkg CommunityToolkit.Mvvm -->
 ```csharp
 using System.Collections.Generic;
 using System.Globalization;
@@ -298,6 +300,7 @@ Chìa khóa là `NumberStyles.Float`: nó cho phép dấu chấm, dấu âm, s�
 
 🔎 **Golden Sample làm đúng như vậy, từ PR #11.** Chỉ khác một điểm: [`GridMarkerViewModel`](../../Samples/GridMarker/GridMarkerViewModel.cs) vẫn giữ các property số (`Rows`, `Spacing`…) để `GridSpec`, code và test khác dùng tiếp. Mỗi ô số có thêm một property chuỗi (`RowsText`, `SpacingText`…) để TextBox bind vào, và hai bên đồng bộ hai chiều. Bộ đọc số dùng chung nằm ở [`ViewModels/NumberText.cs`](../../ViewModels/NumberText.cs); nó chặn cả `NaN` và vô cực. Khi người dùng gõ, chuỗi được đổi thành số (nguyên văn):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 partial void OnSpacingTextChanged(string value)
 {
@@ -308,6 +311,7 @@ partial void OnSpacingTextChanged(string value)
 
 Khi code gán số (test, thiết lập đã lưu…), số được đổi ngược thành chuỗi, trừ khi chuỗi đang có đã ghi đúng số đó, ví dụ giữ nguyên `20.0` mà người dùng đang gõ:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 partial void OnSpacingChanged(double value) => SpacingText = Shown(SpacingText, value);
 ```
@@ -325,6 +329,7 @@ Dự án dùng **CommunityToolkit.Mvvm 8.4.2**. Gói này có *source generator*
 
 **Property thông báo thay đổi.** Nguyên văn từ [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 [ObservableProperty] private int _rows = 3;
 [ObservableProperty] private int _columns = 4;
@@ -335,6 +340,7 @@ Từ field `_rows`, generator viết property `Rows`. Khi `Rows` được gán g
 
 **Command.** Nguyên văn:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 private bool CanDraw() => !HasValidationErrors && !IsBusy;
 
@@ -355,6 +361,7 @@ Từ method `Draw()`, generator viết property `DrawCommand`. XAML bind vào đ
 
 Golden Sample báo bằng tay trong `Revalidate()`, vì **7 property** đều ảnh hưởng tới validate. Một `override` duy nhất gọn hơn gắn attribute lên 7 field (nguyên văn):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 {
@@ -400,6 +407,7 @@ Quy tắc 20/80: **chỉ đổi trạng thái ViewModel trên UI thread.** Trong
 
 ⚠️ **Đừng bắt chước** đoạn "giả lập" trong [`CommonControlsViewModel.cs`](../../ViewModels/CommonControlsViewModel.cs) (nguyên văn):
 
+<!-- doc-check: verbatim ViewModels/CommonControlsViewModel.cs -->
 ```csharp
 IsBusy = true;
 // Giả lập lưu dữ liệu
@@ -442,6 +450,7 @@ System.Windows.Data Error: 40 : BindingExpression path error: 'Rowz' property no
 
 Code-behind của palette chỉ làm **bốn việc hạ tầng**. Mọi logic nằm trong ViewModel. Nguyên văn [`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs):
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerPalette.xaml.cs -->
 ```csharp
 public GridMarkerPalette()
 {

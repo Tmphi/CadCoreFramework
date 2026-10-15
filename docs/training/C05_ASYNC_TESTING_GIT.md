@@ -31,6 +31,7 @@ Module cuối của giai đoạn 0 dạy ba kỹ năng làm việc thật: **ch�
 
 Gọi mạng, đọc file lớn, truy vấn cơ sở dữ liệu… mất thời gian. Nếu đứng chờ, giao diện (và AutoCAD) **đứng hình**. `async`/`await` cho phép **bắt đầu** một việc, làm việc khác, rồi quay lại khi có kết quả:
 
+<!-- doc-check: run output -->
 ```csharp
 using System.Diagnostics;
 
@@ -63,6 +64,7 @@ Trong lúc tải, chương trình vẫn chạy tiếp…
 
 Mỗi chương trình có một hoặc nhiều **thread** (luồng chạy). Chạy thử:
 
+<!-- doc-check: run (không so output: số thread đổi theo từng lần chạy) -->
 ```csharp
 Console.WriteLine($"Trước await: thread {Environment.CurrentManagedThreadId}");
 await Task.Delay(100);
@@ -109,6 +111,7 @@ dotnet add package FluentAssertions --version 7.2.2
 
 Thay nội dung `UnitTest1.cs` bằng:
 
+<!-- doc-check: test -->
 ```csharp
 using FluentAssertions;
 using Xunit;
@@ -378,6 +381,7 @@ Xóa `Class1.cs` và `UnitTest1.cs`. Thêm `<LangVersion>10.0</LangVersion>` và
 
 Tạo `PanelRow.Tests/PanelRowPlannerTests.cs`:
 
+<!-- doc-check: skip test chạy trên lời giải đồ án của học viên; mentor giữ lời giải, không công bố -->
 ```csharp
 using FluentAssertions;
 using PanelRow.Core;

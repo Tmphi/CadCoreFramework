@@ -16,6 +16,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - cú pháp mọi sơ đồ mermaid (mermaid 11.17.2, ghim trong `package-lock.json`).
 - Chạy trên máy: `cd tools/docs`, `npm ci`, `npm run check` ([T06 §4](docs/training/T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)).
 - Dependabot thêm nhóm `docs-tools` (npm, mỗi tháng). `tools\**` được loại khỏi glob của project plugin; template `dotnet new` bỏ qua `node_modules`.
+- Dự án tạo với `IncludeDemos=false`: link và trích đoạn trỏ vào `Demos/` (đã bị xóa) được bỏ qua, để CI của dự án mới không đỏ.
+- **Code mẫu C01–C05, U01 chạy lại ở mọi PR** (`check-snippets.mjs`). Mỗi khối `csharp` có chú thích ẩn `<!-- doc-check: … -->`:
+  - `run` / `run output`: biên dịch C# 10 trên net8.0, cảnh báo là lỗi, chạy, so stdout với khối `text`;
+  - `compile`, `compile-error CSxxxx`;
+  - `test`: xUnit + FluentAssertions;
+  - `verbatim <file>`: trích đoạn so với file nguồn;
+  - `skip <lý do>`.
+  - Hiện có 76 khối: 50 run (20 so output), 1 compile, 1 test, 21 verbatim, 3 skip. Khối mới thiếu chú thích làm CI đỏ ([training/README §7](docs/training/README.md#7-duy-trì-bộ-tài-liệu)).
 
 ### Added (tài liệu — bản đồ học)
 - **Thẻ module** ở đầu cả 20 module C00–C05, T01–T10, U00–U03: dòng ⏱ thời gian đọc (cả trang và riêng phần cốt lõi), bài tập/lab để thực hành, và nhãn mục. Thời gian tính từ số từ thật của trang (kể cả code) ÷ 100 từ/phút; chưa gồm thời gian chạy thử và làm lab.

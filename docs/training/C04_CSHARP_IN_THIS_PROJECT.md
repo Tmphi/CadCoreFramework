@@ -46,6 +46,7 @@ Bạn đã biết biến, vòng lặp, class, interface. Module này dạy phầ
 
 Trong C#, một **hàm** có thể được cất vào biến và truyền đi như một con số. Kiểu của biến đó gọi là **delegate**. Hai delegate dùng nhiều nhất là `Action` và `Func`:
 
+<!-- doc-check: run -->
 ```csharp
 Action sayHi = () => Console.WriteLine("Xin chào");          // Action: hàm KHÔNG trả về gì
 Action<string> log = msg => Console.WriteLine($"[LOG] {msg}");
@@ -67,6 +68,7 @@ Console.WriteLine(isPositive(-1));    // False
 
 Delegate mạnh nhất khi làm **tham số**: hàm nhận một *hành động* từ người gọi và tự quyết định **lúc nào** chạy nó:
 
+<!-- doc-check: run output -->
 ```csharp
 RunInTransaction(scope => Console.WriteLine($"  vẽ bằng {scope}"));
 RunInTransaction(scope =>
@@ -111,6 +113,7 @@ Commit
 
 Lambda dùng được biến **bên ngoài** nó — gọi là **closure** (bao đóng). Nó "bắt" chính **biến**, không phải bản sao giá trị lúc tạo:
 
+<!-- doc-check: run -->
 ```csharp
 int count = 0;
 Action increment = () => count++;   // lambda "bắt" (capture) biến count ở bên ngoài
@@ -144,6 +147,7 @@ Console.WriteLine();
 
 **LINQ** là bộ hàm "hỏi" một danh sách: lọc, biến đổi, đếm, tìm… Mỗi câu hỏi nhận một lambda:
 
+<!-- doc-check: run -->
 ```csharp
 var layers = new List<string> { "0", "E-POWER", "A-WALL", "E-LIGHT", "Defpoints" };
 
@@ -183,6 +187,7 @@ Các hàm LINQ dự án dùng nhiều nhất (số dòng có dùng, ngoài test)
 
 `Where`, `Select`, `OrderBy` **không chạy ngay**. Chúng chỉ tạo ra một *công thức*; công thức chạy khi có người duyệt kết quả (`foreach`, `Count()`, `ToList()`…). Điều này sinh ra một cái bẫy thật của dự án:
 
+<!-- doc-check: run output -->
 ```csharp
 var numbers = new List<int> { 1, 2, 3 };
 IEnumerable<int> bigOnes = numbers.Where(n => n > 1);   // CHƯA chạy — mới là "công thức"
@@ -213,6 +218,7 @@ HOME, INSERT
 
 🔎 [`RibbonService`](../../Core/RibbonService.cs) gỡ tab của plugin đúng theo cách thứ hai:
 
+<!-- doc-check: verbatim Core/RibbonService.cs -->
 ```csharp
 foreach (RibbonTab tab in _ribbon.Tabs.Where(t => t.Id == tabId || t.Name == tabId).ToList())
     _ribbon.Tabs.Remove(tab);
@@ -228,6 +234,7 @@ Bỏ `.ToList()` thì vòng lặp đang đọc `_ribbon.Tabs` và xóa khỏi ch
 
 **Extension method** cho phép gọi một hàm *như thể* nó thuộc về một kiểu có sẵn, dù bạn không sửa được kiểu đó (như `int`, `string`, hay interface của framework). Ba điều kiện: **static class**, **static method**, và chữ **`this`** trước tham số đầu tiên:
 
+<!-- doc-check: run -->
 ```csharp
 Console.WriteLine(26.ToRowLetters());          // AA   ← gọi như thể int có sẵn hàm này
 Console.WriteLine("  e-power ".Normalized());  // E-POWER
@@ -250,6 +257,7 @@ public static class MyExtensions                // extension method: static clas
 
 🔎 Dự án có 111 dòng khai báo extension method, gần hết trong thư mục `Extensions/`. Ví dụ [`CadScopeLineExtensions`](../../Extensions/CadScopeLineExtensions.cs):
 
+<!-- doc-check: verbatim Extensions/CadScopeLineExtensions.cs -->
 ```csharp
 public static ObjectId DrawLine(this ICadScope scope, Point3d startPoint, Point3d endPoint,
     string layer = null, short? colorIndex = null, LineWeight lineWeight = LineWeight.ByLayer,
@@ -272,6 +280,7 @@ Nhờ chữ `this`, bên trong lambda của `Execute` bạn viết `scope.DrawLi
 
 `List<string>`, `List<int>`, `List<GridCell>` là **một** class viết một lần cho mọi kiểu. Chữ `T` trong `List<T>` là **tham số kiểu**: chỗ để người dùng điền kiểu vào. Bạn cũng viết được class và hàm generic:
 
+<!-- doc-check: run -->
 ```csharp
 Result<int> ok = Result<int>.Success(12);
 Result<int> fail = Result<int>.Fail("Layer bị khóa");
@@ -325,6 +334,7 @@ Thường bạn **không cần ghi** `<T>` khi gọi: `FirstOr(new[] { "A1" }, "
 
 **Exception** (ngoại lệ) là cách báo "có chuyện không làm tiếp được". `throw` ném lỗi ra; `try`/`catch` bắt lỗi lại; `finally` chạy **dù có lỗi hay không**:
 
+<!-- doc-check: run output -->
 ```csharp
 foreach (string input in new[] { "3", "", "abc" })
 {
@@ -382,6 +392,7 @@ Lỗi nhập: Chưa nhập số hàng. (Parameter 'text')
 
 Có những đối tượng giữ **tài nguyên** phải trả lại: transaction của AutoCAD, khóa bản vẽ, file đang mở. Chúng thực hiện interface `IDisposable` (có hàm `Dispose()`). Khối `using` bảo đảm `Dispose()` **luôn** được gọi — kể cả khi có lỗi:
 
+<!-- doc-check: run output -->
 ```csharp
 using (var t1 = new FakeTransaction("T1"))
 {
@@ -419,6 +430,7 @@ Bắt lỗi: lỗi giữa chừng
 
 🔎 Đây là trái tim của [`CadContext`](../../Core/CadContext.cs) (rút gọn, `…` là phần lược bớt):
 
+<!-- doc-check: skip rút gọn từ CadContext, "…" là phần lược bớt -->
 ```csharp
 using (doc.LockDocument())
 {
@@ -443,6 +455,7 @@ Lambda của bạn ném lỗi thì `tr.Commit()` không chạy, transaction bị
 
 **Event** (sự kiện) cho một object **báo tin** cho những ai quan tâm mà không cần biết họ là ai. Bên quan tâm **đăng ký** bằng `+=` và **gỡ đăng ký** bằng `-=`:
 
+<!-- doc-check: run -->
 ```csharp
 var theme = new ThemeSource();
 EventHandler<bool> onChanged = (sender, isDark) =>
@@ -473,6 +486,7 @@ public sealed class ThemeSource
 
 🔎 [`ThemeManager.Attach`](../../Themes/ThemeManager.cs) làm đúng như vậy cho mỗi palette:
 
+<!-- doc-check: verbatim Themes/ThemeManager.cs -->
 ```csharp
 EventHandler<bool> onThemeChanged = (_, __) => RunOnUiThread(root, () => ApplyThemeTo(root.Resources));
 root.Loaded += (_, __) =>
@@ -507,6 +521,7 @@ Vì source generator **viết thêm code** vào class, class đó phải khai b�
 
 ## 11. Cú pháp nhỏ hay gặp: is, nameof, tuple
 
+<!-- doc-check: run output -->
 ```csharp
 object value = 42;
 if (value is int number && number > 10)      // is: kiểm tra kiểu VÀ lấy luôn giá trị
@@ -546,6 +561,7 @@ cells
 
 **① [`GridMarkerService.cs`](../../Samples/GridMarker/GridMarkerService.cs)** — vẽ lưới:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerService.cs -->
 ```csharp
 CadResult<int> result = _cadContext.TryExecute(
     scope => DrawCells(scope, spec, cells),
@@ -563,6 +579,7 @@ CadResult<int> result = _cadContext.TryExecute(
 
 **② [`SelectionFilterBuilder.cs`](../../Utils/SelectionFilterBuilder.cs)** — lọc chính xác theo tên layer:
 
+<!-- doc-check: verbatim Utils/SelectionFilterBuilder.cs -->
 ```csharp
 public SelectionFilterBuilder OnLayersExact(params string[] layerNames)
     => OnLayers(layerNames?.Select(EscapeWildcards).ToArray());
@@ -580,6 +597,7 @@ public SelectionFilterBuilder OnLayersExact(params string[] layerNames)
 
 **③ [`RibbonService.cs`](../../Core/RibbonService.cs)** — gỡ tab của plugin:
 
+<!-- doc-check: verbatim Core/RibbonService.cs -->
 ```csharp
 foreach (RibbonTab tab in _ribbon.Tabs.Where(t => t.Id == tabId || t.Name == tabId).ToList())
     _ribbon.Tabs.Remove(tab);
@@ -593,6 +611,7 @@ foreach (RibbonTab tab in _ribbon.Tabs.Where(t => t.Id == tabId || t.Name == tab
 
 **④ [`GridMarkerViewModel.cs`](../../Samples/GridMarker/GridMarkerViewModel.cs)** — tự cập nhật số ô khi có lưới mới được vẽ:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 TrackSubscription(events.Subscribe<GridDrawnMessage>(_ => RefreshCount()));
 ```
@@ -606,6 +625,7 @@ TrackSubscription(events.Subscribe<GridDrawnMessage>(_ => RefreshCount()));
 
 **⑤ [`GridMarkerPalette.xaml.cs`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs)** — gắn ViewModel cho palette:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerPalette.xaml.cs -->
 ```csharp
 DataContext = AppBootstrapper.ServiceProvider?.GetService<GridMarkerViewModel>()
     ?? throw new InvalidOperationException(
@@ -621,6 +641,7 @@ DataContext = AppBootstrapper.ServiceProvider?.GetService<GridMarkerViewModel>()
 
 **⑥ [`CadScopeLineExtensions.cs`](../../Extensions/CadScopeLineExtensions.cs)** — khai báo hàm vẽ đường thẳng:
 
+<!-- doc-check: verbatim Extensions/CadScopeLineExtensions.cs -->
 ```csharp
 public static ObjectId DrawLine(this ICadScope scope, Point3d startPoint, Point3d endPoint,
     string layer = null, short? colorIndex = null, LineWeight lineWeight = LineWeight.ByLayer,
@@ -640,6 +661,7 @@ public static ObjectId DrawLine(this ICadScope scope, Point3d startPoint, Point3
 
 🧪 **Tự giải mã thêm** (không có đáp án — mang câu trả lời đến buổi gặp mentor): hai dòng liền nhau trong `GridMarkerViewModel.cs`:
 
+<!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
 private bool CanDraw() => !HasValidationErrors && !IsBusy;
 
@@ -654,6 +676,7 @@ private bool CanDraw() => !HasValidationErrors && !IsBusy;
 
 <details><summary>Đáp án E1</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 var layers = new List<string> { "0", "E-POWER", "A-WALL", "E-LIGHT", "Defpoints", "E-DATA", "A-DOOR" };
 
@@ -679,6 +702,7 @@ True
 
 <details><summary>Đáp án E2</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 foreach (string name in new[] { "E-POWER", "A*B", "", "Lưới trục", "LAYER:1" })
     Console.WriteLine($"'{name}' hợp lệ? {name.IsValidSymbolName()}");
@@ -706,6 +730,7 @@ So với bản thật [`SymbolNameRules`](../../Utils/SymbolNameRules.cs): dự 
 
 <details><summary>Đáp án E3</summary>
 
+<!-- doc-check: run output -->
 ```csharp
 var job = new DrawJob();
 EventHandler<int> onProgress = (sender, percent) => Console.WriteLine($"Tiến độ: {percent}%");

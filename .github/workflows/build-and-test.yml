@@ -66,7 +66,7 @@ jobs:
           name: coverage-report
           path: coverage/report
 
-  # Kiểm tài liệu: link/anchor, thẻ ⏱ + nhãn 🎯/🔍/📖, sơ đồ mermaid (docs/training/README.md §7).
+  # Kiểm tài liệu: link/anchor, thẻ ⏱ + nhãn 🎯/🔍/📖, sơ đồ mermaid, code mẫu C# (docs/training/README.md §7).
   # Không cần .NET; Linux phân biệt hoa/thường như GitHub nên bắt được link sai chữ hoa.
   docs:
     runs-on: ubuntu-latest
@@ -99,3 +99,14 @@ jobs:
       - name: Mermaid diagrams
         if: ${{ !cancelled() }}
         run: npm run mermaid
+
+      # Code mẫu C01–C05, U01: biên dịch C# 10 / net8.0, chạy, so output (chú thích <!-- doc-check: … -->).
+      - name: Setup .NET (code samples)
+        if: ${{ !cancelled() }}
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Code samples
+        if: ${{ !cancelled() }}
+        run: npm run snippets
