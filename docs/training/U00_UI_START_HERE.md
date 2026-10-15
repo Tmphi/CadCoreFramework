@@ -3,6 +3,8 @@
 # U00 — Nhánh UI: Bắt Đầu Từ Đây (Quy Tắc 20/80)
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [C05](C05_ASYNC_TESTING_GIT.md) (C# và `async`), [T01 §5](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) và [§7](T01_AUTOCAD_NET_FOUNDATIONS.md#7-editor-prompt-hệ-tọa-độ-selection) · **Trong lộ trình:** tuần 7–9 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 25 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** [bài kiểm tra đầu vào](#6-bài-kiểm-tra-đầu-vào) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 **Nhánh UI** dạy phần người dùng *nhìn thấy và bấm vào* của một tool AutoCAD .NET: dòng lệnh, palette, hộp thoại, Ribbon. Nhánh này cũng dạy **vẽ thực thể lên giao diện**, tức là xem trước kết quả trên palette và trên màn hình bản vẽ trước khi chốt vào bản vẽ. Cũng như Giai đoạn 0, nhánh này đi theo **quy tắc 20/80**: dồn sức vào phần nhỏ API và kỹ thuật mà tool AutoCAD dùng nhiều nhất (đã đếm, xem §2), bỏ qua phần còn lại cho tới khi gặp.
 
@@ -17,13 +19,13 @@
 
 ## Mục lục
 
-1. [Bản đồ UI của một tool AutoCAD](#1-bản-đồ-ui-của-một-tool-autocad)
-2. [Quy tắc 20/80: số liệu](#2-quy-tắc-2080-số-liệu)
-3. [Bảy quy tắc vàng](#3-bảy-quy-tắc-vàng)
-4. [Lộ trình 3 tuần](#4-lộ-trình-3-tuần)
-5. [Chuẩn bị](#5-chuẩn-bị)
-6. [Bài kiểm tra đầu vào](#6-bài-kiểm-tra-đầu-vào)
-7. [Sau nhánh UI](#7-sau-nhánh-ui)
+1. [Bản đồ UI của một tool AutoCAD](#1-bản-đồ-ui-của-một-tool-autocad) 🎯
+2. [Quy tắc 20/80: số liệu](#2-quy-tắc-2080-số-liệu) 🔍
+3. [Bảy quy tắc vàng](#3-bảy-quy-tắc-vàng) 🎯
+4. [Lộ trình 3 tuần](#4-lộ-trình-3-tuần) 🎯
+5. [Chuẩn bị](#5-chuẩn-bị) 🎯
+6. [Bài kiểm tra đầu vào](#6-bài-kiểm-tra-đầu-vào) 🎯
+7. [Sau nhánh UI](#7-sau-nhánh-ui) 🎯
 
 ---
 

@@ -23,6 +23,7 @@ Hai lớp dẫn qua lại: trang tra cứu trỏ tới module học khi cần gi
 | Chưa từng lập trình, hoặc chưa biết C# | [C00 — Bắt đầu từ đây](training/C00_START_HERE.md) (Giai đoạn 0, không cần AutoCAD) |
 | Biết C#, muốn chạy thử dự án ngay | [R01 — Khởi động nhanh](reference/R01_QUICKSTART.md) |
 | Biết C#, muốn học bài bản AutoCAD .NET | [Học viện — Bắt đầu từ đâu?](training/README.md#bắt-đầu-từ-đâu) |
+| Biết C#, cần làm được việc trong dự án sớm | [Lộ trình nhanh](training/README.md#lộ-trình-nhanh): chỉ đọc các mục 🎯, đọc ≈ 3,5 giờ rồi làm lab L07 |
 | Đã làm AutoCAD .NET, mới vào dự án | [R02 — Kiến trúc](reference/R02_ARCHITECTURE.md) → [R05 — Golden Sample](reference/R05_GOLDEN_SAMPLE.md) → [T08 — Công thức mở rộng](training/T08_RECIPES_EXTENDING.md) |
 | Làm giao diện (palette, hộp thoại, xem trước) | [U00 — Nhánh UI](training/U00_UI_START_HERE.md), tra nhanh ở [R04](reference/R04_UI.md) |
 | Đang gặp sự cố | [T04 §9 — Cây quyết định](training/T04_DEBUGGING_TROUBLESHOOTING.md#9-cây-quyết-định-triệu-chứng--nguyên-nhân), [T03 — Sổ tay sự cố](training/T03_PITFALLS_CASEBOOK.md) |

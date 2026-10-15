@@ -3,18 +3,25 @@
 # T09 — Sổ Tay Senior
 
 > **Cấp độ:** 🌳 Middle → 🏔️ Senior · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [T03](T03_PITFALLS_CASEBOOK.md) · **Trong lộ trình:** tuần 13; checklist review ở §2 dùng từ tuần 6 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 50 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** [đồ án cuối khóa](T10_LABS_AND_ASSESSMENT.md#3-đồ-án-cuối-khóa-bộ-công-cụ-tủ-điện-msb); checklist §2 cho mọi PR · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Senior không chỉ viết code đúng. Senior **giữ cho cả hệ thống đúng theo thời gian**: biết vì sao kiến trúc như hiện tại, nhận ra khi nào nó cần đổi, review để lỗi không lọt vào, và quản lý danh sách nợ kỹ thuật một cách trung thực.
+
+**Sau module này bạn phải làm được:**
+1. Giải thích lý do của từng ADR, và viết một ADR thay thế có đủ bối cảnh, lựa chọn, hệ quả.
+2. Review một PR bằng [checklist §2](#2-checklist-code-review), kể cả PR "tối ưu" không kèm số đo.
+3. Chọn mục backlog để làm dựa trên tác động, công sức và rủi ro, rồi cập nhật trạng thái của nó một cách trung thực.
 
 ---
 
 ## Mục lục
 
-1. [ADR: Vì sao kiến trúc như hiện tại](#1-adr-vì-sao-kiến-trúc-như-hiện-tại)
-2. [Checklist code review](#2-checklist-code-review)
-3. [Backlog kỹ thuật đã kiểm chứng](#3-backlog-kỹ-thuật-đã-kiểm-chứng)
-4. [Lộ trình kiến trúc](#4-lộ-trình-kiến-trúc)
-5. [Trách nhiệm của Senior](#5-trách-nhiệm-của-senior)
+1. [ADR: Vì sao kiến trúc như hiện tại](#1-adr-vì-sao-kiến-trúc-như-hiện-tại) 🔍
+2. [Checklist code review](#2-checklist-code-review) 🎯
+3. [Backlog kỹ thuật đã kiểm chứng](#3-backlog-kỹ-thuật-đã-kiểm-chứng) 📖
+4. [Lộ trình kiến trúc](#4-lộ-trình-kiến-trúc) 🔍
+5. [Trách nhiệm của Senior](#5-trách-nhiệm-của-senior) 🔍
 
 ---
 

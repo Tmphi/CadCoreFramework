@@ -3,6 +3,8 @@
 # C02 — Dữ Liệu: Kiểu, Collection Và null
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** [C01](C01_FIRST_PROGRAM.md) · **Thời lượng:** tuần 2–3
+>
+> **⏱ Đọc:** ≈ 30 phút · **Thực hành:** [bài tập §10](#10-bài-tập) · **Nhãn mục:** mọi mục đều 🎯, vì Giai đoạn 0 đã lọc theo [quy tắc 20/80](C00_START_HERE.md#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) ([README §5](README.md#5-quy-ước-đọc))
 
 Chương trình thật xử lý **nhiều** dữ liệu cùng lúc: danh sách layer, các ô của lưới, thuộc tính của block. Module này dạy cách chứa chúng (mảng, `List`, `Dictionary`), cách trả về an toàn (`IReadOnlyList`), và cách sống chung với `null` — nguồn lỗi lúc chạy số 1 của người mới.
 

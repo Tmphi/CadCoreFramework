@@ -3,6 +3,8 @@
 # T02 — Mổ Xẻ Kiến Trúc CadCoreFramework
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) §1–6; C# ở mức [C03](C03_OBJECT_ORIENTED.md)–[C04](C04_CSHARP_IN_THIS_PROJECT.md) (interface, DI, lambda, `using`) · **Trong lộ trình:** tuần 4–5 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 60 phút (phần 🎯 ≈ 40 phút) · **Thực hành:** L06 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) dạy luật chơi của AutoCAD. Module này cho thấy framework **áp dụng các luật đó ở đâu, bằng dòng code nào**, và những chỗ nó chưa làm trọn. Hãy đọc với file nguồn mở bên cạnh: mọi link 🔎 đều trỏ vào code thật.
 
@@ -16,20 +18,20 @@
 
 ## Mục lục
 
-1. [Bản đồ dự án và quy tắc phụ thuộc](#1-bản-đồ-dự-án-và-quy-tắc-phụ-thuộc)
-2. [Khởi động và tắt: AppBootstrapper](#2-khởi-động-và-tắt-appbootstrapper)
-3. [Dependency Injection](#3-dependency-injection)
-4. [ICadContext: hợp đồng giao dịch](#4-icadcontext-hợp-đồng-giao-dịch)
-5. [CadCommandBase: biên giới của mọi lệnh](#5-cadcommandbase-biên-giới-của-mọi-lệnh)
-6. [Extensions và Utils: API vẽ một dòng](#6-extensions-và-utils-api-vẽ-một-dòng)
-7. [EventAggregator và EventService](#7-eventaggregator-và-eventservice)
-8. [PaletteService và vòng đời ViewModel](#8-paletteservice-và-vòng-đời-viewmodel)
-9. [RibbonService](#9-ribbonservice)
-10. [ThemeManager, Styles và hệ màu](#10-thememanager-styles-và-hệ-màu)
-11. [Analyzer CAD001–CAD003](#11-analyzer-cad001cad003)
-12. [Logger, Notification, Settings, Path](#12-logger-notification-settings-path)
-13. [Golden Sample: theo dấu một lệnh từ đầu đến cuối](#13-golden-sample-theo-dấu-một-lệnh-từ-đầu-đến-cuối)
-14. [Lộ trình đọc code](#14-lộ-trình-đọc-code)
+1. [Bản đồ dự án và quy tắc phụ thuộc](#1-bản-đồ-dự-án-và-quy-tắc-phụ-thuộc) 🎯
+2. [Khởi động và tắt: AppBootstrapper](#2-khởi-động-và-tắt-appbootstrapper) 🔍
+3. [Dependency Injection](#3-dependency-injection) 🎯
+4. [ICadContext: hợp đồng giao dịch](#4-icadcontext-hợp-đồng-giao-dịch) 🎯
+5. [CadCommandBase: biên giới của mọi lệnh](#5-cadcommandbase-biên-giới-của-mọi-lệnh) 🎯
+6. [Extensions và Utils: API vẽ một dòng](#6-extensions-và-utils-api-vẽ-một-dòng) 🎯
+7. [EventAggregator và EventService](#7-eventaggregator-và-eventservice) 🔍
+8. [PaletteService và vòng đời ViewModel](#8-paletteservice-và-vòng-đời-viewmodel) 🔍
+9. [RibbonService](#9-ribbonservice) 🔍
+10. [ThemeManager, Styles và hệ màu](#10-thememanager-styles-và-hệ-màu) 🔍
+11. [Analyzer CAD001–CAD003](#11-analyzer-cad001cad003) 🎯
+12. [Logger, Notification, Settings, Path](#12-logger-notification-settings-path) 🎯
+13. [Golden Sample: theo dấu một lệnh từ đầu đến cuối](#13-golden-sample-theo-dấu-một-lệnh-từ-đầu-đến-cuối) 🎯
+14. [Lộ trình đọc code](#14-lộ-trình-đọc-code) 🔍
 
 ---
 

@@ -3,6 +3,8 @@
 # C00 — Bắt Đầu Từ Đây: Nhập Môn Lập Trình & C# Theo Quy Tắc 20/80
 
 > **Cấp độ:** 🌰 Nhập môn · **Cần trước:** không gì cả — chưa từng lập trình cũng được · **Thời lượng:** 6 tuần × 8–10 giờ
+>
+> **⏱ Đọc:** ≈ 20 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** [bài kiểm tra đầu vào](#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 **Giai đoạn 0** dành cho người **chưa từng viết một dòng code**. Bạn sẽ học C# (ngôn ngữ của dự án) theo **quy tắc 20/80**: dồn sức vào khoảng 20% tính năng mà chính dự án này dùng tới 80% thời gian, bỏ qua phần còn lại cho tới khi thật sự gặp. Không cần AutoCAD cho tới hết giai đoạn này.
 
@@ -18,13 +20,13 @@ Làm được 4 điều đó là bạn đủ nền để vào [T01](T01_AUTOCAD_
 
 ## Mục lục
 
-1. [Quy tắc 20/80: học đúng phần dự án thật sự dùng](#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng)
-2. [Lộ trình 6 tuần](#2-lộ-trình-6-tuần)
-3. [Chuẩn bị môi trường](#3-chuẩn-bị-môi-trường)
-4. [Cách học mỗi bài: quy trình 5 bước](#4-cách-học-mỗi-bài-quy-trình-5-bước)
-5. [Quy ước trong giai đoạn 0](#5-quy-ước-trong-giai-đoạn-0)
-6. [Bài kiểm tra đầu vào: bạn nên bắt đầu từ đâu?](#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu)
-7. [Sau giai đoạn 0](#7-sau-giai-đoạn-0)
+1. [Quy tắc 20/80: học đúng phần dự án thật sự dùng](#1-quy-tắc-2080-học-đúng-phần-dự-án-thật-sự-dùng) 🔍
+2. [Lộ trình 6 tuần](#2-lộ-trình-6-tuần) 🎯
+3. [Chuẩn bị môi trường](#3-chuẩn-bị-môi-trường) 🎯
+4. [Cách học mỗi bài: quy trình 5 bước](#4-cách-học-mỗi-bài-quy-trình-5-bước) 🎯
+5. [Quy ước trong giai đoạn 0](#5-quy-ước-trong-giai-đoạn-0) 🎯
+6. [Bài kiểm tra đầu vào: bạn nên bắt đầu từ đâu?](#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu) 🎯
+7. [Sau giai đoạn 0](#7-sau-giai-đoạn-0) 🎯
 
 ---
 

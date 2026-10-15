@@ -3,22 +3,29 @@
 # T06 — Build, Phát Hành & DevOps
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T05](T05_TESTING_STRATEGY.md); Git & PR ([C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request)) · **Trong lộ trình:** tuần 13 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L15 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Code chạy được trên máy bạn mới là một nửa. Nửa còn lại là **build tái lập được**, **CI chặn được lỗi**, và **bản phát hành đến tay người dùng đúng như bạn nghĩ**. Module này giải thích từng mắt xích, và chỉ ra những mắt xích đã từng đứt ([T03 A7–A12](T03_PITFALLS_CASEBOOK.md#a7-init-templateps1-không-parse-được-trên-windows-powershell-51)).
+
+**Sau module này bạn phải làm được:**
+1. Build 0 warning và mở PR qua được CI; kể ra những loại lỗi mà CI hiện tại **không** bắt được.
+2. Đọc `CadCoreFramework.csproj` và giải thích được các thiết lập chính: hai TFM `net48`/`net8.0-windows`, `DefaultItemExcludes`, `ExcludeAssets="runtime"`.
+3. Phát hành một bản theo checklist ở [§5](#5-quy-trình-phát-hành-release): chọn số SemVer, tag, đóng gói, kiểm bundle; và đánh giá được một PR cập nhật dependency theo [§7](#7-chính-sách-dependency).
 
 ---
 
 ## Mục lục
 
-1. [Cấu trúc solution](#1-cấu-trúc-solution)
-2. [Giải phẫu `CadCoreFramework.csproj`](#2-giải-phẫu-cadcoreframeworkcsproj)
-3. [Build và chất lượng mã](#3-build-và-chất-lượng-mã)
-4. [CI: `build-and-test.yml`](#4-ci-build-and-testyml)
-5. [Quy trình phát hành (release)](#5-quy-trình-phát-hành-release)
-6. [Bundle Autoloader và cài đặt](#6-bundle-autoloader-và-cài-đặt)
-7. [Chính sách dependency](#7-chính-sách-dependency)
-8. [Template: tạo dự án mới](#8-template-tạo-dự-án-mới)
-9. [Quy trình Git](#9-quy-trình-git)
+1. [Cấu trúc solution](#1-cấu-trúc-solution) 🔍
+2. [Giải phẫu `CadCoreFramework.csproj`](#2-giải-phẫu-cadcoreframeworkcsproj) 🔍
+3. [Build và chất lượng mã](#3-build-và-chất-lượng-mã) 🎯
+4. [CI: `build-and-test.yml`](#4-ci-build-and-testyml) 🎯
+5. [Quy trình phát hành (release)](#5-quy-trình-phát-hành-release) 📖
+6. [Bundle Autoloader và cài đặt](#6-bundle-autoloader-và-cài-đặt) 🔍
+7. [Chính sách dependency](#7-chính-sách-dependency) 🔍
+8. [Template: tạo dự án mới](#8-template-tạo-dự-án-mới) 📖
+9. [Quy trình Git](#9-quy-trình-git) 🎯
 
 ---
 

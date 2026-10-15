@@ -3,6 +3,8 @@
 # T01 — Nền Tảng AutoCAD .NET
 
 > **Cấp độ:** 🌱 Fresher → 🌿 Junior · **Cần trước:** [Giai đoạn 0](C00_START_HERE.md) (C00–C05) hoặc nền C# tương đương ([bài kiểm tra đầu vào](C00_START_HERE.md#6-bài-kiểm-tra-đầu-vào-bạn-nên-bắt-đầu-từ-đâu)); AutoCAD 2024 · **Trong lộ trình:** tuần 1–3 và 10 ([README §3](README.md#3-lộ-trình-đào-tạo))
+>
+> **⏱ Đọc:** ≈ 80 phút (phần 🎯 ≈ 50 phút) · **Thực hành:** L01–L05, L09, L10 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Module này dạy **AutoCAD .NET API** ở mức đủ sâu để bạn hiểu *vì sao* CadCoreFramework được thiết kế như hiện tại. Mỗi khái niệm đều được nối với chỗ framework xử lý nó, để bạn thấy lý thuyết "sống" trong code.
 
@@ -16,20 +18,20 @@ Module này dạy **AutoCAD .NET API** ở mức đủ sâu để bạn hiểu *
 
 ## Mục lục
 
-1. [Plugin sống ở đâu: AutoCAD, .NET và AppDomain dùng chung](#1-plugin-sống-ở-đâu-autocad-net-và-appdomain-dùng-chung)
-2. [Object model: Application → Document → Database](#2-object-model-application--document--database)
-3. [Bên trong Database: ObjectId, bảng ký hiệu, dictionary](#3-bên-trong-database-objectid-bảng-ký-hiệu-dictionary)
-4. [Transaction: trái tim của mọi thao tác](#4-transaction-trái-tim-của-mọi-thao-tác)
-5. [Document Lock và hai ngữ cảnh thực thi](#5-document-lock-và-hai-ngữ-cảnh-thực-thi)
-6. [Lệnh (Command): đăng ký, instance, CommandFlags](#6-lệnh-command-đăng-ký-instance-commandflags)
-7. [Editor: Prompt, hệ tọa độ, Selection](#7-editor-prompt-hệ-tọa-độ-selection)
-8. [Threading và async trong AutoCAD](#8-threading-và-async-trong-autocad)
-9. [Bộ nhớ và vòng đời đối tượng](#9-bộ-nhớ-và-vòng-đời-đối-tượng)
-10. [Events (sự kiện)](#10-events-sự-kiện)
-11. [Undo](#11-undo)
-12. [Vòng đời plugin và cơ chế nạp assembly](#12-vòng-đời-plugin-và-cơ-chế-nạp-assembly)
-13. [accoreconsole: AutoCAD không giao diện](#13-accoreconsole-autocad-không-giao-diện)
-14. [Phụ lục: ErrorStatus thường gặp](#14-phụ-lục-errorstatus-thường-gặp)
+1. [Plugin sống ở đâu: AutoCAD, .NET và AppDomain dùng chung](#1-plugin-sống-ở-đâu-autocad-net-và-appdomain-dùng-chung) 🔍
+2. [Object model: Application → Document → Database](#2-object-model-application--document--database) 🎯
+3. [Bên trong Database: ObjectId, bảng ký hiệu, dictionary](#3-bên-trong-database-objectid-bảng-ký-hiệu-dictionary) 🎯
+4. [Transaction: trái tim của mọi thao tác](#4-transaction-trái-tim-của-mọi-thao-tác) 🎯
+5. [Document Lock và hai ngữ cảnh thực thi](#5-document-lock-và-hai-ngữ-cảnh-thực-thi) 🎯
+6. [Lệnh (Command): đăng ký, instance, CommandFlags](#6-lệnh-command-đăng-ký-instance-commandflags) 🎯
+7. [Editor: Prompt, hệ tọa độ, Selection](#7-editor-prompt-hệ-tọa-độ-selection) 🎯
+8. [Threading và async trong AutoCAD](#8-threading-và-async-trong-autocad) 🔍
+9. [Bộ nhớ và vòng đời đối tượng](#9-bộ-nhớ-và-vòng-đời-đối-tượng) 🎯
+10. [Events (sự kiện)](#10-events-sự-kiện) 🔍
+11. [Undo](#11-undo) 🔍
+12. [Vòng đời plugin và cơ chế nạp assembly](#12-vòng-đời-plugin-và-cơ-chế-nạp-assembly) 🔍
+13. [accoreconsole: AutoCAD không giao diện](#13-accoreconsole-autocad-không-giao-diện) 🔍
+14. [Phụ lục: ErrorStatus thường gặp](#14-phụ-lục-errorstatus-thường-gặp) 📖
 
 ---
 
