@@ -125,7 +125,7 @@ Vì CI build với `-warnaserror`, mọi warning (kể cả CAD001–CAD003 ở 
 - ViewModel (kể cả hàm command của nó) chỉ chuẩn bị dữ liệu và gọi Service; không có logic AutoCAD.
 - **Không bắt `System.Exception` tràn lan** trong code nghiệp vụ: bắt kiểu cụ thể khi bạn *xử lý được* nó. Bắt mọi lỗi chỉ làm ở **biên** (`ExecuteCommand`, `RunSafe`). Framework xử lý riêng `Autodesk.AutoCAD.Runtime.Exception` có `ErrorStatus.UserBreak` (ESC) để không in lỗi rác; không có kiểu nào tên `UserBreakException`. ESC *khi đang prompt* không ném exception mà trả `PromptStatus.Cancel`.
 
-Checklist review đầy đủ: [T09 §2](../training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review). Checklist trước khi mở PR: [T08 §12](../training/T08_RECIPES_EXTENDING.md#12-checklist-trước-khi-mở-pr).
+Checklist review đầy đủ: [T09 §2](../training/T09_SENIOR_PLAYBOOK.md#2-checklist-code-review). Checklist trước khi mở PR: [T08 §13](../training/T08_RECIPES_EXTENDING.md#13-checklist-trước-khi-mở-pr).
 
 ---
 

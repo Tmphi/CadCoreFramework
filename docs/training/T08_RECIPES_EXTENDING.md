@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 
-Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–11 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
+Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
 
 ---
 
@@ -21,7 +21,8 @@ Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu 
 9. [Thêm thiết lập người dùng](#9-thêm-thiết-lập-người-dùng)
 10. [Làm việc với dynamic block](#10-làm-việc-với-dynamic-block)
 11. [Lắng nghe sự kiện bản vẽ đúng cách](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách)
-12. [Checklist trước khi mở PR](#12-checklist-trước-khi-mở-pr)
+12. [Công thức thao tác bản vẽ](#12-công-thức-thao-tác-bản-vẽ): khung tên, xuất PDF, purge + audit, xref, gộp layer
+13. [Checklist trước khi mở PR](#13-checklist-trước-khi-mở-pr)
 
 ---
 
@@ -357,7 +358,715 @@ public sealed class ErasedWatcher : IDisposable
 
 ---
 
-## 12. Checklist trước khi mở PR
+## 12. Công thức thao tác bản vẽ
+
+Năm việc hay gặp khi làm tool cho người vẽ: chèn khung tên, xuất PDF, dọn bản vẽ, gắn xref, gộp layer. Mỗi công thức có hai phần, theo đúng cách tách của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md):
+
+- **Phần lõi:** một lớp `static` nhận `ICadScope` (hoặc `Database` + `Transaction`), chạy *bên trong* `ICadContext.Execute*`. Phần tính toán thuần (hình học, đường dẫn, kiểm tra tên) tách thành hàm riêng, không dùng kiểu AutoCAD.
+- **Lệnh:** prompt trước, rồi gọi phần lõi trong một transaction có `undoMarkName`. Muốn gọi từ palette thì bọc phần lõi vào một service dùng `TryExecute` như [§3](#3-thêm-một-service). Prompt vẫn ở lệnh, ViewModel nhận dữ liệu qua binding.
+
+Chép vào dự án: đặt các file vào `Features/DrawingTools/`, thêm `[assembly: CommandClass(typeof(CadCoreFramework.Features.DrawingTools.DrawingToolsCommands))]` vào `Properties/AssemblyInfo.cs`, thêm 5 lệnh `TOOLS_*` vào `Deployment/PackageContents.xml` ([§1](#1-thêm-một-lệnh)).
+
+> [!NOTE]
+> **Đã kiểm chứng thế nào.** Toàn bộ code dưới đây được chép vào một bản sao của dự án và build `-c Release -warnaserror` sạch trên cả `net48` lẫn `net8.0-windows`. Phần lõi được link vào [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) và chạy trên AutoCAD 2024 thật: 19 kiểm thử, tất cả PASS. Các kiểm thử này dựng sẵn bản vẽ mẫu: block chưa dùng, layer đang khóa, file xref thật, thư mục dự án bị chuyển đi nơi khác. Những câu "đã kiểm" trong mục này đều là kết quả của các lần chạy đó. Ở lần chạy đầu có ba kiểm thử FAIL. Một lần cho thấy công thức xref sai, và công thức đã được sửa ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)). Hai lần còn lại cho thấy hành vi của API mà kiểm thử phải tính tới ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối), [§12.5](#125-gộp-nhiều-layer-thành-một)). Riêng **lệnh** (prompt, hộp thoại chọn file, `SendStringToExecute`) cần AutoCAD có giao diện, nên chỉ được biên dịch, chưa chạy thử.
+
+### 12.1 Khung tên A3/A2/A1 dạng block có attribute
+
+Đừng vẽ khung tên bằng các nét rời. Hãy tạo **một block có attribute**:
+- Người dùng sửa nội dung bằng `ATTEDIT` hoặc bảng Properties.
+- Code đọc lại được: `BlockHelper.GetBlockAttributes`.
+- Mọi lần chèn dùng chung một định nghĩa.
+
+Kích thước khung tách thành `TitleBlockLayout`, chỉ chứa số, nên test được bằng xUnit thuần.
+
+<details><summary><code>Features/DrawingTools/TitleBlock.cs</code></summary>
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using CadCoreFramework.Core;
+using CadCoreFramework.Extensions;
+
+namespace CadCoreFramework.Features.DrawingTools
+{
+    /// <summary>Khổ giấy ISO 216, đặt ngang, đơn vị mm.</summary>
+    public sealed class SheetSize
+    {
+        public static readonly SheetSize A3 = new SheetSize("A3", 420, 297);
+        public static readonly SheetSize A2 = new SheetSize("A2", 594, 420);
+        public static readonly SheetSize A1 = new SheetSize("A1", 841, 594);
+
+        public SheetSize(string name, double width, double height)
+        {
+            Name = name;
+            Width = width;
+            Height = height;
+        }
+
+        public string Name { get; }
+        public double Width { get; }
+        public double Height { get; }
+    }
+
+    /// <summary>Một ô của bảng tên: nhãn cố định + attribute có tag.</summary>
+    public sealed class TitleField
+    {
+        public TitleField(string tag, string label)
+        {
+            Tag = tag;
+            Label = label;
+        }
+
+        public string Tag { get; }
+        public string Label { get; }
+    }
+
+    /// <summary>
+    /// Hình học khung tên: chỉ có số, không có kiểu AutoCAD → test được bằng xUnit thuần.
+    /// Lề trái 20 mm (chừa chỗ đóng tập), các lề khác 10 mm; bảng tên ở góc dưới phải.
+    /// </summary>
+    public sealed class TitleBlockLayout
+    {
+        public const double LeftMargin = 20;
+        public const double Margin = 10;
+        public const double BoxWidth = 180;
+        public const double RowHeight = 8;
+        public const double LabelWidth = 40;
+        public const double TextHeight = 3;
+
+        public static readonly IReadOnlyList<TitleField> Fields = new[]
+        {
+            new TitleField("DU_AN", "Dự án"),
+            new TitleField("BAN_VE", "Bản vẽ"),
+            new TitleField("TY_LE", "Tỷ lệ"),
+            new TitleField("NGAY", "Ngày"),
+            new TitleField("SO_BV", "Số bản vẽ"),
+        };
+
+        private TitleBlockLayout(SheetSize sheet)
+        {
+            Sheet = sheet;
+            FrameMinX = LeftMargin;
+            FrameMinY = Margin;
+            FrameMaxX = sheet.Width - Margin;
+            FrameMaxY = sheet.Height - Margin;
+            BoxMinX = FrameMaxX - BoxWidth;
+            BoxMaxY = FrameMinY + Fields.Count * RowHeight;
+        }
+
+        public static TitleBlockLayout For(SheetSize sheet)
+        {
+            if (sheet == null) throw new ArgumentNullException(nameof(sheet));
+            if (sheet.Width < LeftMargin + Margin + BoxWidth)
+                throw new ArgumentException($"Khổ {sheet.Name} quá nhỏ cho bảng tên rộng {BoxWidth} mm.", nameof(sheet));
+            return new TitleBlockLayout(sheet);
+        }
+
+        public SheetSize Sheet { get; }
+        public double FrameMinX { get; }
+        public double FrameMinY { get; }
+        public double FrameMaxX { get; }
+        public double FrameMaxY { get; }
+        public double BoxMinX { get; }
+        public double BoxMaxY { get; }
+
+        /// <summary>Cạnh dưới của hàng thứ <paramref name="row"/> (0 = hàng trên cùng).</summary>
+        public double RowBottom(int row) => BoxMaxY - (row + 1) * RowHeight;
+    }
+
+    /// <summary>
+    /// Khung tên là MỘT block có attribute: sửa nội dung bằng ATTEDIT/Properties, đọc lại được bằng code,
+    /// và mọi bản vẽ dùng chung một định nghĩa. Gọi bên trong ICadContext.Execute / TryExecute.
+    /// </summary>
+    public static class TitleBlockBuilder
+    {
+        public static string BlockName(SheetSize sheet) => "CADCORE_KHUNG_" + sheet.Name;
+
+        /// <summary>Tạo định nghĩa block nếu chưa có, chèn tại <paramref name="origin"/>, điền attribute.</summary>
+        public static ObjectId Insert(ICadScope scope, SheetSize sheet, Point3d origin,
+            Dictionary<string, string> values)
+        {
+            string name = BlockName(sheet);
+            if (!scope.HasBlock(name))
+                scope.CreateBlockDefinition(name, CreateEntities(scope.Database, TitleBlockLayout.For(sheet)),
+                    Point3d.Origin, "Khung tên " + sheet.Name);
+
+            return scope.InsertBlock(name, origin, attributes: values);
+        }
+
+        private static List<Entity> CreateEntities(Database db, TitleBlockLayout l)
+        {
+            var entities = new List<Entity>
+            {
+                Rectangle(0, 0, l.Sheet.Width, l.Sheet.Height, 0),               // mép giấy
+                Rectangle(l.FrameMinX, l.FrameMinY, l.FrameMaxX, l.FrameMaxY, 0.5), // khung bản vẽ
+                Rectangle(l.BoxMinX, l.FrameMinY, l.FrameMaxX, l.BoxMaxY, 0.35),    // bảng tên
+                new Line(new Point3d(l.BoxMinX + TitleBlockLayout.LabelWidth, l.FrameMinY, 0),
+                         new Point3d(l.BoxMinX + TitleBlockLayout.LabelWidth, l.BoxMaxY, 0)),
+            };
+
+            for (int row = 0; row < TitleBlockLayout.Fields.Count; row++)
+            {
+                TitleField field = TitleBlockLayout.Fields[row];
+                double y = l.RowBottom(row);
+                if (row > 0)
+                    entities.Add(new Line(new Point3d(l.BoxMinX, y + TitleBlockLayout.RowHeight, 0),
+                                          new Point3d(l.FrameMaxX, y + TitleBlockLayout.RowHeight, 0)));
+
+                double textY = y + (TitleBlockLayout.RowHeight - TitleBlockLayout.TextHeight) / 2;
+                entities.Add(new DBText
+                {
+                    TextString = field.Label,
+                    Position = new Point3d(l.BoxMinX + 2, textY, 0),
+                    Height = TitleBlockLayout.TextHeight,
+                });
+                entities.Add(new AttributeDefinition
+                {
+                    Tag = field.Tag,
+                    Prompt = field.Label,
+                    TextString = "",
+                    Position = new Point3d(l.BoxMinX + TitleBlockLayout.LabelWidth + 2, textY, 0),
+                    Height = TitleBlockLayout.TextHeight,
+                });
+            }
+
+            // Nội dung block nằm trên layer 0: block reference đặt ở layer nào thì khung mang màu/kiểu của layer đó.
+            foreach (Entity e in entities)
+            {
+                e.SetDatabaseDefaults(db);
+                e.LayerId = db.LayerZero;
+            }
+            return entities;
+        }
+
+        private static Polyline Rectangle(double x1, double y1, double x2, double y2, double width)
+        {
+            var pl = new Polyline(4);
+            pl.AddVertexAt(0, new Point2d(x1, y1), 0, 0, 0);
+            pl.AddVertexAt(1, new Point2d(x2, y1), 0, 0, 0);
+            pl.AddVertexAt(2, new Point2d(x2, y2), 0, 0, 0);
+            pl.AddVertexAt(3, new Point2d(x1, y2), 0, 0, 0);
+            pl.Closed = true;
+            pl.ConstantWidth = width;   // SAU AddVertexAt: mỗi AddVertexAt ghi đè bề rộng của đỉnh nó thêm
+            return pl;
+        }
+    }
+}
+```
+
+</details>
+
+```csharp
+[CommandMethod("TOOLS_TITLEBLOCK")]
+public void InsertTitleBlock()
+{
+    ExecuteCommand(() =>
+    {
+        string size = CadPromptHelper.GetKeywords("Khổ giấy", new[] { "A3", "A2", "A1" }, "A3");
+        if (size == null) return;
+        Point3d? origin = CadPromptHelper.GetPoint("Góc dưới trái của tờ giấy:");
+        if (origin == null) return;
+        string project = CadPromptHelper.GetString("Tên dự án:");
+        if (project == null) return;
+        string title = CadPromptHelper.GetString("Tên bản vẽ:");
+        if (title == null) return;
+
+        SheetSize sheet = size == "A1" ? SheetSize.A1 : size == "A2" ? SheetSize.A2 : SheetSize.A3;
+        var values = new Dictionary<string, string>
+        {
+            ["DU_AN"] = project,
+            ["BAN_VE"] = title,
+            ["TY_LE"] = "1:100",
+            ["NGAY"] = DateTime.Today.ToString("dd/MM/yyyy"),
+            ["SO_BV"] = "",
+        };
+        ExecuteWithScope(scope => TitleBlockBuilder.Insert(scope, sheet, origin.Value, values),
+            undoMarkName: "Khung tên " + sheet.Name);
+    });
+}
+```
+
+Đã kiểm trên AutoCAD 2024:
+- Reference có đủ 5 attribute với đúng giá trị.
+- Mọi entity trong định nghĩa nằm trên layer 0.
+- Khung A3 đi từ (20, 10) tới (410, 287).
+- Lần chèn thứ hai dùng lại định nghĩa cũ, không thêm entity vào định nghĩa.
+
+Một bẫy nhỏ, cũng đã kiểm: đặt `ConstantWidth` **trước** `AddVertexAt` thì mất. Mỗi lần `AddVertexAt(…, startWidth: 0, endWidth: 0)` ghi bề rộng 0 cho đỉnh mới thêm, nên phải đặt `ConstantWidth` sau cùng.
+
+Chèn khung tên vào **layout** (paper space) thì chạy lệnh khi đang ở tab layout đó, vì `InsertBlock` chèn vào không gian hiện hành. `TitleBlockBuilder.Insert` chèn ở tỷ lệ 1, kích thước tính bằng mm. Muốn đặt khung trong model space theo tỷ lệ bản vẽ (ví dụ 1:100), thêm một tham số `scale` và truyền nó cho `InsertBlock`.
+
+### 12.2 Xuất mọi layout ra một file PDF
+
+[`PlotService`](../../Services/PlotService.cs) đã lo phần khó của việc in. Nó chỉ cho chạy một job in mỗi lúc, tạm đặt `BACKGROUNDPLOT = 0` rồi khôi phục, trả lại layout hiện hành, và gộp nhiều layout thành một PDF nhiều trang. Công thức chỉ cần chọn layout và đặt tên file.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using CadCoreFramework.Core;
+using CadCoreFramework.Extensions;
+
+namespace CadCoreFramework.Features.DrawingTools
+{
+    public static class PdfExport
+    {
+        /// <summary>
+        /// Tên các layout giấy theo thứ tự tab (bỏ Model). Gọi trong ExecuteRead.
+        /// </summary>
+        public static List<string> PaperLayoutNames(ICadScope scope)
+            => scope.Database.GetPaperLayouts(scope.Transaction).Select(l => l.LayoutName).ToList();
+
+        /// <summary>
+        /// "D:\DuAn\MB-01.dwg" → "D:\DuAn\MB-01.pdf". Bản vẽ chưa lưu (Document.Name chỉ là "Drawing1.dwg",
+        /// không có thư mục) → đặt vào <paramref name="fallbackDirectory"/>.
+        /// </summary>
+        public static string PdfPathFor(string drawingPath, string fallbackDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(drawingPath)) throw new ArgumentException("Thiếu tên bản vẽ.", nameof(drawingPath));
+            string directory = Path.GetDirectoryName(drawingPath);
+            if (string.IsNullOrEmpty(directory)) directory = fallbackDirectory;
+            return Path.Combine(directory, Path.GetFileNameWithoutExtension(drawingPath) + ".pdf");
+        }
+    }
+}
+```
+
+```csharp
+[CommandMethod("TOOLS_EXPORT_PDF")]
+public void ExportPdf()
+{
+    ExecuteCommand(() =>
+    {
+        var plot = GetRequiredService<IPlotService>();
+        var notify = GetRequiredService<INotificationService>();
+
+        List<string> layouts = null;
+        CadContext.ExecuteRead(scope => layouts = PdfExport.PaperLayoutNames(scope));
+        if (layouts.Count == 0)
+        {
+            notify.Warn("Bản vẽ không có layout giấy nào.");
+            return;
+        }
+
+        string pdf = PdfExport.PdfPathFor(Document.Name,
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        // In NGOÀI mọi ICadContext.Execute: PlotService tự mở transaction và tự đổi layout hiện hành.
+        if (!plot.PlotMultipleLayouts(Database, layouts, pdf))
+            throw new InvalidOperationException("Xuất PDF thất bại, xem log để biết lý do.");
+        notify.Info($"Đã xuất {layouts.Count} layout ra {pdf}");
+    });
+}
+```
+
+- **In ngoài transaction.** Tên layout đọc trong `ExecuteRead`, còn lệnh in gọi **sau** khi lambda đã xong. Lý do: `PlotService` tự mở transaction và đổi layout hiện hành. Đây là chỗ lệnh được dùng `Document`/`Database` trực tiếp. Service thì không được (CAD001), nên phần in nằm ở lệnh.
+- **Đã kiểm:**
+  - Bản vẽ mới có đúng hai layout giấy `Layout1`, `Layout2`, theo thứ tự tab.
+  - Đi đúng luồng của lệnh thì ra một PDF có số trang bằng số layout.
+  - Bản vẽ chưa lưu có `Document.Name = "Drawing1.dwg"`, không có thư mục, nên cần `fallbackDirectory`.
+- `PlotService` chép page setup của từng layout rồi đặt máy in thành `DWG To PDF.pc3` (tham số `printerName`). Muốn đổi cách thiết lập trang in thì mở rộng `PlotService`, đừng chép code in vào lệnh.
+
+### 12.3 Purge nhiều lượt và Audit
+
+```csharp
+using Autodesk.AutoCAD.DatabaseServices;
+using CadCoreFramework.Core;
+
+namespace CadCoreFramework.Features.DrawingTools
+{
+    public static class DrawingCleanup
+    {
+        /// <summary>
+        /// Purge mọi block, layer, linetype, text style, dim style, RegApp không còn được dùng.
+        /// Lặp nhiều lượt: xóa một block không dùng có thể làm layer/linetype mà chỉ block đó dùng trở thành
+        /// "không dùng" ở lượt sau. Trả về số bản ghi đã xóa. Gọi trong ICadContext.Execute / TryExecute.
+        /// </summary>
+        public static int PurgeAll(ICadScope scope, int maxPasses = 10)
+        {
+            Database db = scope.Database;
+            Transaction tr = scope.Transaction;
+            int erased = 0;
+
+            for (int pass = 0; pass < maxPasses; pass++)
+            {
+                ObjectIdCollection ids = Candidates(db, tr);
+                db.Purge(ids);              // Purge KHÔNG xóa gì: nó bỏ khỏi ids những bản ghi còn được tham chiếu
+                if (ids.Count == 0) break;
+
+                foreach (ObjectId id in ids)
+                    tr.GetObject(id, OpenMode.ForWrite).Erase();
+                erased += ids.Count;
+            }
+            return erased;
+        }
+
+        private static ObjectIdCollection Candidates(Database db, Transaction tr)
+        {
+            var ids = new ObjectIdCollection();
+            ObjectId[] tables =
+            {
+                db.BlockTableId, db.LayerTableId, db.LinetypeTableId,
+                db.TextStyleTableId, db.DimStyleTableId, db.RegAppTableId,
+            };
+            foreach (ObjectId tableId in tables)
+            {
+                var table = (SymbolTable)tr.GetObject(tableId, OpenMode.ForRead);
+                foreach (ObjectId id in table)
+                {
+                    var record = (SymbolTableRecord)tr.GetObject(id, OpenMode.ForRead);
+                    if (record.IsErased || record.IsDependent) continue;          // "XREF|LAYER": thuộc file xref
+                    if (record is BlockTableRecord block && (block.IsLayout || block.IsFromExternalReference))
+                        continue;                                                   // xref: tháo bằng XREF → Detach
+                    ids.Add(id);
+                }
+            }
+            return ids;
+        }
+    }
+}
+```
+
+```csharp
+[CommandMethod("TOOLS_PURGE_AUDIT")]
+public void PurgeAndAudit()
+{
+    ExecuteCommand(() =>
+    {
+        int erased = 0;
+        CadContext.Execute(scope => { erased = DrawingCleanup.PurgeAll(scope); }, undoMarkName: "Purge");
+        GetRequiredService<INotificationService>().Info($"Đã purge {erased} bản ghi không dùng.");
+
+        // .NET API không có hàm Audit cho cả bản vẽ → xếp lệnh AUDIT chạy ngay sau lệnh này.
+        Document.SendStringToExecute("_.AUDIT _Y ", true, false, false);
+    });
+}
+```
+
+- **`Database.Purge` không xóa gì.** Nó lọc tập id bạn đưa vào, chỉ giữ lại những bản ghi không còn được tham chiếu. Việc `Erase` là của bạn.
+- **Một lượt là không đủ (đã kiểm).** Ví dụ: layer chỉ được dùng bởi entity *bên trong* một block chưa ai chèn. Ở lượt 1, `Purge` cho xóa block nhưng giữ layer. Sang lượt 2, sau khi block đã bị xóa trong cùng transaction, layer mới được xóa.
+- Kiểm thử `PurgeAll` cũng xác nhận layer 0 và layer hiện hành không bị đụng tới. Gọi `PurgeAll` lần hai trả về 0.
+- **Không có API Audit cho cả bản vẽ.** Metadata `AcDbMgd.dll` (AutoCAD 2024) không có `Database.Audit`. `AuditInfo` không có constructor public; nó chỉ là tham số của `DBObject.Audit`, phần mà người viết custom object override. Vì vậy công thức gửi lệnh `AUDIT` qua `SendStringToExecute`, và lệnh này chạy **sau** khi lệnh hiện tại kết thúc. Chạy `_.AUDIT` rồi `_Y` trong accoreconsole cho prompt `Fix any errors detected? [Yes/No] <N>:` và kết thúc bằng `Total errors found 0 fixed 0`.
+- Purge chạy trong một `Execute` có `undoMarkName`; `AUDIT` là một lệnh riêng, chạy sau đó.
+
+### 12.4 Attach xref với đường dẫn tương đối
+
+```csharp
+using System;
+using System.IO;
+using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using CadCoreFramework.Core;
+using CadCoreFramework.Utils;
+
+namespace CadCoreFramework.Features.DrawingTools
+{
+    public static class XrefAttacher
+    {
+        /// <summary>
+        /// Attach <paramref name="xrefPath"/> rồi chèn một tham chiếu tại <paramref name="position"/> vào không gian
+        /// hiện hành. Gọi trong ICadContext.Execute*. Xem <see cref="AttachDefinition"/> về đường dẫn.
+        /// </summary>
+        public static ObjectId Attach(ICadScope scope, string xrefPath, Point3d position, string? hostDrawingPath)
+        {
+            ObjectId definitionId = AttachDefinition(scope.Database, scope.Transaction, xrefPath, hostDrawingPath);
+            var reference = new BlockReference(position, definitionId);
+            reference.SetDatabaseDefaults(scope.Database);
+            return scope.AppendEntityToCurrentSpace(reference);
+        }
+
+        /// <summary>
+        /// Tạo (hoặc dùng lại) định nghĩa xref và ấn định đường dẫn lưu trong bản vẽ:
+        /// bản vẽ chủ đã lưu (<paramref name="hostDrawingPath"/> có thư mục) và cùng ổ đĩa → đường dẫn TƯƠNG ĐỐI
+        /// với thư mục bản vẽ chủ; còn lại → đường dẫn TUYỆT ĐỐI. Không để mặc AutoCAD: với bản vẽ chưa lưu,
+        /// AttachXref ghi đường dẫn tương đối theo thư mục hiện hành của tiến trình.
+        /// </summary>
+        public static ObjectId AttachDefinition(Database db, Transaction tr, string xrefPath, string? hostDrawingPath)
+        {
+            string fullPath = Path.GetFullPath(xrefPath);
+            if (!File.Exists(fullPath)) throw new FileNotFoundException("Không tìm thấy file xref.", fullPath);
+            string name = SymbolNameRules.Validate(Path.GetFileNameWithoutExtension(fullPath), nameof(xrefPath));
+
+            var blockTable = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+            if (blockTable.Has(name))
+            {
+                var existing = (BlockTableRecord)tr.GetObject(blockTable[name], OpenMode.ForRead);
+                if (!existing.IsFromExternalReference)
+                    throw new InvalidOperationException($"Bản vẽ đã có block thường tên '{name}'. Đổi tên file xref hoặc block.");
+                return existing.ObjectId;                    // đã attach: chỉ chèn thêm tham chiếu
+            }
+
+            ObjectId definitionId = db.AttachXref(fullPath, name);
+            var definition = (BlockTableRecord)tr.GetObject(definitionId, OpenMode.ForWrite);
+            definition.PathName = RelativePath(hostDrawingPath, fullPath) ?? fullPath;
+            return definitionId;
+        }
+
+        /// <summary>
+        /// Đường dẫn của <paramref name="xrefPath"/> tính từ thư mục chứa bản vẽ chủ, theo cách AutoCAD ghi:
+        /// <c>.\XREF\nen.dwg</c>, <c>..\Chung\khung.dwg</c>. Trả null khi bản vẽ chủ chưa lưu (null, hoặc tên
+        /// không có thư mục như "Drawing1.dwg") hoặc hai file nằm khác ổ đĩa.
+        /// </summary>
+        public static string? RelativePath(string? hostDrawingPath, string xrefPath)
+        {
+            if (string.IsNullOrEmpty(hostDrawingPath) || !Path.IsPathRooted(hostDrawingPath)) return null;
+            string hostDir = Path.GetDirectoryName(Path.GetFullPath(hostDrawingPath));
+            string target = Path.GetFullPath(xrefPath);
+            if (!string.Equals(Path.GetPathRoot(hostDir), Path.GetPathRoot(target), StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            string[] from = hostDir.TrimEnd('\\').Split('\\');
+            string[] to = target.Split('\\');
+            int common = 0;
+            while (common < from.Length && common < to.Length - 1 &&
+                   string.Equals(from[common], to[common], StringComparison.OrdinalIgnoreCase))
+                common++;
+
+            string tail = string.Join("\\", to.Skip(common));
+            return common == from.Length
+                ? ".\\" + tail
+                : string.Join("\\", Enumerable.Repeat("..", from.Length - common)) + "\\" + tail;
+        }
+    }
+}
+```
+
+```csharp
+[CommandMethod("TOOLS_XREF")]
+public void AttachXref()
+{
+    ExecuteCommand(() =>
+    {
+        string path = GetRequiredService<IDialogService>().ShowOpenFileDialog("Bản vẽ AutoCAD (*.dwg)|*.dwg", "Chọn file xref");
+        if (string.IsNullOrEmpty(path)) return;
+        Point3d? position = CadPromptHelper.GetPoint("Điểm chèn xref:");
+        if (position == null) return;
+
+        // DWGTITLED = 1: bản vẽ đã được lưu ít nhất một lần, Document.Name là đường dẫn đầy đủ.
+        bool saved = Convert.ToInt32(CadApplicationHelper.GetSystemVariable("DWGTITLED")) == 1;
+        string host = saved ? Document.Name : null;
+        if (!saved)
+            GetRequiredService<INotificationService>().Warn("Bản vẽ chưa lưu: xref được ghi đường dẫn tuyệt đối. Lưu bản vẽ trước nếu muốn đường dẫn tương đối.");
+
+        ExecuteWithScope(scope => XrefAttacher.Attach(scope, path, position.Value, host),
+            undoMarkName: "Attach " + Path.GetFileName(path));
+    });
+}
+```
+
+**Tương đối hay tuyệt đối?**
+- **Đường dẫn tương đối** (`.\XREF\nen.dwg`) không gãy khi bạn chuyển **cả thư mục dự án** sang ổ khác, sang máy khác hay nén gửi đi. Nó chỉ gãy khi tách bản vẽ chủ khỏi thư mục `XREF`.
+- **Đường dẫn tuyệt đối** thì ngược lại.
+
+Kiểm thử đã làm đúng kịch bản đó:
+1. Lưu bản vẽ chủ (một side database) trong `proj1\`, gắn một xref tương đối và một xref tuyệt đối, cả hai nằm trong `proj1\XREF\`.
+2. Chép cả thư mục sang `proj2\`, rồi **xóa** `proj1\`.
+3. Mở lại `proj2\host.dwg` và gọi `ResolveXrefs`. Kết quả: xref tương đối `Resolved`, xref tuyệt đối `FileNotFound`.
+
+**Vì sao không để mặc AutoCAD chọn.** Đây là kiểm thử đã FAIL ở bản đầu của công thức. Bản đầu chỉ đổi đường dẫn khi tính được đường dẫn tương đối, và giả định `AttachXref` ghi đường dẫn tuyệt đối. Thực tế với `REFPATHTYPE = 1` (mặc định), `AttachXref` **tự** ghi đường dẫn tương đối, kể cả khi bản vẽ chủ **chưa lưu**. Khi đó nó tính theo *thư mục hiện hành của tiến trình*. Lần chạy thử ghi `..\CadCoreFramework_accoreconsole_profile\Temp\…\LAB_XREF_RAW.dwg`, tính từ thư mục làm việc của accoreconsole. Người dùng lưu bản vẽ ở chỗ khác là xref gãy. Vì vậy công thức luôn tự gán `PathName`:
+- Bản vẽ chủ đã lưu và cùng ổ đĩa: đường dẫn tương đối với bản vẽ chủ.
+- Còn lại: đường dẫn tuyệt đối, kèm cảnh báo cho người dùng.
+
+Hai chi tiết cũng đã kiểm:
+- Mở một bản vẽ đã lưu thì `DWGTITLED = 1` và `Document.Name` là đường dẫn đầy đủ. Với `Drawing1.dwg` chưa lưu, `DWGTITLED = 0`, còn `Database.Filename` lại là đường dẫn **template** (`…\Template\acadiso.dwt`), nên đừng dùng nó làm "đường dẫn bản vẽ chủ".
+- Sau `Database.SaveAs`, cả `Document.Name` lẫn `Database.Filename` đều **không** đổi.
+
+Gắn lại cùng một file chỉ chèn thêm tham chiếu, dùng chung định nghĩa. Trùng tên với một block thường thì báo lỗi rõ ràng.
+
+### 12.5 Gộp nhiều layer thành một
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
+using CadCoreFramework.Core;
+using CadCoreFramework.Extensions;
+using CadCoreFramework.Utils;
+
+namespace CadCoreFramework.Features.DrawingTools
+{
+    public sealed class LayerMergeResult
+    {
+        public LayerMergeResult(int entitiesMoved, IReadOnlyList<string> erased,
+            IReadOnlyList<string> kept, IReadOnlyList<string> missing)
+        {
+            EntitiesMoved = entitiesMoved;
+            Erased = erased;
+            Kept = kept;
+            Missing = missing;
+        }
+
+        public int EntitiesMoved { get; }
+        /// <summary>Layer nguồn đã xóa.</summary>
+        public IReadOnlyList<string> Erased { get; }
+        /// <summary>Layer nguồn còn được tham chiếu nên giữ lại (đã hết entity, nhưng Purge chưa cho xóa).</summary>
+        public IReadOnlyList<string> Kept { get; }
+        /// <summary>Tên nguồn không có trong bản vẽ.</summary>
+        public IReadOnlyList<string> Missing { get; }
+    }
+
+    public static class LayerMerger
+    {
+        /// <summary>"A, b ,,B" → ["A", "b"]: bỏ khoảng trắng, bỏ mục rỗng, bỏ trùng (không phân biệt hoa thường).</summary>
+        public static List<string> ParseNames(string? text)
+            => (text ?? "").Split(',')
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        /// <summary>Luật gộp layer, logic thuần. Trả danh sách lỗi (rỗng = hợp lệ).</summary>
+        public static List<string> Validate(IReadOnlyCollection<string> sources, string target)
+        {
+            var errors = new List<string>();
+            string? targetError = SymbolNameRules.GetError(target);
+            if (targetError != null) errors.Add("Layer đích: " + targetError);
+            if (sources.Count == 0) errors.Add("Chưa có layer nguồn nào.");
+
+            foreach (string source in sources)
+            {
+                if (string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
+                    errors.Add($"'{source}' vừa là nguồn vừa là đích.");
+                else if (string.Equals(source, "0", StringComparison.OrdinalIgnoreCase))
+                    errors.Add("Không gộp layer 0: entity nằm trên layer 0 trong block lấy layer của block reference, gộp sẽ đổi cách hiển thị.");
+                else if (string.Equals(source, "Defpoints", StringComparison.OrdinalIgnoreCase))
+                    errors.Add("Không gộp Defpoints: AutoCAD đặt điểm định nghĩa của kích thước lên đó và không in layer này.");
+                else if (source.IndexOf('|') >= 0)
+                    errors.Add($"'{source}' là layer của xref: sửa trong file xref.");
+            }
+            return errors;
+        }
+
+        /// <summary>
+        /// Chuyển mọi entity (trong model, mọi layout, mọi định nghĩa block, kể cả attribute) từ các layer nguồn
+        /// sang layer đích, rồi xóa các layer nguồn mà Purge xác nhận không còn tham chiếu.
+        /// Gọi trong ICadContext.Execute / TryExecute (một transaction, một bước Undo).
+        /// </summary>
+        public static LayerMergeResult Merge(ICadScope scope, IReadOnlyCollection<string> sources, string target)
+        {
+            List<string> errors = Validate(sources, target);
+            if (errors.Count > 0) throw new ArgumentException(string.Join(" ", errors), nameof(sources));
+
+            Database db = scope.Database;
+            Transaction tr = scope.Transaction;
+            ObjectId targetId = scope.EnsureLayer(target);
+
+            var layerTable = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            var sourceIds = new Dictionary<ObjectId, string>();
+            var missing = new List<string>();
+            foreach (string name in sources)
+            {
+                if (layerTable.Has(name)) sourceIds[layerTable[name]] = name;
+                else missing.Add(name);
+            }
+
+            // Layer hiện hành không xóa được → chuyển layer hiện hành sang đích (layer đang đóng băng thì sang 0).
+            if (sourceIds.ContainsKey(db.Clayer))
+            {
+                var targetLayer = (LayerTableRecord)tr.GetObject(targetId, OpenMode.ForRead);
+                db.Clayer = targetLayer.IsFrozen ? db.LayerZero : targetId;
+            }
+
+            int moved = 0;
+            var blockTable = (BlockTable)tr.GetObject(db.BlockTableId, OpenMode.ForRead);
+            foreach (ObjectId blockId in blockTable)
+            {
+                var block = (BlockTableRecord)tr.GetObject(blockId, OpenMode.ForRead);
+                if (block.IsFromExternalReference || block.IsDependent) continue;
+
+                foreach (ObjectId id in block)
+                {
+                    if (!(tr.GetObject(id, OpenMode.ForRead) is Entity entity)) continue;
+                    if (sourceIds.ContainsKey(entity.LayerId)) moved += MoveToLayer(tr, id, targetId);
+
+                    // Attribute không nằm trong block table record mà thuộc về block reference.
+                    if (entity is BlockReference reference)
+                    {
+                        foreach (ObjectId attributeId in reference.AttributeCollection)
+                        {
+                            var attribute = (Entity)tr.GetObject(attributeId, OpenMode.ForRead);
+                            if (sourceIds.ContainsKey(attribute.LayerId)) moved += MoveToLayer(tr, attributeId, targetId);
+                        }
+                    }
+                }
+            }
+
+            var purgeable = new ObjectIdCollection(sourceIds.Keys.ToArray());
+            db.Purge(purgeable);
+            var erased = new List<string>();
+            foreach (ObjectId id in purgeable)
+            {
+                tr.GetObject(id, OpenMode.ForWrite).Erase();
+                erased.Add(sourceIds[id]);
+            }
+            List<string> kept = sourceIds.Values.Except(erased).ToList();
+            return new LayerMergeResult(moved, erased, kept, missing);
+        }
+
+        private static int MoveToLayer(Transaction tr, ObjectId id, ObjectId layerId)
+        {
+            // forceOpenOnLockedLayer = true: entity trên layer KHÓA vẫn mở để ghi được (nếu không: eOnLockedLayer).
+            var entity = (Entity)tr.GetObject(id, OpenMode.ForWrite, false, true);
+            entity.LayerId = layerId;
+            return 1;
+        }
+    }
+}
+```
+
+```csharp
+[CommandMethod("TOOLS_MERGE_LAYERS")]
+public void MergeLayers()
+{
+    ExecuteCommand(() =>
+    {
+        var notify = GetRequiredService<INotificationService>();
+        string sourceText = CadPromptHelper.GetString("Các layer nguồn, cách nhau bằng dấu phẩy:");
+        if (sourceText == null) return;
+        string target = CadPromptHelper.GetString("Layer đích:");
+        if (target == null) return;
+
+        List<string> sources = LayerMerger.ParseNames(sourceText);
+        List<string> errors = LayerMerger.Validate(sources, target.Trim());
+        if (errors.Count > 0)
+        {
+            foreach (string error in errors) notify.Warn(error);
+            return;
+        }
+
+        LayerMergeResult result = null;
+        CadContext.Execute(scope => { result = LayerMerger.Merge(scope, sources, target.Trim()); },
+            undoMarkName: "Gộp layer → " + target.Trim());
+
+        notify.Info($"Đã chuyển {result.EntitiesMoved} entity sang '{target.Trim()}'. Đã xóa: {string.Join(", ", result.Erased)}.");
+        if (result.Kept.Count > 0) notify.Warn("Còn được tham chiếu nên chưa xóa: " + string.Join(", ", result.Kept));
+        if (result.Missing.Count > 0) notify.Warn("Không có trong bản vẽ: " + string.Join(", ", result.Missing));
+    });
+}
+```
+
+Những chỗ một bản "gộp layer" đơn giản hay làm sai, và công thức này xử lý:
+
+| Chỗ dễ sót | Công thức làm gì | Đã kiểm |
+| :--- | :--- | :---: |
+| Chỉ duyệt không gian hiện hành | Duyệt **mọi** block table record: model, mọi layout, mọi định nghĩa block (bỏ xref) | ✅ entity ở model, ở `Layout1` và trong định nghĩa block đều chuyển |
+| Attribute | Attribute thuộc về block reference, không nằm trong block table record, nên duyệt `AttributeCollection` riêng | ✅ |
+| Layer nguồn đang **khóa** | `GetObject(id, ForWrite, openErased: false, forceOpenOnLockedLayer: true)` | ✅ xem dưới bảng |
+| Layer nguồn là layer hiện hành | Chuyển `Clayer` sang layer đích trước (layer đích đang đóng băng thì sang 0) | ✅ nhánh thường; nhánh layer đích đóng băng chưa kiểm |
+| Xóa layer vẫn còn được tham chiếu | Chỉ xóa những layer mà `Purge` cho phép; còn lại báo trong `Kept` | ✅ hai layer nguồn đều xóa được, `Kept` rỗng |
+| Layer 0, Defpoints, layer của xref | Từ chối ngay ở `Validate` | ✅ logic thuần |
+
+**Khóa layer: bẫy trong chính kiểm thử.** Đây là kiểm thử thứ hai đã FAIL ở lần chạy đầu. Kiểm thử khóa layer rồi mở entity `ForWrite` *trong cùng transaction*, và AutoCAD **không** báo lỗi. Làm lại với layer khóa **đã commit** thì đúng như mong đợi: `GetObject(…, ForWrite)` ném `eOnLockedLayer`, còn bản có `forceOpenOnLockedLayer: true` mở được. Bài học cho người viết kiểm thử: muốn tái hiện trạng thái của bản vẽ thật, hãy commit phần chuẩn bị trước, rồi mới chạy phần cần kiểm trong một transaction mới.
+
+Toàn bộ thao tác gộp (chuyển entity, đổi layer hiện hành, xóa layer) nằm trong một `Execute` với `undoMarkName`: một transaction, một undo mark. Ctrl+Z trên AutoCAD có giao diện chưa được kiểm trong lần chạy này; thêm nó vào smoke test thủ công khi bạn chép công thức vào dự án.
+
+---
+
+## 13. Checklist trước khi mở PR
 
 - [ ] Build `-c Release -warnaserror` 0 warning (analyzer CAD001–CAD003 chạy trong build); `dotnet test` xanh trên cả hai TFM
 - [ ] Không prompt trong transaction; không prompt trong Service/ViewModel (CAD002)
@@ -382,6 +1091,8 @@ Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK
 2. Palette mới có ô "Chiều rộng". Bind ô đó thế nào, và vì sao không bind thẳng vào `double`?
 3. Bạn viết một Overrule vẽ thêm nhãn cho khung tủ của §3. Dùng filter nào, và chuyện gì xảy ra nếu không đặt filter?
 4. Vì sao `PanelService` luôn truyền `undoMarkName`, dù lệnh `PANEL_DRAW` đã được AutoCAD gom Undo theo lệnh?
+5. Bạn gọi `db.Purge(ids)` một lần rồi `Erase` mọi id còn lại, nhưng sau đó lệnh `PURGE` của AutoCAD vẫn tìm thấy layer để xóa. Vì sao?
+6. Người dùng attach xref vào bản vẽ `Drawing1.dwg` chưa lưu, rồi lưu bản vẽ vào thư mục dự án. Mở lại thì xref báo "Not Found". Chuyện gì đã xảy ra, và công thức §12.4 tránh nó thế nào?
 
 <details><summary>Gợi ý</summary>
 
@@ -389,6 +1100,8 @@ Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK
 2. Bind vào một property **chuỗi**, rồi đọc số bằng `NumberText` như `SpacingText` của Golden Sample. Bind thẳng vào `double` thì WPF đọc `2,5` thành 25 và lặng lẽ giữ số cũ khi ô trống ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)).
 3. `SetExtensionDictionaryEntryFilter(PanelService.DataKey)`, vì dữ liệu tủ nằm trong Xrecord của Extension Dictionary ([§7](#7-thêm-overrule)). Không filter thì `WorldDraw` chạy cho mọi `Polyline` trong bản vẽ, rất nhiều lần.
 4. Service còn được gọi từ palette, tức application context, nơi AutoCAD không tự gom Undo theo lệnh ([T01 §11](T01_AUTOCAD_NET_FOUNDATIONS.md#11-undo)).
+5. Xóa một block không dùng làm layer chỉ được block đó dùng trở thành "không dùng", nhưng chỉ ở lượt `Purge` kế tiếp. Phải lặp cho tới khi `Purge` không trả về gì ([§12.3](#123-purge-nhiều-lượt-và-audit)).
+6. Với `REFPATHTYPE = 1`, `AttachXref` ghi đường dẫn tương đối ngay cả khi bản vẽ chủ chưa lưu, và tính theo thư mục hiện hành của tiến trình chứ không theo thư mục dự án. Công thức kiểm `DWGTITLED`: bản vẽ chưa lưu thì luôn ghi đường dẫn tuyệt đối và cảnh báo người dùng ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)).
 </details>
 
 ---
