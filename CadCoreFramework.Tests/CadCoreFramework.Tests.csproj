@@ -22,24 +22,24 @@
 
   <ItemGroup>
     <!-- xUnit test framework -->
-    <PackageReference Include="xunit"                         Version="2.9.0" />
-    <PackageReference Include="xunit.runner.visualstudio"     Version="2.8.2">
+    <PackageReference Include="xunit"                         Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio"     Version="4.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"        Version="17.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk"        Version="18.11.0" />
 
     <!-- Assertion library — reads like English -->
-    <PackageReference Include="FluentAssertions"              Version="6.12.0" />
+    <PackageReference Include="FluentAssertions"              Version="7.2.2" />
 
     <!-- Mocking framework — for future integration-style tests -->
-    <PackageReference Include="Moq"                           Version="4.20.70" />
+    <PackageReference Include="Moq"                           Version="4.21.0" />
 
     <!-- Shared serialisation library (same version as production) -->
     <PackageReference Include="Newtonsoft.Json"               Version="13.0.4" />
 
     <!-- Code Coverage — collect coverage data during test run -->
-    <PackageReference Include="coverlet.collector"            Version="6.0.2">
+    <PackageReference Include="coverlet.collector"            Version="10.1.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
