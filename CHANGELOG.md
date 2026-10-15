@@ -9,6 +9,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] — 2026-10-15
+
+Bản MINOR sau v1.0.0, gồm:
+- **Tính năng:** `IDataFileService` (JSON, CSV, Excel), lệnh demo `DEMO_ATTR_EXPORT` / `DEMO_ATTR_IMPORT`.
+- **Sửa lỗi:** 32 trên 34 mục backlog đã kiểm chứng ([T09 §3](docs/training/T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), PR #6–#13). B-20 mới xong một phần (HeadlessLab); B-21 ngoài phạm vi. Thêm: `Install.bat` báo thành công khi chép thiếu file.
+- **Tài liệu:** bộ tài liệu đào tạo (Giai đoạn 0, nhánh UI, T01–T10) và bộ tra cứu R01–R06.
+
+Dự án đã dựng từ v1.0.0 cần đọc **"Changed (PR #6) — lưu ý khi nâng cấp"** bên dưới. Ngoài ra, `IFileSystemService` có thêm hai thành viên (`ReadAllBytes`, `WriteAllBytes`): lớp tự viết implement interface này phải thêm hai hàm đó.
+
+### Fixed (gói cài đặt)
+- **`Install.bat` báo "CAI DAT HOAN TAT VA THANH CONG 100%" dù chép thiếu file.** Lỗi có từ v1.0.0, tìm thấy khi chạy thử gói 1.1.0 trước khi phát hành. `xcopy` gặp đường dẫn dài quá khoảng 254 ký tự (ví dụ giải nén ZIP vào thư mục sâu) thì báo `Insufficient memory` và bỏ qua file đó. Script chỉ kiểm `PackageContents.xml`, nên vẫn báo thành công. Lần thử cài vào một đường dẫn đích 261 ký tự thiếu 4 trên 22 file.
+  - Đã sửa: dùng `robocopy` (chép được đường dẫn dài) và coi mã thoát ≥ 8 là lỗi.
+  - Đã kiểm lại: đường dẫn dài và đường dẫn ngắn đều cài đủ 22 file. Khi chép thất bại thật (đích bị một file chặn tên), script báo `[LOI]`.
+- Version assembly `1.1.0.0` (`Properties/AssemblyInfo.cs`; log khởi động in version này) và version MSI mẫu (`Deployment/installer`).
+
 ### Added (đọc/ghi file JSON, CSV, Excel)
 - **`IDataFileService`** (đăng ký DI): `ReadJson<T>`/`WriteJson<T>`, `ReadCsv`/`WriteCsv`, `ReadExcel`/`WriteExcel`/`GetExcelSheetNames` (`.xlsx`), `ReadTable`/`WriteTable` chọn định dạng theo đuôi file. Lỗi thường gặp trả `CadResult` thất bại kèm thông điệp tiếng Việt: không thấy file, file đang mở trong Excel, JSON/CSV sai cấu trúc (có số dòng), `.xls` cũ, CSV không phải UTF-8. Ghi atomic, đọc được file đang mở.
 - **`Models/DataSheet`**: bảng dùng chung cho ba định dạng; `GetText`/`TryGetDouble` đọc ô bất kể nguồn. **`Utils/CsvCodec`**: CSV theo RFC 4180, tự viết, tự nhận dấu phân cách `,` `;` hoặc tab; ghi UTF-8 có BOM, số theo InvariantCulture.
@@ -318,5 +335,6 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 - File logging via `ILoggerService` / `LoggerService` (originally Serilog; replaced by a self-written file logger because AutoCAD 2024 preloads an incompatible Serilog — see "Fixed (first real AutoCAD run)").
 - `ThemeManager` — automatic WPF theme switching following AutoCAD Dark/Light mode.
 
-[Unreleased]: https://github.com/Tmphi/CadCoreFramework/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Tmphi/CadCoreFramework/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Tmphi/CadCoreFramework/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Tmphi/CadCoreFramework/releases/tag/v1.0.0

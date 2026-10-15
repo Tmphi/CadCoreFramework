@@ -125,7 +125,7 @@ flowchart LR
 | 1 | `main` xanh CI, không còn PR dở dang cho bản này | Người phát hành |
 | 2 | **HeadlessLab** (`.\tests\integration\run-headless-lab.ps1`) exit 0, rồi **smoke test thủ công** 17 bước ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)) trên AutoCAD sạch, từ commit sắp gắn tag | Người phát hành |
 | 3 | Chạy `package.ps1` **trên bản sao** của repo (không làm bẩn `dist/` thật), đọc lại mọi file người dùng sẽ thấy: `HDSD.txt`, thông điệp `Install.bat` ([A12](T03_PITFALLS_CASEBOOK.md#a12-gói-phát-hành-kèm-hướng-dẫn-của-một-sản-phẩm-khác)) | Người phát hành |
-| 4 | Thử `Install.bat`/`Uninstall.bat` với `APPDATA` trỏ thư mục tạm | Người phát hành |
+| 4 | Thử `Install.bat`/`Uninstall.bat` với `APPDATA` trỏ thư mục tạm, **đếm số file đã cài** so với số file trong `CadCoreFramework.bundle` của zip. Thử cả một đường dẫn **dài** (giải nén vào thư mục sâu): trước v1.1.0, `xcopy` bỏ sót file ở đường dẫn dài hơn khoảng 254 ký tự mà script vẫn báo thành công | Người phát hành |
 | 5 | PR đổi CHANGELOG `[Unreleased]` → `[x.y.z] — ngày`; merge | Owner merge |
 | 6 | `git tag -a vx.y.z -m "…"` trên commit merge; `git push origin vx.y.z` | Người phát hành |
 | 7 | Theo dõi `release.yml`; **tải zip từ trang Release về kiểm tra** (version trong manifest, đủ DLL hai TFM) | Người phát hành |

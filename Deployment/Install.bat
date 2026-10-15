@@ -28,7 +28,11 @@ echo [2/3] Xoa ban cai dat cu neu co...
 if exist "%BUNDLE_DEST%" rmdir /s /q "%BUNDLE_DEST%" >nul 2>&1
 
 echo [3/3] Sao chep plugin vao AutoCAD ApplicationPlugins...
-xcopy "%BUNDLE_SRC%" "%BUNDLE_DEST%\" /E /I /Y /Q >nul
+:: robocopy thay xcopy: xcopy bao "Insufficient memory" va BO QUA file khi duong dan dai hon ~254 ky tu
+:: (vd giai nen ZIP vao thu muc sau) nhung van chep PackageContents.xml -> cai thieu DLL ma bao thanh cong.
+:: robocopy chep duoc duong dan dai; ma thoat >= 8 nghia la co file khong chep duoc.
+robocopy "%BUNDLE_SRC%" "%BUNDLE_DEST%" /E /R:2 /W:1 /NFL /NDL /NJH /NJS /NP >nul
+if errorlevel 8 goto ERROR_COPY
 
 if exist "%BUNDLE_DEST%\PackageContents.xml" goto SUCCESS
 goto ERROR_COPY
