@@ -9,6 +9,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (T08 §12 — công thức thao tác bản vẽ)
+- Năm công thức thay cho các chủ đề của Cookbook cũ, mỗi công thức gồm phần lõi chạy trên `ICadScope` và một lệnh `TOOLS_*`: khung tên A3/A2/A1 dạng block có attribute; xuất mọi layout ra một PDF qua `PlotService`; purge nhiều lượt + `AUDIT`; attach xref với đường dẫn tương đối; gộp layer (mọi block table record, attribute, layer khóa, layer hiện hành, chỉ xóa layer mà `Purge` cho phép).
+- Hành vi AutoCAD đã kiểm và ghi vào tài liệu:
+  - `AttachXref` với `REFPATHTYPE = 1` ghi đường dẫn tương đối theo **thư mục hiện hành** khi bản vẽ chủ chưa lưu, nên công thức luôn tự gán `PathName`.
+  - Chuyển cả thư mục dự án: xref tương đối vẫn `Resolved`, xref tuyệt đối thành `FileNotFound`.
+  - `Purge` một lượt không đủ.
+  - .NET API không có `Database.Audit`.
+  - `eOnLockedLayer` chỉ xuất hiện khi trạng thái khóa đã commit.
+  - `ConstantWidth` đặt trước `AddVertexAt` bị mất.
+- Checklist trước khi mở PR chuyển thành T08 §13; thêm hai câu tự kiểm tra.
+- **Kiểm chứng**: code chép nguyên văn từ một bản sao dự án, build `-c Release -warnaserror` sạch trên net48 và net8.0-windows; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab: 19 kiểm thử mới, cùng 18 kiểm thử cũ, 37/37 PASS. Lệnh (prompt, hộp thoại, `SendStringToExecute`) chỉ được biên dịch.
+
 ### Changed (hợp nhất `docs/` thành một bộ tài liệu hai lớp)
 - **Cấu trúc mới**: `docs/README.md` là cửa vào duy nhất; `docs/training/` (Học viện, không đổi tên) và `docs/reference/` (Tra cứu R01–R06) dùng chung một bộ quy ước: thanh điều hướng, dòng "Dùng khi / Học bài bản", mục lục, trích dẫn dạng `R03 §2`.
 - **Phần 1–9 cũ chuyển thành R01–R06** (đổi tên bằng `git mv`, giữ lịch sử):
