@@ -345,7 +345,7 @@ ViewModel chỉ gọi `_layerService.GetAllLayers()` và gán vào property hi�
 
 [`IDataFileService`](../../Services/IDataFileService.cs) đọc và ghi JSON (Newtonsoft.Json), CSV (tự viết, [`Utils/CsvCodec.cs`](../../Utils/CsvCodec.cs)) và Excel `.xlsx` ([MiniExcel](https://github.com/mini-software/MiniExcel) 1.44.1, giấy phép Apache-2.0, không kéo theo DLL nào khác). Service không dùng API AutoCAD, gọi được ở mọi thread.
 
-- **Không ném exception với lỗi thường gặp.** Mọi hàm trả `CadResult` / `CadResult<T>`. Thông điệp lỗi tiếng Việt đọc được ngay: không thấy file, file đang mở trong Excel, JSON hoặc CSV sai cấu trúc (kèm số dòng), `.xls` cũ, CSV không phải UTF-8. Lỗi người dùng tự sửa được ghi log mức Warning, lỗi lạ ghi mức Error kèm stack trace.
+- **Không ném exception với lỗi thường gặp.** Mọi hàm trả `CadResult` / `CadResult<T>`. Thông điệp lỗi tiếng Việt đọc được ngay: không thấy file, file đang mở trong Excel, JSON hoặc CSV sai cấu trúc (kèm số dòng), `.xls` cũ, CSV không phải UTF-8. Service **không tự ghi log**: exception gốc nằm ở `CadResult.Exception`, người gọi hiển thị bằng `Notify.Error(result.ErrorMessage, result.Exception)`, nên log có đúng một dòng, kèm stack trace. Bản đầu tự ghi log trong service, và khi kiểm trong AutoCAD thì mỗi lỗi bị ghi hai lần.
 - **Ghi atomic.** Ghi ra tệp tạm rồi thay thế. Ghi thất bại (ví dụ file đang mở trong Excel) thì file cũ còn nguyên.
 - **Đọc được file đang mở trong Excel.** Service mở file với `FileShare.ReadWrite`. Ghi vào file đó thì thất bại kèm lời nhắc đóng file.
 

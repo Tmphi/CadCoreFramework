@@ -23,12 +23,15 @@ namespace CadCoreFramework.Services
         private static readonly char[] InvalidSheetChars = { ':', '\\', '/', '?', '*', '[', ']' };
 
         private readonly IFileSystemService _fileSystem;
-        private readonly ILoggerService _logger;
 
-        public DataFileService(IFileSystemService fileSystem, ILoggerService logger)
+        /// <summary>
+        /// Service KHÔNG tự ghi log: lỗi trả về trong <see cref="CadResult"/>, exception gốc nằm ở
+        /// <c>CadResult.Exception</c>. Người gọi hiển thị bằng <c>INotificationService.Error(result.ErrorMessage, result.Exception)</c>
+        /// → đúng MỘT dòng log, có stack trace (tự log ở đây thì mỗi lỗi bị ghi hai lần — đã gặp khi kiểm trong AutoCAD).
+        /// </summary>
+        public DataFileService(IFileSystemService fileSystem)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _logger = logger;
         }
 
         // ─── JSON ────────────────────────────────────────────────────────────
@@ -245,38 +248,26 @@ namespace CadCoreFramework.Services
             catch (Exception ex) { return CadResult.Fail(Describe(ex, path, verb), ex); }
         }
 
-        private string Describe(Exception ex, string path, string verb)
+        private static string Describe(Exception ex, string path, string verb)
         {
             string name = string.IsNullOrEmpty(path) ? "(không có đường dẫn)" : Path.GetFileName(path);
-            string message;
-            bool expected = true; // lỗi người dùng tự sửa được → Warning; lỗi lạ → Error kèm stack trace
             switch (ex)
             {
                 case FileNotFoundException _:
                 case DirectoryNotFoundException _:
-                    message = $"Không tìm thấy file '{path}'.";
-                    break;
+                    return $"Không tìm thấy file '{path}'.";
                 case UnauthorizedAccessException _:
-                    message = $"Không có quyền {verb.ToLowerInvariant()} file '{path}' (file chỉ đọc, hoặc thư mục cần quyền quản trị).";
-                    break;
+                    return $"Không có quyền {verb.ToLowerInvariant()} file '{path}' (file chỉ đọc, hoặc thư mục cần quyền quản trị).";
                 case IOException io when IsSharingViolation(io):
-                    message = $"File '{name}' đang được mở trong chương trình khác (Excel?). Đóng file rồi thử lại.";
-                    break;
+                    return $"File '{name}' đang được mở trong chương trình khác (Excel?). Đóng file rồi thử lại.";
                 case JsonException _:
-                    message = $"File '{name}' không phải JSON hợp lệ: {ex.Message}";
-                    break;
+                    return $"File '{name}' không phải JSON hợp lệ: {ex.Message}";
                 case FormatException _:
                 case ArgumentException _:
-                    message = $"File '{name}': {ex.Message}";
-                    break;
+                    return $"File '{name}': {ex.Message}";
                 default:
-                    message = $"{verb} file '{name}' thất bại: {ex.Message}";
-                    expected = false;
-                    break;
+                    return $"{verb} file '{name}' thất bại: {ex.Message}";
             }
-            if (expected) _logger?.Warning(message);
-            else _logger?.Error(message, ex);
-            return message;
         }
 
         // ERROR_SHARING_VIOLATION (32), ERROR_LOCK_VIOLATION (33), ERROR_UNABLE_TO_REMOVE_REPLACED (1175).

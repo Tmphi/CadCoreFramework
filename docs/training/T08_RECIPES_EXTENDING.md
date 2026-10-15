@@ -1112,7 +1112,7 @@ public void DemoAttributeExport()
         if (string.IsNullOrEmpty(path)) return;
 
         CadResult written = GetRequiredService<IDataFileService>().WriteTable(path, sheet);
-        if (!written.IsSuccess) { Notify.Error(written.ErrorMessage); return; }
+        if (!written.IsSuccess) { Notify.Error(written.ErrorMessage, written.Exception); return; }
         Notify.Info($"Đã xuất {sheet.RowCount} block, {sheet.Columns.Count - BlockAttributeTable.FixedColumns.Length} tag ra {path}");
     });
 }
@@ -1130,7 +1130,7 @@ public void DemoAttributeImport()
         if (string.IsNullOrEmpty(path)) return;
 
         CadResult<DataSheet> read = GetRequiredService<IDataFileService>().ReadTable(path);
-        if (!read.IsSuccess) { Notify.Error(read.ErrorMessage); return; }
+        if (!read.IsSuccess) { Notify.Error(read.ErrorMessage, read.Exception); return; }
 
         AttributeImportResult result = null;
         CadContext.Execute(scope => { result = BlockAttributeTable.Import(scope, read.Value); },
@@ -1168,7 +1168,12 @@ Những chỗ dễ sai, và phần lõi xử lý thế nào:
 - 56 unit test mới (`DataSheetTests`, `CsvCodecTests`, `DataFileServiceTests`) chạy trên đĩa thật, xanh trên cả `net48` lẫn `net8.0-windows`.
 - 4 kiểm thử HeadlessLab trên AutoCAD 2024: 3 kiểm thử `ATTR_*` cho phần lõi, cộng `DATAFILE_FORMATS_INSIDE_AUTOCAD`. Các kiểm thử ghi rồi đọc lại cả ba định dạng ngay trong tiến trình AutoCAD, tức MiniExcel chạy được trên net48 bên trong AutoCAD.
 - Excel 16 thật mở file do service ghi: `.xlsx` giữ `001` và `2E5` là chữ, `12.5` là số. Đọc `.xlsx` trong lúc Excel đang mở nó thì được. Ghi đè thì nhận đúng thông báo "đang được mở trong chương trình khác". File Excel lưu bằng "CSV (Comma delimited)" bị `ReadCsv` từ chối kèm hướng dẫn.
-- Hai lệnh `DEMO_ATTR_*` (hộp thoại chọn file, thông báo) cần AutoCAD có giao diện.
+- Hai lệnh `DEMO_ATTR_*` chạy trên AutoCAD 2024 có giao diện (2026-10-15), với bản vẽ mẫu có 4 block: 3 trong model (1 trên layer khóa) và 1 trên `Layout1`. Log của plugin ghi:
+  - `Đã xuất 4 block, 2 tag ra …\EXP.xlsx`.
+  - Sau khi sửa cả 4 dòng trong Excel: `Đã đổi 3 attribute trên 3 block.` và `Bỏ qua 1 block trên layer khóa: 2C8`. File đang mở trong Excel vẫn được đọc.
+  - Xuất đè lên file đang mở: `File 'EXP.xlsx' đang được mở trong chương trình khác (Excel?)…`.
+  - Một lần Ctrl+Z trả cả 3 attribute về giá trị cũ (người dùng xác nhận; bước này không ghi log).
+- Lần chạy đó lộ ra một lỗi: mỗi lỗi bị **ghi log hai lần**, một lần `WRN` do service ghi và một lần `ERR` do `Notify.Error`. Đã sửa: service không tự ghi log, lệnh truyền `result.Exception` cho `Notify.Error`.
 
 ---
 

@@ -32,7 +32,7 @@ namespace CadCoreFramework.HeadlessLab
             {
                 var sheet = new DataSheet(new[] { "Tên", "Số", "X" });
                 sheet.AddRow("Tủ điện \"MSB\", tầng 1", "001", 12.5);
-                var service = new DataFileService(new FileSystemService(), null);
+                var service = new DataFileService(new FileSystemService());
                 string dir = Path.Combine(Path.GetTempPath(), "CadCoreLab_" + Path.GetRandomFileName());
                 Directory.CreateDirectory(dir);
                 try
@@ -78,7 +78,7 @@ namespace CadCoreFramework.HeadlessLab
             {
                 ObjectId a = InsertTable(scope, scope.CurrentSpace, new Point3d(0, 0, 0), "001", "x");
                 ObjectId b = InsertTable(scope, scope.CurrentSpace, new Point3d(50, 0, 0), "002", "y");
-                var service = new DataFileService(new FileSystemService(), null);
+                var service = new DataFileService(new FileSystemService());
                 string dir = Path.Combine(Path.GetTempPath(), "CadCoreLab_" + Path.GetRandomFileName());
                 Directory.CreateDirectory(dir);
                 try

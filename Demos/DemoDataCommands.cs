@@ -226,7 +226,7 @@ namespace CadCoreFramework.Demos
                 if (string.IsNullOrEmpty(path)) return;
 
                 CadResult written = GetRequiredService<IDataFileService>().WriteTable(path, sheet);
-                if (!written.IsSuccess) { Notify.Error(written.ErrorMessage); return; }
+                if (!written.IsSuccess) { Notify.Error(written.ErrorMessage, written.Exception); return; }
                 Notify.Info($"Đã xuất {sheet.RowCount} block, {sheet.Columns.Count - BlockAttributeTable.FixedColumns.Length} tag ra {path}");
             });
         }
@@ -244,7 +244,7 @@ namespace CadCoreFramework.Demos
                 if (string.IsNullOrEmpty(path)) return;
 
                 CadResult<DataSheet> read = GetRequiredService<IDataFileService>().ReadTable(path);
-                if (!read.IsSuccess) { Notify.Error(read.ErrorMessage); return; }
+                if (!read.IsSuccess) { Notify.Error(read.ErrorMessage, read.Exception); return; }
 
                 AttributeImportResult result = null;
                 CadContext.Execute(scope => { result = BlockAttributeTable.Import(scope, read.Value); },

@@ -17,7 +17,7 @@ namespace CadCoreFramework.Tests
     public sealed class DataFileServiceTests : IDisposable
     {
         private readonly string _dir = Path.Combine(Path.GetTempPath(), "CadCoreFrameworkTests_" + Path.GetRandomFileName());
-        private readonly DataFileService _service = new DataFileService(new FileSystemService(), logger: null!);
+        private readonly DataFileService _service = new DataFileService(new FileSystemService());
 
         public DataFileServiceTests() => Directory.CreateDirectory(_dir);
 
@@ -206,6 +206,7 @@ namespace CadCoreFramework.Tests
                 CadResult write = _service.WriteExcel(file, new DataSheet(new[] { "Khác" }));
                 write.IsSuccess.Should().BeFalse();
                 write.ErrorMessage.Should().Be("File 'dang-mo.xlsx' đang được mở trong chương trình khác (Excel?). Đóng file rồi thử lại.");
+                write.Exception.Should().BeAssignableTo<IOException>("người gọi cần exception gốc để log có stack trace");
             }
 
             File.ReadAllBytes(file).Should().Equal(before, "ghi thất bại không được làm hỏng file cũ");

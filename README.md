@@ -251,7 +251,7 @@ var files = GetRequiredService<IDataFileService>();
 var sheet = new DataSheet(new[] { "Tên", "Công suất" });
 sheet.AddRow("Máy bơm", 55.0);
 CadResult written = files.WriteTable(@"C:\temp\thiet-bi.xlsx", sheet);   // .xlsx / .csv / .json theo đuôi file
-if (!written.IsSuccess) { notify.Error(written.ErrorMessage); return; }
+if (!written.IsSuccess) { notify.Error(written.ErrorMessage, written.Exception); return; }
 
 CadResult<DataSheet> read = files.ReadTable(@"C:\temp\thiet-bi.xlsx");
 if (read.IsSuccess && read.Value.TryGetDouble(0, "Công suất", out double kw)) notify.Info($"{read.Value.GetText(0, "Tên")}: {kw} kW");

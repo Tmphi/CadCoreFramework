@@ -19,7 +19,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - 56 unit test mới (376 × 2 runtime).
   - 4 kiểm thử HeadlessLab mới (22/22 trên AutoCAD 2024; MiniExcel chạy trong tiến trình AutoCAD). Ba kiểm thử `ATTR_*` chỉ biên dịch khi còn `Demos/`, để dự án tạo bằng `IncludeDemos=false` vẫn build được lab. Tạm bỏ dòng kiểm layer khóa thì `ATTR_IMPORT_REPORTS_MISSING_LOCKED_UNKNOWN` FAIL.
   - Excel 16 thật mở file do service ghi: `.xlsx` giữ `001`/`2E5` là chữ. CSV thì bị Excel đổi `001` → `1`, `2E5` → `200000`, và trên máy dùng dấu phẩy thập phân thì CSV phân cách `,` bị dồn vào một cột. Đọc `.xlsx` đang mở trong Excel được, ghi đè thì báo lỗi rõ ràng. CSV ANSI do Excel lưu bị từ chối kèm hướng dẫn.
-  - Hai lệnh demo chưa chạy trên AutoCAD có giao diện.
+  - Hai lệnh demo chạy trên AutoCAD 2024 có giao diện (2026-10-15). Log xác nhận: xuất 4 block / 2 tag; nhập đổi 3 attribute và bỏ qua block trên layer khóa; ghi đè file đang mở trong Excel thì báo lỗi rõ ràng. Người dùng xác nhận một lần Ctrl+Z trả lại cả 3 attribute. Lần chạy này cho thấy mỗi lỗi bị ghi log hai lần (`WRN` + `ERR`). Đã sửa: `DataFileService` không tự ghi log nữa (constructor chỉ còn `IFileSystemService`), lệnh truyền `CadResult.Exception` cho `Notify.Error`.
 
 ### Added (T08 §12 — công thức thao tác bản vẽ)
 - Năm công thức thay cho các chủ đề của Cookbook cũ, mỗi công thức gồm phần lõi chạy trên `ICadScope` và một lệnh `TOOLS_*`: khung tên A3/A2/A1 dạng block có attribute; xuất mọi layout ra một PDF qua `PlotService`; purge nhiều lượt + `AUDIT`; attach xref với đường dẫn tương đối; gộp layer (mọi block table record, attribute, layer khóa, layer hiện hành, chỉ xóa layer mà `Purge` cho phép).
