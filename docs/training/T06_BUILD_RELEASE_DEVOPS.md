@@ -92,6 +92,8 @@ Runner **không có AutoCAD**. CI chỉ kiểm build + unit test, nên smoke tes
 
 Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run view <id> --log-failed`.
 
+**Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
+
 ---
 
 ## 5. Quy trình phát hành (release)
@@ -178,7 +180,21 @@ Plugin sống chung AppDomain với AutoCAD và các plugin khác ([T01 §1](T01
 4. Có bản cho **cả `net48` và `net8`** không?
 5. **Kiểm thử trong AutoCAD thật**, vì CI không phát hiện được xung đột với host.
 
-Dependency hiện tại: `CommunityToolkit.Mvvm 8.2.2`, `Microsoft.Extensions.DependencyInjection 8.0.0`, `Newtonsoft.Json 13.0.3` (+ dependency bắc cầu `System.*` cho net48).
+Dependency hiện tại: `CommunityToolkit.Mvvm 8.2.2`, `Microsoft.Extensions.DependencyInjection 8.0.0`, `Newtonsoft.Json 13.0.3`, `MiniExcel 1.44.1` (+ dependency bắc cầu `System.*` cho net48).
+
+**Nâng version (Dependabot, xem [§4](#4-ci-build-and-testyml)):**
+
+| Package | Dependabot | Lý do |
+| :--- | :--- | :--- |
+| `AutoCAD.NET*` | Bỏ qua | Version gắn với dải AutoCAD đích: 24.x cho net48 (AutoCAD 2024), 25.x cho net8. Đổi là quyết định có chủ đích |
+| `MiniExcel` | Bỏ qua (ghim 1.44.1) | Từ 1.45, trên net48 nó kéo theo `Microsoft.Bcl.AsyncInterfaces` 10.x; 1.44.1 không có dependency |
+| `Microsoft.CodeAnalysis*` | Bỏ qua (ghim 4.6.0) | Là mức sàn của analyzer: analyzer không được đòi Roslyn mới hơn VS/SDK của người dùng |
+| `FluentAssertions` | Chỉ tới 7.x | Từ v8 dùng license của Xceed, phải trả phí khi dùng thương mại; v7 vẫn Apache 2.0 |
+| `CommunityToolkit.Mvvm`, `Microsoft.Extensions.DependencyInjection`, `Newtonsoft.Json` | Minor + patch (nhóm `plugin-runtime`) | Bản major thường đổi dependency bắc cầu cho net48 |
+| Còn lại (test, benchmark, tool) | Mọi bản (nhóm `dev-tools`) | Chỉ chạy trên máy dev/CI; CI xanh là đủ |
+
+> [!WARNING]
+> **PR `plugin-runtime` xanh CI vẫn chưa được merge ngay.** CI không có AutoCAD, nên không thấy được xung đột với host. Trước khi merge, làm bước 2–5 của checklist trên với bản mới: so danh sách DLL trong `bin\x64\Release\net48\` trước và sau khi nâng, rồi thử trong AutoCAD thật. `ignore` trong `dependabot.yml` cũng chặn PR security update của chính package đó, nên package bị bỏ qua phải tự theo dõi cảnh báo bảo mật.
 
 ---
 
