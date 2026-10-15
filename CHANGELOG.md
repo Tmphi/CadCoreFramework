@@ -9,6 +9,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [1.1.1] — 2026-10-15
+
+Bản PATCH: cập nhật dependency và CI. API công khai và hành vi của plugin không đổi. Dự án có test riêng dùng FluentAssertions 6 nếu nâng theo lên 7.2.2 thì nên đọc release notes của FluentAssertions 7 trước. Test của template chạy được trên 7.2.2 mà không phải sửa dòng nào.
+
+- Version assembly `1.1.1.0` (`Properties/AssemblyInfo.cs`) và version MSI mẫu (`Deployment/installer`).
+
 ### Changed (dependency — PR #20–#24)
 - **Package đi theo bundle:** `CommunityToolkit.Mvvm` 8.2.2 → 8.4.2, `Microsoft.Extensions.DependencyInjection` 8.0.0 → 8.0.1, `Newtonsoft.Json` 13.0.3 → 13.0.4.
   - Trên net48, bundle có `Microsoft.Bcl.AsyncInterfaces` **10.0.0.1** (trước đây 8.0.0.0) và các bản `System.Memory`/`Buffers`/`Unsafe`/`Threading.Tasks.Extensions` mới hơn. Số file không đổi.
@@ -343,6 +351,7 @@ Bản phát hành đầu tiên: [GitHub Release v1.0.0](https://github.com/Tmphi
 - File logging via `ILoggerService` / `LoggerService` (originally Serilog; replaced by a self-written file logger because AutoCAD 2024 preloads an incompatible Serilog — see "Fixed (first real AutoCAD run)").
 - `ThemeManager` — automatic WPF theme switching following AutoCAD Dark/Light mode.
 
-[Unreleased]: https://github.com/Tmphi/CadCoreFramework/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Tmphi/CadCoreFramework/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/Tmphi/CadCoreFramework/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Tmphi/CadCoreFramework/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Tmphi/CadCoreFramework/releases/tag/v1.0.0

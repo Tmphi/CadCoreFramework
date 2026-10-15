@@ -21,7 +21,7 @@
     .\Deployment\installer\build-msi.ps1 -Version 1.0.0.0
 #>
 param(
-    [string]$Version = '1.1.0.0'
+    [string]$Version = '1.1.1.0'
 )
 
 Set-StrictMode -Version Latest
