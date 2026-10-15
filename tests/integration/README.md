@@ -131,7 +131,7 @@ integration:
   runs-on: [self-hosted, windows, autocad]
   needs: build
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - run: dotnet build -c Release
     - run: .\tests\integration\run-integration-tests.ps1 -Configuration Release
 ```
