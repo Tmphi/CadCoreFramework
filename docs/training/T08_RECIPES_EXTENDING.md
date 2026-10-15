@@ -368,7 +368,7 @@ Năm việc hay gặp khi làm tool cho người vẽ: chèn khung tên, xuất 
 Chép vào dự án: đặt các file vào `Features/DrawingTools/`, thêm `[assembly: CommandClass(typeof(CadCoreFramework.Features.DrawingTools.DrawingToolsCommands))]` vào `Properties/AssemblyInfo.cs`, thêm 5 lệnh `TOOLS_*` vào `Deployment/PackageContents.xml` ([§1](#1-thêm-một-lệnh)).
 
 > [!NOTE]
-> **Đã kiểm chứng thế nào.** Toàn bộ code dưới đây được chép vào một bản sao của dự án và build `-c Release -warnaserror` sạch trên cả `net48` lẫn `net8.0-windows`. Phần lõi được link vào [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) và chạy trên AutoCAD 2024 thật: 19 kiểm thử, tất cả PASS. Các kiểm thử này dựng sẵn bản vẽ mẫu: block chưa dùng, layer đang khóa, file xref thật, thư mục dự án bị chuyển đi nơi khác. Những câu "đã kiểm" trong mục này đều là kết quả của các lần chạy đó. Ở lần chạy đầu có ba kiểm thử FAIL. Một lần cho thấy công thức xref sai, và công thức đã được sửa ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)). Hai lần còn lại cho thấy hành vi của API mà kiểm thử phải tính tới ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối), [§12.5](#125-gộp-nhiều-layer-thành-một)). Riêng **lệnh** (prompt, hộp thoại chọn file, `SendStringToExecute`) cần AutoCAD có giao diện, nên chỉ được biên dịch, chưa chạy thử.
+> **Đã kiểm chứng thế nào.** Toàn bộ code dưới đây được chép vào một bản sao của dự án và build `-c Release -warnaserror` sạch trên cả `net48` lẫn `net8.0-windows`. Phần lõi được link vào [HeadlessLab](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) và chạy trên AutoCAD 2024 thật: 19 kiểm thử, tất cả PASS. Các kiểm thử này dựng sẵn bản vẽ mẫu: block chưa dùng, layer đang khóa, file xref thật, thư mục dự án bị chuyển đi nơi khác. Những câu "đã kiểm" trong mục này đều là kết quả của các lần chạy đó. Ở lần chạy đầu có ba kiểm thử FAIL. Một lần cho thấy công thức xref sai, và công thức đã được sửa ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối)). Hai lần còn lại cho thấy hành vi của API mà kiểm thử phải tính tới ([§12.4](#124-attach-xref-với-đường-dẫn-tương-đối), [§12.5](#125-gộp-nhiều-layer-thành-một)). Riêng **lệnh** (prompt, hộp thoại chọn file, `SendStringToExecute`) cần AutoCAD có giao diện, vì plugin không nạp được trong accoreconsole. Ngày 2026-10-15, cả 5 lệnh đã chạy trên AutoCAD 2024 có giao diện, bằng một DLL dựng từ `main` cộng nguyên văn code của mục này, trên các bản vẽ mẫu dựng sẵn. Chỗ nào log của plugin xác nhận thì ghi kèm số liệu trong log ở từng mục.
 
 ### 12.1 Khung tên A3/A2/A1 dạng block có attribute
 
@@ -593,6 +593,7 @@ public void InsertTitleBlock()
 - Mọi entity trong định nghĩa nằm trên layer 0.
 - Khung A3 đi từ (20, 10) tới (410, 287).
 - Lần chèn thứ hai dùng lại định nghĩa cũ, không thêm entity vào định nghĩa.
+- Lệnh `TOOLS_TITLEBLOCK` trên AutoCAD có giao diện: hỏi khổ giấy, điểm, tên dự án, tên bản vẽ, rồi chèn khung; `ATTEDIT` sửa được 5 attribute.
 
 Một bẫy nhỏ, cũng đã kiểm: đặt `ConstantWidth` **trước** `AddVertexAt` thì mất. Mỗi lần `AddVertexAt(…, startWidth: 0, endWidth: 0)` ghi bề rộng 0 cho đỉnh mới thêm, nên phải đặt `ConstantWidth` sau cùng.
 
@@ -667,6 +668,7 @@ public void ExportPdf()
   - Bản vẽ mới có đúng hai layout giấy `Layout1`, `Layout2`, theo thứ tự tab.
   - Đi đúng luồng của lệnh thì ra một PDF có số trang bằng số layout.
   - Bản vẽ chưa lưu có `Document.Name = "Drawing1.dwg"`, không có thư mục, nên cần `fallbackDirectory`.
+  - Lệnh `TOOLS_EXPORT_PDF` trên AutoCAD có giao diện, bản vẽ chưa lưu: log ghi `Đã xuất 2 layout ra C:\Users\…\Documents\Drawing1.pdf`.
 - `PlotService` chép page setup của từng layout rồi đặt máy in thành `DWG To PDF.pc3` (tham số `printerName`). Muốn đổi cách thiết lập trang in thì mở rộng `PlotService`, đừng chép code in vào lệnh.
 
 ### 12.3 Purge nhiều lượt và Audit
@@ -750,6 +752,7 @@ public void PurgeAndAudit()
 - Kiểm thử `PurgeAll` cũng xác nhận layer 0 và layer hiện hành không bị đụng tới. Gọi `PurgeAll` lần hai trả về 0.
 - **Không có API Audit cho cả bản vẽ.** Metadata `AcDbMgd.dll` (AutoCAD 2024) không có `Database.Audit`. `AuditInfo` không có constructor public; nó chỉ là tham số của `DBObject.Audit`, phần mà người viết custom object override. Vì vậy công thức gửi lệnh `AUDIT` qua `SendStringToExecute`, và lệnh này chạy **sau** khi lệnh hiện tại kết thúc. Chạy `_.AUDIT` rồi `_Y` trong accoreconsole cho prompt `Fix any errors detected? [Yes/No] <N>:` và kết thúc bằng `Total errors found 0 fixed 0`.
 - Purge chạy trong một `Execute` có `undoMarkName`; `AUDIT` là một lệnh riêng, chạy sau đó.
+- Lệnh `TOOLS_PURGE_AUDIT` trên AutoCAD có giao diện: log ghi `Đã purge 9 bản ghi không dùng.`, sau đó `AUDIT` tự chạy khi lệnh kết thúc.
 
 ### 12.4 Attach xref với đường dẫn tương đối
 
@@ -875,6 +878,10 @@ Hai chi tiết cũng đã kiểm:
 - Sau `Database.SaveAs`, cả `Document.Name` lẫn `Database.Filename` đều **không** đổi.
 
 Gắn lại cùng một file chỉ chèn thêm tham chiếu, dùng chung định nghĩa. Trùng tên với một block thường thì báo lỗi rõ ràng.
+
+Lệnh `TOOLS_XREF` trên AutoCAD có giao diện:
+- Trên bản vẽ chủ đã lưu, chọn file trong thư mục `XREF` cạnh nó: Saved Path là `.\XREF\nen.dwg`.
+- Trên Drawing1 chưa lưu: log ghi cảnh báo `Bản vẽ chưa lưu: xref được ghi đường dẫn tuyệt đối. …`.
 
 ### 12.5 Gộp nhiều layer thành một
 
@@ -1056,13 +1063,21 @@ Những chỗ một bản "gộp layer" đơn giản hay làm sai, và công th�
 | Chỉ duyệt không gian hiện hành | Duyệt **mọi** block table record: model, mọi layout, mọi định nghĩa block (bỏ xref) | ✅ entity ở model, ở `Layout1` và trong định nghĩa block đều chuyển |
 | Attribute | Attribute thuộc về block reference, không nằm trong block table record, nên duyệt `AttributeCollection` riêng | ✅ |
 | Layer nguồn đang **khóa** | `GetObject(id, ForWrite, openErased: false, forceOpenOnLockedLayer: true)` | ✅ xem dưới bảng |
-| Layer nguồn là layer hiện hành | Chuyển `Clayer` sang layer đích trước (layer đích đang đóng băng thì sang 0) | ✅ nhánh thường; nhánh layer đích đóng băng chưa kiểm |
+| Layer nguồn là layer hiện hành | Chuyển `Clayer` sang layer đích trước (layer đích đang đóng băng thì sang 0) | ✅ cả hai nhánh; nhánh layer đích đóng băng kiểm trên AutoCAD có giao diện: layer hiện hành thành `0` |
 | Xóa layer vẫn còn được tham chiếu | Chỉ xóa những layer mà `Purge` cho phép; còn lại báo trong `Kept` | ✅ hai layer nguồn đều xóa được, `Kept` rỗng |
 | Layer 0, Defpoints, layer của xref | Từ chối ngay ở `Validate` | ✅ logic thuần |
 
 **Khóa layer: bẫy trong chính kiểm thử.** Đây là kiểm thử thứ hai đã FAIL ở lần chạy đầu. Kiểm thử khóa layer rồi mở entity `ForWrite` *trong cùng transaction*, và AutoCAD **không** báo lỗi. Làm lại với layer khóa **đã commit** thì đúng như mong đợi: `GetObject(…, ForWrite)` ném `eOnLockedLayer`, còn bản có `forceOpenOnLockedLayer: true` mở được. Bài học cho người viết kiểm thử: muốn tái hiện trạng thái của bản vẽ thật, hãy commit phần chuẩn bị trước, rồi mới chạy phần cần kiểm trong một transaction mới.
 
-Toàn bộ thao tác gộp (chuyển entity, đổi layer hiện hành, xóa layer) nằm trong một `Execute` với `undoMarkName`: một transaction, một undo mark. Ctrl+Z trên AutoCAD có giao diện chưa được kiểm trong lần chạy này; thêm nó vào smoke test thủ công khi bạn chép công thức vào dự án.
+Toàn bộ thao tác gộp (chuyển entity, đổi layer hiện hành, xóa layer) nằm trong một `Execute` với `undoMarkName`: một transaction, một undo mark.
+
+Đã kiểm `TOOLS_MERGE_LAYERS` trên AutoCAD 2024 có giao diện, với bản vẽ mẫu có `L1` đang khóa (một line, một block reference, một line bên trong định nghĩa block) và `L2` là layer hiện hành (một line):
+- Gộp `L1,L2` vào `DICH`: log ghi `Đã chuyển 4 entity sang 'DICH'. Đã xóa: L1, L2.`, tức là cả entity bên trong định nghĩa block lẫn entity trên layer khóa.
+- **Một lần Ctrl+Z** trả lại toàn bộ: `L1` và `L2` hiện lại, `L1` vẫn khóa, entity về layer cũ, layer hiện hành lại là `L2`.
+- Cùng bản vẽ nhưng `DICH` đang đóng băng: layer hiện hành thành `0`.
+- Nhập `0` làm layer nguồn: `Validate` từ chối, lệnh dừng trước khi đụng vào bản vẽ.
+
+Khi chép công thức vào dự án, đưa ba bước đầu vào smoke test thủ công.
 
 ---
 

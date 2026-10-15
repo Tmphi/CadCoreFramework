@@ -19,7 +19,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `eOnLockedLayer` chỉ xuất hiện khi trạng thái khóa đã commit.
   - `ConstantWidth` đặt trước `AddVertexAt` bị mất.
 - Checklist trước khi mở PR chuyển thành T08 §13; thêm hai câu tự kiểm tra.
-- **Kiểm chứng**: code chép nguyên văn từ một bản sao dự án, build `-c Release -warnaserror` sạch trên net48 và net8.0-windows; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab: 19 kiểm thử mới, cùng 18 kiểm thử cũ, 37/37 PASS. Lệnh (prompt, hộp thoại, `SendStringToExecute`) chỉ được biên dịch.
+- **Kiểm chứng**: code chép nguyên văn từ một bản sao dự án, build `-c Release -warnaserror` sạch trên net48 và net8.0-windows; phần lõi chạy trên AutoCAD 2024 bằng HeadlessLab: 19 kiểm thử mới, cùng 18 kiểm thử cũ, 37/37 PASS.
+- **Kiểm trên AutoCAD 2024 có giao diện** (2026-10-15, người dùng chạy; log của plugin xác nhận những bước có ghi log): cả 5 lệnh `TOOLS_*` trên các bản vẽ mẫu dựng sẵn, bằng một DLL dựng từ `main` cộng nguyên văn code của T08 §12. Gộp `L1` (đang khóa) và `L2` (hiện hành) vào `DICH` chuyển 4 entity, kể cả entity bên trong định nghĩa block. Một lần Ctrl+Z trả lại toàn bộ. Khi `DICH` đang đóng băng, layer hiện hành thành `0`. Hai điểm "chưa kiểm" cuối cùng của T08 §12.5 đã được kiểm.
 
 ### Changed (hợp nhất `docs/` thành một bộ tài liệu hai lớp)
 - **Cấu trúc mới**: `docs/README.md` là cửa vào duy nhất; `docs/training/` (Học viện, không đổi tên) và `docs/reference/` (Tra cứu R01–R06) dùng chung một bộ quy ước: thanh điều hướng, dòng "Dùng khi / Học bài bản", mục lục, trích dẫn dạng `R03 §2`.
