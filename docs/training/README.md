@@ -172,7 +172,7 @@ Dành cho người **đã vững C#** (đạt 7–8 điểm [bài kiểm tra đ�
 | 4 | [T04](T04_DEBUGGING_TROUBLESHOOTING.md), [T05](T05_TESTING_STRATEGY.md), [T06](T06_BUILD_RELEASE_DEVOPS.md), [T08](T08_RECIPES_EXTENDING.md), [T09 §2](T09_SENIOR_PLAYBOOK.md#2-checklist-code-review); chưa biết WPF thì thêm [U01](U01_WPF_MVVM_BASICS.md) | — | Gắn được debugger vào AutoCAD; nói được mỗi phần của tính năng sắp làm sẽ test ở tầng nào |
 | 5 | — | L07 Nhân bản Golden Sample (2–3 ngày) | Tính năng mới + ≥ 15 unit test, PR qua CI, tự review bằng [T08 §13](T08_RECIPES_EXTENDING.md#13-checklist-trước-khi-mở-pr) và T09 §2 |
 
-**Tổng:** đọc ≈ 3,5 giờ (thêm ≈ 40 phút nếu học U01) và lab ≈ 7 giờ + 2–3 ngày. Thời gian đọc tính như dòng ⏱ ([§5](#5-quy-ước-đọc)), cộng cả README dự án, R01 và R05; thời lượng lab lấy ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab). Chưa tính thời gian chạy thử các ví dụ 🧪. Ghi thời gian thực tế của bạn vào mô tả PR của lab để hiệu chỉnh các con số này.
+**Tổng:** đọc ≈ 4 giờ, kể cả các khối ✅ tự kiểm tra sau mỗi mục 🎯 (thêm ≈ 40 phút nếu học U01), và lab ≈ 7 giờ + 2–3 ngày. Thời gian đọc tính như dòng ⏱ ([§5](#5-quy-ước-đọc)), cộng cả README dự án, R01 và R05; thời lượng lab lấy ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab). Chưa tính thời gian chạy thử các ví dụ 🧪. Ghi thời gian thực tế của bạn vào mô tả PR của lab để hiệu chỉnh các con số này.
 
 **Cần làm giao diện xem trước?** Sau bước 5, học các mục 🎯 của [U00](U00_UI_START_HERE.md), [U02](U02_UI_IN_AUTOCAD.md), [U03](U03_DRAWING_ON_UI.md) (đọc ≈ 1 giờ 45 phút), rồi làm L17 Xem trước trên palette (1–2 ngày).
 
@@ -211,12 +211,11 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | 🔎 **Đọc code** | Mở file được dẫn và đọc *trước khi* đọc tiếp |
 | 🧪 **Thử ngay** | Thí nghiệm 5–15 phút trên AutoCAD hoặc unit test |
 | ⚠️ **Bẫy** | Lỗi đã từng xảy ra (với dự án này hoặc rất phổ biến) |
-| ✅ **Tự kiểm tra** | Câu hỏi cuối mục. Đáp án nằm trong khối thu gọn, hãy tự trả lời trước khi mở |
-| 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
+| ✅ **Tự kiểm tra** | Câu hỏi ngay sau mỗi mục 🎯 (T01, T02, T04–T08) và cuối mỗi module. Đáp án nằm trong khối thu gọn. **Gấp tài liệu lại, tự trả lời** (nói ra hoặc viết ra) rồi mới mở: cố nhớ lại giúp nhớ lâu hơn nhiều so với đọc lại. Sai câu nào thì đọc lại đúng đoạn đó, và hỏi lại câu đó ở lần ôn sau || 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
 | 🎯 **Cốt lõi** | Nhãn ở cuối dòng Mục lục: mục cần để làm việc hằng ngày với dự án và để học module sau. [Lộ trình nhanh](#lộ-trình-nhanh) chỉ đọc các mục này |
 | 🔍 **Đào sâu** | Giải thích gốc rễ hoặc chủ đề nâng cao. Học ở lộ trình đầy đủ, hoặc khi gặp đúng vấn đề. Mục tiêu đầu ra ở đầu module là của **cả** module, nên vài mục tiêu cần cả phần 🔍 |
 | 📖 **Tra cứu** | Không học tuần tự, mở khi cần: bảng mã lỗi, công thức, backlog, đề đánh giá |
-| ⏱ **Đọc** | Thời gian đọc kỹ cả trang và riêng phần 🎯, tính bằng số từ (kể cả code) ÷ 100 từ/phút, làm tròn 5 phút. **Chưa** gồm mở file nguồn, chạy thử, bài tập và lab; thời lượng lab ghi ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab) |
+| ⏱ **Đọc** | Thời gian đọc kỹ cả trang và riêng phần 🎯, tính bằng số từ (kể cả code và các khối ✅) ÷ 100 từ/phút, làm tròn 5 phút. **Chưa** gồm mở file nguồn, chạy thử, bài tập và lab; thời lượng lab ghi ở [T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab) |
 | 🌰 🌱 🌿 🌳 🏔️ | Năm cấp: Nhập môn → Fresher → Junior → Middle → Senior ([§2](#2-khung-năng-lực-5-cấp)) |
 | `B-xx` | Mã một mục trong [backlog kỹ thuật](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng): vấn đề thật đã kiểm chứng trong code. B-01…B-27 lập tại v1.0.0, B-28…B-30 tìm thấy khi sửa; hầu hết đã sửa ở PR #6/#7. B-31…B-34 tìm thấy khi viết nhánh UI; B-31…B-33 đã sửa ở PR #11, B-34 ở PR #13. Xem cột Trạng thái |
 | Lab `TÊN` / HeadlessLab | Một kiểm thử trên AutoCAD thật trong [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) |

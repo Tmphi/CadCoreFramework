@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T05](T05_TESTING_STRATEGY.md); Git & PR ([C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request)) · **Trong lộ trình:** tuần 13 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 10 phút) · **Thực hành:** L15 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L15 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Code chạy được trên máy bạn mới là một nửa. Nửa còn lại là **build tái lập được**, **CI chặn được lỗi**, và **bản phát hành đến tay người dùng đúng như bạn nghĩ**. Module này giải thích từng mắt xích, và chỉ ra những mắt xích đã từng đứt ([T03 A7–A12](T03_PITFALLS_CASEBOOK.md#a7-init-templateps1-không-parse-được-trên-windows-powershell-51)).
 
@@ -80,6 +80,19 @@ dotnet build CadCoreFramework.csproj -c Release -p:IncludeDemos=false   # kiểm
 
 Quy ước file: 4 dấu cách, CRLF trong working tree, `utf-8-bom`. Riêng `*.ps1` **bắt buộc BOM** ([A7](T03_PITFALLS_CASEBOOK.md#a7-init-templateps1-không-parse-được-trên-windows-powershell-51)), và `.gitattributes` ép `*.bat`/`*.cmd` dùng CRLF.
 
+### ✅ Tự kiểm tra §3
+
+1. Build trên máy bạn báo 1 warning `IDE0005` (using thừa), vẫn ra DLL. Đẩy lên thì sao?
+2. Bạn vừa sửa code chỉ dùng trong `Demos/`. Chạy lệnh nào để chắc dự án không có demo vẫn build được?
+3. Script `.ps1` mới có chuỗi tiếng Việt, lưu UTF-8 không BOM. Chạy bằng Windows PowerShell 5.1 thì chuyện gì có thể xảy ra?
+
+<details><summary>Đáp án</summary>
+
+1. CI đỏ: CI build với `-warnaserror`, chính sách 0 warning. Chạy đúng lệnh CI trước khi đẩy: `dotnet build CadCoreFramework.sln -c Release -warnaserror`.
+2. `dotnet build CadCoreFramework.csproj -c Release -p:IncludeDemos=false`.
+3. PowerShell 5.1 đọc file không BOM theo bảng mã ANSI: chữ Việt thành ký tự rác, có khi script không parse được (A7). Lưu `*.ps1` với BOM.
+</details>
+
 ---
 
 ## 4. CI: `build-and-test.yml`
@@ -91,6 +104,7 @@ Quy ước file: 4 dấu cách, CRLF trong working tree, `utf-8-bom`. Riêng `*.
 | Checkout, Setup .NET 8.0.x, Cache NuGet | | Cache theo hash các `*.csproj` |
 | `dotnet tool restore` | Cài ReportGenerator (khai báo trong `.config/dotnet-tools.json`) | |
 | Build Release `-warnaserror` | | 0 warning hoặc đỏ |
+| Build labs (starter), Build labs (solutions) | Biên dịch [`labs/Labs.csproj`](../../labs/README.md): code khởi đầu, rồi lời giải mẫu (`-p:UseSolutions=true`) | Hai bước riêng: trong một bước pwsh nhiều dòng, chỉ exit code của lệnh cuối quyết định. Chấm lab cần AutoCAD, nên chạy tay bằng `labs/run-lab.ps1` |
 | Test + coverage (cả 2 TFM) | `--collect:"XPlat Code Coverage"`, `--logger "trx;LogFilePrefix=test-results"` | `LogFilePrefix` (không phải `LogFileName`) để hai TFM không ghi đè `.trx` của nhau |
 | ReportGenerator | HTML + Cobertura | |
 | Upload artifact | `test-results`, `coverage-report` | Xem trong trang run của Actions |
@@ -112,6 +126,21 @@ Xem trạng thái nhanh: `gh run list --limit 5`. Xem log bước lỗi: `gh run
 Chạy cả năm trên máy trước khi đẩy: `cd tools/docs`, `npm ci` (một lần), rồi `npm run check`. Hai bước đầu không cần `npm ci`; hai bước cuối cần .NET SDK 8 trở lên. Dự án tạo bằng template với `IncludeDemos=false` không còn `Demos/`: link vào thư mục đó được bỏ qua (script ghi rõ số link bỏ qua), để CI của dự án mới không đỏ.
 
 **Dependabot** ([`.github/dependabot.yml`](../../.github/dependabot.yml)): mỗi thứ Hai mở PR nâng version cho GitHub Actions và NuGet. Các bản nâng được gộp thành tối đa 3 PR: `github-actions`, `plugin-runtime` (package đi theo bundle vào AutoCAD) và `dev-tools` (test, benchmark, ReportGenerator). Mỗi tháng có thêm một PR `docs-tools` cho package npm của `tools/docs`. CI ở trên chạy trên từng PR. Những package bị loại khỏi tự động, và lý do, xem [§7](#7-chính-sách-dependency).
+
+### ✅ Tự kiểm tra §4
+
+1. CI của PR xanh. Có được kết luận "plugin chạy đúng trong AutoCAD" không?
+2. Job `docs` báo lỗi số phút trên dòng ⏱ của module bạn vừa sửa. Vì sao, và sửa thế nào?
+3. Bước test ghi `.trx` bằng `LogFilePrefix` chứ không phải `LogFileName`. Vì sao?
+4. Bạn đổi tên một heading `##` trong T01. Bước CI nào có thể đỏ, ở file nào?
+
+<details><summary>Đáp án</summary>
+
+1. Không. Runner không có AutoCAD: CI chỉ kiểm build, unit test, tài liệu. Smoke test trong AutoCAD vẫn là việc của người phát hành ([T05 §7](T05_TESTING_STRATEGY.md#7-những-gì-chỉ-autocad-thật-mới-kiểm-được)).
+2. Số từ của trang đổi nên số phút đổi theo. CI ghi đúng con số cần ghi: sửa dòng ⏱ theo đó (hoặc chạy `npm run reading-time` trên máy trước).
+3. Test chạy cho hai TFM: `LogFileName` cố định thì hai lần chạy ghi đè `.trx` của nhau.
+4. `npm run links`: anchor của heading đổi theo tên, nên mọi link `T01_…md#tên-cũ` ở các file khác thành link gãy. Tìm và sửa chúng.
+</details>
 
 ---
 
@@ -246,6 +275,19 @@ Lệnh mới đơn lẻ: `dotnet new install .\Templates\cad-command` rồi `dot
 3. Mở PR: mô tả *Summary* + *Verification* (đã chạy gì, kết quả). Với thay đổi hành vi, ghi kết quả smoke test.
 4. CI phải xanh. **Owner review và merge.** Người viết PR không tự merge bản quan trọng.
 5. Sau merge: `git checkout main && git pull --ff-only` và xóa branch đã merge (`git branch -d …`).
+
+### ✅ Tự kiểm tra §9
+
+1. Viết commit message cho việc sửa lỗi palette không nhớ vị trí, theo quy ước của repo.
+2. PR của bạn đổi hành vi một lệnh. Phần *Verification* phải có gì?
+3. Vì sao dùng `git pull --ff-only` sau khi merge, thay vì `git pull` thường?
+
+<details><summary>Đáp án</summary>
+
+1. Ví dụ `fix(palette): remember palette position across sessions`, thân commit giải thích **vì sao** lỗi xảy ra và vì sao cách sửa đúng.
+2. Đã chạy gì và kết quả: build, test, và kết quả smoke test trong AutoCAD cho hành vi đã đổi.
+3. `main` ở máy bạn không có commit riêng: `--ff-only` chỉ tua tới. Nếu nó từ chối, nghĩa là bạn đã lỡ commit vào `main`, và bạn biết ngay thay vì tạo merge commit âm thầm.
+</details>
 
 ---
 

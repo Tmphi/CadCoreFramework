@@ -9,6 +9,11 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (tài liệu — luyện nhớ lại, GĐ3 phần 1)
+- Khối **✅ Tự kiểm tra** ngay sau mỗi mục 🎯 của T02, T04, T05, T06, T07, T08 (30 khối; T01 đã có từ trước), đáp án thu gọn. Câu hỏi là tình huống ("chuyện gì xảy ra nếu…", "tầng nào bắt lỗi này sớm nhất") thay vì nhắc lại định nghĩa, và không trùng khối ✅ cuối module.
+- training/README §5 hướng dẫn cách dùng: gấp tài liệu, tự trả lời, sai thì đọc lại đúng đoạn đó. Thẻ ⏱ đã tính cả chữ của các khối ✅. Tổng của lộ trình nhanh thành ≈ 4 giờ đọc.
+- T05 §9: bộ chấm `labs/` đã chạy `CadContext` thật trong accoreconsole nhờ shim `GetAcadDocument`. T06 §4: bảng bước CI có thêm hai bước build lab. T07 §2: `SelectAll` chọn trong mọi không gian (đã thử trên AutoCAD 2024).
+
 ### Added (lab chấm trên AutoCAD — `labs/`)
 - Bộ chấm tự động cho lab L02–L06 của T10, chạy trên **AutoCAD thật** (accoreconsole `/isolate`, không đổi thiết lập AutoCAD của máy): `.\labs\run-lab.ps1 -Lab L02`. Học viên viết bài vào `labs/L02…L05/` (có sẵn chữ ký, `TODO`). Lời giải mẫu ở `labs/LoiGiai/`, chấm bằng `-Solution`.
 - 20 kiểm tra. L02: layer, đếm theo `DxfName` mà không mở entity nào (đọc danh sách đối tượng mà transaction đã mở), tên thật của dynamic block `*U…`, không có gì mở `ForWrite`, paper space của Layout1. L03: mỗi thí nghiệm một phiên accoreconsole riêng, kiểm rằng code tái hiện đúng hiện tượng. L04: prompt **thật** với UCS xoay 30°, kiểm toạ độ WCS và không prompt khi đang mở transaction. L05: chọn DOOR đã chỉnh mà không chọn nhầm WINDOW; `OnLayersExact` (B-17). L06: `RemoveMetadata` Erase Xrecord (B-09).

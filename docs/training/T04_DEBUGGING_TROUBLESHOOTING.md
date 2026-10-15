@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md); dùng debugger cơ bản ([C01 §9](C01_FIRST_PROGRAM.md#9-debug-xem-chương-trình-chạy-từng-bước)) · **Trong lộ trình:** tuần 11 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 30 phút (phần 🎯 ≈ 15 phút) · **Thực hành:** L12, L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 20 phút) · **Thực hành:** L12, L16 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên trong* một tiến trình lớn của hãng khác, crash nhiều khi không có stack trace, và lỗi phụ thuộc vào bản vẽ, phiên bản AutoCAD, plugin khác đang chạy. Module này trang bị **quy trình** chẩn đoán, không chỉ công cụ.
 
@@ -52,6 +52,20 @@ Debug plugin AutoCAD khó hơn debug ứng dụng thường. Code chạy *bên t
 | Grep / reflection metadata DLL | Kiểm chứng API có tồn tại | §6 |
 | `AppDomain.GetAssemblies()`, Fusion log | Lỗi nạp DLL, xung đột version | §7 |
 
+### ✅ Tự kiểm tra §1
+
+Chọn công cụ **đầu tiên** cho từng tình huống:
+1. AutoCAD đóng đột ngột, không có hộp thoại nào.
+2. Bạn muốn biết sysvar `DARKMODE` có tồn tại không, mà không đụng tới AutoCAD đang làm việc.
+3. Mở rồi đóng palette 5 lần, nghi mỗi lần lại thêm một subscription.
+
+<details><summary>Đáp án</summary>
+
+1. Event Viewer (Application log), §5.
+2. accoreconsole `/isolate`, §5.3 (hoặc tra metadata DLL, §6).
+3. `CORE_DEBUG`, tab Event Subscribers: con số tăng mãi là rò rỉ.
+</details>
+
 ---
 
 ## 2. Vòng lặp phát triển: build → nạp → thử
@@ -69,6 +83,19 @@ dotnet build CadCoreFramework.csproj -c Debug -f net48     # chỉ plugin, nhanh
 > - Sửa code khởi động (`AppBootstrapper`), event, Overrule, Ribbon.
 > - Thấy hành vi không giải thích được.
 > - Trước khi xác nhận một bản sửa là đúng (luôn kiểm trên phiên AutoCAD sạch).
+
+### ✅ Tự kiểm tra §2
+
+1. Vì sao build Debug nạp lại được nhiều lần mà không tắt AutoCAD?
+2. Bạn sửa `AppBootstrapper` để hook thêm một event, build, `NETLOAD` bản mới. Event cũ đi đâu? Nên làm gì?
+3. Bản sửa của bạn chạy đúng sau năm lần nạp lại liên tiếp. Đã đủ để báo "đã sửa" chưa?
+
+<details><summary>Đáp án</summary>
+
+1. Bản Debug có tên assembly kèm timestamp: mỗi lần build là một assembly *mới*, nên .NET không coi là nạp trùng.
+2. Bản cũ vẫn nằm trong AppDomain, event nó hook **vẫn còn**. Sửa code khởi động hay event thì khởi động lại AutoCAD.
+3. Chưa. Kiểm lại trên một phiên AutoCAD **sạch**: các bản nạp trước có thể che hoặc gây ra hành vi bạn đang thấy.
+</details>
 
 ---
 
@@ -114,6 +141,19 @@ F5 sẽ mở AutoCAD và gắn debugger sẵn. Sau đó `NETLOAD` như thường
 > [!CAUTION]
 > Không để breakpoint dừng **bên trong một transaction đang mở** quá lâu rồi thao tác với AutoCAD (click, đổi tab). Bạn đang giữ lock và transaction. Đừng "Stop debugging" giữa transaction rồi tiếp tục dùng phiên AutoCAD đó cho việc quan trọng.
 
+### ✅ Tự kiểm tra §3
+
+1. Attach vào `acad.exe` của AutoCAD 2024 thì chọn Code type nào? AutoCAD 2025 thì sao?
+2. Lệnh chạy, không báo lỗi, nhưng bản vẽ không đổi gì. Bật thiết lập nào của debugger để tìm nhanh nhất?
+3. Breakpoint báo "No symbols have been loaded". Kiểm cửa sổ nào, tìm gì trong đó?
+
+<details><summary>Đáp án</summary>
+
+1. 2024: `Managed (.NET Framework 4.x)`. 2025+: `Managed (.NET Core, .NET 5+)`.
+2. Exception Settings → tích **Common Language Runtime Exceptions**. Debugger dừng ngay lúc exception được ném, kể cả khi sau đó có `catch` nuốt mất.
+3. Debug → Windows → **Modules**: có assembly `CadCoreFramework_<timestamp>` không, symbol đã nạp chưa. Thấy nhiều bản `CadCoreFramework_*` nghĩa là đang chạy bản cũ: khởi động lại AutoCAD.
+</details>
+
 ---
 
 ## 4. Log, Debug Inspector, CommandHistory
@@ -144,6 +184,21 @@ Mức log: bản **Debug** ghi từ `DBG`, bản **Release** ghi từ `INF`.
 | Command History | 50 lệnh gần nhất: tên, thời gian, thành công/thất bại | "Lệnh vừa rồi có chạy không, mất bao lâu?" |
 | DI Services | Mọi service đã đăng ký: interface, implementation, lifetime | "Service X có được đăng ký không?" |
 | Event Subscribers | Số subscriber theo từng loại message | Nghi rò rỉ subscription: con số tăng mãi sau mỗi lần mở/đóng palette |
+
+### ✅ Tự kiểm tra §4
+
+1. Mở log hôm nay mà không thấy dòng `CadCoreFramework initialized`. Kết luận gì?
+2. Log có `[ERR] Một subscriber của GridDrawnMessage ném exception.` Lưới đã được vẽ vào bản vẽ chưa? Lỗi nằm ở đâu?
+3. Log có `[WRN] StartUndoMark '…' thất bại`. Người dùng bị ảnh hưởng thế nào?
+4. Bạn nghi `IPanelService` chưa được đăng ký. Kiểm ở đâu mà không cần debugger?
+
+<details><summary>Đáp án</summary>
+
+1. `InitializeCore` không chạy hết: khởi động đã lỗi. Tìm dòng lỗi phía trên trong log.
+2. Đã vẽ: message chỉ được publish sau khi commit. Lỗi nằm ở phía **người nhận** message, không ở phần vẽ.
+3. Lệnh vẫn chạy và vẽ đúng, nhưng các thay đổi không được gom thành một bước Undo.
+4. `CORE_DEBUG`, tab DI Services: danh sách mọi service đã đăng ký kèm lifetime.
+</details>
 
 ---
 

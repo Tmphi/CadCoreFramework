@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 85 phút (phần 🎯 ≈ 20 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 95 phút (phần 🎯 ≈ 25 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
 
@@ -72,6 +72,19 @@ public class PanelCommands : CadCommandBase
 }
 ```
 
+### ✅ Tự kiểm tra §1
+
+1. Trong `PANEL_DRAW`, hai prompt nằm **trước** `service.Draw`. Nếu đưa `GetString` vào bên trong lambda vẽ của service thì sao?
+2. `service.Draw` trả `CadResult` thất bại. Vì sao lệnh lại `throw`, thay vì tự in lỗi rồi `return`?
+3. Người dùng nhấn ESC ở prompt điểm. Đi theo code: chuyện gì xảy ra tiếp?
+
+<details><summary>Đáp án</summary>
+
+1. Đó là prompt **bên trong** transaction và lock: AutoCAD "đơ" khi chờ người dùng ([T03 B4](T03_PITFALLS_CASEBOOK.md#b4-autocad-đơ-khi-chờ-người-dùng)). Service còn không được prompt (CAD002), vì nó được gọi cả từ palette.
+2. Lệnh là biên: ném ra để `ExecuteCommand` lo phần chung (in `[Lỗi Hệ Thống]`, ghi log, ghi lịch sử là thất bại). Service thì không ném, để caller (lệnh hay palette) tự quyết.
+3. `CadPromptHelper.GetPoint` trả `null`, lệnh `return`: không validate, không gọi service, không mở transaction nào.
+</details>
+
 ---
 
 ## 2. Thêm một tính năng trọn vẹn
@@ -89,6 +102,19 @@ Copy `Samples/GridMarker/` thành `Features/<Tên>/` (hoặc thư mục bạn ch
 | 7 | `XxxPalette.xaml(.cs)` | Chỉ binding; `DynamicResource`; code-behind lấy ViewModel từ DI (fail-loud) | `XamlPaletteTests` |
 | 8 | Đăng ký | `ConfigureServices`: service `AddSingleton`, ViewModel `AddTransient`; `CommandClass` | — |
 | 9 | Tài liệu | Mục `[Unreleased]` trong CHANGELOG; cập nhật T-module nếu đổi quy ước | — |
+
+### ✅ Tự kiểm tra §2
+
+1. Vì sao làm `XxxSpec` và `XxxPlanner` **trước** Service và Command?
+2. Lifetime của `XxxService` và `XxxViewModel` khi đăng ký là gì?
+3. Vòng lặp vẽ trong Service nên dày hay mỏng? Logic tính tọa độ nằm ở đâu?
+
+<details><summary>Đáp án</summary>
+
+1. Chúng là logic thuần: viết và test được bằng xUnit ngay, không cần AutoCAD. Các tầng sau chỉ việc gọi chúng.
+2. Service `AddSingleton`, ViewModel `AddTransient` (mỗi lần mở palette một instance mới, cái cũ được Dispose).
+3. Mỏng: chỉ "vẽ những gì Planner đã tính". Tọa độ nằm trong Planner, nơi test được kết quả; lambda thì chỉ test được hợp đồng.
+</details>
 
 ---
 
@@ -126,6 +152,19 @@ public sealed class PanelService : IPanelService
 
 Quy tắc: không đọc `MdiActiveDocument` (CAD001), không prompt, không giữ `DBObject` trong field, luôn truyền `undoMarkName` (service có thể được gọi từ palette).
 
+### ✅ Tự kiểm tra §3
+
+1. Bạn thêm field `Polyline _lastFrame` vào `PanelService` để lần sau sửa khung vừa vẽ. Sai ở đâu, nên giữ gì thay vào?
+2. `PanelService` cần tên bản vẽ để ghi vào XRecord. Lấy ở đâu cho đúng quy tắc?
+3. Vì sao lambda trả `frame` và service dùng `TryExecute`, thay vì `Execute` rồi tự đọc lại id?
+
+<details><summary>Đáp án</summary>
+
+1. `DBObject` chỉ dùng được trong transaction đã mở nó; dùng lại sau đó là hành vi không xác định hoặc làm AutoCAD dừng hẳn ([T03 B5](T03_PITFALLS_CASEBOOK.md#b5-dùng-dbobject-sau-khi-transaction-kết-thúc)). Giữ `ObjectId` (trong phiên) hoặc `Handle` (bền vững).
+2. Bên trong lambda, từ `scope.Document` (hoặc `scope.Database`): đi qua `ICadContext`. Không đọc `MdiActiveDocument` trong service (CAD001).
+3. `TryExecute<T>` trả `CadResult<ObjectId>`: có cả giá trị lẫn lỗi dạng giá trị, đúng một transaction, và caller tự quyết cách báo lỗi.
+</details>
+
 ---
 
 ## 4. Thêm một palette
@@ -162,6 +201,19 @@ public void ShowPanelPalette()
 Thêm palette vào mảng `Palettes` trong `XamlPaletteTests` (test resource key ở cả hai theme sẽ tự chạy cho nó), đăng ký ViewModel vào container giả, và một dòng `AddTransient<PanelViewModel>()` trong `ConfigureServices`. Lệnh mới nhớ thêm vào `Deployment/PackageContents.xml` (test `PackageManifestTests` kiểm).
 
 Ô nhập **số** trên palette: bind vào chuỗi và tự parse bằng `NumberText`, đừng bind thẳng vào `double` (gõ `2,5` sẽ thành 25 — [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Mẫu để chép là `RowsText`/`SpacingText` trong `GridMarkerViewModel` ([R05 §3](../reference/R05_GOLDEN_SAMPLE.md#3-nguyên-tắc-2--validate-một-lần-ở-model)); test `EveryPaletteTextBox_BindsToAStringProperty` sẽ đỏ nếu palette mới của bạn bind ô vào số. Palette cần **khung xem trước** hình sẽ vẽ: [U03](U03_DRAWING_ON_UI.md).
+
+### ✅ Tự kiểm tra §4
+
+1. XAML của palette có `Background="#FF202020"`. Sai gì, sửa thế nào?
+2. Bạn thêm key `PanelAccentBrush` vào `Themes/` nhưng chỉ ở theme tối. Ai phát hiện, khi nào?
+3. Palette đã phát hành tên `PanelPalette`; giờ muốn đổi thành `PanelTools`. Người dùng mất gì, và tránh thế nào?
+
+<details><summary>Đáp án</summary>
+
+1. Mã màu cứng không đổi theo theme. Dùng `{DynamicResource …}` với key có trong `Themes/AutoCadTheme.xaml`; `ThemeManager.Attach(this)` lo việc áp lại khi người dùng đổi `COLORTHEME`.
+2. `XamlPaletteTests`, ngay khi chạy `dotnet test` (trên máy hoặc CI): test kiểm mọi resource key có ở **cả hai** theme.
+3. Guid của palette dẫn xuất từ tên: tên mới là Guid mới, AutoCAD quên vị trí và kích thước đã lưu. Muốn đổi thì truyền Guid cũ qua `GetOrCreatePaletteSet(name, guid)` trước lần Toggle đầu.
+</details>
 
 ---
 
@@ -1200,6 +1252,17 @@ Những chỗ dễ sai, và phần lõi xử lý thế nào:
 - [ ] CHANGELOG `[Unreleased]`; cập nhật T-module nếu đổi quy ước
 
 Checklist review đầy đủ cho người review: [T09 §2](T09_SENIOR_PLAYBOOK.md#2-checklist-code-review).
+
+### ✅ Tự kiểm tra §13
+
+1. PR của bạn chỉ sửa `Utils/SelectionFilterBuilder.cs`. `dotnet test` xanh. Còn bước nào trong checklist?
+2. Ba mục nào của checklist đã có analyzer bắt lúc build, và mục nào trong đó analyzer vẫn có thể bỏ sót?
+
+<details><summary>Đáp án</summary>
+
+1. Sửa helper trong `Utils/` thì chạy `tests\integration\run-headless-lab.ps1` (nếu có AutoCAD) và thêm một kiểm thử lab **đỏ trên code cũ**. Thêm CHANGELOG `[Unreleased]`, và smoke tay những kịch bản bị ảnh hưởng.
+2. CAD001 (`MdiActiveDocument` trong Service/ViewModel), CAD002 (prompt trong Service/ViewModel), CAD003 (ghi trong `ExecuteRead`). Cả ba chỉ thấy lời gọi **trực tiếp**: Service gọi một helper tự viết mà helper đó prompt thì lọt ([T02 §11](T02_ARCHITECTURE_DEEP_DIVE.md#11-analyzer-cad001cad003)).
+</details>
 
 ---
 
