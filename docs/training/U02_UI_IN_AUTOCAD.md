@@ -42,6 +42,22 @@ Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổ
 | Truy cập nhanh một lệnh có sẵn | **Nút Ribbon** gửi lệnh | Tab "CadCore" |
 | Báo kết quả, cảnh báo | **Dòng lệnh** (`INotificationService`) | Mọi lệnh của dự án |
 
+Cùng bảng đó, dạng câu hỏi lần lượt:
+
+```mermaid
+flowchart TD
+    Q1{"Cần pick điểm hay chọn đối tượng,<br/>chỉ vài thông số?"} -- có --> CMD["Lệnh + prompt"]
+    Q1 -- không --> Q2{"Nhiều thông số, chỉnh qua lại nhiều lần,<br/>cần xem kết quả liên tục?"}
+    Q2 -- có --> PAL["Palette"]
+    Q2 -- không --> Q3{"Thiết lập một lần trước khi chạy,<br/>có OK / Hủy?"}
+    Q3 -- có --> DLG["Hộp thoại modal"]
+    Q3 -- không --> RIB["Nút Ribbon gửi một lệnh có sẵn"]
+    PAL -. "cần click vào bản vẽ" .-> CMD
+    CMD --> OUT["Kết quả và cảnh báo:<br/>dòng lệnh (INotificationService)"]
+    PAL --> OUT
+    DLG --> OUT
+```
+
 Golden Sample làm **cả hai**: lệnh `SAMPLE_GRID` (pick điểm) và palette (nhập trên form). Cả hai dùng chung `GridSpec.Validate()`, `GridPlanner` và `GridMarkerService` ([R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md)). Đây là mẫu nên theo: **logic dùng chung, chỉ lớp UI khác nhau**.
 
 ### ✅ Tự kiểm tra §1

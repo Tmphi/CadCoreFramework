@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [U01](U01_WPF_MVVM_BASICS.md), [U02](U02_UI_IN_AUTOCAD.md), [T01 §3–4](T01_AUTOCAD_NET_FOUNDATIONS.md#3-bên-trong-database-objectid-bảng-ký-hiệu-dictionary) · **Trong lộ trình:** tuần 9 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 100 phút (phần 🎯 ≈ 70 phút) · **Thực hành:** [bài tập §12](#12-bài-tập-và-tự-kiểm-tra), L17, L19 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 100 phút (phần 🎯 ≈ 75 phút) · **Thực hành:** [bài tập §12](#12-bài-tập-và-tự-kiểm-tra), L17, L19 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, lưới, mặt bằng) cần vẽ hình ở những chỗ **không phải bản vẽ**: một khung trên palette, hay hình tạm trên màn hình trước khi người dùng xác nhận. Module này là hướng dẫn từng bước cho việc đó.
 
@@ -28,6 +28,21 @@ Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, l�
 - **Phần đọc entity (§7):** chạy trên AutoCAD 2024 bằng HeadlessLab, 20/20 kiểm thử xanh (18 có sẵn + 2 của module).
 - **Phần vẽ tạm (§9):** đã gọi API thật trong accoreconsole.
 - **Trong AutoCAD 2024 có giao diện:** `CadPreview` trong một palette thật, xem trước các đối tượng đang chọn, và hình transient hiện ra rồi biến mất đều đã kiểm ([trạng thái kiểm chứng](#trạng-thái-kiểm-chứng)).
+
+### Tra theo việc cần làm
+
+| Bạn cần… | Đọc |
+| :--- | :--- |
+| Thêm khung xem trước vào palette của mình | [§1](#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ) → [§6](#6-bước-5--kiểm-thử) theo thứ tự (lab L17) |
+| Sửa hình xem trước bị lộn ngược, méo, hay lệch khỏi khung | [§3](#3-bước-2--biến-đổi-tọa-độ) |
+| Xem trước các entity người dùng đang chọn trong bản vẽ | [§7](#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước) |
+| Ảnh nhỏ (thumbnail) cho một block trong thư viện | [§8](#8-xem-trước-block-thumbnail) |
+| Hình chạy theo chuột trong lúc đặt đối tượng | [§9.1](#91-jig-hình-chạy-theo-chuột) |
+| Hiện tạm kết quả của cả lệnh trước khi người dùng xác nhận | [§9.2](#92-transient-hình-tạm-đứng-yên) |
+| Làm nổi bật entity có sẵn | [§9.3](#93-làm-nổi-bật-entity-có-sẵn) |
+| Khung xem trước chậm khi có rất nhiều hình | [§10](#10-hiệu-năng) |
+| Viết test cho phần xem trước | [§6](#6-bước-5--kiểm-thử) |
+| Gặp lỗi lạ (sai màu, mất attribute, hình tạm không mất) | [§11](#11-bẫy) |
 
 ---
 

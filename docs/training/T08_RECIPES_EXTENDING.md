@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T02](T02_ARCHITECTURE_DEEP_DIVE.md), [R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md) · **Trong lộ trình:** tuần 6 (§1–3) và 8 (§4–6) ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 95 phút (phần 🎯 ≈ 25 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 100 phút (phần 🎯 ≈ 30 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong code của dự án) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
 
@@ -12,6 +12,34 @@ Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu 
 1. Thêm một lệnh, một tính năng trọn vẹn theo Golden Sample, một service và một palette, chạm đủ mọi file mà checklist của từng công thức yêu cầu.
 2. Biết công thức nào có sẵn cho việc mình sắp làm (Ribbon, Overrule, metadata, settings, dynamic block, sự kiện, thao tác bản vẽ), mở đúng mục 📖 khi cần thay vì tự nghĩ lại từ đầu.
 3. Tự kiểm PR của mình bằng [checklist §13](#13-checklist-trước-khi-mở-pr) trước khi gửi review.
+
+### Tra theo việc cần làm
+
+| Bạn cần… | Đọc |
+| :--- | :--- |
+| Thêm một lệnh mới | [§1](#1-thêm-một-lệnh) |
+| Làm một tính năng có cả lệnh lẫn palette | [§2](#2-thêm-một-tính-năng-trọn-vẹn), rồi [§3](#3-thêm-một-service), [§4](#4-thêm-một-palette) |
+| Nút trên palette cần người dùng click vào bản vẽ | [§5](#5-palette-cần-người-dùng-chọn-điểm-trên-màn-hình) |
+| Ô nhập số trên palette | [§4](#4-thêm-một-palette), [U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi) |
+| Khung xem trước hình sẽ vẽ, trên palette | [U03 §1–6](U03_DRAWING_ON_UI.md#1-kiến-trúc-một-kế-hoạch-hai-nơi-vẽ) |
+| Hình chạy theo chuột trước khi chốt | [U03 §9.1](U03_DRAWING_ON_UI.md#91-jig-hình-chạy-theo-chuột) |
+| Chọn đối tượng theo loại, layer, tên block | [T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter), [R03 §3](../reference/R03_API.md#3-truy-vấn-và-lọc-chọn) |
+| Đếm hay duyệt nhanh hàng nghìn entity | [T07 §2](T07_PERFORMANCE_AND_SCALE.md#2-lọc-trước-khi-mở-objectclass) |
+| Gắn dữ liệu riêng lên entity | [§8](#8-lưu-metadata-xdata-hay-xrecord) |
+| Lưu thiết lập của người dùng giữa các phiên | [§9](#9-thêm-thiết-lập-người-dùng) |
+| Đọc, đổi thuộc tính của dynamic block | [§10](#10-làm-việc-với-dynamic-block) |
+| Cập nhật palette khi người dùng xóa hay sửa entity | [§11](#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách) |
+| Vẽ thêm một nhãn cho mọi khung tủ mà không lưu vào bản vẽ | [§7](#7-thêm-overrule) |
+| Thêm nút lên Ribbon | [§6](#6-thêm-ribbon-tab) |
+| Chèn khung tên có attribute | [§12.1](#121-khung-tên-a3a2a1-dạng-block-có-attribute) |
+| Xuất layout ra PDF | [§12.2](#122-xuất-mọi-layout-ra-một-file-pdf) |
+| Dọn bản vẽ (purge, audit) | [§12.3](#123-purge-nhiều-lượt-và-audit) |
+| Gắn xref bằng đường dẫn tương đối | [§12.4](#124-attach-xref-với-đường-dẫn-tương-đối) |
+| Gộp nhiều layer thành một | [§12.5](#125-gộp-nhiều-layer-thành-một) |
+| Xuất, nhập attribute qua Excel, CSV, JSON | [§12.6](#126-xuất-nhập-bảng-attribute-excel-csv-json), [R03](../reference/R03_API.md#đọc-ghi-file-dữ-liệu-idatafileservice) |
+| Sửa hàng loạt file DWG không mở ra | [T07 §4](T07_PERFORMANCE_AND_SCALE.md#4-xử-lý-nhiều-bản-vẽ-side-database) |
+| Viết test cho service mới | [T05 §4](T05_TESTING_STRATEGY.md#4-lớp-vỏ-autocad-fakecadcontext-kiểm-hợp-đồng) |
+| Kiểm lại trước khi mở PR | [§13](#13-checklist-trước-khi-mở-pr) |
 
 ---
 
@@ -240,6 +268,26 @@ Palette chạy ở **application context**: không prompt từ ViewModel ([T01 �
    ViewModel nhận `ICommandLauncher` qua constructor và test bằng Mock.
 3. **`ExecuteInCommandContextAsync`**, khi cần chạy chuỗi thao tác *như một lệnh* rồi xử lý tiếp kết quả: `await Application.DocumentManager.ExecuteInCommandContextAsync(async _ => { … }, null);` (chữ ký đã kiểm chứng: `Func<object, Task>` + `object`, trả về `ExecutionResult` có `await` được).
 
+Lựa chọn 2 chạy như sau (lệnh `PANEL_PICK` là ví dụ). Nút trên palette không tự prompt: nó chỉ xếp lệnh vào hàng đợi, và AutoCAD chạy lệnh đó sau khi handler của nút trả về:
+
+```mermaid
+sequenceDiagram
+    participant U as Người dùng
+    participant VM as ViewModel của palette
+    participant L as ICommandLauncher
+    participant C as Lệnh PANEL_PICK
+    participant S as Service
+    U->>VM: bấm "Chọn điểm"
+    VM->>L: Launch("PANEL_PICK")
+    L->>C: SendStringToExecute (xếp hàng, chạy sau)
+    Note over C: command context: được prompt
+    C->>U: CadPromptHelper.GetPoint
+    U->>C: click điểm
+    C->>S: Draw(spec, x, y)
+    S-->>C: CadResult
+    S--)VM: message qua EventAggregator (sau commit), nếu palette cần cập nhật
+```
+
 Với **hộp thoại modal** (không phải palette) cần chọn điểm, mẫu đơn giản nhất là "đóng → hỏi → mở lại" ngay trong lệnh: [U02 §4](U02_UI_IN_AUTOCAD.md#4-hộp-thoại-modal).
 
 ---
@@ -382,6 +430,17 @@ Nhận diện block: **luôn so effective name**, đừng so `br.Name` (tên ẩ
 ---
 
 ## 11. Lắng nghe sự kiện bản vẽ đúng cách
+
+Handler của sự kiện database chạy **giữa** một thao tác của AutoCAD, nên chỉ ghi nhận rồi về ngay; việc thật làm sau, khi AutoCAD rảnh:
+
+```mermaid
+flowchart TD
+    E["ObjectErased<br/>(giữa thao tác của AutoCAD)"] -->|"bỏ qua un-erase;<br/>chỉ ghi nhận ObjectId"| P[("_pending")]
+    E -->|"đăng ký Idle (một lần)"| I["Application.Idle<br/>(AutoCAD rảnh)"]
+    P --> I
+    I -->|"gỡ Idle, lấy rồi xóa danh sách"| X["Xử lý qua ICadContext<br/>hoặc publish message"]
+    D["Dispose()"] -.->|"gỡ ObjectErased và Idle"| E
+```
 
 ```csharp
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;   // Application.Idle của AutoCAD
