@@ -1,0 +1,48 @@
+name: "Báo cáo lab"
+description: "Nộp kết quả một lab (T10) kèm thời gian làm THẬT, để hiệu chỉnh các ước lượng của lộ trình."
+title: "[Lab] L__ — "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Một issue cho một lab. Ghi thời gian **thật**, kể cả lúc đọc đề và sửa lỗi; không tính lúc nghỉ. Con số lệch xa ước lượng ở [T10 §2](../blob/main/docs/training/T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab) là thông tin quý, không phải điểm trừ.
+        Mentor tổng hợp mọi báo cáo bằng `node tools/docs/learning-report.mjs` (docs/training/README §8).
+  - type: dropdown
+    id: lab
+    attributes:
+      label: Lab
+      options: [L01, L02, L03, L04, L05, L06, L07, L08, L09, L10, L11, L12, L13, L14, L15, L16, L17, L18, L19]
+    validations:
+      required: true
+  - type: input
+    id: hours
+    attributes:
+      label: Thời gian làm thực tế (giờ)
+      description: "Chỉ ghi số, dấu chấm thập phân. Ví dụ: 3.5"
+      placeholder: "3.5"
+    validations:
+      required: true
+  - type: textarea
+    id: reading
+    attributes:
+      label: Thời gian đọc tài liệu cho lab này (phút)
+      description: "Mỗi dòng một module, `🎯` nếu chỉ đọc các mục 🎯. Ví dụ: `T01 🎯: 80` hoặc `T02: 95`. Bỏ trống nếu đã đọc từ trước."
+      placeholder: "T01 🎯: 80"
+  - type: textarea
+    id: grader
+    attributes:
+      label: Kết quả run-lab.ps1
+      description: "Với L02–L06: dán phần kết quả của `.\\labs\\run-lab.ps1 -Lab L0x`."
+      render: text
+  - type: textarea
+    id: report
+    attributes:
+      label: Báo cáo
+      description: "Đã làm gì, quan sát được gì, trả lời câu phản tư của lab (T10 quy tắc 3)."
+    validations:
+      required: true
+  - type: input
+    id: pr
+    attributes:
+      label: Link PR
+      description: "Nếu lab có PR."

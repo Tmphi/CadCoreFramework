@@ -1,0 +1,46 @@
+name: "Đo đầu/cuối giai đoạn"
+description: "Điểm vấn đáp trước khi học và lúc đánh giá lên cấp, cùng một bộ câu, để đo mức tiến bộ."
+title: "[Đo] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cùng **một** bộ câu hỏi, làm hai lần: **trước khi** bắt đầu giai đoạn, và **lúc đánh giá lên cấp**. Gấp tài liệu, trả lời bằng lời của mình; mentor chấm từng câu. Bộ câu của từng cấp ghi ở cột *Vấn đáp* của [T10 §4](../blob/main/docs/training/T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp).
+        Điểm thấp ở lần đầu là điều bình thường: đó là điểm xuất phát.
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Lên cấp
+      options:
+        - "🌰 → 🌱 Fresher"
+        - "🌱 → 🌿 Junior"
+        - "🌿 → 🌳 Middle"
+        - "🌳 → 🏔️ Senior"
+    validations:
+      required: true
+  - type: dropdown
+    id: when
+    attributes:
+      label: Lần đo
+      options:
+        - "Trước khi học"
+        - "Lúc đánh giá lên cấp"
+    validations:
+      required: true
+  - type: textarea
+    id: scores
+    attributes:
+      label: Điểm từng câu
+      description: "Mỗi dòng một câu: `Q1: 2`. Thang 0–2: 0 = sai hoặc không biết, 1 = đúng một phần, 2 = đúng và giải thích được vì sao. Fresher dùng `C1` … `C10` cho 10 câu của C05 §6."
+      placeholder: |
+        Q1: 2
+        Q2: 1
+    validations:
+      required: true
+  - type: input
+    id: learner
+    attributes:
+      label: Học viên
+      description: "Tên hoặc mã học viên; dùng mã nếu repo công khai. Hai lần đo của cùng một người phải ghi giống nhau."
+    validations:
+      required: true

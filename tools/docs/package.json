@@ -13,7 +13,8 @@
     "snippets": "node check-snippets.mjs",
     "exercises": "node check-exercises.mjs",
     "deck": "node build-deck.mjs",
-    "check": "node check-links.mjs && node check-reading-time.mjs && node check-mermaid.mjs && node build-deck.mjs && node check-snippets.mjs && node check-exercises.mjs"
+    "learning": "node learning-report.mjs --check",
+    "check": "node check-links.mjs && node check-reading-time.mjs && node check-mermaid.mjs && node build-deck.mjs && node learning-report.mjs --check && node check-snippets.mjs && node check-exercises.mjs"
   },
   "devDependencies": {
     "jsdom": "30.1.2",
