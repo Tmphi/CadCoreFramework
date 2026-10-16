@@ -9,6 +9,11 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed (build Debug trong Visual Studio: CS0006)
+- Build `Debug | Any CPU` trong Visual Studio (Ctrl+Shift+B) lỗi `CS0006: Metadata file '…CadCoreFramework_<giờ>.dll' could not be found` ở `CadCoreFramework.Testing`/`Tests`. Nguyên nhân: tên DLL gắn giờ được tính lại mỗi lần MSBuild đọc project. VS build từng project riêng, nên project tham chiếu đọc lại plugin vài giây sau và đi tìm một tên không tồn tại. Release không bị vì tên cố định; x64 qua được là nhờ VS dùng lại kết quả đọc cũ.
+- Tên DLL gắn giờ (hot-reload) chuyển sang cấu hình mới **`DebugAcad`** (`DebugAcad | x64` trong `.sln`, chỉ build plugin + analyzer). `Debug` giờ ra `CadCoreFramework.dll` tên cố định như Release. Kiểm bằng cách giả lập VS (build plugin, chờ 2 giây, build Testing/Tests/Benchmarks với `BuildProjectReferences=false`): trước sửa lỗi CS0006, sau sửa qua. `sln` Rebuild `Debug|Any CPU`, `Debug|x64`, `DebugAcad|x64` đều qua; 376/376 test qua trên net48 và net8.0-windows.
+- Tài liệu: README, R01, R06 §1, T01, T02 §2.1, T04 §2–§3, T06, T09 ADR-008 ghi `DebugAcad`, và nhắc `NETLOAD` file có gắn giờ, không `NETLOAD` bản copy `CadCoreFramework.dll` (bị khóa, làm hỏng lần build sau).
+
 ### Fixed (bộ chấm lab và HeadlessLab: chỉ AutoCAD 2021–2024)
 - `labs/run-lab.ps1` và `tests/integration/run-headless-lab.ps1` từng tự chọn bản AutoCAD **mới nhất** đã cài. Máy có cả AutoCAD 2024 lẫn 2025 thì chúng chọn 2025, trong khi DLL lab là net48 build với API AutoCAD 2024 còn AutoCAD 2025+ chạy .NET 8. Giờ chúng chỉ tự chọn bản mới nhất trong khoảng 2021–2024 (truyền `-AcCorePath` vẫn chọn tay được). Thử trên cây thư mục giả: có 2024 và 2025 thì chọn 2024; không có 2024 thì chọn 2023; chỉ có 2020, 2025, "AutoCAD 2024 Beta" hay thư mục không có `accoreconsole.exe` thì báo không tìm thấy, kèm lý do. Trên máy thật vẫn chọn AutoCAD 2024: L06 2/2, HeadlessLab 22/22.
 - `labs/README` từng ghi "AutoCAD 2021 trở lên": sửa thành 2021–2024. training/README §4 và README của `tests/integration` ghi rõ giới hạn này.

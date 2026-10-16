@@ -108,7 +108,8 @@ Nếu cấu hình sai, plugin có thể không nạp được hoặc gây lỗi 
 Dự án đã **multi-target** sẵn cả `net48` (AutoCAD 2021–2024) lẫn `net8.0-windows` (AutoCAD 2025+). Một lần `dotnet build` sinh ra cả hai TFM, và `package.ps1` đóng gói cả hai vào bundle đúng thư mục. Bản `net8.0-windows` **chưa được chạy thử trên AutoCAD 2025** (ngoài phạm vi hiện tại).
 
 ### Chế độ Build (Debug vs Release)
-- **Chế độ Debug**: tên assembly có **timestamp** (`CadCoreFramework_yyyyMMdd_HHmmss.dll`), và Post-build copy nó về tên cố định `CadCoreFramework.dll`. Mỗi lần build là một assembly mới, nên bạn `NETLOAD` lại được mà không cần khởi động lại AutoCAD. Để Debug: Visual Studio → `Debug` → `Attach to Process` → `acad.exe` (Managed .NET Framework 4.x). Chi tiết: [T04](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md).
+- **Chế độ Debug**: ra `CadCoreFramework.dll` tên cố định, build được cả solution (kể cả test) trong Visual Studio.
+- **Chế độ DebugAcad** (chọn `DebugAcad | x64`): tên assembly có **timestamp** (`bin\x64\DebugAcad\net48\CadCoreFramework_yyyyMMdd_HHmmss.dll`), và Post-build copy nó về tên cố định `CadCoreFramework.dll`. Mỗi lần build là một assembly mới, nên bạn `NETLOAD` **file có gắn giờ** lại được mà không cần khởi động lại AutoCAD. Cấu hình này chỉ build plugin, không build test. Để Debug: Visual Studio → `Debug` → `Attach to Process` → `acad.exe` (Managed .NET Framework 4.x). Chi tiết: [T04](docs/training/T04_DEBUGGING_TROUBLESHOOTING.md).
 - **Chế độ Release**: Sau khi Build Release, chạy `.\package.ps1` để đóng gói thành thư mục `.bundle` đúng chuẩn Autodesk. Chép thư mục bundle vào `%APPDATA%\Autodesk\ApplicationPlugins` là plugin tự chạy.
 
 ---

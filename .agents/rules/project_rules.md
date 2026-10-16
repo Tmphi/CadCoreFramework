@@ -52,7 +52,7 @@ Dự án này sử dụng kiến trúc đóng gói các API thô của AutoCAD �
 
 - **Xử lý Lỗi**: Trả về object `CadResult<T>` hoặc `CadResult` thay vì ném ra Exceptions cho các thao tác logic nghiệp vụ. Sử dụng lớp `Guard` (`Guard.NotNull`, `Guard.NotEmpty`) để validate tham số đầu vào.
 - **Dependency Injection**: Mọi Service/ViewModel mới phải được đăng ký trong `AppBootstrapper.cs`.
-- **Build**: Dùng `dotnet build` để biên dịch. Không dùng `.\build.ps1` (xem `build_rule.md`). Nếu AutoCAD đang giữ lock file DLL, dùng công cụ hot-reload đã được cấu hình sẵn trong csproj (Debug timestamp suffix).
+- **Build**: Dùng `dotnet build` để biên dịch. Không dùng `.\build.ps1` (xem `build_rule.md`). Nếu AutoCAD đang giữ lock file DLL, dùng cấu hình hot-reload đã có sẵn trong csproj: `-c DebugAcad -p:Platform=x64` (tên DLL gắn giờ; `Debug` thường giữ tên cố định).
 - **Cấu trúc thư mục**: 
   - `Commands/`: Chứa các lệnh Cad.
   - `Core/`: Logic nền tảng (CadContext, EventAggregator).

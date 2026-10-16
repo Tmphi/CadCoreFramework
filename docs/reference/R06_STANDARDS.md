@@ -21,9 +21,11 @@
 **Vấn đề:** .NET Framework **không gỡ (unload) được** assembly khỏi AppDomain. Khi bạn `NETLOAD` lại một DLL **cùng identity** (cùng tên assembly + version), CLR trả về chính assembly **đã nạp từ trước**: code cũ, BAML (XAML đã biên dịch) cũ. Ngoài ra, DLL nạp bằng `NETLOAD` bị khóa nên không ghi đè được khi build. Kết quả là bạn sửa XAML, build lại, nạp lại mà vẫn thấy giao diện cũ, hoặc gặp lỗi lệch kiểu giữa hai bản.
 
 **Cách của dự án** (cấu hình trong [`CadCoreFramework.csproj`](../../CadCoreFramework.csproj)):
-1. Build Debug đặt `AssemblyName` kèm thời điểm build: `CadCoreFramework_20261010_120000.dll`.
-2. Target `PostBuild` copy file đó về tên chuẩn `CadCoreFramework.dll` để script `NETLOAD` vẫn dùng được.
-3. Mỗi lần build là một **identity mới**, nên `NETLOAD` nạp đúng code + BAML mới mà không cần tắt AutoCAD.
+1. Cấu hình **`DebugAcad`** (chọn `DebugAcad | x64` trong Visual Studio, hoặc `dotnet build CadCoreFramework.csproj -c DebugAcad -p:Platform=x64 -f net48`) đặt `AssemblyName` kèm thời điểm build: `bin\x64\DebugAcad\net48\CadCoreFramework_20261010_120000.dll`.
+2. Mỗi lần build là một **identity mới**, nên `NETLOAD` **file có gắn giờ** nạp đúng code + BAML mới mà không cần tắt AutoCAD.
+3. Target `PostBuild` copy file đó về tên chuẩn `CadCoreFramework.dll` cho công cụ khác. **Đừng `NETLOAD` bản copy này**: AutoCAD khóa nó và lần build sau bước copy thất bại.
+
+Vì sao không gắn giờ ở `Debug`: tên được tính lại mỗi lần MSBuild đọc project. Visual Studio build từng project riêng, nên project test tham chiếu plugin đọc lại project vài giây sau và đi tìm một tên DLL không tồn tại (`CS0006: Metadata file '…CadCoreFramework_<giờ>.dll' could not be found`). Vì vậy `Debug` giữ tên cố định, còn `DebugAcad` trong `.sln` chỉ build plugin (và analyzer), không build test.
 
 > [!WARNING]
 > Các bản cũ **vẫn nằm trong AppDomain** (event đã hook, `Initialize` đã chạy). Khi sửa code khởi động, event, Overrule, Ribbon, hoặc khi thấy hành vi lạ, hãy khởi động lại AutoCAD ([T04 §2](../training/T04_DEBUGGING_TROUBLESHOOTING.md#2-vòng-lặp-phát-triển-build--nạp--thử)). Hệ quả kỹ thuật: pack URI của WPF phải dựng tên assembly **lúc runtime** ([T02 §2.1](../training/T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)).

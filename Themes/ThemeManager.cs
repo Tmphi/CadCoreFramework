@@ -31,7 +31,7 @@ namespace CadCoreFramework.Themes
     public static class ThemeManager
     {
         // ─── URIs ─────────────────────────────────────────────────────────────────
-        // Lazy evaluation: in Debug, the assembly name includes a timestamp suffix
+        // Lazy evaluation: in DebugAcad, the assembly name includes a timestamp suffix
         // (e.g. CadCoreFramework_20240101_120000), so pack URIs must use the actual
         // runtime name rather than the canonical hard-coded string.
 

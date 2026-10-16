@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) §1–6; C# ở mức [C03](C03_OBJECT_ORIENTED.md)–[C04](C04_CSHARP_IN_THIS_PROJECT.md) (interface, DI, lambda, `using`) · **Trong lộ trình:** tuần 4–5 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 75 phút (phần 🎯 ≈ 55 phút) · **Thực hành:** L06 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 80 phút (phần 🎯 ≈ 55 phút) · **Thực hành:** L06 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 [T01](T01_AUTOCAD_NET_FOUNDATIONS.md) dạy luật chơi của AutoCAD. Module này cho thấy framework **áp dụng các luật đó ở đâu, bằng dòng code nào**, và những chỗ nó chưa làm trọn. Hãy đọc với file nguồn mở bên cạnh: mọi link 🔎 đều trỏ vào code thật.
 
@@ -136,9 +136,9 @@ Những quyết định đáng chú ý:
 
 ### 2.1 Hot-reload: tên assembly có timestamp
 
-🔎 [`CadCoreFramework.csproj`](../../CadCoreFramework.csproj): ở cấu hình Debug, `AssemblyName = CadCoreFramework_yyyyMMdd_HHmmss`. Target `PostBuild` copy file đó về `CadCoreFramework.dll` (kèm `.pdb`) để đường dẫn nạp luôn cố định. Vì .NET Framework không gỡ được assembly ([T01 §12](T01_AUTOCAD_NET_FOUNDATIONS.md#12-vòng-đời-plugin-và-cơ-chế-nạp-assembly)), mỗi lần build sinh ra một *identity* mới, nên nạp lại được mà không tắt AutoCAD.
+🔎 [`CadCoreFramework.csproj`](../../CadCoreFramework.csproj): ở cấu hình `DebugAcad`, `AssemblyName = CadCoreFramework_yyyyMMdd_HHmmss`. Target `PostBuild` copy file đó về `CadCoreFramework.dll` (kèm `.pdb`) để công cụ khác có tên cố định. Vì .NET Framework không gỡ được assembly ([T01 §12](T01_AUTOCAD_NET_FOUNDATIONS.md#12-vòng-đời-plugin-và-cơ-chế-nạp-assembly)), mỗi lần build sinh ra một *identity* mới, nên `NETLOAD` file có gắn giờ được mà không tắt AutoCAD. `Debug` và `Release` giữ tên `CadCoreFramework`: gắn giờ ở `Debug` làm project test trong Visual Studio đi tìm sai tên DLL ([R06 §1](../reference/R06_STANDARDS.md#1-nạp-lại-plugin-không-cần-tắt-autocad)).
 
-Hệ quả bạn phải biết: tên assembly **không cố định** ở bản Debug. Mọi chỗ cần tên assembly (pack URI của WPF) phải lấy **lúc runtime**. Xem [`GridMarkerPalette.LoadStyles`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs): `Assembly.GetExecutingAssembly().GetName().Name`.
+Hệ quả bạn phải biết: tên assembly **không cố định** ở bản `DebugAcad`. Mọi chỗ cần tên assembly (pack URI của WPF) phải lấy **lúc runtime**. Xem [`GridMarkerPalette.LoadStyles`](../../Samples/GridMarker/GridMarkerPalette.xaml.cs): `Assembly.GetExecutingAssembly().GetName().Name`.
 
 ---
 
