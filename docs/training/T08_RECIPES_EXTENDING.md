@@ -6,7 +6,7 @@
 >
 > **⏱ Đọc:** ≈ 95 phút (phần 🎯 ≈ 25 phút; §12 chiếm hơn nửa module và là 📖) · **Thực hành:** L07, L08, L11 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
-Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong v1.0.0) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
+Mỗi công thức gồm **checklist các file phải chạm** và **code mẫu dùng đúng API hiện có**. Phần nào là *đề xuất bổ sung* (chưa có trong code của dự án) được ghi rõ. Mọi công thức đều tuân thủ quy tắc của [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md): khi phân vân, **copy cách Golden Sample làm**. Code của §1, §3–5, §7, §9–12 đã được biên dịch thử trong một bản sao của dự án (build `-warnaserror` sạch); phần lõi của §12 còn được chạy trên AutoCAD 2024 thật; phần T08 để bạn tự viết (`PanelSpec`, `PanelViewModel`) thì làm theo [Golden Sample](../reference/R05_GOLDEN_SAMPLE.md).
 
 **Sau module này bạn phải làm được:**
 1. Thêm một lệnh, một tính năng trọn vẹn theo Golden Sample, một service và một palette, chạm đủ mọi file mà checklist của từng công thức yêu cầu.
@@ -254,7 +254,7 @@ Dự án có sẵn tab **"CadCore"**: [`Commands/CadCoreRibbon.cs`](../../Comman
 | NETLOAD khi AutoCAD **đã mở xong** | Ribbon đã có → gọi build action **ngay** (trong `InitializeRibbon` hoặc `RegisterBuildAction`, cái nào đến sau) |
 | Người dùng chạy `CUI` / `MENULOAD` / `WSCURRENT` … | `CommandEnded` → `Application.Idle` → gọi lại build action |
 
-Trên v1.0.0, trường hợp NETLOAD muộn **không ai** gọi build, và `AddButton` không idempotent (dựng lại khi tab còn sẽ nhân đôi nút). Từ PR #6: thứ tự `RegisterBuildAction`/`InitializeRibbon` không còn quan trọng; `AddButton` bỏ qua nút trùng lệnh; và có `RemoveTab` để build luôn dựng lại từ đầu. Rút gọn từ [`Commands/CadCoreRibbon.cs`](../../Commands/CadCoreRibbon.cs): code nguyên văn, `…` là phần lược bớt, chú thích cuối dòng là của tài liệu:
+Thứ tự gọi `RegisterBuildAction`/`InitializeRibbon` không quan trọng; `AddButton` bỏ qua nút trùng lệnh; và `RemoveTab` cho build luôn dựng lại từ đầu. Rút gọn từ [`Commands/CadCoreRibbon.cs`](../../Commands/CadCoreRibbon.cs): code nguyên văn, `…` là phần lược bớt, chú thích cuối dòng là của tài liệu:
 
 ```csharp
 public static class CadCoreRibbon
@@ -288,6 +288,11 @@ if (ribbonService != null)
 ```
 
 Kiểm tra (chỉ làm được trong GUI): NETLOAD khi AutoCAD đã mở → tab xuất hiện; chạy `CUI` rồi đóng → tab vẫn còn, **không** nhân đôi nút; cài bằng bundle (nạp lúc khởi động) → tab xuất hiện; nút bấm chạy đúng lệnh.
+
+<details><summary>📜 Lịch sử</summary>
+
+- Trên v1.0.0, trường hợp NETLOAD muộn **không ai** gọi build, và `AddButton` không idempotent: dựng lại khi tab còn thì nút bị nhân đôi. PR #6 làm thứ tự gọi không còn quan trọng, cho `AddButton` bỏ qua nút trùng lệnh, và thêm `RemoveTab` (B-05).
+</details>
 
 ---
 

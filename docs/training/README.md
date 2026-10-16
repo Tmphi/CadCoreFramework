@@ -230,7 +230,8 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | 🔎 **Đọc code** | Mở file được dẫn và đọc *trước khi* đọc tiếp |
 | 🧪 **Thử ngay** | Thí nghiệm 5–15 phút trên AutoCAD hoặc unit test |
 | ⚠️ **Bẫy** | Lỗi đã từng xảy ra (với dự án này hoặc rất phổ biến) |
-| ✅ **Tự kiểm tra** | Câu hỏi ngay sau mỗi mục 🎯 (T01, T02, T04–T08, U01–U03) và cuối mỗi module. Đáp án nằm trong khối thu gọn. **Gấp tài liệu lại, tự trả lời** (nói ra hoặc viết ra) rồi mới mở: cố nhớ lại giúp nhớ lâu hơn nhiều so với đọc lại. Sai câu nào thì đọc lại đúng đoạn đó, và hỏi lại câu đó ở lần ôn sau ([lịch ôn](#lịch-ôn), có bộ thẻ Anki) || 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
+| ✅ **Tự kiểm tra** | Câu hỏi ngay sau mỗi mục 🎯 (T01, T02, T04–T08, U01–U03) và cuối mỗi module. Đáp án nằm trong khối thu gọn. **Gấp tài liệu lại, tự trả lời** (nói ra hoặc viết ra) rồi mới mở: cố nhớ lại giúp nhớ lâu hơn nhiều so với đọc lại. Sai câu nào thì đọc lại đúng đoạn đó, và hỏi lại câu đó ở lần ôn sau ([lịch ôn](#lịch-ôn), có bộ thẻ Anki) || 📜 **Lịch sử** | Khối thu gọn cuối mục: code *từng* thế nào (trên v1.0.0, trước một PR), lỗi nào đã sửa ở đâu. Thân bài chỉ tả code **hiện tại**, nên lần đầu đọc có thể bỏ qua khối này. Mở nó khi làm lab sửa backlog trên v1.0.0 ([T10 quy tắc 6](T10_LABS_AND_ASSESSMENT.md#1-quy-tắc-làm-lab)) |
+| 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
 | 🎯 **Cốt lõi** | Nhãn ở cuối dòng Mục lục: mục cần để làm việc hằng ngày với dự án và để học module sau. [Lộ trình nhanh](#lộ-trình-nhanh) chỉ đọc các mục này |
 | 🔍 **Đào sâu** | Giải thích gốc rễ hoặc chủ đề nâng cao. Học ở lộ trình đầy đủ, hoặc khi gặp đúng vấn đề. Mục tiêu đầu ra ở đầu module là của **cả** module, nên vài mục tiêu cần cả phần 🔍 |
 | 📖 **Tra cứu** | Không học tuần tự, mở khi cần: bảng mã lỗi, công thức, backlog, đề đánh giá |
@@ -257,7 +258,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 
 - Tài liệu sống cùng code: **PR thay đổi hành vi phải cập nhật T-module liên quan** (checklist review có mục này).
 - Khi gặp sự cố mới: thêm một mục vào [T03](T03_PITFALLS_CASEBOOK.md) theo đúng format, *sau khi* đã có cách tái hiện.
-- Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó.
+- Khi sửa một mục backlog `B-xx`: cập nhật trạng thái trong [T09 §3](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) và mọi chỗ trong T-modules nhắc tới nó. Thân bài viết lại theo code **mới**; mô tả code cũ chuyển vào khối `<details><summary>📜 Lịch sử</summary>` ở cuối mục (trước khối ✅ nếu có), kèm mã `B-xx` và số PR. Mã `B-xx` ngắn trong thân bài thì giữ, vì lab và T09 dùng chúng để tra.
 - Thêm hoặc đổi một mục `##` của module: gắn nhãn 🎯/🔍/📖 ở cuối dòng Mục lục, rồi cập nhật dòng ⏱ ở đầu module ([§5](#5-quy-ước-đọc)). Đổi nhãn 🎯 của module trong [lộ trình nhanh](#lộ-trình-nhanh) thì cập nhật cả con số "Tổng" ở đó.
 - **CI kiểm tài liệu ở mọi PR** (job `docs`, [T06 §4](T06_BUILD_RELEASE_DEVOPS.md#4-ci-build-and-testyml)): link và anchor, nhãn và số phút trên dòng ⏱, sơ đồ mermaid. Khi sửa một module, số từ đổi nên số phút có thể phải đổi theo; CI báo đúng con số cần ghi. Chạy trước trên máy: `cd tools/docs`, `npm ci` (một lần), `npm run check`. Con số "Tổng" của lộ trình nhanh thì CI **không** kiểm. Đếm số từ của một trang bằng tay:
   ```powershell
@@ -284,7 +285,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 
 | Phần | Kiểm chứng thế nào |
 | :--- | :--- |
-| T01–T10 | Viết dựa trên `main` lúc phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab). Chỗ mô tả hành vi của v1.0.0 ghi rõ "trên v1.0.0". Các bước chỉ AutoCAD có giao diện mới kiểm được (T05 smoke 13–17: theme, Ribbon, vị trí palette, async nhiều bản vẽ, ô nhập số) đã kiểm trên AutoCAD 2024 ngày 2026-10-14 |
+| T01–T10 | Viết dựa trên `main` lúc phát hành **v1.0.0** (2026-10-13), AutoCAD 2024; cập nhật theo PR #6 và #7 (sửa backlog, HeadlessLab). Chỗ mô tả hành vi của v1.0.0 ghi rõ "trên v1.0.0"; từ GĐ4 (2026-10-16), các ghi chú đó ở T02, T08, U01, U02 nằm trong khối 📜 Lịch sử, thân bài chỉ tả code hiện tại. Các bước chỉ AutoCAD có giao diện mới kiểm được (T05 smoke 13–17: theme, Ribbon, vị trí palette, async nhiều bản vẽ, ô nhập số) đã kiểm trên AutoCAD 2024 ngày 2026-10-14 |
 | C00–C05 (Giai đoạn 0) | Thêm ngày 2026-10-14: ví dụ chạy trên .NET 8 (C# 10), khác biệt trên .NET Framework 4.8 đã chạy thử, số liệu 20/80 đếm trên `main` cùng ngày |
 | U00–U03 (nhánh UI) | Thêm cùng ngày. Hành vi WPF chạy thật trên net48 và net8. Các bước của U03 áp vào một bản sao của dự án; áp lại trên code của PR #11: 330/330 test, ảnh palette trùng từng byte. Hành vi AutoCAD chạy trong accoreconsole (HeadlessLab 20/20). Các mục chỉ AutoCAD có giao diện mới kiểm được đã kiểm bằng một DLL kiểm thử chứa nguyên văn code của tài liệu (danh sách ở cuối U02 và U03) |
 | PR #11, #13 | Sửa B-31…B-34. Hành vi trước khi sửa được ghi rõ "trước PR #11". Bản sửa đã kiểm trong AutoCAD 2024 có giao diện: T05 smoke 17 và bước từ khóa của `DEMO_PROMPT` |

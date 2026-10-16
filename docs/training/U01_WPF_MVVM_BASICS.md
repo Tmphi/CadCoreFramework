@@ -264,7 +264,7 @@ Vì vậy palette ghi rõ `Mode=OneWay`: `<Run Text="{Binding MarkerCount, Mode=
 
 ## 5. Ba bẫy khi nhập số
 
-Ba bẫy này **từng có thật trên palette Grid Marker**, cho tới PR #11 (kiểm bằng cách dựng palette thật, gõ vào ô rồi đọc ViewModel, trên cả net48 lẫn net8). Chúng là mục [B-31 và B-32](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng) trong backlog. PR #11 sửa chúng đúng theo cách ở [§5.3](#53-cách-sửa-2080-ô-số-bind-vào-chuỗi). Lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số) cho bạn tự sửa lại trên code cũ rồi so với bản đã merge.
+Ba bẫy dưới đây là hành vi của WPF khi một ô nhập được bind **thẳng** vào property số. Kết quả trong bảng là kết quả thật, kiểm bằng cách dựng palette thật, gõ vào ô rồi đọc ViewModel, trên cả net48 lẫn net8. Cách sửa ở [§5.3](#53-cách-sửa-2080-ô-số-bind-vào-chuỗi). Palette Grid Marker từng mắc cả ba ([B-31 và B-32](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), xem khối 📜 cuối mục); lab [L18](T10_LABS_AND_ASSESSMENT.md#l18--sửa-bẫy-ô-nhập-số) cho bạn tự sửa lại trên code cũ.
 
 ### 5.1 Dấu phẩy thập phân: gõ "2,5" thành 25
 
@@ -276,7 +276,7 @@ WPF đổi chuỗi thành số theo `Language` của phần tử, **mặc địn
 | `1,5` | **15**, không báo lỗi | 1.5 |
 | `abc` hoặc ô trống | giữ 20, ô viền đỏ | giữ 20, ô viền đỏ |
 
-Trên palette thật, trước PR #11: gõ **`2,5`** vào ô KHOẢNG CÁCH thì `Spacing` thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`. WPF còn nhận cả chuỗi `NaN` (và `∞`) mà không báo lỗi: `Spacing` thành `NaN`, mà `GridSpec.Validate()` khi đó cũng không chặn ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng), sửa ở PR #13).
+Trên một palette, gõ **`2,5`** vào ô khoảng cách bind thẳng vào `double` thì property thành **25**. Không có lỗi validate nào, và nút Vẽ vẫn bật. Nguyên nhân là dấu phẩy được hiểu là *dấu phân cách hàng nghìn* của `en-US`. WPF còn nhận cả chuỗi `NaN` (và `∞`) mà không báo lỗi, nên luật validate phải tự chặn chúng: `GridSpec.Validate()` chặn `NaN` và vô cực ([B-34](T09_SENIOR_PLAYBOOK.md#3-backlog-kỹ-thuật-đã-kiểm-chứng)).
 
 Dòng lệnh AutoCAD thì khác: luôn dùng dấu chấm, vì dấu phẩy là dấu ngăn cách tọa độ (`10,5` là một điểm). Gõ `1,5` vào `GetDouble` thì AutoCAD **từ chối** (đã chạy thật trên AutoCAD 2024):
 
@@ -289,7 +289,7 @@ Requires numeric value.
 
 ### 5.2 Ô bị xóa trắng: ViewModel vẫn giữ giá trị cũ
 
-Xóa trắng ô SỐ HÀNG (đang là 3) trên palette thật, trước PR #11:
+Ô SỐ HÀNG bind thẳng vào `int Rows` (đang là 3). Xóa trắng ô:
 - Ô viền đỏ (WPF không đổi được `""` thành `int`).
 - `Rows` **vẫn là 3**, `ValidationSummary` rỗng, nút Vẽ **vẫn bật**. Palette có khung xem trước như ở U03 thì khung vẫn hiện lưới 3 hàng.
 
@@ -355,7 +355,7 @@ XAML: `<TextBox Text="{Binding WidthText, UpdateSourceTrigger=PropertyChanged}"/
 
 Chìa khóa là `NumberStyles.Float`: nó cho phép dấu chấm, dấu âm, số mũ và khoảng trắng, nhưng **không** cho dấu phân cách hàng nghìn. Thêm `NumberStyles.AllowThousands` thì `"2,5"` lại thành 25. Đó chính là kiểu mà WPF dùng mặc định.
 
-🔎 **Golden Sample làm đúng như vậy, từ PR #11.** Chỉ khác một điểm: [`GridMarkerViewModel`](../../Samples/GridMarker/GridMarkerViewModel.cs) vẫn giữ các property số (`Rows`, `Spacing`…) để `GridSpec`, code và test khác dùng tiếp. Mỗi ô số có thêm một property chuỗi (`RowsText`, `SpacingText`…) để TextBox bind vào, và hai bên đồng bộ hai chiều. Bộ đọc số dùng chung nằm ở [`ViewModels/NumberText.cs`](../../ViewModels/NumberText.cs); nó chặn cả `NaN` và vô cực. Khi người dùng gõ, chuỗi được đổi thành số (nguyên văn):
+🔎 **Golden Sample làm đúng như vậy.** Chỉ khác một điểm: [`GridMarkerViewModel`](../../Samples/GridMarker/GridMarkerViewModel.cs) vẫn giữ các property số (`Rows`, `Spacing`…) để `GridSpec`, code và test khác dùng tiếp. Mỗi ô số có thêm một property chuỗi (`RowsText`, `SpacingText`…) để TextBox bind vào, và hai bên đồng bộ hai chiều. Bộ đọc số dùng chung nằm ở [`ViewModels/NumberText.cs`](../../ViewModels/NumberText.cs); nó chặn cả `NaN` và vô cực. Khi người dùng gõ, chuỗi được đổi thành số (nguyên văn):
 
 <!-- doc-check: verbatim Samples/GridMarker/GridMarkerViewModel.cs -->
 ```csharp
@@ -377,6 +377,12 @@ Test `EveryPaletteTextBox_BindsToAStringProperty` trong `XamlPaletteTests` kiể
 
 > [!TIP]
 > 💡 **20/80:** ô nhập **số** trên palette thì bind vào `string` và tự parse bằng `CultureInfo.InvariantCulture` + `NumberStyles.Float`. Mọi lỗi, kể cả lỗi "không phải số", đi về **một chỗ** validate. Ô chữ (tên layer, tên tủ) thì bind thẳng như bình thường.
+
+<details><summary>📜 Lịch sử</summary>
+
+- Trước PR #11, các ô số của palette Grid Marker bind thẳng vào `int`/`double`. Trên palette thật: gõ `2,5` vào ô KHOẢNG CÁCH thì `Spacing` thành 25, không lỗi, nút Vẽ vẫn bật (B-31); xóa trắng ô SỐ HÀNG thì `Rows` vẫn giữ 3 và nút Vẽ vẫn bật (B-32). PR #11 sửa đúng theo cách ở §5.3. Lab L18 làm lại việc này trên commit `632a6c1`.
+- Trước PR #13, `GridSpec.Validate()` không chặn `NaN` và vô cực, nên gõ `NaN` vào ô khoảng cách cũng lọt qua (B-34).
+</details>
 
 ### ✅ Tự kiểm tra §5
 

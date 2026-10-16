@@ -93,7 +93,7 @@ Kết quả đã kiểm với từ khóa `Yes`/`No`, mặc định `Yes`:
 - Nhấn Enter → `Yes`.
 - Gõ `n` → `No`: chỉ cần gõ **phần đầu** của từ khóa, không phân biệt hoa thường.
 
-⚠️ **Lỗi của dự án (B-33, đã sửa ở PR #11):** trước PR #11, `CadPromptHelper.GetKeywords` tự nối `[Yes/No]` vào câu nhắc, trong khi AutoCAD **cũng tự nối** danh sách từ khóa: `PromptOptions.AppendKeywordsToMessage` mặc định là `true` (đã kiểm). Kết quả là danh sách bị in hai lần (nguyên văn, AutoCAD 2024):
+⚠️ **Bẫy (B-33): đừng tự nối `[Yes/No]` vào câu nhắc.** AutoCAD **tự nối** danh sách từ khóa: `PromptOptions.AppendKeywordsToMessage` mặc định là `true` (đã kiểm). Tự nối thêm thì danh sách bị in hai lần (nguyên văn, AutoCAD 2024):
 
 ```text
 Vẽ lưới này? [Yes/No] [Yes/No] <Yes>:
@@ -109,7 +109,7 @@ options.Keywords.Default = "Yes";
 PromptResult answer = Editor.GetKeywords(options);
 ```
 
-`CadPromptHelper.GetKeywords` làm đúng như vậy từ PR #11, và extension cũ `AskKeyword` (`[Obsolete]`) cũng vậy. Kiểm thử HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cả hai đúng: kiểm thử chạy prompt thật trong accoreconsole, rồi runner kiểm trong output rằng danh sách chỉ xuất hiện một lần. Chạy cùng kiểm thử đó trên code cũ thì nó fail, với output `LAB keyword prompt [Yes/No] [Yes/No] <Yes>:`.
+`CadPromptHelper.GetKeywords` làm đúng như vậy, và extension cũ `AskKeyword` (`[Obsolete]`) cũng vậy. Kiểm thử HeadlessLab `KEYWORDS_PROMPT_LISTS_ONCE` giữ cả hai đúng: kiểm thử chạy prompt thật trong accoreconsole, rồi runner kiểm trong output rằng danh sách chỉ xuất hiện một lần.
 
 ### 2.4 Hệ tọa độ: `GetPoint` trả về UCS
 
@@ -117,12 +117,18 @@ Thí nghiệm thật: xoay UCS 90° quanh trục Z, gõ `10,0`. `Editor.GetPoint
 
 ### 2.5 Số thực: dòng lệnh từ chối dấu phẩy
 
-Trên dòng lệnh, dấu phẩy là dấu ngăn cách tọa độ. Gõ `1,5` vào `GetDouble` thì AutoCAD báo `Requires numeric value.` và hỏi lại. Palette WPF thì ngược lại: **âm thầm** đổi `2,5` thành 25 ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Người dùng cùng một tool không nên gặp hai luật khác nhau, nên palette cũng nên chỉ nhận dấu chấm, giống dòng lệnh. Palette Grid Marker làm vậy từ PR #11 ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)).
+Trên dòng lệnh, dấu phẩy là dấu ngăn cách tọa độ. Gõ `1,5` vào `GetDouble` thì AutoCAD báo `Requires numeric value.` và hỏi lại. Palette WPF thì ngược lại: **âm thầm** đổi `2,5` thành 25 ([U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)). Người dùng cùng một tool không nên gặp hai luật khác nhau, nên palette cũng nên chỉ nhận dấu chấm, giống dòng lệnh. Palette Grid Marker làm đúng như vậy ([U01 §5.3](U01_WPF_MVVM_BASICS.md#53-cách-sửa-2080-ô-số-bind-vào-chuỗi)).
 
 ### 2.6 Chọn đối tượng và thông báo
 
 - **Chọn:** `CadPromptHelper.GetSelection(message, filter)` kết hợp [`SelectionFilterBuilder`](../../Utils/SelectionFilterBuilder.cs): lọc theo loại, layer, màu, XData ([T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter), lab L05). Xem 5 cách lọc đang chạy: lệnh `DEMO_SELECTION_FILTER`.
 - **Thông báo:** `WriteMessage` là API được dùng nhiều nhất trong code AutoCAD công khai (4.008 file). Luôn bắt đầu chuỗi bằng `"\n"`, nếu không chữ sẽ dính vào dòng prompt trước. Trong dự án, hãy dùng `INotificationService` (`Info`/`Warn`/`Error`): nó ghi cả log và chỉ ghi vào bản vẽ **đang active** ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)).
+
+<details><summary>📜 Lịch sử</summary>
+
+- Trước PR #11, `CadPromptHelper.GetKeywords` (và `AskKeyword`) tự nối `[Yes/No]` vào câu nhắc, nên danh sách từ khóa bị in hai lần (B-33). Chạy `KEYWORDS_PROMPT_LISTS_ONCE` trên code cũ thì kiểm thử fail, với output `LAB keyword prompt [Yes/No] [Yes/No] <Yes>:`. Bài tập U02-E1 sửa lại lỗi này trên commit `632a6c1`.
+- Trước PR #11, ô số của palette Grid Marker còn nhận `2,5` thành 25 (B-31, xem [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số)), tức hai luật khác nhau giữa dòng lệnh và palette như ở §2.5.
+</details>
 
 ### ✅ Tự kiểm tra §2
 
@@ -332,8 +338,8 @@ Chọn cách phản hồi cho từng tình huống:
 | `eLockViolation` khi bấm nút palette | Ghi bản vẽ từ application context mà không lock | Mọi ghi đi qua `ICadContext` | [T03 B1](T03_PITFALLS_CASEBOOK.md#b1-elockviolation-khi-bấm-nút-trên-palette) |
 | Prompt từ palette chạy lung tung | Prompt ở application context | Nhập trên form, hoặc nút gửi lệnh | [§7.2](#72-nút-palette-chạy-một-lệnh-để-prompt) |
 | Palette không mở, lỗi `StaticResourceExtension` | `StaticResource` tới key nạp sau `InitializeComponent` | `DynamicResource` | [T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension) |
-| Gõ `2,5` thành 25 trên palette | WPF dùng `en-US` mặc định | Ô số bind vào chuỗi, parse InvariantCulture (Golden Sample: PR #11) | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), B-31 |
-| Danh sách từ khóa in hai lần | Tự nối `[…]` trong khi AutoCAD cũng nối | Để `AppendKeywordsToMessage` làm việc đó (đã sửa ở PR #11) | [§2.3](#23-từ-khóa), B-33 |
+| Gõ `2,5` thành 25 trên palette | WPF dùng `en-US` mặc định | Ô số bind vào chuỗi, parse InvariantCulture (như Golden Sample) | [U01 §5](U01_WPF_MVVM_BASICS.md#5-ba-bẫy-khi-nhập-số), B-31 |
+| Danh sách từ khóa in hai lần | Tự nối `[…]` trong khi AutoCAD cũng nối | Để `AppendKeywordsToMessage` làm việc đó | [§2.3](#23-từ-khóa), B-33 |
 | Thông báo hoặc vẽ "biến mất" sau khi người dùng đổi bản vẽ | Gọi `Editor` của bản vẽ **không** active | Báo kết quả lên bản vẽ đang active | [T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active) |
 | Palette mất vị trí sau mỗi lần mở AutoCAD | `PaletteSet` không có Guid cố định | `PaletteService` tự dẫn xuất Guid; đừng đổi tên palette | [T03 B27](T03_PITFALLS_CASEBOOK.md#b27-palette-không-nhớ-vị-trí) |
 | Hiển thị số liệu của bản vẽ trước | Palette không biết người dùng đã chuyển bản vẽ | Nghe `DocumentActivated` | Bài tập U02-E2 |
