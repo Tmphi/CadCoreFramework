@@ -26,7 +26,7 @@ và **rollback** (kiểm thử in ấn chạy trên database đã commit — b�
 .\tests\integration\run-headless-lab.ps1          # log: tests\integration\headless-lab.log
 ```
 
-Exit code: `0` mọi kiểm thử PASS · `1` có FAIL / thiếu kết quả / build lỗi · `2` không có accoreconsole.
+Exit code: `0` mọi kiểm thử PASS · `1` có FAIL / thiếu kết quả / build lỗi · `2` không có accoreconsole của AutoCAD 2021–2024. Lab là DLL net48 build với API AutoCAD 2024, nên runner chỉ tự chọn AutoCAD 2021–2024 (mới nhất trong khoảng đó), không bao giờ chọn 2025+ (chạy .NET 8).
 CI (GitHub Actions) không có AutoCAD nên chỉ **biên dịch** lab (nó nằm trong `CadCoreFramework.sln`):
 ai làm `Utils/`/`Extensions/` phụ thuộc UI sẽ làm hỏng build ngay.
 

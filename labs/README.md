@@ -2,7 +2,7 @@
 
 Bộ chấm cho các lab [L02–L06 của T10](../docs/training/T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab). Làm xong một lab, chạy một lệnh: bài làm được nạp vào **AutoCAD thật** (accoreconsole, không mở giao diện), chạy trên một bản vẽ mẫu, rồi in từng kiểm tra đạt hay chưa, kèm lý do.
 
-Cần: AutoCAD 2021 trở lên, bản đầy đủ (có `accoreconsole.exe`; AutoCAD LT không có), .NET SDK 8 trở lên. Runner chạy accoreconsole với profile riêng trong `%TEMP%`, **không** đổi thiết lập AutoCAD của bạn ([T10 quy tắc 5](../docs/training/T10_LABS_AND_ASSESSMENT.md#1-quy-tắc-làm-lab)).
+Cần: **AutoCAD 2021–2024**, bản đầy đủ (có `accoreconsole.exe`; AutoCAD LT không có), .NET SDK 8 trở lên. DLL lab build cho .NET Framework 4.8 với API AutoCAD 2024, nên AutoCAD 2025 trở đi (chạy .NET 8) không nạp được; máy cài cả hai thì runner tự chọn bản mới nhất trong khoảng 2021–2024. Runner chạy accoreconsole với profile riêng trong `%TEMP%`, **không** đổi thiết lập AutoCAD của bạn ([T10 quy tắc 5](../docs/training/T10_LABS_AND_ASSESSMENT.md#1-quy-tắc-làm-lab)).
 
 ## Cách làm
 

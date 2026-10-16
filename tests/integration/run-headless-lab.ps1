@@ -29,12 +29,15 @@ $Project = Join-Path $PSScriptRoot 'HeadlessLab\HeadlessLab.csproj'
 $Dll = Join-Path $PSScriptRoot 'HeadlessLab\bin\Debug\net48\CadCoreFramework.HeadlessLab.dll'
 
 if (-not $AcCorePath) {
+    # HeadlessLab là net48, build với API AutoCAD 2024 (R24): chỉ AutoCAD 2021–2024 (.NET Framework 4.8).
+    # AutoCAD 2025+ chạy .NET 8, nên không bao giờ tự chọn nó, kể cả khi máy cài cả hai.
     # @(...): một bản cài → pipeline trả chuỗi đơn; $x[-1] sẽ là KÝ TỰ cuối (xem T03 A6).
     $candidates = @(Get-ChildItem 'C:\Program Files\Autodesk' -Directory -Filter 'AutoCAD 20*' -ErrorAction SilentlyContinue |
+                    Where-Object { $_.Name -match '^AutoCAD (\d{4})$' -and [int]$Matches[1] -ge 2021 -and [int]$Matches[1] -le 2024 } |
                     Sort-Object Name | ForEach-Object { Join-Path $_.FullName 'accoreconsole.exe' } | Where-Object { Test-Path $_ })
     if ($candidates.Count -gt 0) { $AcCorePath = $candidates[-1] }
 }
-if (-not $AcCorePath -or -not (Test-Path $AcCorePath)) { Write-Host 'accoreconsole.exe not found.'; exit 2 }
+if (-not $AcCorePath -or -not (Test-Path $AcCorePath)) { Write-Host 'accoreconsole.exe of AutoCAD 2021–2024 not found (AutoCAD 2025+ runs .NET 8 and cannot load the net48 lab DLL).'; exit 2 }
 
 Write-Host "Building HeadlessLab…"
 & dotnet build $Project -c Debug --nologo -v q | Out-Null
