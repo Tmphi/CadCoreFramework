@@ -9,6 +9,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (tài liệu — bộ thẻ ôn và lịch ôn, GĐ3 phần 3)
+- **Bộ thẻ ôn** [`docs/training/deck/CadCoreFramework-flashcards.txt`](docs/training/deck/CadCoreFramework-flashcards.txt): 437 thẻ, sinh bằng `tools/docs/build-deck.mjs` từ chính tài liệu. Gồm 268 câu hỏi của 79 khối ✅ (ghép câu số N với đáp án số N), 144 thuật ngữ GLOSSARY, 25 câu ngân hàng T10 §5. Định dạng nhập văn bản của Anki: tab, HTML, tag theo module và nguồn (`CadCore::T02`, `CadCore::tu-kiem-tra`…), GUID cố định để nhập lại thì cập nhật thẻ cũ.
+- training/README §3 **Lịch ôn**: cách dùng bộ thẻ, và lịch ôn không cần phần mềm (hôm sau, 1 tuần, 1 tháng).
+- CI (job `docs`, bước "Review deck", `npm run deck`): file thẻ đã commit phải khớp tài liệu; khối ✅ nào có câu hỏi mà không có đúng một đáp án cùng số thì đỏ. Bước này bắt được hai khối lệch ngay lần chạy đầu: U01 §8 (câu 4 viết thành đoạn văn) và T09 (câu 1 là câu hỏi mở, không có đáp án; đã thêm đáp án nói cách chấm).
+- T01, khối ✅ §7: `` "DOOR,`*U*" `` viết bằng code span một backtick nên GitHub hiển thị sai (chữ `U` nghiêng, mất dấu `*`); sửa thành code span hai backtick.
+
 ### Added (tài liệu — luyện nhớ lại, GĐ3 phần 2)
 - Khối **✅ Tự kiểm tra** ngay sau mỗi mục 🎯 nội dung của U01 (10), U02 (6), U03 (7): 23 khối, cùng cách viết với phần 1, không trùng khối ✅ cuối module. Hai chi tiết nằm ngoài nội dung mục đã chạy thử trước khi ghi: `[RelayCommand]` trên `SaveAsync` sinh ra `SaveCommand` (`AsyncRelayCommand`, CommunityToolkit.Mvvm 8.4.2); và `PreviewShape.Arc` từ 350° tới 10° tạo **5** đoạn, không phải 4 như tính tay, vì sai số số thực trước `Math.Ceiling`.
 - Thẻ ⏱ của U01–U03 theo số từ mới. training/README: U01 thêm ≈ 55 phút vào lộ trình nhanh; nhánh xem trước (U00, U02, U03) ≈ 2 giờ.

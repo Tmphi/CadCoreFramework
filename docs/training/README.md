@@ -178,6 +178,25 @@ Dành cho người **đã vững C#** (đạt 7–8 điểm [bài kiểm tra đ�
 
 Lộ trình nhanh **không** thay cho lộ trình đầy đủ và không tự động lên cấp: nó đưa bạn tới chỗ làm được việc. Các mục 🔍, T03 và T07 học dần theo nhu cầu; đánh giá lên cấp vẫn theo [T10 §4](T10_LABS_AND_ASSESSMENT.md#4-đề-đánh-giá-lên-cấp).
 
+### Lịch ôn
+
+Đọc một lần rồi thôi thì quên nhanh. **Tự nhớ lại, cách quãng ngày một xa**, thì nhớ lâu. Có hai cách, dùng cách nào cũng được:
+
+**Cách 1 — bộ thẻ Anki.** [`deck/CadCoreFramework-flashcards.txt`](deck/CadCoreFramework-flashcards.txt) sinh tự động từ chính tài liệu: mọi câu hỏi trong các khối ✅, thuật ngữ trong [GLOSSARY](GLOSSARY.md), và ngân hàng câu hỏi [T10 §5](T10_LABS_AND_ASSESSMENT.md#5-ngân-hàng-câu-hỏi).
+- **Nhập:** trong [Anki](https://apps.ankiweb.net/), File → Import, chọn file. Các dòng `#…` ở đầu file khai báo sẵn: phân cách tab, có HTML, deck `CadCoreFramework`, tag ở cột 3, GUID ở cột 4.
+- **Chỉ học phần đã đọc:** mỗi thẻ có tag theo module (`CadCore::T02`, `CadCore::U01`…) và theo nguồn (`CadCore::tu-kiem-tra`, `CadCore::thuat-ngu`, `CadCore::ngan-hang`). Dùng Custom Study hoặc tạo filtered deck theo tag, ví dụ `tag:CadCore::T02`. Anki tự lên lịch hỏi lại.
+- **Tài liệu đổi:** tải file mới và nhập lại. Mỗi thẻ có GUID cố định theo vị trí câu hỏi trong tài liệu, nên khi nhập, chọn cập nhật thẻ đã có (Existing notes: Update) thì thẻ cũ được sửa thay vì nhân đôi.
+
+**Cách 2 — không dùng phần mềm.** Đầu mỗi buổi học, dành 15 phút trả lời lại các khối ✅ (gấp tài liệu, nói hoặc viết ra rồi mới mở đáp án):
+
+| Khi nào | Ôn gì |
+| :--- | :--- |
+| Hôm sau ngày đọc một module | Mọi khối ✅ của module đó |
+| 1 tuần sau | Những câu sai lần trước, cộng 3 câu bất kỳ |
+| 1 tháng sau | Khối ✅ cuối module |
+
+Câu nào sai thì ghi lại, đọc lại đúng đoạn tài liệu của nó, và hỏi lại ở lần ôn sau. Mentor dùng ngân hàng câu hỏi T10 §5 cho phần vấn đáp.
+
 ---
 
 ## 4. Chuẩn bị môi trường
@@ -211,7 +230,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | 🔎 **Đọc code** | Mở file được dẫn và đọc *trước khi* đọc tiếp |
 | 🧪 **Thử ngay** | Thí nghiệm 5–15 phút trên AutoCAD hoặc unit test |
 | ⚠️ **Bẫy** | Lỗi đã từng xảy ra (với dự án này hoặc rất phổ biến) |
-| ✅ **Tự kiểm tra** | Câu hỏi ngay sau mỗi mục 🎯 (T01, T02, T04–T08, U01–U03) và cuối mỗi module. Đáp án nằm trong khối thu gọn. **Gấp tài liệu lại, tự trả lời** (nói ra hoặc viết ra) rồi mới mở: cố nhớ lại giúp nhớ lâu hơn nhiều so với đọc lại. Sai câu nào thì đọc lại đúng đoạn đó, và hỏi lại câu đó ở lần ôn sau || 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
+| ✅ **Tự kiểm tra** | Câu hỏi ngay sau mỗi mục 🎯 (T01, T02, T04–T08, U01–U03) và cuối mỗi module. Đáp án nằm trong khối thu gọn. **Gấp tài liệu lại, tự trả lời** (nói ra hoặc viết ra) rồi mới mở: cố nhớ lại giúp nhớ lâu hơn nhiều so với đọc lại. Sai câu nào thì đọc lại đúng đoạn đó, và hỏi lại câu đó ở lần ôn sau ([lịch ôn](#lịch-ôn), có bộ thẻ Anki) || 💡 **20/80** | Điều đáng nhớ nhất của mục — phần nhỏ kiến thức dùng nhiều nhất trong dự án |
 | 🎯 **Cốt lõi** | Nhãn ở cuối dòng Mục lục: mục cần để làm việc hằng ngày với dự án và để học module sau. [Lộ trình nhanh](#lộ-trình-nhanh) chỉ đọc các mục này |
 | 🔍 **Đào sâu** | Giải thích gốc rễ hoặc chủ đề nâng cao. Học ở lộ trình đầy đủ, hoặc khi gặp đúng vấn đề. Mục tiêu đầu ra ở đầu module là của **cả** module, nên vài mục tiêu cần cả phần 🔍 |
 | 📖 **Tra cứu** | Không học tuần tự, mở khi cần: bảng mã lỗi, công thức, backlog, đề đánh giá |
@@ -258,6 +277,7 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 
   Thêm `pkg CommunityToolkit.Mvvm` nếu khối cần NuGet, `allow CS8602` nếu khối cố ý sinh một cảnh báo. Viết khối mới thì thử nhanh trước khi gắn chú thích: `node tools/docs/check-snippets.mjs C02 --assume-run`. Module khác (T, U02, U03) chưa bắt buộc chú thích, nhưng khối nào có chú thích cũng được kiểm.
 - **Bài tập chấm tự động** ([`exercises/`](../../exercises/README.md)): đổi đề hay đáp án một bài trong C01–C04/U01 thì sửa luôn file bài làm, lời giải mẫu (`exercises/LoiGiai/`) và test. CI kiểm: lời giải mẫu qua mọi test, code khởi đầu đỏ ở **mọi** bài, mỗi bài có đúng một lớp test.
+- **Bộ thẻ ôn** ([`deck/`](deck/CadCoreFramework-flashcards.txt)) sinh từ các khối ✅, GLOSSARY và T10 §5: **đừng sửa tay**. Sửa tài liệu, chạy `node tools/docs/build-deck.mjs --write`, rồi commit cả file thẻ. CI (`npm run deck`) báo đỏ khi file thẻ không khớp tài liệu, và khi một khối ✅ có câu hỏi số N mà không có đúng một đáp án số N. Câu hỏi mở (không có đáp án cố định) thì vẫn ghi một đáp án nói cách chấm, như T09.
 - **Lab chấm trên AutoCAD** ([`labs/`](../../labs/README.md)): CI không có AutoCAD nên chỉ biên dịch. Đổi bộ chấm, lời giải mẫu, đề L02–L06, hay API framework mà lab dùng (`CadContext`, `CadPromptHelper`, `DynamicBlockHelper`, `SelectionFilterBuilder`, `XRecordHelper`) thì chạy trên máy có AutoCAD: `.\labs\run-lab.ps1 -Solution` (mọi kiểm tra đạt) và `.\labs\run-lab.ps1` (mọi kiểm tra của L02–L05 phần 1 đỏ).
 - **U01–U03 cũng trích nguyên văn code dự án**: `GridMarkerPalette.xaml(.cs)`, `GridMarkerViewModel`, `GridMarkerCommands`, `CadPromptHelper`, `WindowManagerService`, `SampleCommands`, `LayerManagerControl.xaml(.cs)`, `CommonControlsViewModel`, `DemoUiCommands`. PR đổi các file đó phải kiểm lại trích dẫn. Code hướng dẫn ở U03 (`PreviewShape`, `CadPreview`, `EntityPreviewBuilder`…) **chưa nằm trong repo**: người học tự thêm qua lab L17. Đã có người đưa nó vào repo thì sửa U03 cho trỏ tới file thật. Bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu) đếm lại được bằng lệnh ghi dưới bảng.
 ### Trạng thái kiểm chứng
@@ -275,3 +295,4 @@ Nạp `bin\Debug\net48\CadCoreFramework.dll` vào AutoCAD bằng `NETLOAD` hoặ
 | Code mẫu C01–C05, U01 (job `docs`, 2026-10-15) | 76 khối có chú thích `doc-check`: 50 chạy (20 so output với khối `text`), 1 biên dịch, 1 test xUnit, 21 trích nguyên văn so với file nguồn, 3 bỏ qua có lý do. Đối chứng với 8 lỗi cài sẵn (thiếu chú thích, trích sai, khối không biên dịch, sai mã lỗi mong đợi, ném exception, output lệch, test fail; một khối đúng mã lỗi thì qua): cả 8 đều đúng kết quả |
 | Bài tập chấm tự động (`exercises/`, 2026-10-15) | 14 bài, 521 test. Lời giải mẫu (giống đáp án trong tài liệu) qua cả 521 test; code khởi đầu đỏ ở cả 14 bài (513 test đỏ, 8 test xanh là các test kiểm phần đúng sẵn có, như luật cũ của `PanelSpec`). Đối chứng với lỗi cài sẵn (một bài có sẵn lời giải nên test xanh hết, lời giải mẫu in sai một chữ, file bài không có test, lớp test không có bài, lời giải không biên dịch): cả 5 đều bị bắt |
 | Lab chấm trên AutoCAD (`labs/`, 2026-10-16) | 20 kiểm tra cho L02–L06, chạy trên accoreconsole của AutoCAD 2024. Lời giải mẫu đạt cả 20. Code khởi đầu đỏ ở 17 kiểm tra của L02–L05 phần 1; 3 kiểm tra framework (L05 B-17, L06) xanh trên `main` vì lỗi đã sửa ở PR #6, còn trên `v1.0.0` (qua `-FrameworkRoot`) thì đỏ, sửa xong thì xanh. Đối chứng với 16 bài làm sai mà trông hợp lý (đếm bằng `GetObject`, đếm theo `br.Name`, mở `LayerTable` `ForWrite`, đếm ModelSpace thay cho CurrentSpace, `Commit` ở TN1, `ForWrite` ở TN2, chỉ đọc thuộc tính ở TN3, `LockDocument` ở TN4, hai `Execute` nối tiếp ở TN5, không đổi màu ở TN6, không đổi UCS → WCS, bản thô có đổi hệ, prompt bên trong `Execute`, hỏi thừa một điểm, filter thiếu `` `*U* ``, không lọc lại theo tên thật): cả 16 đều bị bắt, đúng kiểm tra, đúng lý do. Bản vẽ mẫu lưu ra DWG 2018 rồi chấm lại trên chính file đó: đạt. Nhánh `[SKIP]` (máy không có bộ dynamic block mẫu) thử bằng cách tạm đổi tên file mẫu mà bộ dựng bản vẽ đi tìm. Trên AutoCAD 2024 có giao diện (2026-10-16, bản build lời giải mẫu, mở `lab-sample.dwg`): NETLOAD DLL lab được; `TRAIN_DUMP` in đúng layer và số đếm; `TRAIN_DOORS` tìm đủ 3 DOOR, 2 cái tên `*U…`; với UCS xoay 30°, `TRAIN_LINE2P` có đường cao su, vẽ đúng chỗ click; ESC ở điểm thứ hai thì không vẽ gì |
+| Bộ thẻ ôn (`deck/`, 2026-10-16) | 437 thẻ sinh từ tài liệu; mọi dòng đủ 4 cột (mặt trước, mặt sau, tag, GUID), không trùng GUID. CI kiểm file khớp tài liệu: sửa một đáp án mà không sinh lại thì đỏ (đã thử). Lần chạy đầu bắt được hai khối ✅ lệch số câu/đáp án (U01 §8, T09), đã sửa. Chạy được cả trong dự án sinh từ template (file đổi tên theo tên dự án). **Chưa thử** nhập vào Anki trên máy kiểm chứng: định dạng (các dòng `#separator`, `#html`, `#deck`, `#columns`, `#tags column`, `#guid column`) theo tài liệu nhập văn bản của Anki 2.1.55 trở lên |
