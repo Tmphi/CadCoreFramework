@@ -206,7 +206,7 @@ Câu nào sai thì ghi lại, đọc lại đúng đoạn tài liệu của nó,
 | Thành phần | Phiên bản | Ghi chú |
 | :--- | :--- | :--- |
 | Windows | 10/11 x64 | AutoCAD chỉ chạy 64-bit |
-| AutoCAD | **2024** (đã kiểm chứng) | 2021–2024 dùng bản `net48`. AutoCAD 2025+ (`net8.0-windows`) **chưa được kiểm chứng**, nằm ngoài phạm vi hiện tại |
+| AutoCAD | **2024** (đã kiểm chứng) | 2021–2024 dùng bản `net48`. AutoCAD 2025+ (`net8.0-windows`) **chưa được kiểm chứng**, nằm ngoài phạm vi hiện tại. Bộ chấm lab ([`labs/`](../../labs/README.md)) và HeadlessLab là DLL `net48`, nên **cần** AutoCAD 2021–2024 |
 | Visual Studio | 2022 (khuyến nghị) | Workload ".NET desktop development" |
 | .NET SDK | 8.x trở lên | CI dùng 8.0.x; máy dev có thể dùng SDK mới hơn |
 | Git + GitHub CLI | mới nhất | `gh` để tạo PR, xem CI |

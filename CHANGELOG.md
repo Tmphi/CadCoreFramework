@@ -9,6 +9,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed (bộ chấm lab và HeadlessLab: chỉ AutoCAD 2021–2024)
+- `labs/run-lab.ps1` và `tests/integration/run-headless-lab.ps1` từng tự chọn bản AutoCAD **mới nhất** đã cài. Máy có cả AutoCAD 2024 lẫn 2025 thì chúng chọn 2025, trong khi DLL lab là net48 build với API AutoCAD 2024 còn AutoCAD 2025+ chạy .NET 8. Giờ chúng chỉ tự chọn bản mới nhất trong khoảng 2021–2024 (truyền `-AcCorePath` vẫn chọn tay được). Thử trên cây thư mục giả: có 2024 và 2025 thì chọn 2024; không có 2024 thì chọn 2023; chỉ có 2020, 2025, "AutoCAD 2024 Beta" hay thư mục không có `accoreconsole.exe` thì báo không tìm thấy, kèm lý do. Trên máy thật vẫn chọn AutoCAD 2024: L06 2/2, HeadlessLab 22/22.
+- `labs/README` từng ghi "AutoCAD 2021 trở lên": sửa thành 2021–2024. training/README §4 và README của `tests/integration` ghi rõ giới hạn này.
+
 ### Added (đo hiệu quả học, GĐ6)
 - Hai mẫu issue (`.github/ISSUE_TEMPLATE/`): **Báo cáo lab** (lab, giờ làm thật, phút đọc từng module, kết quả `run-lab.ps1`, báo cáo, link PR) và **Đo đầu/cuối giai đoạn** (cấp, lần đo, điểm 0–2 từng câu, mã học viên). Cả hai qua schema `github-issue-forms` của SchemaStore.
 - `tools/docs/learning-report.mjs`: đọc issue bằng `gh`, in giờ làm lab so với T10 §2, phút đọc so với ⏱, mức tăng điểm theo giai đoạn trên đúng bộ vấn đáp của T10 §4, cùng mục "Cần xem lại" cho issue ghi sai dạng. Tên trường đọc từ chính hai mẫu issue, ước lượng và bộ câu đọc từ chính T10.
