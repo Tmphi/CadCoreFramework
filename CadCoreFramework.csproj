@@ -54,15 +54,25 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
 
     <!--
-      WPF HOT-RELOAD TRICK (Debug only):
-      Append a timestamp to the AssemblyName on every Debug build so AutoCAD
+      WPF HOT-RELOAD TRICK (DebugAcad only):
+      Append a timestamp to the AssemblyName on every DebugAcad build so AutoCAD
       never holds a file lock on the previous DLL. Allows NETLOAD of the new
       DLL without restarting AutoCAD.
       The Post-Build event below copies the timestamped file back to the
       canonical name so other tooling can always find CadCoreFramework.dll.
+
+      Vì sao tách khỏi Debug: tên được tính lại MỖI LẦN MSBuild đọc project. Visual Studio
+      build từng project riêng, nên project tham chiếu (Testing/Tests/Benchmarks) đọc lại
+      project này vài giây sau và đi tìm một tên DLL chưa từng tồn tại (CS0006).
+      Debug giữ tên cố định; DebugAcad (trong .sln chỉ build plugin) mới gắn giờ.
     -->
-    <AssemblyName Condition="'$(Configuration)' == 'Debug' And '$(DesignTimeBuild)' != 'true'">CadCoreFramework_$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</AssemblyName>
-    <AssemblyName Condition="'$(Configuration)' != 'Debug' Or '$(DesignTimeBuild)' == 'true'">CadCoreFramework</AssemblyName>
+    <Configurations>Debug;Release;DebugAcad</Configurations>
+    <AssemblyName Condition="'$(Configuration)' == 'DebugAcad' And '$(DesignTimeBuild)' != 'true'">CadCoreFramework_$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</AssemblyName>
+    <AssemblyName Condition="'$(Configuration)' != 'DebugAcad' Or '$(DesignTimeBuild)' == 'true'">CadCoreFramework</AssemblyName>
+    <!-- SDK chỉ tự đặt các giá trị Debug cho cấu hình tên "Debug" → DebugAcad khai báo lại. -->
+    <DebugSymbols Condition="'$(Configuration)' == 'DebugAcad'">true</DebugSymbols>
+    <Optimize Condition="'$(Configuration)' == 'DebugAcad'">false</Optimize>
+    <DefineConstants Condition="'$(Configuration)' == 'DebugAcad'">$(DefineConstants);DEBUG</DefineConstants>
 
     <!-- Templates\**: file nguồn của `dotnet new cad-command` — không biên dịch vào plugin DLL.
          tests\**: HeadlessLab (project test riêng, link lại mã nguồn của plugin) — không được lẫn vào plugin. -->
@@ -144,11 +154,13 @@
   </ItemGroup>
 
   <!-- ═══ WPF Hot-Reload Post-Build ══════════════════════════════════════
-       Copies the timestamped Debug DLL to the canonical CadCoreFramework.dll
-       so that NETLOAD scripts and external tools always find a stable filename.
+       Copies the timestamped DebugAcad DLL to the canonical CadCoreFramework.dll
+       so that external tools always find a stable filename.
+       NETLOAD file có gắn giờ, KHÔNG NETLOAD bản copy này: AutoCAD sẽ khóa nó
+       và lần build sau bước copy thất bại.
   ═══════════════════════════════════════════════════════════════════════════ -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent"
-          Condition="'$(Configuration)' == 'Debug' And '$(TargetName)' != 'CadCoreFramework'">
+          Condition="'$(Configuration)' == 'DebugAcad' And '$(TargetName)' != 'CadCoreFramework'">
     <Exec Command="copy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(TargetDir)CadCoreFramework.dll&quot;" />
     <Exec Command="if exist &quot;$(TargetDir)$(TargetName).pdb&quot; copy /Y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(TargetDir)CadCoreFramework.pdb&quot;" />
   </Target>

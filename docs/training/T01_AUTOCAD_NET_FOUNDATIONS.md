@@ -59,7 +59,7 @@ Hệ quả trực tiếp:
 | Sự thật | Hệ quả cho bạn | Framework xử lý ở đâu |
 | :--- | :--- | :--- |
 | Mọi plugin chung **một AppDomain** | Hai DLL cùng *identity* (tên + AssemblyVersion + public key) không thể nạp hai bản khác nhau | Gỡ Serilog, tự viết logger ([T03 A1](T03_PITFALLS_CASEBOOK.md#a1-serilog-missingmethodexception-ngay-khi-khởi-động)) |
-| .NET Framework **không gỡ (unload) được** assembly | Nạp lại DLL cùng tên trả về bản cũ → muốn "hot reload" phải đổi tên assembly | `AssemblyName` có timestamp ở bản Debug ([T02 §2](T02_ARCHITECTURE_DEEP_DIVE.md#2-khởi-động-và-tắt-appbootstrapper)) |
+| .NET Framework **không gỡ (unload) được** assembly | Nạp lại DLL cùng tên trả về bản cũ → muốn "hot reload" phải đổi tên assembly | `AssemblyName` có timestamp ở bản `DebugAcad` ([T02 §2](T02_ARCHITECTURE_DEEP_DIVE.md#2-khởi-động-và-tắt-appbootstrapper)) |
 | Exception không bắt ở biên → có thể **làm sập AutoCAD** | Mọi điểm vào (lệnh, event handler, nút bấm) phải có try/catch | `CadCommandBase.ExecuteCommand`, `ViewModelBase.RunSafe` |
 | API AutoCAD **đơn luồng** | Chỉ main thread được gọi API | [§8](#8-threading-và-async-trong-autocad) |
 
@@ -716,7 +716,7 @@ Khi plugin cần `Microsoft.Extensions.DependencyInjection.dll`, CLR đi tìm th
 
 ### ✅ Tự kiểm tra §12
 
-1. Vì sao bản Debug có `AssemblyName` dạng `CadCoreFramework_20261013_214119`?
+1. Vì sao bản `DebugAcad` có `AssemblyName` dạng `CadCoreFramework_20261013_214119`?
 2. Thêm thư viện `Foo 2.x` vào dự án. Cần kiểm tra gì *trước* khi merge?
 
 <details><summary>Đáp án</summary>

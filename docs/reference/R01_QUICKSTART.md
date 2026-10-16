@@ -74,7 +74,7 @@ Dự án tách mỗi loại trách nhiệm vào một thư mục. Vai trò của
 dotnet build CadCoreFramework.sln -c Debug
 ```
 
-Bản Debug có tên assembly kèm thời điểm build (ví dụ `CadCoreFramework_20261010_120000.dll`) rồi được copy về `CadCoreFramework.dll`, nhờ vậy bạn nạp lại được mà không phải tắt AutoCAD. Cơ chế và giới hạn của nó: [R06 §1](R06_STANDARDS.md#1-nạp-lại-plugin-không-cần-tắt-autocad).
+Bản Debug ra `CadCoreFramework.dll` (tên cố định). DLL đã `NETLOAD` bị AutoCAD khóa, nên muốn build và nạp lại nhiều lần mà không tắt AutoCAD thì dùng cấu hình `DebugAcad`: [R06 §1](R06_STANDARDS.md#1-nạp-lại-plugin-không-cần-tắt-autocad).
 
 **Bước 2 — Nạp vào AutoCAD.**
 1. Mở AutoCAD và **một bản vẽ bất kỳ** (lệnh cần có bản vẽ đang mở).

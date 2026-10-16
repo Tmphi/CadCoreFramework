@@ -71,12 +71,13 @@ Chọn công cụ **đầu tiên** cho từng tình huống:
 ## 2. Vòng lặp phát triển: build → nạp → thử
 
 ```powershell
-dotnet build CadCoreFramework.csproj -c Debug -f net48     # chỉ plugin, nhanh hơn build cả solution
+dotnet build CadCoreFramework.csproj -c DebugAcad -p:Platform=x64 -f net48     # chỉ plugin; trong VS: chọn DebugAcad | x64
 ```
 
-- Output: `bin\Debug\net48\CadCoreFramework_<timestamp>.dll` + bản copy `CadCoreFramework.dll` (và `.pdb`).
-- Nạp bằng `NETLOAD`, hoặc bằng tool nạp từ byte array của nhóm (không khóa file, nạp lại được nhiều lần).
+- Output: `bin\x64\DebugAcad\net48\CadCoreFramework_<timestamp>.dll` + bản copy `CadCoreFramework.dll` (và `.pdb`).
+- `NETLOAD` **file có gắn giờ** (bản copy tên cố định sẽ bị khóa, làm hỏng lần build sau), hoặc nạp bằng tool nạp từ byte array của nhóm (không khóa file, nạp lại được nhiều lần).
 - Nhờ tên assembly có timestamp, **mỗi lần build là một assembly mới**, nên nạp lại được mà không tắt AutoCAD ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)).
+- Cấu hình `Debug` thường ra `CadCoreFramework.dll` tên cố định (để project test build được trong Visual Studio). Đã `NETLOAD` bản đó thì phải tắt AutoCAD mới build lại được.
 
 > [!WARNING]
 > **Nạp lại không "thay thế" bản cũ.** Bản cũ vẫn nằm trong AppDomain: `IExtensionApplication` của nó đã chạy, event nó hook vẫn còn, lệnh cùng tên bị bản mới đè. Sau nhiều lần nạp, hành vi có thể "lạ". **Khởi động lại AutoCAD** khi:
@@ -86,13 +87,13 @@ dotnet build CadCoreFramework.csproj -c Debug -f net48     # chỉ plugin, nhanh
 
 ### ✅ Tự kiểm tra §2
 
-1. Vì sao build Debug nạp lại được nhiều lần mà không tắt AutoCAD?
+1. Vì sao build `DebugAcad` nạp lại được nhiều lần mà không tắt AutoCAD?
 2. Bạn sửa `AppBootstrapper` để hook thêm một event, build, `NETLOAD` bản mới. Event cũ đi đâu? Nên làm gì?
 3. Bản sửa của bạn chạy đúng sau năm lần nạp lại liên tiếp. Đã đủ để báo "đã sửa" chưa?
 
 <details><summary>Đáp án</summary>
 
-1. Bản Debug có tên assembly kèm timestamp: mỗi lần build là một assembly *mới*, nên .NET không coi là nạp trùng.
+1. Bản `DebugAcad` có tên assembly kèm timestamp: mỗi lần build là một assembly *mới*, nên .NET không coi là nạp trùng.
 2. Bản cũ vẫn nằm trong AppDomain, event nó hook **vẫn còn**. Sửa code khởi động hay event thì khởi động lại AutoCAD.
 3. Chưa. Kiểm lại trên một phiên AutoCAD **sạch**: các bản nạp trước có thể che hoặc gây ra hành vi bạn đang thấy.
 </details>
@@ -130,7 +131,7 @@ F5 sẽ mở AutoCAD và gắn debugger sẵn. Sau đó `NETLOAD` như thường
 
 | Dấu hiệu | Kiểm tra |
 | :--- | :--- |
-| *"The breakpoint will not currently be hit. No symbols have been loaded"* | **Debug → Windows → Modules**: assembly `CadCoreFramework_<timestamp>` có trong danh sách không, symbol đã nạp chưa |
+| *"The breakpoint will not currently be hit. No symbols have been loaded"* | **Debug → Windows → Modules**: assembly `CadCoreFramework` (bản `DebugAcad`: `CadCoreFramework_<timestamp>`) có trong danh sách không, symbol đã nạp chưa |
 | Nạp bằng byte array | Tool phải nạp kèm PDB (`Assembly.Load(rawAssembly, rawSymbolStore)`), hoặc chỉ cho VS đường dẫn PDB bằng chuột phải module → *Load Symbols*. Khi cần debug sâu, dùng `NETLOAD` trực tiếp cho đơn giản |
 | Đang chạy bản cũ | Có nhiều `CadCoreFramework_*` trong Modules. Khởi động lại AutoCAD |
 
@@ -151,7 +152,7 @@ F5 sẽ mở AutoCAD và gắn debugger sẵn. Sau đó `NETLOAD` như thường
 
 1. 2024: `Managed (.NET Framework 4.x)`. 2025+: `Managed (.NET Core, .NET 5+)`.
 2. Exception Settings → tích **Common Language Runtime Exceptions**. Debugger dừng ngay lúc exception được ném, kể cả khi sau đó có `catch` nuốt mất.
-3. Debug → Windows → **Modules**: có assembly `CadCoreFramework_<timestamp>` không, symbol đã nạp chưa. Thấy nhiều bản `CadCoreFramework_*` nghĩa là đang chạy bản cũ: khởi động lại AutoCAD.
+3. Debug → Windows → **Modules**: có assembly `CadCoreFramework` (bản `DebugAcad`: `CadCoreFramework_<timestamp>`) không, symbol đã nạp chưa. Thấy nhiều bản `CadCoreFramework_*` nghĩa là đang chạy bản cũ: khởi động lại AutoCAD.
 </details>
 
 ---

@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🏔️ Senior · **Cần trước:** [T05](T05_TESTING_STRATEGY.md); Git & PR ([C05 §4](C05_ASYNC_TESTING_GIT.md#4-git-và-pull-request)) · **Trong lộ trình:** tuần 13 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 20 phút) · **Thực hành:** L15 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 40 phút (phần 🎯 ≈ 20 phút) · **Thực hành:** L15 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Code chạy được trên máy bạn mới là một nửa. Nửa còn lại là **build tái lập được**, **CI chặn được lỗi**, và **bản phát hành đến tay người dùng đúng như bạn nghĩ**. Module này giải thích từng mắt xích, và chỉ ra những mắt xích đã từng đứt ([T03 A7–A12](T03_PITFALLS_CASEBOOK.md#a7-init-templateps1-không-parse-được-trên-windows-powershell-51)).
 
@@ -58,7 +58,7 @@ Project plugin nằm **ở gốc repo**, nên các thư mục project khác ph�
 | `Nullable` | `annotations` | Cho phép chú thích `?` trên API công khai mà không ngập cảnh báo từ AutoCAD API (chưa có annotation) |
 | `EnforceCodeStyleInBuild`, `AnalysisLevel=latest`, `AnalysisMode=Recommended` | | Rule IDE/CA chạy **lúc build**, không chỉ trong IDE |
 | `GenerateDocumentationFile` + `NoWarn CS1591` | | Bắt buộc để IDE0005 (using thừa) chạy khi build; không bắt doc cho mọi member |
-| `AssemblyName` (Debug) | `CadCoreFramework_yyyyMMdd_HHmmss` | Hot-reload ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)). Target `PostBuild` copy về tên cố định |
+| `AssemblyName` (`DebugAcad`) | `CadCoreFramework_yyyyMMdd_HHmmss` | Hot-reload ([T02 §2.1](T02_ARCHITECTURE_DEEP_DIVE.md#21-hot-reload-tên-assembly-có-timestamp)). Target `PostBuild` copy về tên cố định. `Debug`/`Release` giữ `CadCoreFramework`; trong `.sln`, `DebugAcad` chỉ build plugin + analyzer |
 | `DefaultItemExcludes` | các project khác + `Templates\**` + `tests\**` + `tools\**` + `exercises\**` + `labs\**` | Không biên dịch lẫn code test / template / bài tập / lab vào plugin, không kéo `node_modules` vào project |
 | `IncludeDemos` | mặc định `true` | `false` thì loại `Demos/**` khỏi DLL |
 | `MSBuildWarningsAsMessages` | `MSB3277` | Xung đột version vô hại khi có thư mục `dist/` cạnh NuGet |
@@ -72,7 +72,7 @@ Project plugin nằm **ở gốc repo**, nên các thư mục project khác ph�
 
 ```powershell
 dotnet build CadCoreFramework.sln -c Release -warnaserror      # đúng lệnh CI dùng
-dotnet build CadCoreFramework.csproj -c Debug -f net48         # vòng lặp dev nhanh
+dotnet build CadCoreFramework.csproj -c DebugAcad -p:Platform=x64 -f net48   # vòng lặp dev nhanh, NETLOAD lại không tắt AutoCAD
 dotnet build CadCoreFramework.csproj -c Release -p:IncludeDemos=false   # kiểm tra build không demo
 ```
 
