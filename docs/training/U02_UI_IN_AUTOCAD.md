@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌳 Middle · **Cần trước:** [U01](U01_WPF_MVVM_BASICS.md), [T01 §5–7](T01_AUTOCAD_NET_FOUNDATIONS.md#5-document-lock-và-hai-ngữ-cảnh-thực-thi) · **Trong lộ trình:** tuần 8 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 35 phút (phần 🎯 ≈ 30 phút) · **Thực hành:** [bài tập §10](#10-bài-tập), L08 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 45 phút (phần 🎯 ≈ 40 phút) · **Thực hành:** [bài tập §10](#10-bài-tập), L08 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 U01 dạy WPF như một thư viện độc lập. Module này đưa UI vào **bên trong AutoCAD**, nơi có thêm ba ràng buộc: **ngữ cảnh** (command hay application context), **lock** của bản vẽ, và **nhiều bản vẽ** cùng mở. Thứ tự các mục theo đúng bảng 20/80 ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu): dòng lệnh trước, vì đó là UI mà tool AutoCAD dùng nhiều nhất.
 
@@ -43,6 +43,17 @@ Các hành vi AutoCAD trong module (prompt, từ khóa, UCS, chọn sẵn, đổ
 | Báo kết quả, cảnh báo | **Dòng lệnh** (`INotificationService`) | Mọi lệnh của dự án |
 
 Golden Sample làm **cả hai**: lệnh `SAMPLE_GRID` (pick điểm) và palette (nhập trên form). Cả hai dùng chung `GridSpec.Validate()`, `GridPlanner` và `GridMarkerService` ([R05 — Golden Sample](../reference/R05_GOLDEN_SAMPLE.md)). Đây là mẫu nên theo: **logic dùng chung, chỉ lớp UI khác nhau**.
+
+### ✅ Tự kiểm tra §1
+
+1. Trước khi xuất PDF hàng loạt, người dùng chọn thư mục đích và khổ giấy một lần, rồi bấm OK hoặc Hủy. Bề mặt UI nào?
+2. Golden Sample có cả lệnh `SAMPLE_GRID` lẫn palette. Hai bên dùng chung những gì, và khác nhau ở đâu?
+
+<details><summary>Đáp án</summary>
+
+1. Hộp thoại modal: thiết lập một lần trước khi chạy, có OK/Hủy.
+2. Dùng chung `GridSpec.Validate()`, `GridPlanner` và `GridMarkerService`. Chỉ lớp UI khác nhau: lệnh hỏi và pick điểm trên dòng lệnh, palette nhập trên form.
+</details>
 
 ---
 
@@ -113,6 +124,21 @@ Trên dòng lệnh, dấu phẩy là dấu ngăn cách tọa độ. Gõ `1,5` v�
 - **Chọn:** `CadPromptHelper.GetSelection(message, filter)` kết hợp [`SelectionFilterBuilder`](../../Utils/SelectionFilterBuilder.cs): lọc theo loại, layer, màu, XData ([T01 §7.4](T01_AUTOCAD_NET_FOUNDATIONS.md#74-selection-và-selectionfilter), lab L05). Xem 5 cách lọc đang chạy: lệnh `DEMO_SELECTION_FILTER`.
 - **Thông báo:** `WriteMessage` là API được dùng nhiều nhất trong code AutoCAD công khai (4.008 file). Luôn bắt đầu chuỗi bằng `"\n"`, nếu không chữ sẽ dính vào dòng prompt trước. Trong dự án, hãy dùng `INotificationService` (`Info`/`Warn`/`Error`): nó ghi cả log và chỉ ghi vào bản vẽ **đang active** ([T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)).
 
+### ✅ Tự kiểm tra §2
+
+1. Prompt "Số hàng" có `defaultValue: 3`. Người dùng nhấn Enter: kết quả là gì? Nhấn ESC thì `CadPromptHelper.GetInteger` trả gì?
+2. Prompt từ khóa `Yes`/`No`, mặc định `Yes`. Người dùng gõ `n`. Kết quả?
+3. Bạn viết `new PromptKeywordOptions("\nVẽ lưới này? [Yes/No]")` rồi thêm hai từ khóa. Dòng lệnh in ra gì?
+4. `ed.WriteMessage("Đã vẽ xong")` hiện ra dính vào cuối dòng prompt trước. Vì sao? Trong dự án nên dùng gì thay?
+
+<details><summary>Đáp án</summary>
+
+1. Enter: `Status = OK`, giá trị 3. ESC: `Status = Cancel`, helper trả `null`, lệnh `return`.
+2. `No`: chỉ cần gõ phần đầu của từ khóa, không phân biệt hoa thường.
+3. `Vẽ lưới này? [Yes/No] [Yes/No] <…>:`. AutoCAD tự nối danh sách từ khóa (`AppendKeywordsToMessage` mặc định `true`), nên câu nhắc chỉ chứa phần chữ (lỗi B-33).
+4. Chuỗi không bắt đầu bằng `"\n"`. Trong dự án dùng `INotificationService.Info`: nó ghi cả log và chỉ ghi vào bản vẽ đang active.
+</details>
+
 ---
 
 ## 3. Palette
@@ -140,6 +166,19 @@ Những điều phải biết (chi tiết ở [T02 §8](T02_ARCHITECTURE_DEEP_DI
 - Palette là **application context**. Nút bấm trên palette ghi bản vẽ qua `ICadContext` (tự lock, tự gom undo), **không** prompt. Cần pick điểm thì làm theo [§7.2](#72-nút-palette-chạy-một-lệnh-để-prompt).
 
 **Một palette, nhiều bản vẽ.** Palette chỉ có một, bản vẽ thì nhiều. Mỗi lần bấm nút, `ICadContext` làm việc với bản vẽ **đang active** *tại lúc bấm*. Nhưng thứ palette đang *hiển thị* (ví dụ "Số ô trong bản vẽ: 12") có thể là của bản vẽ trước, nếu không có gì làm mới nó. Code công khai giải quyết việc này bằng sự kiện `DocumentCollection.DocumentActivated` (398 file). `IEventService` của dự án chưa có sự kiện này, và đó là [bài tập U02-E2](#10-bài-tập).
+
+### ✅ Tự kiểm tra §3
+
+1. Người dùng bấm nút X của palette. ViewModel còn sống không? Còn nhận message không?
+2. Vì sao `TogglePalette` nhận một **hàm tạo** `() => new GridMarkerPalette()`, không nhận một palette đã tạo sẵn?
+3. Nút "Vẽ" trên palette có cần tự `LockDocument` không?
+
+<details><summary>Đáp án</summary>
+
+1. Nút X chỉ **ẩn** palette: ViewModel vẫn sống và vẫn nhận message.
+2. View chỉ được tạo khi người dùng thật sự mở palette, nên không ai mở thì không tốn gì. Mỗi lần mở lại, `PaletteService` gọi hàm đó để tạo content mới và Dispose ViewModel cũ ([T02 §8](T02_ARCHITECTURE_DEEP_DIVE.md#8-paletteservice-và-vòng-đời-viewmodel)).
+3. Không tự lock. Nút ghi bản vẽ qua `ICadContext` (tự lock, tự gom undo theo `undoMarkName`), và không prompt.
+</details>
 
 ---
 
@@ -241,6 +280,21 @@ _cadContext.ExecuteRead(scope =>
 - Người dùng xóa entity → `ObjectErased`, xử lý ở `Application.Idle` ([T08 §11](T08_RECIPES_EXTENDING.md#11-lắng-nghe-sự-kiện-bản-vẽ-đúng-cách), lab L09).
 - Người dùng chuyển bản vẽ → `DocumentActivated` (bài tập U02-E2).
 
+### ✅ Tự kiểm tra §7
+
+1. Nút "▶ Vẽ lưới" trên palette vẽ 12 ô. Vì sao Service phải truyền `undoMarkName`, trong khi lệnh `SAMPLE_GRID` không cần?
+2. Nút "Chọn điểm gốc" trên palette cần người dùng click vào bản vẽ. Làm thế nào?
+3. Người dùng xóa một ô lưới bằng phím Delete. Palette biết bằng cách nào, và xử lý ở đâu?
+4. Vì sao `ViewTableRecord` trả về từ `GetCurrentView()` phải nằm trong `using`?
+
+<details><summary>Đáp án</summary>
+
+1. Trong một lệnh, AutoCAD tự gom mọi thay đổi thành một bước Undo. Từ palette (application context) thì không. Có `undoMarkName`, một lần Ctrl+Z xóa cả lưới, dù vẽ từ lệnh hay từ palette.
+2. Nút gửi một lệnh bằng `SendStringToExecute` (qua interface `ICommandLauncher`, để ViewModel test được), và lệnh đó prompt. Không prompt trực tiếp từ palette.
+3. Nghe `ObjectErased`, ghi nhận trong handler, rồi xử lý ở `Application.Idle` (T08 §11, lab L09). Không sửa database trong handler.
+4. Nó **không** nằm trong database, nên không transaction nào đóng nó hộ: phải tự `Dispose` (T03 B11).
+</details>
+
 ---
 
 ## 8. Phản hồi cho người dùng
@@ -252,6 +306,22 @@ _cadContext.ExecuteRead(scope =>
 | Vòng lặp lâu trong lệnh (hàng nghìn entity) | `IProgressMeterService` (thanh tiến trình ở thanh trạng thái) | 91 file công khai dùng `ProgressMeter` |
 | Xác nhận trước khi xóa hoặc ghi đè | `INotificationService.Confirm` (hộp Yes/No) | Đừng dùng hộp thoại cho thông báo thường: nó chặn người dùng |
 | Lỗi validate trên palette | Dòng chữ đỏ + nút tắt (`CanExecute`) | Báo **trước** khi bấm, không phải sau |
+
+### ✅ Tự kiểm tra §8
+
+Chọn cách phản hồi cho từng tình huống:
+1. Lệnh duyệt 8.000 block để cập nhật attribute, mất 30 giây.
+2. Lệnh xuất xong 12 file PDF.
+3. Lệnh sắp ghi đè một file Excel đã có.
+4. Người dùng gõ số cột là 0 trên palette.
+
+<details><summary>Đáp án</summary>
+
+1. `IProgressMeterService`: thanh tiến trình ở thanh trạng thái.
+2. `INotificationService.Info`, không dùng hộp thoại: thông báo thường không được chặn người dùng.
+3. `INotificationService.Confirm` (hộp Yes/No).
+4. Dòng chữ đỏ và nút Vẽ tắt ngay khi gõ, trước khi bấm.
+</details>
 
 ---
 
@@ -267,6 +337,20 @@ _cadContext.ExecuteRead(scope =>
 | Thông báo hoặc vẽ "biến mất" sau khi người dùng đổi bản vẽ | Gọi `Editor` của bản vẽ **không** active | Báo kết quả lên bản vẽ đang active | [T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active) |
 | Palette mất vị trí sau mỗi lần mở AutoCAD | `PaletteSet` không có Guid cố định | `PaletteService` tự dẫn xuất Guid; đừng đổi tên palette | [T03 B27](T03_PITFALLS_CASEBOOK.md#b27-palette-không-nhớ-vị-trí) |
 | Hiển thị số liệu của bản vẽ trước | Palette không biết người dùng đã chuyển bản vẽ | Nghe `DocumentActivated` | Bài tập U02-E2 |
+
+### ✅ Tự kiểm tra §9
+
+Không nhìn bảng, nói gốc rễ của từng triệu chứng:
+1. Bấm nút trên palette thì báo `eLockViolation`.
+2. Palette mất vị trí mỗi lần mở lại AutoCAD.
+3. Lệnh async báo "Đã vẽ" nhưng người dùng không thấy dòng nào, vì họ đã chuyển sang bản vẽ khác trong lúc chờ.
+
+<details><summary>Đáp án</summary>
+
+1. Ghi bản vẽ từ application context mà không lock. Mọi thao tác ghi đi qua `ICadContext`.
+2. `PaletteSet` không có Guid cố định. `PaletteService` tự dẫn xuất Guid từ tên palette, nên đừng đổi tên palette.
+3. Gọi `Editor` của bản vẽ không còn active. Báo kết quả lên bản vẽ **đang** active (`INotificationService`).
+</details>
 
 ---
 
