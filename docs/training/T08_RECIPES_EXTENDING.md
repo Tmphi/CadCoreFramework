@@ -434,7 +434,7 @@ Nhận diện block: **luôn so effective name**, đừng so `br.Name` (tên ẩ
 Handler của sự kiện database chạy **giữa** một thao tác của AutoCAD, nên chỉ ghi nhận rồi về ngay; việc thật làm sau, khi AutoCAD rảnh:
 
 ```mermaid
-flowchart LR
+flowchart TD
     E["ObjectErased<br/>(giữa thao tác của AutoCAD)"] -->|"bỏ qua un-erase;<br/>chỉ ghi nhận ObjectId"| P[("_pending")]
     E -->|"đăng ký Idle (một lần)"| I["Application.Idle<br/>(AutoCAD rảnh)"]
     P --> I
