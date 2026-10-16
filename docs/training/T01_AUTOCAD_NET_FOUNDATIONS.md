@@ -508,7 +508,7 @@ Ký tự wildcard trong giá trị chuỗi: `* ? # @ . ~ [ ] - , `` ` ``. Một 
 <details><summary>Đáp án</summary>
 
 1. Tọa độ UCS bị hiểu như WCS: Line bị xoay/dời so với chỗ người dùng click (lệch 30° quanh gốc UCS). `CadPromptHelper.GetPoint` tránh được lỗi này.
-2. Bỏ sót các dynamic block "DOOR" đã chỉnh tham số (tên `*Uxx`). Sửa: lọc `"DOOR,`*U*"`, rồi lọc lại sau khi chọn bằng effective name (`DynamicBlockHelper.GetEffectiveName`). Xem [T03 B12](T03_PITFALLS_CASEBOOK.md#b12-lọc-block-theo-tên-bỏ-sót-dynamic-block).
+2. Bỏ sót các dynamic block "DOOR" đã chỉnh tham số (tên `*Uxx`). Sửa: lọc `` "DOOR,`*U*" ``, rồi lọc lại sau khi chọn bằng effective name (`DynamicBlockHelper.GetEffectiveName`). Xem [T03 B12](T03_PITFALLS_CASEBOOK.md#b12-lọc-block-theo-tên-bỏ-sót-dynamic-block).
 </details>
 
 ---

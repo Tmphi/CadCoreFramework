@@ -194,6 +194,7 @@ Bằng chứng "Lab `TÊN`" là kiểm thử [HeadlessLab](../../tests/integrati
 
 <details><summary>Gợi ý</summary>
 
+1. Không có đáp án duy nhất; mentor chấm *lập luận*. ADR tốt có đủ **bối cảnh → quyết định → hệ quả**, ghi cả cái giá phải trả như các dòng ❌ ở bảng §1, và nói nó thay ADR số mấy.
 2. Một lựa chọn hợp lý: B-01 + B-23 (lỗi người dùng nhìn thấy, sửa nhỏ, cần kiểm trực quan), rồi B-04 (trải nghiệm hằng ngày). Lý do: tác động lên người dùng / công sức, rủi ro thấp, có cách kiểm chứng rõ.
 3. Yêu cầu số đo trước/sau theo phương pháp ở [T07 §8](T07_PERFORMANCE_AND_SCALE.md#8-đo-đạc), trên kích thước dữ liệu thực tế (vd. `MaxCells`). Không có số đo thì không merge với lý do "tối ưu".
 </details>

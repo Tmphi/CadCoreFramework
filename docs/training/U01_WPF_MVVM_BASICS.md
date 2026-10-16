@@ -521,8 +521,7 @@ Từ một `Task.Run`, mỗi dòng sau xảy ra gì?
 1. `PanelName = "Tủ 2";` (property bind vào một `TextBlock`).
 2. `Items.Add(newItem);` (`ObservableCollection` đang làm `ItemsSource`).
 3. `DrawCommand.NotifyCanExecuteChanged();`
-
-Và 4: tính 10.000 điểm xem trước mất 2 giây. Viết luồng xử lý đúng quy tắc 20/80.
+4. (Không chạy từ `Task.Run` nữa:) tính 10.000 điểm xem trước mất 2 giây. Viết luồng xử lý đúng quy tắc 20/80.
 
 <details><summary>Đáp án</summary>
 

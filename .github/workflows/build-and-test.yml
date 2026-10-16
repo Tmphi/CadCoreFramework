@@ -109,6 +109,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: npm run mermaid
 
+      # Bộ thẻ ôn (docs/training/deck/) sinh từ các khối ✅, GLOSSARY, T10 §5: file đã commit phải khớp tài liệu,
+      # và mỗi câu hỏi số N của một khối ✅ phải có đúng một đáp án số N.
+      - name: Review deck
+        if: ${{ !cancelled() }}
+        run: npm run deck
+
       # Code mẫu C01–C05, U01: biên dịch C# 10 / net8.0, chạy, so output (chú thích <!-- doc-check: … -->).
       - name: Setup .NET (code samples)
         if: ${{ !cancelled() }}
