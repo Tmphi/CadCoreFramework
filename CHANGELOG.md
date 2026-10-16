@@ -9,6 +9,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed (tài liệu — thân bài chỉ tả code hiện tại, GĐ4 phần 1)
+- Ghi chú lịch sử ("trên v1.0.0…", "từ PR #6…", "trước PR #11…") trong T02, T08, U01, U02 chuyển vào khối thu gọn **📜 Lịch sử** ở cuối mục. Thân bài viết lại ở thì hiện tại; mã `B-xx` vẫn giữ làm tham chiếu ngắn cho lab và T09. Bảng "theme trên v1.0.0" của T02 §10 vào trọn một khối 📜, giữ nguyên bài học về kiểm chứng giả định.
+- Ghi chú kiểu changelog trong T01, T05 bỏ số PR ("từ PR #11 `XamlPaletteTests` còn…" thành "`XamlPaletteTests` còn…"). Phản ví dụ có chủ đích (bảng `DEMO_ASYNC_AWAIT` trên v1.0.0 ở T01 §8) và mốc đo lường ("sau PR #13: 1.257/5.884 dòng") được giữ trong thân bài.
+- training/README §5 thêm ký hiệu 📜; §7 thêm quy tắc: sửa một mục backlog thì thân bài viết theo code mới, mô tả code cũ vào 📜.
+- T03, T09, T10 giữ nguyên, vì bản thân chúng là sổ tay sự cố, backlog và lab làm trên code cũ.
+
 ### Added (tài liệu — bộ thẻ ôn và lịch ôn, GĐ3 phần 3)
 - **Bộ thẻ ôn** [`docs/training/deck/CadCoreFramework-flashcards.txt`](docs/training/deck/CadCoreFramework-flashcards.txt): 437 thẻ, sinh bằng `tools/docs/build-deck.mjs` từ chính tài liệu. Gồm 268 câu hỏi của 79 khối ✅ (ghép câu số N với đáp án số N), 144 thuật ngữ GLOSSARY, 25 câu ngân hàng T10 §5. Định dạng nhập văn bản của Anki: tab, HTML, tag theo module và nguồn (`CadCore::T02`, `CadCore::tu-kiem-tra`…), GUID cố định để nhập lại thì cập nhật thẻ cũ.
 - training/README §3 **Lịch ôn**: cách dùng bộ thẻ, và lịch ôn không cần phần mềm (hôm sau, 1 tuần, 1 tháng).

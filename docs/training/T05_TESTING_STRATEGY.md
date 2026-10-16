@@ -259,7 +259,7 @@ Test này **đã tái hiện đúng** lỗi [A3](T03_PITFALLS_CASEBOOK.md#a3-sho
 | `EveryResourceKeyReferencedByPalettesAndStyles_Resolves` (tối + sáng) | Mọi `{Dynamic/StaticResource X}` trong XAML (đọc file như text) đều resolve được — bắt lỗi kiểu B-03 |
 | `AttachedPalette_FollowsThemeChangesWhileLoaded_AndStopsAfterUnloaded` | Palette đang hiện đổi màu theo theme; đã đóng thì thôi nghe (không rò rỉ) |
 
-Test ViewModel không bắt được lỗi nằm ở **binding**. Lỗi B-31/B-32 nằm đúng ở đó: WPF tự đổi chuỗi thành số trước khi ViewModel thấy gì. Vì vậy, từ PR #11, `XamlPaletteTests` còn **gõ vào ô thật** của palette: `GridMarkerPalette_CommaDecimalInSpacing_IsAnError_NotTwentyFive` và `GridMarkerPalette_ClearedRows_DisablesDraw`. Hai kỹ thuật cần nhớ:
+Test ViewModel không bắt được lỗi nằm ở **binding**. Lỗi B-31/B-32 nằm đúng ở đó: WPF tự đổi chuỗi thành số trước khi ViewModel thấy gì. Vì vậy `XamlPaletteTests` còn **gõ vào ô thật** của palette: `GridMarkerPalette_CommaDecimalInSpacing_IsAnError_NotTwentyFive` và `GridMarkerPalette_ClearedRows_DisablesDraw`. Hai kỹ thuật cần nhớ:
 - Tìm ô theo **nhãn hiển thị** ("KHOẢNG CÁCH"), không theo tên property. Nhờ vậy, cùng một test chạy được trên code cũ (để thấy nó FAIL) lẫn code mới.
 - Gọi `Measure`, `Arrange` **và** `UpdateLayout()` trước khi gõ. Thiếu `UpdateLayout()` thì binding chưa được gắn, gán `TextBox.Text` không tới ViewModel, và test đỏ vì lý do sai.
 
@@ -330,7 +330,7 @@ dotnet reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:
 ## 9. Integration test headless: hiện trạng và hướng đi
 
 - **Plugin** vẫn không nạp được trong accoreconsole: nó là một DLL tham chiếu `AcMgd`, mà accoreconsole không nạp được `AcMgd` ([A5](T03_PITFALLS_CASEBOOK.md#a5-accoreconsole-crash-0xc00000fd-khi-netload-plugin)). Runner smoke trả exit code 3.
-- **HeadlessLab** (PR #6, [ADR-015](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)) giải quyết phần lớn nhu cầu mà **không** đổi việc phát hành một DLL: [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) là một DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`. Mỗi kiểm thử chạy trên AutoCAD thật trong transaction riêng rồi rollback; in `LAB|tên|PASS|FAIL`. Lab chạy được cả **prompt thật**: runner ghi sẵn câu trả lời vào file `.scr`, rồi đọc output để kiểm chuỗi AutoCAD đã in ra (`KEYWORDS_PROMPT_LISTS_ONCE`, B-33).
+- **HeadlessLab** ([ADR-015](T09_SENIOR_PLAYBOOK.md#1-adr-vì-sao-kiến-trúc-như-hiện-tại)) giải quyết phần lớn nhu cầu mà **không** đổi việc phát hành một DLL: [`tests/integration/HeadlessLab`](../../tests/integration/README.md#headlesslab--kiểm-thử-headless-trên-autocad-thật) là một DLL chỉ dành cho kiểm thử, **link** lại mã không-UI (`Extensions/`, `Utils/`, `PlotService`…) và chỉ tham chiếu `AcDbMgd` + `AcCoreMgd`. Mỗi kiểm thử chạy trên AutoCAD thật trong transaction riêng rồi rollback; in `LAB|tên|PASS|FAIL`. Lab chạy được cả **prompt thật**: runner ghi sẵn câu trả lời vào file `.scr`, rồi đọc output để kiểm chuỗi AutoCAD đã in ra (`KEYWORDS_PROMPT_LISTS_ONCE`, B-33).
 
 ```powershell
 .\tests\integration\run-headless-lab.ps1     # exit 0 = mọi kiểm thử PASS

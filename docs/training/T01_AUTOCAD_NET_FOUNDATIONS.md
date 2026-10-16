@@ -543,7 +543,7 @@ Khi method của lệnh chạm tới `await` đầu tiên và trả quyền, Aut
 4. `CommandHistory` ghi nhận lệnh "thành công" ngay khi phần đồng bộ xong, trước khi phần async chạy.
 5. Bản vẽ đã chụp có thể **không còn active**: vẽ vào `Database` của nó vẫn được, nhưng **Editor** của nó (`WriteMessage`, prompt, `Regen`) ném `eNotApplicable` — và lỗi đó hủy luôn transaction đang vẽ (đã xảy ra thật với `DEMO_ASYNC_AWAIT`, [T03 B31](T03_PITFALLS_CASEBOOK.md#b31-gọi-editor-của-bản-vẽ-không-active)). Báo kết quả **sau** khi vẽ xong, lên bản vẽ đang active (`INotificationService`), kèm tên bản vẽ đã vẽ vào.
 
-So sánh hai cách trong chính repo, như ở v1.0.0 (từ PR #6/#7 demo đã dùng `ExecuteWithScopeAsync` → `ExecuteAsync`):
+Phản ví dụ có thật, so với cách đúng. Cột trái là `DEMO_ASYNC_AWAIT` như ở v1.0.0; demo hiện tại đã dùng cách của cột phải (`ExecuteWithScopeAsync` → `ExecuteAsync`):
 
 | | `DEMO_ASYNC_AWAIT` trên v1.0.0 ([`Demos/DemoServicesCommands.cs`](../../Demos/DemoServicesCommands.cs)) | `ICadContext.ExecuteAsync` ([`Core/CadContext.cs`](../../Core/CadContext.cs)) |
 | :--- | :--- | :--- |
@@ -651,7 +651,7 @@ private void OnIdle(object sender, EventArgs e)
 | **Application context** (palette) | Mỗi lần lock/transaction có thể thành một bước riêng | Bao bằng `StartUndoMark` / `EndUndoMark` |
 
 Framework cung cấp hai cách:
-- Tham số `undoMarkName` của `ICadContext.Execute/TryExecute/ExecuteAsync`: gọi COM `StartUndoMark`/`EndUndoMark` quanh transaction. Từ v1.0.0, lỗi COM ở đây được **ghi log** thay vì bị nuốt.
+- Tham số `undoMarkName` của `ICadContext.Execute/TryExecute/ExecuteAsync`: gọi COM `StartUndoMark`/`EndUndoMark` quanh transaction. Lỗi COM ở đây được **ghi log** (Warning), không bị nuốt; thao tác vẫn chạy, chỉ không gom thành một bước Undo.
 - [`UndoGroupManager`](../../Core/UndoGroupManager.cs): bao *nhiều* lần `Execute` trong một khối `using`.
 
 > [!NOTE]
