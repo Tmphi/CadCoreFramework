@@ -9,6 +9,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (tài liệu — tra theo việc cần làm và sơ đồ, GĐ4 phần 2)
+- T08 và U03 có bảng **"Tra theo việc cần làm"** ngay trên Mục lục: "bạn cần… → đọc mục nào". Bảng của T08 nối sang cả T01, T05, T07, U01, U03 và R03 (23 việc, kể cả sáu công thức của §12 vốn không hiện ở Mục lục); U03 có 10 việc.
+- Bốn sơ đồ mermaid mới, ở các module chưa có sơ đồ nào: U02 §1 (chọn bề mặt UI, dạng câu hỏi lần lượt), T08 §5 (nút palette nhờ một lệnh hỏi điểm qua `ICommandLauncher`), T08 §11 (ghi nhận ở `ObjectErased`, xử lý ở `Application.Idle`), T07 §4 (vòng lặp side database cho cả lô file). Mỗi sơ đồ bám đúng bảng hay code ngay cạnh nó.
+
 ### Changed (tài liệu — thân bài chỉ tả code hiện tại, GĐ4 phần 1)
 - Ghi chú lịch sử ("trên v1.0.0…", "từ PR #6…", "trước PR #11…") trong T02, T08, U01, U02 chuyển vào khối thu gọn **📜 Lịch sử** ở cuối mục. Thân bài viết lại ở thì hiện tại; mã `B-xx` vẫn giữ làm tham chiếu ngắn cho lab và T09. Bảng "theme trên v1.0.0" của T02 §10 vào trọn một khối 📜, giữ nguyên bài học về kiểm chứng giả định.
 - Ghi chú kiểu changelog trong T01, T05 bỏ số PR ("từ PR #11 `XamlPaletteTests` còn…" thành "`XamlPaletteTests` còn…"). Phản ví dụ có chủ đích (bảng `DEMO_ASYNC_AWAIT` trên v1.0.0 ở T01 §8) và mốc đo lường ("sau PR #13: 1.257/5.884 dòng") được giữ trong thân bài.

@@ -145,6 +145,22 @@ public static int CountBlockRefs(string dwgPath, string effectiveName)
 }
 ```
 
+Một lô nhiều file đi theo vòng lặp này. Mỗi bước ứng với một quy tắc trong bảng dưới:
+
+```mermaid
+flowchart TD
+    START["Danh sách file DWG"] --> MORE{"Còn file?"}
+    MORE -- còn --> OPEN["using (var db = new Database(false, true))<br/>ReadDwgFile(…, OpenForReadAndAllShare) → CloseInput(true)"]
+    OPEN --> TR["Transaction của riêng db:<br/>đọc / sửa → Commit"]
+    TR --> SAVE["Có sửa thì db.SaveAs(…)"]
+    SAVE --> DONE["Dispose db (cuối using)"]
+    OPEN -. "lỗi" .-> LOG["catch: ghi log file lỗi,<br/>đi tiếp file sau"]
+    TR -. "lỗi" .-> LOG
+    LOG --> DONE
+    DONE --> MORE
+    MORE -- hết --> SUM["Báo cáo tổng kết cuối lô"]
+```
+
 | Quy tắc | Vì sao |
 | :--- | :--- |
 | `using` cho `Database` | Đối tượng C++ lớn, phải giải phóng tường minh ([T01 §9](T01_AUTOCAD_NET_FOUNDATIONS.md#9-bộ-nhớ-và-vòng-đời-đối-tượng)) |
