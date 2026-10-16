@@ -1,0 +1,82 @@
+[
+  {
+    "number": 1,
+    "title": "[Lab] L02 — mẫu 1",
+    "body": "### Lab\n\nL02\n\n### Thời gian làm thực tế (giờ)\n\n3.5\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT01 🎯: 80\nT02 🎯: 60\n\n### Kết quả run-lab.ps1\n\n```text\nKết quả: 5 đạt, 0 chưa đạt, 0 bỏ qua.\n```\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 2,
+    "title": "[Lab] L02 — mẫu 2",
+    "body": "### Lab\n\nL02\n\n### Thời gian làm thực tế (giờ)\n\n2.5\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT01 🎯: 70\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 3,
+    "title": "[Lab] L02 — mẫu 3",
+    "body": "### Lab\n\nL02\n\n### Thời gian làm thực tế (giờ)\n\n4\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT01 🎯: 95\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 4,
+    "title": "[Lab] L02 — mẫu 4",
+    "body": "### Lab\n\nL02\n\n### Thời gian làm thực tế (giờ)\n\n3\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\n_No response_\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 5,
+    "title": "[Lab] L02 — mẫu 5",
+    "body": "### Lab\n\nL02\n\n### Thời gian làm thực tế (giờ)\n\n3.5\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT01: 140\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 6,
+    "title": "[Lab] L07 — mẫu 6",
+    "body": "### Lab\n\nL07\n\n### Thời gian làm thực tế (giờ)\n\n30\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT08 🎯: 40\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 7,
+    "title": "[Lab] L07 — mẫu 7",
+    "body": "### Lab\n\nL07\n\n### Thời gian làm thực tế (giờ)\n\n28\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\n_No response_\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 8,
+    "title": "[Lab] L09 — mẫu 8",
+    "body": "### Lab\n\nL09\n\n### Thời gian làm thực tế (giờ)\n\nkhoảng 6\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\n_No response_\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 9,
+    "title": "[Lab] L42 — mẫu 9",
+    "body": "### Lab\n\nL42\n\n### Thời gian làm thực tế (giờ)\n\n2\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\n_No response_\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 10,
+    "title": "[Lab] L04 — mẫu 10",
+    "body": "### Lab\n\nL04\n\n### Thời gian làm thực tế (giờ)\n\n1.5\n\n### Thời gian đọc tài liệu cho lab này (phút)\n\nT01 phần 7: 30\n\n### Kết quả run-lab.ps1\n\n_No response_\n\n### Báo cáo\n\nDữ liệu mẫu cho kiểm thử script, không phải báo cáo thật.\n\n### Link PR\n\n_No response_"
+  },
+  {
+    "number": 11,
+    "title": "[Đo] mẫu 11",
+    "body": "### Lên cấp\n\n🌱 → 🌿 Junior\n\n### Lần đo\n\nTrước khi học\n\n### Điểm từng câu\n\nQ1: 0\nQ2: 1\nQ3: 0\nQ5: 1\nQ7: 0\nQ9: 0\nQ12: 1\nQ21: 0\n\n### Học viên\n\nHV01"
+  },
+  {
+    "number": 12,
+    "title": "[Đo] mẫu 12",
+    "body": "### Lên cấp\n\n🌱 → 🌿 Junior\n\n### Lần đo\n\nLúc đánh giá lên cấp\n\n### Điểm từng câu\n\nQ1: 2\nQ2: 2\nQ3: 1\nQ5: 2\nQ7: 2\nQ9: 1\nQ12: 2\nQ21: 2\n\n### Học viên\n\nHV01"
+  },
+  {
+    "number": 13,
+    "title": "[Đo] mẫu 13",
+    "body": "### Lên cấp\n\n🌱 → 🌿 Junior\n\n### Lần đo\n\nTrước khi học\n\n### Điểm từng câu\n\nQ1: 1\nQ2: 1\nQ3: 0\nQ5: 0\nQ7: 1\nQ9: 0\nQ12: 0\nQ21: 1\n\n### Học viên\n\nHV02"
+  },
+  {
+    "number": 14,
+    "title": "[Đo] mẫu 14",
+    "body": "### Lên cấp\n\n🌱 → 🌿 Junior\n\n### Lần đo\n\nLúc đánh giá lên cấp\n\n### Điểm từng câu\n\nQ1: 2\nQ2: 1\nQ3: 2\nQ5: 2\nQ7: 1\nQ9: 2\nQ12: 2\nQ21: 1\n\n### Học viên\n\nHV02"
+  },
+  {
+    "number": 15,
+    "title": "[Đo] mẫu 15",
+    "body": "### Lên cấp\n\n🌰 → 🌱 Fresher\n\n### Lần đo\n\nTrước khi học\n\n### Điểm từng câu\n\nC1: 1\nC2: 0\nC3: 0\nC4: 1\nC5: 0\nC6: 0\nC7: 0\nC8: 1\nC9: 0\nC10: 0\n\n### Học viên\n\nHV03"
+  },
+  {
+    "number": 16,
+    "title": "[Đo] mẫu 16",
+    "body": "### Lên cấp\n\n🌿 → 🌳 Middle\n\n### Lần đo\n\nTrước khi học\n\n### Điểm từng câu\n\nQ4: 1\nQ6: 1\n\n### Học viên\n\nHV01"
+  }
+]

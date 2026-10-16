@@ -115,6 +115,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: npm run deck
 
+      # Script tổng hợp số đo hiệu quả học (README §8) chạy trên dữ liệu mẫu fixtures/ và phải ra đúng báo cáo mẫu:
+      # bắt việc đổi bảng thời lượng lab (T10 §2), bộ câu lên cấp (T10 §4) hay mẫu issue mà quên script.
+      - name: Learning report (sample data)
+        if: ${{ !cancelled() }}
+        run: npm run learning
+
       # Code mẫu C01–C05, U01: biên dịch C# 10 / net8.0, chạy, so output (chú thích <!-- doc-check: … -->).
       - name: Setup .NET (code samples)
         if: ${{ !cancelled() }}

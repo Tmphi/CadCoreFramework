@@ -9,6 +9,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (đo hiệu quả học, GĐ6)
+- Hai mẫu issue (`.github/ISSUE_TEMPLATE/`): **Báo cáo lab** (lab, giờ làm thật, phút đọc từng module, kết quả `run-lab.ps1`, báo cáo, link PR) và **Đo đầu/cuối giai đoạn** (cấp, lần đo, điểm 0–2 từng câu, mã học viên). Cả hai qua schema `github-issue-forms` của SchemaStore.
+- `tools/docs/learning-report.mjs`: đọc issue bằng `gh`, in giờ làm lab so với T10 §2, phút đọc so với ⏱, mức tăng điểm theo giai đoạn trên đúng bộ vấn đáp của T10 §4, cùng mục "Cần xem lại" cho issue ghi sai dạng. Tên trường đọc từ chính hai mẫu issue, ước lượng và bộ câu đọc từ chính T10.
+- CI (job `docs`, bước "Learning report (sample data)", `npm run learning`): chạy script trên 16 issue giả lập ở `tools/docs/fixtures/` (có 5 trường hợp sai cài sẵn), so với báo cáo mẫu đã commit.
+- training/README §8 **Đo hiệu quả học**: hai số đo, cách tổng hợp, và khi nào sửa con số của tài liệu (≥ 5 báo cáo lệch khỏi ước lượng; thời gian đọc lệch > 30% ở nhiều module; câu vẫn 0 điểm ở lần đo sau). §6 mentor: hỏi bộ vấn đáp hai lần. T10 quy tắc 3: báo cáo lab bằng mẫu issue, kèm giờ làm thật. Sửa bảng "Bắt đầu từ đâu?" còn ghi lộ trình nhanh ≈ 3,5 giờ (đã là ≈ 4 giờ từ GĐ3).
+
 ### Added (tài liệu — tra theo việc cần làm và sơ đồ, GĐ4 phần 2)
 - T08 và U03 có bảng **"Tra theo việc cần làm"** ngay trên Mục lục: "bạn cần… → đọc mục nào". Bảng của T08 nối sang cả T01, T05, T07, U01, U03 và R03 (23 việc, kể cả sáu công thức của §12 vốn không hiện ở Mục lục); U03 có 10 việc.
 - Bốn sơ đồ mermaid mới, ở các module chưa có sơ đồ nào: U02 §1 (chọn bề mặt UI, dạng câu hỏi lần lượt), T08 §5 (nút palette nhờ một lệnh hỏi điểm qua `ICommandLauncher`), T08 §11 (ghi nhận ở `ObjectErased`, xử lý ở `Application.Idle`), T07 §4 (vòng lặp side database cho cả lô file). Mỗi sơ đồ bám đúng bảng hay code ngay cạnh nó.
