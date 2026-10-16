@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌱 Fresher → 🌿 Junior · **Cần trước:** [C03](C03_OBJECT_ORIENTED.md) (class, interface), [C04](C04_CSHARP_IN_THIS_PROJECT.md) (lambda, event, attribute), [C05 §1](C05_ASYNC_TESTING_GIT.md#1-async-và-await-chờ-mà-không-đứng-hình) (`async`) · **Trong lộ trình:** tuần 7 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 40 phút (phần 🎯 ≈ 40 phút) · **Thực hành:** [bài tập §12](#12-bài-tập), L18 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 55 phút (phần 🎯 ≈ 55 phút) · **Thực hành:** [bài tập §12](#12-bài-tập), L18 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 **WPF** (Windows Presentation Foundation) là thư viện giao diện của .NET mà dự án dùng cho mọi palette. Module này dạy đúng **phần WPF mà 4 palette của dự án dùng** (đã đếm ở [U00 §2](U00_UI_START_HERE.md#2-quy-tắc-2080-số-liệu)): bố cục `Grid`/`StackPanel`, 8 control, binding, MVVM với CommunityToolkit.Mvvm, `ObservableCollection`, resource và theme. Module cũng chỉ ra các **bẫy đã kiểm chứng trên chính palette của dự án**.
 
@@ -72,6 +72,19 @@ Dấu ngoặc nhọn trong thuộc tính, như `{Binding Rows}` hay `{DynamicRes
 
 File XAML có cặp là một file C# **code-behind** (`GridMarkerPalette.xaml.cs`). Hai file cùng khai báo một `partial class`. Hàm `InitializeComponent()` (do trình biên dịch sinh ra) dựng cây đối tượng từ XAML.
 
+### ✅ Tự kiểm tra §1
+
+1. Viết lại `<TextBlock Text="Tủ điện" FontSize="14"/>` bằng C#.
+2. `Text="3"` và `Text="{Binding Rows}"` khác nhau thế nào?
+3. Code-behind của palette có `if (Rows > 30) DrawButton.IsEnabled = false;`. Đoạn này thuộc về đâu?
+
+<details><summary>Đáp án</summary>
+
+1. `new TextBlock { Text = "Tủ điện", FontSize = 14 }`. Mỗi thẻ là một `new`, mỗi thuộc tính là một lần gán property.
+2. `"3"` là giá trị viết thẳng. `{Binding Rows}` là markup extension: giá trị được tính lúc chạy, từ property `Rows` của `DataContext`, và tự cập nhật.
+3. ViewModel: đó là logic (một luật validate quyết định nút bật hay tắt). View chỉ hiển thị; nút tự mờ khi `CanExecute` của command trả `false`.
+</details>
+
 ---
 
 ## 2. Bố cục: `Grid` và `StackPanel`
@@ -111,6 +124,19 @@ Kích thước cột của `Grid`: `Auto` (vừa nội dung) · `*` (chia phần
 
 `Grid.Column="2"` là **attached property**: `StackPanel` không có property `Column`, nhưng `Grid` cha "gắn" thêm cho nó để biết đặt vào cột nào.
 
+### ✅ Tự kiểm tra §2
+
+1. Muốn ba cột: nhãn vừa đủ chữ, ô nhập chiếm phần còn lại, nút rộng 60. Viết ba `ColumnDefinition`.
+2. Ô nhập dính sát mép palette. Tăng `Margin` hay `Padding` của ô?
+3. Vì sao `StackPanel` viết được `Grid.Column="2"` dù nó không có property `Column`?
+
+<details><summary>Đáp án</summary>
+
+1. `Width="Auto"`, `Width="*"`, `Width="60"`.
+2. `Margin`: khoảng **ngoài** phần tử. `Padding` là khoảng giữa viền ô và chữ bên trong.
+3. Đó là attached property: `Grid` cha "gắn" thêm cho phần tử con để biết đặt nó vào cột nào.
+</details>
+
 ---
 
 ## 3. Tám control dùng nhiều
@@ -127,6 +153,22 @@ Kích thước cột của `Grid`: `Auto` (vừa nội dung) · `*` (chia phần
 | `ListBox` | `ItemsSource` + `SelectedItem` | Debug Inspector |
 
 Xem cả 8 control đang chạy: lệnh `SHOW_UI_TEMPLATE` mở palette [`CommonControlsPalette.xaml`](../../Views/CommonControlsPalette.xaml).
+
+### ✅ Tự kiểm tra §3
+
+Chọn control và property cần bind cho từng việc:
+1. Hiện câu "Đã vẽ 12 ô", người dùng không sửa được.
+2. Chọn một layer trong danh sách layer của bản vẽ.
+3. Bật/tắt tùy chọn "Vẽ cả nhãn".
+4. Nút "Vẽ lưới".
+
+<details><summary>Đáp án</summary>
+
+1. `TextBlock`, bind `Text`.
+2. `ComboBox`, bind `ItemsSource` (danh sách) và `SelectedItem` (layer đang chọn).
+3. `CheckBox`, bind `IsChecked`.
+4. `Button`, bind `Command`.
+</details>
 
 ---
 
@@ -202,6 +244,21 @@ Vì vậy palette ghi rõ `Mode=OneWay`: `<Run Text="{Binding MarkerCount, Mode=
 ```
 
 `CommandParameter="{Binding}"` truyền chính `LayerModel` của dòng đó vào command.
+
+### ✅ Tự kiểm tra §4
+
+1. `<Run Text="{Binding MarkerCount}"/>`, với `MarkerCount` chỉ có `get`. Chuyện gì xảy ra, sửa thế nào?
+2. ViewModel có `bool IsBusy`. Muốn lớp phủ "Đang vẽ..." hiện khi `IsBusy` là `true`. Dùng gì?
+3. Chữ trạng thái phải đỏ khi lỗi, xanh khi thành công, mà ViewModel không được biết `Brush`. Làm thế nào?
+4. Nút "Tắt" trên mỗi dòng của `DataGrid` layer gọi `{Binding ToggleLayerCommand}` mà không chạy. Vì sao?
+
+<details><summary>Đáp án</summary>
+
+1. `Run.Text` mặc định hai chiều, không ghi ngược vào property chỉ đọc được: `InvalidOperationException`. Ghi `Mode=OneWay`.
+2. `Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"`, với `BooleanToVisibilityConverter`.
+3. ViewModel giữ một enum trạng thái; XAML dùng `DataTrigger` theo giá trị enum để đặt `Foreground` bằng `DynamicResource`.
+4. `DataContext` của mỗi dòng là `LayerModel` của dòng đó, không phải ViewModel. Đi ngược lên bằng `RelativeSource AncestorType=DataGrid` tới `DataContext.ToggleLayerCommand`, và truyền dòng bằng `CommandParameter="{Binding}"`.
+</details>
 
 ---
 
@@ -321,6 +378,21 @@ Test `EveryPaletteTextBox_BindsToAStringProperty` trong `XamlPaletteTests` kiể
 > [!TIP]
 > 💡 **20/80:** ô nhập **số** trên palette thì bind vào `string` và tự parse bằng `CultureInfo.InvariantCulture` + `NumberStyles.Float`. Mọi lỗi, kể cả lỗi "không phải số", đi về **một chỗ** validate. Ô chữ (tên layer, tên tủ) thì bind thẳng như bình thường.
 
+### ✅ Tự kiểm tra §5
+
+1. Ô SỐ HÀNG bind thẳng vào `int Rows` (đang là 3). Người dùng xóa trắng ô. `Rows` là bao nhiêu, nút Vẽ ra sao, và vì sao `GridSpec.Validate()` không giúp được?
+2. Đồng nghiệp đề xuất đặt `Language="vi-VN"` cho palette để gõ `2,5` cho đúng. Bạn trả lời thế nào?
+3. Parse bằng `NumberStyles.Float | NumberStyles.AllowThousands` với `InvariantCulture`. Chuỗi `2,5` thành gì?
+4. Ô "Tên tủ" có cần đi qua property chuỗi + parse như ô số không?
+
+<details><summary>Đáp án</summary>
+
+1. `Rows` vẫn là 3 (ô chỉ viền đỏ) và nút Vẽ vẫn bật. Lỗi chuyển đổi nằm ở **binding**, ViewModel không bao giờ thấy, nên chỗ giữ luật cũng không thấy.
+2. Không sửa được, chỉ đổi chiều bẫy: người quen gõ dấu chấm như dòng lệnh AutoCAD sẽ có `1.5` thành 15. Cách đúng là bind vào chuỗi và parse bằng một quy tắc duy nhất (chỉ dấu chấm).
+3. 25: `AllowThousands` biến dấu phẩy thành dấu phân cách hàng nghìn, đúng kiểu WPF dùng mặc định. Chỉ dùng `NumberStyles.Float`.
+4. Không. Ô chữ bind thẳng; chỉ ô **số** mới cần.
+</details>
+
 ---
 
 ## 6. MVVM với CommunityToolkit.Mvvm
@@ -376,6 +448,19 @@ protected override void OnPropertyChanged(PropertyChangedEventArgs e)
 
 **Command bất đồng bộ.** Đặt `[RelayCommand]` lên một method `async Task` thì generator sinh ra `AsyncRelayCommand`. Lệnh này **tự khóa nút trong lúc đang chạy** (đã kiểm: khi đang chạy thì `IsRunning = true` và `CanExecute = false`; chạy xong thì `CanExecute = true`), nên người dùng không bấm hai lần được. Muốn có thêm lớp phủ "đang bận" và ô báo lỗi thì dùng `RunSafeAsync` của [`ViewModelBase`](../../ViewModels/ViewModelBase.cs) ([R04 §2](../reference/R04_UI.md#2-viewmodel-viewmodelbase-và-runsafe)).
 
+### ✅ Tự kiểm tra §6
+
+1. Bạn viết `[ObservableProperty] private string _panelName = "";`. Generator sinh ra property tên gì, và class cần điều kiện gì?
+2. Muốn chạy code mỗi khi `PanelName` đổi. Viết chữ ký method.
+3. `[RelayCommand] private async Task SaveAsync()`. XAML bind vào tên nào? Người dùng bấm hai lần liên tiếp thì sao?
+
+<details><summary>Đáp án</summary>
+
+1. `PanelName`. Class phải là `partial`, vì generator viết thêm vào chính class đó.
+2. `partial void OnPanelNameChanged(string value)`. Hook chạy mỗi lần property được gán một giá trị **khác**.
+3. `SaveCommand`: generator bỏ hậu tố `Async` và thêm `Command` (sinh ra một `AsyncRelayCommand`). Trong lúc đang chạy, `CanExecute` là `false`, nên lần bấm thứ hai không có tác dụng.
+</details>
+
 ---
 
 ## 7. Danh sách: `ObservableCollection`
@@ -390,6 +475,17 @@ Thí nghiệm thật trên một cửa sổ **đang hiển thị**: hai `ListBox
 `ObservableCollection<T>` bắn sự kiện `CollectionChanged` mỗi khi thêm, xóa hay xếp lại. `List<T>` không bắn gì. Nhưng `ObservableCollection` chỉ báo khi **danh sách** đổi. Muốn một **dòng** cập nhật khi property của phần tử đổi (ví dụ nút Bật/Tắt layer) thì chính phần tử cũng phải báo thay đổi. [`LayerModel`](../../Models/LayerModel.cs) kế thừa `ObservableObject` vì lý do đó.
 
 Khi nào thì thay **cả danh sách** thay vì `Add`/`Remove`? Khi danh sách được tính lại toàn bộ mỗi lần, như hình xem trước của lưới: tạo danh sách mới rồi gán vào property ([U03 §5](U03_DRAWING_ON_UI.md#5-bước-4--nối-vào-golden-sample)).
+
+### ✅ Tự kiểm tra §7
+
+1. Danh sách layer là `ObservableCollection<LayerModel>`. Bấm "Tắt", `IsOn` của phần tử đổi thành `false`, nhưng chữ trên dòng không đổi. Thiếu gì?
+2. Hình xem trước được tính lại toàn bộ mỗi khi người dùng gõ. Nên `Clear()` rồi `Add` từng hình, hay làm cách khác?
+
+<details><summary>Đáp án</summary>
+
+1. `ObservableCollection` chỉ báo khi **danh sách** đổi (thêm, xóa, xếp lại). Muốn một dòng cập nhật thì chính phần tử phải báo thay đổi: `LayerModel` kế thừa `ObservableObject`, `IsOn` là property có thông báo.
+2. Tạo danh sách mới rồi gán vào property (một lần thông báo), như khung xem trước của U03.
+</details>
 
 ---
 
@@ -419,6 +515,23 @@ System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ =>
 
 `ContinueWith` chạy `IsBusy = false` trên **thread pool**. Ở palette UI Template nó vẫn chạy được (đã kiểm bằng đúng mẫu code này: lớp phủ vẫn ẩn đi), vì `IsBusy` chỉ được bind vào `Visibility`, thuộc dòng đầu của bảng trên. Chép đúng mẫu này sang `GridMarkerViewModel` thì hỏng: ở đó đổi `IsBusy` sẽ gọi `NotifyCanExecuteChanged()` (đoạn `OnPropertyChanged` ở §6), tức dòng cuối của bảng, và ném `InvalidOperationException`. Viết đúng: `await Task.Delay(1000); IsBusy = false;` trong một method `async`.
 
+### ✅ Tự kiểm tra §8
+
+Từ một `Task.Run`, mỗi dòng sau xảy ra gì?
+1. `PanelName = "Tủ 2";` (property bind vào một `TextBlock`).
+2. `Items.Add(newItem);` (`ObservableCollection` đang làm `ItemsSource`).
+3. `DrawCommand.NotifyCanExecuteChanged();`
+
+Và 4: tính 10.000 điểm xem trước mất 2 giây. Viết luồng xử lý đúng quy tắc 20/80.
+
+<details><summary>Đáp án</summary>
+
+1. Không lỗi: binding tự chuyển cập nhật về UI thread, `TextBlock` đổi sau một nhịp.
+2. `NotSupportedException`: `CollectionView` không cho đổi danh sách từ luồng khác luồng Dispatcher.
+3. `InvalidOperationException`: luồng gọi không sở hữu đối tượng.
+4. `var points = await Task.Run(() => Tinh(…));` rồi gán `Points = points;` sau `await`. Phần sau `await` (không có `ConfigureAwait(false)`) chạy lại trên UI thread, nên chỉ trạng thái ViewModel được đổi ở đó.
+</details>
+
 ---
 
 ## 9. Resource, style và theme
@@ -431,6 +544,17 @@ System.Threading.Tasks.Task.Delay(1000).ContinueWith(_ =>
 | `{DynamicResource KhongCoKeyNay}` | **Không lỗi**: `Foreground` giữ màu mặc định `#FF000000`. Chữ đen trên palette tối nghĩa là **không nhìn thấy** |
 
 Dự án nạp `Styles.xaml` và theme **sau** `InitializeComponent()` (`ThemeManager.Attach`), nên mọi key màu/style **bắt buộc** dùng `DynamicResource`. Dùng `StaticResource` cho các key đó từng làm palette không mở được ([T03 A3](T03_PITFALLS_CASEBOOK.md#a3-show_ui_template-lỗi-provide-value-on-staticresourceextension)). `StaticResource` chỉ dành cho key khai báo **ngay trong file đó** (ví dụ `BoolToVis`). Danh sách key màu, và vì sao không bao giờ viết `Background="White"`: [R04 §4](../reference/R04_UI.md#4-theme-sángtối-tự-động). Test `XamlPaletteTests` tự kiểm mọi key mà XAML tham chiếu, ở cả hai theme ([T05 §6](T05_TESTING_STRATEGY.md#6-xaml-palette-trên-sta)).
+
+### ✅ Tự kiểm tra §9
+
+1. Palette mới viết `Background="{StaticResource BackgroundBrush}"`. Mở palette thì sao, vì sao?
+2. Khi nào dùng `StaticResource` trong dự án này là đúng?
+
+<details><summary>Đáp án</summary>
+
+1. Không mở được: `XamlParseException` (A3). `StaticResource` tìm key **một lần, lúc nạp XAML**, mà style và theme chỉ được nạp **sau** `InitializeComponent()` bằng `ThemeManager.Attach`. Dùng `DynamicResource`.
+2. Cho key khai báo ngay trong chính file đó, ví dụ converter `BoolToVis`.
+</details>
 
 ---
 
@@ -474,6 +598,19 @@ public GridMarkerPalette()
 4. `Loaded`: gọi một command của ViewModel (đếm số ô trong bản vẽ).
 
 Câu hỏi để tự kiểm: một đoạn code-behind có `if`, có tính toán, hay gọi Service thì gần như chắc chắn nó thuộc về ViewModel.
+
+### ✅ Tự kiểm tra §11
+
+1. Kể bốn việc code-behind của `GridMarkerPalette` làm, theo thứ tự.
+2. Vì sao `DataContext` được gán cho chính `UserControl`, không phải một `Grid` con?
+3. Quên `AddTransient<GridMarkerViewModel>()` trong `ConfigureServices`. Người dùng mở palette thì thấy gì?
+
+<details><summary>Đáp án</summary>
+
+1. `InitializeComponent()` → `ThemeManager.Attach(this)` → gán `DataContext` từ DI → đăng ký `Loaded` (gọi command đếm số ô).
+2. `PaletteService` tìm ViewModel ở `DataContext` của UserControl để `Dispose` nó khi mở lại palette. Gắn vào `Grid` con thì ViewModel không bao giờ được Dispose (lỗi từng có trên v1.0.0, B-26).
+3. `GetService` trả `null`, code-behind ném `InvalidOperationException` có thông điệp nói rõ ViewModel chưa được đăng ký. Lệnh mở palette báo lỗi đó, thay vì hiện một palette "chết".
+</details>
 
 ---
 

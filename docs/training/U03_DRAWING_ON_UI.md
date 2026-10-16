@@ -4,7 +4,7 @@
 
 > **Cấp độ:** 🌿 Junior → 🌳 Middle · **Cần trước:** [U01](U01_WPF_MVVM_BASICS.md), [U02](U02_UI_IN_AUTOCAD.md), [T01 §3–4](T01_AUTOCAD_NET_FOUNDATIONS.md#3-bên-trong-database-objectid-bảng-ký-hiệu-dictionary) · **Trong lộ trình:** tuần 9 ([README §3](README.md#3-lộ-trình-đào-tạo))
 >
-> **⏱ Đọc:** ≈ 90 phút (phần 🎯 ≈ 60 phút) · **Thực hành:** [bài tập §12](#12-bài-tập-và-tự-kiểm-tra), L17, L19 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
+> **⏱ Đọc:** ≈ 100 phút (phần 🎯 ≈ 70 phút) · **Thực hành:** [bài tập §12](#12-bài-tập-và-tự-kiểm-tra), L17, L19 ([T10 §2](T10_LABS_AND_ASSESSMENT.md#2-danh-sách-bài-lab)) · **Nhãn mục:** 🎯 cốt lõi · 🔍 đào sâu · 📖 tra cứu ([README §5](README.md#5-quy-ước-đọc))
 
 Tool kiểu "nhập thông số → **xem trước** → vẽ" (tủ điện, lưới, mặt bằng) cần vẽ hình ở những chỗ **không phải bản vẽ**: một khung trên palette, hay hình tạm trên màn hình trước khi người dùng xác nhận. Module này là hướng dẫn từng bước cho việc đó.
 
@@ -68,6 +68,17 @@ Vì sao không vẽ thẳng các `Entity` lên WPF?
 - **Xem trước phải khớp với thứ sẽ vẽ.** Cả hai nhánh cùng đọc kết quả của `GridPlanner`, nên không thể lệch nhau.
 
 Khi dữ liệu nằm sẵn **trong bản vẽ** (người dùng chọn entity, thư viện block), đường đi là: đọc entity **trong một transaction đọc** → đổi thành cùng loại dữ liệu thuần → đóng transaction → vẽ ([§7](#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)).
+
+### ✅ Tự kiểm tra §1
+
+1. Vì sao hình xem trước của lưới không thể lệch với lưới được vẽ vào bản vẽ?
+2. Người dùng chọn 3 entity có sẵn, palette cần xem trước chúng. Liệt kê các bước theo thứ tự.
+
+<details><summary>Đáp án</summary>
+
+1. Cả hai nhánh cùng đọc **một** kết quả: danh sách `GridCell` của `GridPlanner`. Service vẽ nó vào bản vẽ, `GridPreview` đổi nó thành hình xem trước.
+2. Đọc entity trong một transaction **đọc** → đổi ngay thành `PreviewShape` (dữ liệu thuần) → đóng transaction → giao danh sách hình cho ViewModel để vẽ. Không giữ `Entity` nào sau khi transaction đóng.
+</details>
 
 ---
 
@@ -214,6 +225,21 @@ Ba quyết định thiết kế cần hiểu:
 1. **Hàm tạo là `private`**, chỉ tạo hình qua các hàm `static` đã kiểm tham số. Không thể có một `Circle` bán kính âm ([C03 §3](C03_OBJECT_ORIENTED.md#3-đóng-gói-đối-tượng-tự-giữ-luật-của-mình)).
 2. **Tên `Label`, không phải `Text`**: class đã có property `Text`, nên đặt một hàm cũng tên `Text` sẽ gây lỗi `CS0102: The type 'PreviewShape' already contains a definition for 'Text'`.
 3. **`Rgb = null` nghĩa là "màu chữ của theme"**. Màu 7 của AutoCAD hiển thị *trắng trên nền tối, đen trên nền sáng*. Màu cố định sẽ biến mất ở một trong hai theme ([§7](#7-đọc-entity-trong-bản-vẽ-thành-hình-xem-trước)).
+
+### ✅ Tự kiểm tra §2
+
+1. Vì sao cung tròn được chia thành đoạn thẳng ngay khi tạo, thay vì để renderer vẽ cung?
+2. Code gọi `PreviewShape.Circle(0, 0, -5)`. Chuyện gì xảy ra, và vì sao không thể tạo một `PreviewShape` bán kính âm bằng cách nào khác?
+3. `PreviewShape.Arc(0, 0, 10, startAngle: 350°, endAngle: 10°)` (đổi ra radian). Cung quét bao nhiêu độ, gồm bao nhiêu đoạn?
+4. Vì sao hàm tạo chữ tên là `Label`, không phải `Text`?
+
+<details><summary>Đáp án</summary>
+
+1. Renderer chỉ cần biết vẽ đường gấp khúc, và tránh được bẫy chiều quét của cung khi lật trục Y.
+2. `ArgumentOutOfRangeException` ("Bán kính phải > 0."). Hàm tạo là `private`: chỉ tạo hình được qua các hàm `static` đã kiểm tham số.
+3. 20°: `endAngle < startAngle` nghĩa là cung đi qua góc 0, nên `sweep` được cộng thêm 360°. Mỗi đoạn ≤ 5°, nên trên giấy là 4 đoạn. Chạy thật thì ra **5**: sau khi đổi sang radian và cộng 2π, tỉ số `sweep / 5°` là 4,000000000000005 (sai số làm tròn của số thực), và `Math.Ceiling` đẩy nó lên 5. Ở đây vô hại (cung mịn hơn), nhưng đừng viết test kiểm số đoạn bằng con số tính tay.
+4. Class đã có property `Text`; một method cùng tên gây `CS0102`.
+</details>
 
 ---
 
@@ -365,6 +391,19 @@ namespace CadCoreFramework.Models.Preview
 ![Lật trục Y bằng một transform cho cả canvas: chữ bị lộn ngược, nét bị phóng to theo scale](img/u03-naive-flip.png)
 
 `PreviewViewport` đổi **từng điểm** sang pixel trước khi vẽ. Nhờ vậy chữ được vẽ thẳng, và nét luôn dày đúng 1 px ở mọi mức zoom.
+
+### ✅ Tự kiểm tra §3
+
+1. Hình từ (0; 0) tới (200; 50), khung 220 × 120, lề 10. Tính `scale`, rồi điểm (0; 50) và (200; 0) ra pixel nào.
+2. Vì sao chỉ dùng **một** `scale` cho cả hai trục?
+3. Bản vẽ dùng tọa độ VN-2000 (600 000; 1 200 000). Vì sao công thức trừ `MinX`, `MaxY` **trước** khi nhân?
+
+<details><summary>Đáp án</summary>
+
+1. Vùng dùng được 200 × 100, `scale = min(200/200; 100/50) = 1`. Lệch: x = (220 − 200)/2 = 10, y = (120 − 50)/2 = 35. (0; 50) ra **(10; 35)**, (200; 0) ra **(210; 85)**.
+2. Hai hệ số khác nhau làm hình bị méo (hình vuông thành chữ nhật).
+3. Trừ trước đưa tọa độ lớn về số nhỏ, rồi mới nhân, nên không mất chính xác. Với tọa độ VN-2000 kết quả vẫn đúng tuyệt đối (đã chạy).
+</details>
 
 ---
 
@@ -545,6 +584,21 @@ Những dòng đáng đọc kỹ:
 
 ![Ảnh kiểm hướng: trục X đỏ sang phải, trục Y xanh lên trên, cung 0–90° ở góc trên-phải, chữ xoay 90° đọc từ dưới lên](img/u03-orientation-check.png)
 
+### ✅ Tự kiểm tra §4
+
+1. Vì sao `CadPreview` tự vẽ trong `OnRender`, thay vì thả hàng nghìn `Line` và `TextBlock` lên một `Canvas`?
+2. ViewModel gọi `Preview.Add(shape)` trên danh sách đang hiển thị. Khung xem trước có vẽ lại không?
+3. Chữ trong AutoCAD xoay 30°. `RotateTransform` của WPF nhận góc nào, vì sao?
+4. `Shapes` phải là `DependencyProperty` có `AffectsRender`. Mỗi phần đó để làm gì?
+
+<details><summary>Đáp án</summary>
+
+1. Một phần tử WPF duy nhất, nhẹ và nhanh hơn nhiều so với hàng nghìn phần tử.
+2. Không. WPF chỉ thấy "property đổi" khi bạn gán một **đối tượng khác**; sửa bên trong danh sách cũ thì không ai vẽ lại. Gán một danh sách mới.
+3. −30°. Góc dương trong AutoCAD là ngược chiều kim đồng hồ; trên màn hình WPF (trục Y hướng xuống), góc dương là thuận chiều.
+4. `DependencyProperty` để bind được từ XAML (và nhận `{DynamicResource}`). `AffectsRender` để WPF tự gọi lại `OnRender` khi giá trị đổi.
+</details>
+
 ---
 
 ## 5. Bước 4 — Nối vào Golden Sample
@@ -642,6 +696,19 @@ Nền đặt trên `Border`, không đặt trên `CadPreview`, để góc bo tr�
 <!-- Mô hình xem trước (logic thuần) — Utils/EntityPreviewBuilder.cs dùng nó. -->
 <Compile Include="..\..\..\Models\Preview\*.cs" Link="Linked\Models\Preview\%(Filename)%(Extension)" />
 ```
+
+### ✅ Tự kiểm tra §5
+
+1. Bạn thêm khung xem trước vào palette. Vì sao không cần viết code gì để nó cập nhật theo từng phím gõ?
+2. Người dùng gõ `2,5` vào ô khoảng cách. Khung xem trước hiện gì?
+3. Vì sao màu nền đặt trên `Border` bao ngoài, không đặt trên `CadPreview`?
+
+<details><summary>Đáp án</summary>
+
+1. `Revalidate()` đã chạy mỗi khi một input đổi và mỗi khi người dùng gõ vào ô số. Gán `Preview` ngay trong `Revalidate()` là đủ.
+2. Không có hình: `2,5` là input sai (ô số chỉ nhận dấu chấm), và input sai thì `Preview` rỗng.
+3. Để góc bo tròn của `Border` không bị nền vuông của control che mất.
+</details>
 
 ---
 
@@ -754,6 +821,19 @@ PixelAt(bmp, 110, 70).Should().Be(Colors.Black, "nét không được lệch lê
 ⚠️ **Bẫy khi viết test pixel:** bản đầu của test này dùng **nền trắng** và kiểm `R > 200`. Trên nền trắng, kênh đỏ **vốn đã** bằng 255, nên test luôn pass, kể cả khi không vẽ gì. Cũng chính lỗi đó: nếu tính sai lề (8 chứ không phải 10) thì vẫn "đúng" nhờ may mắn. Một test chỉ có giá trị khi **nó fail được**: hãy thử làm hỏng code và xác nhận test đỏ ([T10 Q17](T10_LABS_AND_ASSESSMENT.md#5-ngân-hàng-câu-hỏi)).
 
 Không cần test gì thêm cho XAML: [`XamlPaletteTests`](../../CadCoreFramework.Tests/XamlPaletteTests.cs) đọc file XAML và tự kiểm mọi key `DynamicResource` mới (`SurfaceBrush`, `BorderBrush`, `TextPrimaryBrush`, `LabelStyle`) ở cả hai theme.
+
+### ✅ Tự kiểm tra §6
+
+1. Ba tầng test của tính năng xem trước là gì, mỗi tầng kiểm cái gì?
+2. Test pixel vẽ hình trên nền trắng rồi kiểm "pixel tại nét có R > 200". Vì sao test này vô dụng? Sửa thế nào?
+3. Vì sao `GridPreviewTests` so hình xem trước với chính thứ Service vẽ?
+
+<details><summary>Đáp án</summary>
+
+1. Logic thuần (`PreviewViewportTests`, `GridPreviewTests`): kiểm bằng số. ViewModel: kiểm hợp đồng với View (`Preview` đổi theo input, rỗng khi input sai). Vẽ thật ra ảnh (`RenderTargetBitmap` trên luồng STA): đọc pixel đã tính trước.
+2. Nền trắng có sẵn R = 255, nên test luôn pass, kể cả khi không vẽ gì. Dùng nền đen, và kiểm cả những pixel **không được** có nét. Test chỉ có giá trị khi nó fail được.
+3. Mục tiêu của xem trước là trùng với thứ sẽ vẽ. Test đó giữ hai nhánh không lệch nhau khi một bên đổi hình học.
+</details>
 
 ---
 
@@ -1199,6 +1279,22 @@ Chênh lệch khoảng 8 lần, và nó lớn dần theo số hình. Với vài 
 | Hình tạm còn trên màn hình sau khi lệnh xong | Không `EraseTransient` ở mọi đường ra | `using (var preview = new TransientPreview())` | [§9.2](#92-transient-hình-tạm-đứng-yên) |
 | Điểm của jig lệch khi UCS xoay | Đổi UCS → WCS cho kết quả của `AcquirePoint` | `AcquirePoint` đã là WCS | [§9.1](#91-jig-hình-chạy-theo-chuột) |
 | Test pixel "luôn pass" | Nền trắng, kiểm kênh màu mà nền đã có sẵn | Nền đen, kiểm cả pixel *không được* có nét | [§6](#6-bước-5--kiểm-thử) |
+
+### ✅ Tự kiểm tra §11
+
+Không nhìn bảng, nói gốc rễ và cách sửa:
+1. Đổi số hàng trên palette mà khung xem trước vẫn hiện lưới cũ.
+2. Build báo `CS0104: 'Polyline' is an ambiguous reference`.
+3. Xem trước một block có attribute: attribute biến mất, hoặc hiện tên tag thay cho giá trị.
+4. Hình màu 7 hiện tốt trên theme tối nhưng biến mất trên theme sáng.
+
+<details><summary>Đáp án</summary>
+
+1. Code sửa phần tử trong danh sách cũ: gán một danh sách **mới** cho `Preview`.
+2. File `using` cả `DatabaseServices` lẫn `GraphicsInterface`, cả hai đều có `Polyline`. Thêm alias `using Polyline = Autodesk.AutoCAD.DatabaseServices.Polyline;`.
+3. Tin rằng `Explode` trả về attribute. Bỏ qua `AttributeDefinition`, đọc giá trị từ `AttributeCollection` của block reference.
+4. Màu 7 bị đổi thành trắng cố định. Để `Rgb = null`: màu chữ của theme quyết định, như màu 7 của AutoCAD.
+</details>
 
 ---
 

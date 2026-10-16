@@ -9,6 +9,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (tài liệu — luyện nhớ lại, GĐ3 phần 2)
+- Khối **✅ Tự kiểm tra** ngay sau mỗi mục 🎯 nội dung của U01 (10), U02 (6), U03 (7): 23 khối, cùng cách viết với phần 1, không trùng khối ✅ cuối module. Hai chi tiết nằm ngoài nội dung mục đã chạy thử trước khi ghi: `[RelayCommand]` trên `SaveAsync` sinh ra `SaveCommand` (`AsyncRelayCommand`, CommunityToolkit.Mvvm 8.4.2); và `PreviewShape.Arc` từ 350° tới 10° tạo **5** đoạn, không phải 4 như tính tay, vì sai số số thực trước `Math.Ceiling`.
+- Thẻ ⏱ của U01–U03 theo số từ mới. training/README: U01 thêm ≈ 55 phút vào lộ trình nhanh; nhánh xem trước (U00, U02, U03) ≈ 2 giờ.
+
 ### Added (tài liệu — luyện nhớ lại, GĐ3 phần 1)
 - Khối **✅ Tự kiểm tra** ngay sau mỗi mục 🎯 của T02, T04, T05, T06, T07, T08 (30 khối; T01 đã có từ trước), đáp án thu gọn. Câu hỏi là tình huống ("chuyện gì xảy ra nếu…", "tầng nào bắt lỗi này sớm nhất") thay vì nhắc lại định nghĩa, và không trùng khối ✅ cuối module.
 - training/README §5 hướng dẫn cách dùng: gấp tài liệu, tự trả lời, sai thì đọc lại đúng đoạn đó. Thẻ ⏱ đã tính cả chữ của các khối ✅. Tổng của lộ trình nhanh thành ≈ 4 giờ đọc.
