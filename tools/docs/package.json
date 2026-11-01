@@ -17,7 +17,7 @@
     "check": "node check-links.mjs && node check-reading-time.mjs && node check-mermaid.mjs && node build-deck.mjs && node learning-report.mjs --check && node check-snippets.mjs && node check-exercises.mjs"
   },
   "devDependencies": {
-    "jsdom": "30.1.2",
-    "mermaid": "12.1.0"
+    "jsdom": "30.1.3",
+    "mermaid": "12.2.0"
   }
 }
