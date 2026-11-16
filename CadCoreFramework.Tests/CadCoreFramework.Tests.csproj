@@ -27,7 +27,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"        Version="18.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk"        Version="18.12.0" />
 
     <!-- Assertion library — reads like English -->
     <PackageReference Include="FluentAssertions"              Version="7.2.2" />
@@ -39,7 +39,7 @@
     <PackageReference Include="Newtonsoft.Json"               Version="13.0.4" />
 
     <!-- Code Coverage — collect coverage data during test run -->
-    <PackageReference Include="coverlet.collector"            Version="10.1.0">
+    <PackageReference Include="coverlet.collector"            Version="10.1.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
